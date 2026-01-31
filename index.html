@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SugarBroccoli Engine V2.0</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; background: #fff9fa; }
+        .box { max-width: 500px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .btn { background: #ff85a2; color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="section">
+        <h3>1. 行业选择</h3>
+        <button onclick="IndustryAdapter.setIndustry('nail');location.reload()">💅 美甲</button>
+        <button onclick="IndustryAdapter.setIndustry('food');location.reload()">🌭 小吃</button>
+    </div>
+    <div class="section">
+        <h3>2. 采购提取 (Vision)</h3>
+        <textarea id="ocr" style="width:100%">拼多多订单：售后卡 x100 实付:¥500</textarea>
+        <button class="btn" onclick="doVision()">解析截图</button>
+    </div>
+    <div class="section">
+        <h3>3. 模拟销售 (Accounting)</h3>
+        <button class="btn" onclick="doSale()">记录一单收入 (¥198)</button>
+        <div id="log" style="margin-top:10px; font-size:13px; color:#666;"></div>
+        <div id="alert-area"></div>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script src="vision.js"></script>
+<script src="accounting.js"></script>
+<script src="alert.js"></script>
+<script>
+    async function doVision() {
+        const res = await UniversalVision.parseAnyReceipt(document.getElementById('ocr').value);
+        AccountingEngine.syncPurchase(res.itemName, res.unitCost, res.quantity);
+        alert(`同步成功！${res.itemName} 单件成本: ¥${res.unitCost}`);
+    }
+
+    function doSale() {
+        const lib = JSON.parse(localStorage.getItem('cost_lib'));
+        const firstItem = Object.keys(lib)[0]; 
+        const res = AccountingEngine.calculateProfit(198, firstItem);
+        
+        document.getElementById('log').innerHTML = `
+            今日服务净利: ¥${res.netProfit} (扣除耗材: ¥${res.unitCost})<br>
+            ${firstItem} 剩余库存: ${res.remainingStock}`;
+        
+        const alertHtml = AlertSystem.check(firstItem, res.remainingStock, lib[firstItem].total);
+        document.getElementById('alert-area').innerHTML = alertHtml;
+    }
+</script>
+</body>
+</html>
