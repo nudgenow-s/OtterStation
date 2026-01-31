@@ -49,6 +49,7 @@
             <p>房租是生存的第一道坎。请输入每月固定支出：</p>
             <input type="number" id="rent" placeholder="¥ 5000">
             <button onclick="move(2)">下一步</button>
+            <span class="back-link" onclick="move(0)">返回上一步</span>
         </div>
 
         <div class="step" id="s2">
@@ -56,6 +57,7 @@
             <p>如果你不发工资，那你只是在自我剥削：</p>
             <input type="number" id="salary" placeholder="¥ 8000">
             <button onclick="move(3)">下一步</button>
+            <span class="back-link" onclick="move(1)">返回上一步</span>
         </div>
 
         <div class="step" id="s3">
@@ -63,18 +65,22 @@
             <p>水电、材料折旧。算出日均运营成本：</p>
             <input type="number" id="misc" placeholder="¥ 1000">
             <button onclick="move(4)">最后一步</button>
+            <span class="back-link" onclick="move(2)">返回上一步</span>
         </div>
 
         <div class="step" id="s4">
             <h2>🏗️ 初始投入成本</h2>
             <p>装修、设备、加盟费等沉没成本：</p>
             <input type="number" id="startup" placeholder="¥ 50000">
-            <button onclick="save()">完成并进入</button>
+            <button onclick="save()">完成并进入水獭能量站</button>
+            <span class="back-link" onclick="move(3)">返回上一步</span>
         </div>
     </div>
 
     <script>
+        // 路由守卫
         if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
+        
         let selectedIndustry = 'nail';
 
         function selectType(type, el) {
@@ -89,23 +95,36 @@
         function move(s) {
             document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
             document.getElementById('s' + s).classList.add('active');
+            // 5 段进度
             document.getElementById('bar').style.width = ((s + 1) / 5 * 100) + '%';
         }
 
         function save() {
+            // 获取并校验输入数据
             const rent = Number(document.getElementById('rent').value) || 0;
             const salary = Number(document.getElementById('salary').value) || 0;
             const misc = Number(document.getElementById('misc').value) || 0;
             const startup = Number(document.getElementById('startup').value) || 0;
             
+            // 1. 存储月度原子数据 (用于 main.html 的老板锁修改)
             localStorage.setItem('monthlyRent', rent);
             localStorage.setItem('monthlySalary', salary);
             localStorage.setItem('monthlyOther', misc);
+            
+            // 2. 存储初始投入 (用于回本倒计时预测)
             localStorage.setItem('startupCost', startup);
-            localStorage.setItem('dailyCost', ((rent + salary + misc) / 30).toFixed(2));
+            
+            // 3. 计算并存储核心日均成本
+            const daily = ((rent + salary + misc) / 30).toFixed(2);
+            localStorage.setItem('dailyCost', daily);
+            
+            // 4. 行业与环境初始化
             localStorage.setItem('industry_type', selectedIndustry);
             localStorage.setItem('hasSetup', 'true');
             localStorage.setItem('todayRev', '0');
+            localStorage.setItem('last_active_date', new Date().toLocaleDateString());
+            
+            // 5. 跳转
             window.location.href = 'main.html';
         }
     </script>
