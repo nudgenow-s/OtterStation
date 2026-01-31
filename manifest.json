@@ -1,0 +1,16 @@
+{
+  "short_name": "能量站",
+  "name": "美业主理人能量站 - 逻辑驱动版",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1864/1864470.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#ff85a2"
+}
