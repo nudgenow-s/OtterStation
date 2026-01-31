@@ -13,20 +13,17 @@
         .card { width: 340px; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
         .logo { font-size: 60px; margin-bottom: 10px; transition: 0.3s; }
         .progress { height: 6px; background: #eee; border-radius: 3px; margin: 20px 0; overflow: hidden; }
-        #bar { height: 100%; width: 25%; background: var(--main-color); transition: 0.5s; }
+        #bar { height: 100%; width: 20%; background: var(--main-color); transition: 0.5s; }
         .step { display: none; animation: fadeIn 0.4s; text-align: left; }
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         h2 { color: var(--main-color); font-size: 20px; margin-top: 0; }
         p { font-size: 13px; color: #888; line-height: 1.6; }
-        
-        /* 行业选择器样式 */
         .industry-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
         .industry-item { border: 2px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
         .industry-item.selected { border-color: var(--main-color); background: #fdf0f2; }
         .industry-item span { font-size: 24px; display: block; }
         .industry-item label { font-size: 11px; color: #666; font-weight: bold; }
-
         input { width: 100%; border: none; background: #fdf0f2; padding: 15px; border-radius: 15px; font-size: 18px; margin: 15px 0; box-sizing: border-box; outline: none; color: var(--main-color); }
         button { width: 100%; background: var(--main-color); color: white; border: none; padding: 15px; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .back-link { display: block; text-align: center; font-size: 12px; color: #ccc; margin-top: 15px; text-decoration: none; cursor: pointer; }
@@ -39,17 +36,10 @@
         
         <div class="step active" id="s0">
             <h2>🏷️ 选择行业身份</h2>
-            <p>INTJ 逻辑：不同的行业有不同的成本模型。请选择你的赛道：</p>
             <div class="industry-grid" id="industry-selector">
-                <div class="industry-item selected" onclick="selectType('nail', this)">
-                    <span>💅</span><label>美甲美睫</label>
-                </div>
-                <div class="industry-item" onclick="selectType('food', this)">
-                    <span>🌭</span><label>小吃摆摊</label>
-                </div>
-                <div class="industry-item" onclick="selectType('retail', this)">
-                    <span>👗</span><label>服装零售</label>
-                </div>
+                <div class="industry-item selected" onclick="selectType('nail', this)"><span>💅</span><label>美甲美睫</label></div>
+                <div class="industry-item" onclick="selectType('food', this)"><span>🌭</span><label>小吃摆摊</label></div>
+                <div class="industry-item" onclick="selectType('retail', this)"><span>👗</span><label>服装零售</label></div>
             </div>
             <button onclick="move(1)">确认身份</button>
         </div>
@@ -59,39 +49,38 @@
             <p>房租是生存的第一道坎。请输入每月固定支出：</p>
             <input type="number" id="rent" placeholder="¥ 5000">
             <button onclick="move(2)">下一步</button>
-            <span class="back-link" onclick="move(0)">返回重选行业</span>
         </div>
 
         <div class="step" id="s2">
             <h2>👸 你的专属工资</h2>
-            <p>如果不给自己发工资，那你只是在自我剥削。你希望每月拿多少？</p>
+            <p>如果你不发工资，那你只是在自我剥削：</p>
             <input type="number" id="salary" placeholder="¥ 8000">
             <button onclick="move(3)">下一步</button>
         </div>
 
         <div class="step" id="s3">
             <h2>🔋 杂费与折旧</h2>
-            <p>水电、材料折旧。算出日均成本，你才知道睁眼欠多少钱：</p>
+            <p>水电、材料折旧。算出日均运营成本：</p>
             <input type="number" id="misc" placeholder="¥ 1000">
-            <button onclick="save()">进入水獭能量站</button>
+            <button onclick="move(4)">最后一步</button>
+        </div>
+
+        <div class="step" id="s4">
+            <h2>🏗️ 初始投入成本</h2>
+            <p>装修、设备、加盟费等沉没成本：</p>
+            <input type="number" id="startup" placeholder="¥ 50000">
+            <button onclick="save()">完成并进入</button>
         </div>
     </div>
 
     <script>
-        // 路由守卫：已配置则直接跳过
-        if (localStorage.getItem('hasSetup') === 'true') {
-            window.location.href = 'main.html';
-        }
-
+        if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
         let selectedIndustry = 'nail';
 
         function selectType(type, el) {
             selectedIndustry = type;
-            // UI 反馈
             document.querySelectorAll('.industry-item').forEach(item => item.classList.remove('selected'));
             el.classList.add('selected');
-            
-            // 联动主题色
             const theme = IndustryAdapter.registry[type].theme;
             document.documentElement.style.setProperty('--main-color', theme);
             document.getElementById('main-logo').innerText = IndustryAdapter.registry[type].icon;
@@ -100,27 +89,23 @@
         function move(s) {
             document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
             document.getElementById('s' + s).classList.add('active');
-            // 进度条逻辑调整为 4 段
-            document.getElementById('bar').style.width = ((s + 1) / 4 * 100) + '%';
+            document.getElementById('bar').style.width = ((s + 1) / 5 * 100) + '%';
         }
 
         function save() {
             const rent = Number(document.getElementById('rent').value) || 0;
             const salary = Number(document.getElementById('salary').value) || 0;
             const misc = Number(document.getElementById('misc').value) || 0;
+            const startup = Number(document.getElementById('startup').value) || 0;
             
-            // 计算每日生存成本
-            const daily = (rent + salary + misc) / 30;
-            
-            // 核心数据落库
-            localStorage.setItem('dailyCost', daily.toFixed(2));
+            localStorage.setItem('monthlyRent', rent);
+            localStorage.setItem('monthlySalary', salary);
+            localStorage.setItem('monthlyOther', misc);
+            localStorage.setItem('startupCost', startup);
+            localStorage.setItem('dailyCost', ((rent + salary + misc) / 30).toFixed(2));
             localStorage.setItem('industry_type', selectedIndustry);
             localStorage.setItem('hasSetup', 'true');
-            
-            // 初始化当日营收
             localStorage.setItem('todayRev', '0');
-            
-            // 引导前往主页
             window.location.href = 'main.html';
         }
     </script>
