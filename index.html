@@ -2,57 +2,152 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>SugarBroccoli Engine V2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SugarBroccoli - 经营多邻国</title>
     <style>
-        body { font-family: sans-serif; padding: 30px; background: #fff9fa; }
-        .box { max-width: 500px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .btn { background: #ff85a2; color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; }
+        :root {
+            --duo-green: #58cc02; --duo-border: #46a302;
+            --duo-orange: #ff9600; --duo-blue: #1cb0f6;
+            --duo-red: #ff4b4b; --bg: #ffffff;
+        }
+        body { font-family: "din-round", "PingFang SC", sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        
+        .app-container { width: 100%; max-width: 420px; }
+
+        /* 顶部状态栏：多邻国标志性的进度条 */
+        .top-nav { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .progress-container { flex-grow: 1; height: 16px; background: #e5e5e5; border-radius: 20px; position: relative; }
+        .progress-bar { height: 100%; width: 0%; background: var(--duo-green); border-radius: 20px; transition: 0.5s; box-shadow: inset 0 -4px rgba(0,0,0,0.1); }
+
+        /* 核心卡片样式 */
+        .card {
+            background: white; border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5;
+            border-radius: 20px; padding: 20px; margin-bottom: 20px; position: relative;
+        }
+        .card:active { border-bottom-width: 2px; transform: translateY(4px); }
+
+        /* 多邻国式角色提示 */
+        .duo-character { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
+        .owl { font-size: 50px; }
+        .speech-bubble {
+            background: white; border: 2px solid #e5e5e5; padding: 10px 15px;
+            border-radius: 15px; position: relative; font-weight: bold; font-size: 14px;
+        }
+
+        /* 按钮：标志性的厚实感 */
+        .btn {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.1s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-green { background: var(--duo-green); color: white; border-bottom: 5px solid var(--duo-border); }
+        .btn-blue { background: var(--duo-blue); color: white; border-bottom: 5px solid #148fcc; }
+        .btn:active { border-bottom-width: 0; transform: translateY(5px); }
+
+        /* 输入框 */
+        textarea, input {
+            width: 100%; border: 2px solid #e5e5e5; border-radius: 15px;
+            padding: 12px; box-sizing: border-box; font-size: 16px; outline: none; background: #f7f7f7;
+        }
+
+        /* 隐藏 section 的逻辑 */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-<div class="box">
-    <div class="section">
-        <h3>1. 行业选择</h3>
-        <button onclick="IndustryAdapter.setIndustry('nail');location.reload()">💅 美甲</button>
-        <button onclick="IndustryAdapter.setIndustry('food');location.reload()">🌭 小吃</button>
+
+<div class="app-container">
+    <div class="top-nav">
+        <span style="font-size: 24px;">🦉</span>
+        <div class="progress-container">
+            <div id="main-progress" class="progress-bar"></div>
+        </div>
+        <span id="score-val" style="font-weight: bold; color: var(--duo-green);">0%</span>
     </div>
-    <div class="section">
-        <h3>2. 采购提取 (Vision)</h3>
-        <textarea id="ocr" style="width:100%">拼多多订单：售后卡 x100 实付:¥500</textarea>
-        <button class="btn" onclick="doVision()">解析截图</button>
+
+    <div class="duo-character">
+        <div class="owl" id="owl-face">🤔</div>
+        <div class="speech-bubble" id="owl-msg">还没记账？房东可不会等你！</div>
     </div>
-    <div class="section">
-        <h3>3. 模拟销售 (Accounting)</h3>
-        <button class="btn" onclick="doSale()">记录一单收入 (¥198)</button>
-        <div id="log" style="margin-top:10px; font-size:13px; color:#666;"></div>
-        <div id="alert-area"></div>
+
+    <div class="card" id="config-card">
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-blue" style="flex:1" onclick="switchIndustry('nail')">💅 美甲</button>
+            <button class="btn btn-blue" style="flex:1" onclick="switchIndustry('food')">🌭 摆摊</button>
+        </div>
     </div>
+
+    <div class="card">
+        <p style="margin-top:0; font-weight: bold; color: #afafaf;">喂入采购截图文本</p>
+        <textarea id="ocr-data" rows="2">实付: ¥500 数量: 100张</textarea>
+        <button class="btn btn-green" style="margin-top:15px;" onclick="handleVision()">同步成本数据</button>
+    </div>
+
+    <div class="card">
+        <p style="margin-top:0; font-weight: bold; color: #afafaf;">录入今日收入</p>
+        <input type="number" id="revenue-val" placeholder="¥ 0.00">
+        <button class="btn btn-green" style="margin-top:15px;" onclick="handleSale()">完成一笔成交！</button>
+    </div>
+
+    <div id="alert-zone"></div>
 </div>
 
 <script src="config.js"></script>
 <script src="vision.js"></script>
 <script src="accounting.js"></script>
 <script src="alert.js"></script>
+
 <script>
-    async function doVision() {
-        const res = await UniversalVision.parseAnyReceipt(document.getElementById('ocr').value);
-        AccountingEngine.syncPurchase(res.itemName, res.unitCost, res.quantity);
-        alert(`同步成功！${res.itemName} 单件成本: ¥${res.unitCost}`);
+    // UI 交互胶水代码
+    function switchIndustry(type) {
+        IndustryAdapter.setIndustry(type);
+        updateOwl("🥳", `已切换到${IndustryAdapter.getCurrent().name}模式！`);
     }
 
-    function doSale() {
-        const lib = JSON.parse(localStorage.getItem('cost_lib'));
-        const firstItem = Object.keys(lib)[0]; 
-        const res = AccountingEngine.calculateProfit(198, firstItem);
+    async function handleVision() {
+        const text = document.getElementById('ocr-data').value;
+        const res = await UniversalVision.parseAnyReceipt(text);
+        AccountingEngine.syncPurchase(res.itemName, res.unitCost, res.quantity);
+        updateOwl("🤩", `哇！识别到了${res.quantity}件${res.itemName}，每件才¥${res.unitCost}？太会买了！`);
+    }
+
+    function handleSale() {
+        const rev = parseFloat(document.getElementById('revenue-val').value) || 0;
+        const lib = JSON.parse(localStorage.getItem('cost_lib')) || {};
+        const firstItem = Object.keys(lib)[0] || "通用耗材";
         
-        document.getElementById('log').innerHTML = `
-            今日服务净利: ¥${res.netProfit} (扣除耗材: ¥${res.unitCost})<br>
-            ${firstItem} 剩余库存: ${res.remainingStock}`;
+        const res = AccountingEngine.calculateProfit(rev, firstItem);
         
-        const alertHtml = AlertSystem.check(firstItem, res.remainingStock, lib[firstItem].total);
-        document.getElementById('alert-area').innerHTML = alertHtml;
+        // 更新进度条 (以日目标为基准)
+        const dailyTarget = parseFloat(localStorage.getItem('dailyTarget')) || 333;
+        const progress = Math.min((rev / dailyTarget) * 100, 100);
+        document.getElementById('main-progress').style.width = progress + '%';
+        document.getElementById('score-val').innerText = Math.floor(progress) + '%';
+
+        // 状态更新
+        if (progress < 100) {
+            updateOwl("😒", `只有 ${Math.floor(progress)}%？今天的房租还没赚出来哦！`);
+        } else {
+            updateOwl("👑", `100%！剩下的全是利润，去买杯奶茶吧！`);
+        }
+
+        // 检查库存预警
+        const alertHtml = AlertSystem.check(firstItem, res.remainingStock, lib[firstItem]?.total || 100);
+        document.getElementById('alert-area')?.remove(); // 清理旧预警
+        if(alertHtml) {
+            const div = document.createElement('div');
+            div.id = 'alert-area';
+            div.innerHTML = alertHtml;
+            document.body.appendChild(div);
+            updateOwl("😱", "大事不好！耗材快用光了，快去进货！");
+        }
+    }
+
+    function updateOwl(face, msg) {
+        document.getElementById('owl-face').innerText = face;
+        document.getElementById('owl-msg').innerText = msg;
     }
 </script>
+
 </body>
 </html>
