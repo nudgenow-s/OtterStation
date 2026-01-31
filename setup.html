@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能量基石 - Setup</title>
+    <style>
+        :root { --main-color: #ff85a2; --bg: #fff9fa; }
+        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { width: 340px; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        .logo { font-size: 50px; margin-bottom: 10px; }
+        .progress { height: 6px; background: #eee; border-radius: 3px; margin: 20px 0; overflow: hidden; }
+        #bar { height: 100%; width: 33%; background: var(--main-color); transition: 0.5s; }
+        .step { display: none; animation: fadeIn 0.4s; text-align: left; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { color: var(--main-color); font-size: 20px; margin-top: 0; }
+        p { font-size: 13px; color: #888; line-height: 1.6; }
+        input { width: 100%; border: none; background: #fdf0f2; padding: 15px; border-radius: 15px; font-size: 18px; margin: 15px 0; box-sizing: border-box; outline: none; }
+        button { width: 100%; background: var(--main-color); color: white; border: none; padding: 15px; border-radius: 50px; font-size: 16px; cursor: pointer; }
+        .back { color: #bbb; background: none; margin-top: 10px; font-size: 12px; border: none; width: 100%; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">🦦</div>
+        <div class="progress"><div id="bar"></div></div>
+        
+        <div class="step active" id="s1">
+            <h2>🏠 房租与物业</h2>
+            <p>严厉模式：房租是第一道坎。请输入每月房租总额：</p>
+            <input type="number" id="rent" placeholder="¥ 5000">
+            <button onclick="move(2)">下一步</button>
+        </div>
+
+        <div class="step" id="s2">
+            <h2>👸 你的专属工资</h2>
+            <p>INTJ 提醒：别忘了你自己的劳动力成本！你希望每月拿多少保底工资？</p>
+            <input type="number" id="salary" placeholder="¥ 8000">
+            <button onclick="move(3)">下一步</button>
+            <button class="back" onclick="move(1)">返回</button>
+        </div>
+
+        <div class="step" id="s3">
+            <h2>🔋 杂费与折旧</h2>
+            <p>包含水电、材料损耗。精确的成本核算才能带来真利润：</p>
+            <input type="number" id="misc" placeholder="¥ 1000">
+            <button onclick="save()">完成配置</button>
+            <button class="back" onclick="move(2)">返回</button>
+        </div>
+    </div>
+
+    <script>
+        function move(s) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('s' + s).classList.add('active');
+            document.getElementById('bar').style.width = (s / 3 * 100) + '%';
+        }
+        function save() {
+            const rent = Number(document.getElementById('rent').value);
+            const salary = Number(document.getElementById('salary').value);
+            const misc = Number(document.getElementById('misc').value);
+            
+            const totalDaily = (rent + salary + misc) / 30;
+            localStorage.setItem('dailyCost', totalDaily.toFixed(2));
+            localStorage.setItem('hasSetup', 'true');
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>
