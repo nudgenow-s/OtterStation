@@ -27,7 +27,8 @@
         /* 报表弹窗 */
         #report-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; padding:25px; box-sizing:border-box; overflow-y:auto; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dotted #eee; font-size: 13px; }
+        .forecast-card { background: #f8f9ff; padding: 15px; border-radius: 20px; margin: 15px 0; border-left: 5px solid #4facfe; text-align: left; }
     </style>
 </head>
 <body>
@@ -35,7 +36,7 @@
 <div class="app-container">
     <div class="top-nav">
         <span id="date-display">2026/01/31</span>
-        <span onclick="toggleReport()" style="cursor:pointer">📊 报表</span>
+        <span onclick="toggleReport()" style="cursor:pointer">📊 报表中心</span>
     </div>
     
     <div id="industry-logo" style="font-size: 13px; color: var(--primary-pink); font-weight: bold;">🦦 OTTER STATION</div>
@@ -53,18 +54,25 @@
     <a href="ai_extract.html" class="ai-link" style="display:block; margin-top:15px; font-size:12px; color:#1cb0f6; text-decoration:none;">✨ 识别采购截图</a>
 
     <div class="badge-wall" id="badges">
-        <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span>
+        <span id="badge-first_blood" title="首单入账">💰</span><span id="badge-profitable_king" title="盈利王者">👑</span><span id="badge-smart_buyer" title="精明猎手">🦊</span><span id="badge-anti_procrastination" title="拒绝拖延">🔥</span>
     </div>
 </div>
 
 <div id="report-modal">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="color:var(--primary-pink); margin:0;">经营趋势</h2>
-        <button onclick="toggleReport()" style="border:none; background:none; font-size:24px;">×</button>
+        <h2 style="color:var(--primary-pink); margin:0;">数据复盘</h2>
+        <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
     </div>
-    <div style="margin:20px 0;"><canvas id="trendChart"></canvas></div>
+
+    <div class="forecast-card" id="forecast-area">
+        <div style="font-size: 11px; color: #666; font-weight: bold;">🔮 月度利润预测 (基于近7日表现)</div>
+        <div id="forecast-val" style="font-size: 20px; color: #4facfe; font-weight: bold; margin-top: 5px;">计算中...</div>
+        <div id="forecast-desc" style="font-size: 10px; color: #999; margin-top: 3px;">保持当前状态，本月预计净收入</div>
+    </div>
+
+    <div style="margin:10px 0;"><canvas id="trendChart"></canvas></div>
     <div id="history-list"></div>
-    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出 CSV 报表</button>
+    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全量 CSV 报表</button>
 </div>
 
 <script src="accounting.js"></script>
@@ -94,24 +102,56 @@
             
             totalRev += val;
             localStorage.setItem('todayRev', totalRev);
-            AccountingEngine.saveDailySnapshot(totalRev); // 自动存入历史
+            
+            // 立即存入快照并执行勋章检查
+            AccountingEngine.saveDailySnapshot(totalRev); 
+            if (typeof AchievementSystem !== 'undefined') AchievementSystem.check();
 
             showProfitFeedback(result.netProfit, result.materialCost);
             input.value = '';
             render();
-            if (typeof AchievementSystem !== 'undefined') AchievementSystem.check();
         }
     }
 
     function showProfitFeedback(net, mat) {
-        document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${net} (物料 ¥${mat})`;
-        setTimeout(() => { document.getElementById('profit-tip').innerText = ""; }, 3000);
+        const tip = document.getElementById('profit-tip');
+        tip.innerText = `✨ 纯赚 ¥${net} (物料 ¥${mat})`;
+        setTimeout(() => { tip.innerText = ""; }, 3000);
     }
 
     function toggleReport() {
         const modal = document.getElementById('report-modal');
-        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
-        if(modal.style.display === 'block') { renderChart(); renderHistoryList(); }
+        const isOpening = modal.style.display !== 'block';
+        modal.style.display = isOpening ? 'block' : 'none';
+        if(isOpening) { 
+            renderChart(); 
+            renderHistoryList(); 
+            calculateForecast();
+        }
+    }
+
+    function calculateForecast() {
+        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        const dates = Object.keys(history);
+        const now = new Date();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const daysPassed = now.getDate();
+        const remainingDays = daysInMonth - daysPassed;
+
+        if (dates.length < 1) {
+            document.getElementById('forecast-val').innerText = "暂无数据";
+            return;
+        }
+
+        // 取近7日均值
+        const recentData = dates.slice(-7).map(d => parseFloat(history[d].profit));
+        const avgDailyProfit = recentData.reduce((a, b) => a + b, 0) / recentData.length;
+        
+        // 当前已获利 + (均值 * 剩余天数)
+        const currentTotalProfit = dates.reduce((sum, d) => sum + parseFloat(history[d].profit), 0);
+        const estimatedTotal = currentTotalProfit + (avgDailyProfit * remainingDays);
+
+        document.getElementById('forecast-val').innerText = `¥ ${estimatedTotal.toFixed(2)}`;
     }
 
     function renderChart() {
@@ -130,9 +170,10 @@
 
     function renderHistoryList() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        let html = '<h3 style="font-size:15px; margin:20px 0 10px;">历史明细</h3>';
+        let html = '<h3 style="font-size:14px; margin:20px 0 10px; color:#666;">历史账单</h3>';
         Object.keys(history).reverse().forEach(date => {
-            html += `<div class="history-item"><span>${date}</span><strong>¥${history[date].revenue} (${history[date].achievement}%)</strong></div>`;
+            const h = history[date];
+            html += `<div class="history-item"><span>${date}</span><strong>¥${h.revenue} (${h.achievement}%)</strong></div>`;
         });
         document.getElementById('history-list').innerHTML = html;
     }
@@ -150,8 +191,10 @@
 
     function render() {
         const score = Math.floor((totalRev / DAILY_COST) * 100);
-        document.getElementById('health-score').innerText = score + '%';
-        document.getElementById('health-score').style.color = score >= 100 ? "var(--success-green)" : "var(--primary-pink)";
+        const scoreEl = document.getElementById('health-score');
+        scoreEl.innerText = score + '%';
+        scoreEl.style.color = score >= 100 ? "var(--success-green)" : "var(--primary-pink)";
+        
         const emoji = document.getElementById('emoji-status');
         if(score === 0) emoji.innerText = "😴";
         else if(score < 100) emoji.innerText = "🦦";
@@ -159,10 +202,12 @@
         else emoji.innerText = "💎";
 
         const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
-        earned.forEach(id => { if(document.getElementById('badge-'+id)) document.getElementById('badge-'+id).classList.add('active-badge'); });
+        earned.forEach(id => { 
+            const el = document.getElementById('badge-'+id);
+            if(el) el.classList.add('active-badge'); 
+        });
     }
 
-    // 初始化
     const today = new Date().toLocaleDateString();
     if (localStorage.getItem('last_active_date') !== today) {
         localStorage.setItem('todayRev', '0');
