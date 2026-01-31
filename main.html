@@ -12,19 +12,19 @@
         :root { --primary-pink: #ff85a2; --bg: #fff9fa; --success-green: #58cc02; }
         body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .app-container { width: 340px; background: #fff; border-radius: 35px; box-shadow: 0 20px 40px rgba(255,133,162,0.1); padding: 25px; text-align: center; position: relative; }
-        .top-nav { display: flex; justify-content: space-between; font-size: 12px; color: #ccc; margin-bottom: 10px; }
+        .top-nav { display: flex; justify-content: space-between; font-size: 11px; color: #ccc; margin-bottom: 15px; }
         #emoji-status { font-size: 90px; margin: 15px 0; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
         .health-score { font-size: 50px; font-weight: bold; color: var(--primary-pink); line-height: 1; }
         .health-label { color: #999; font-size: 12px; margin-top: 5px; }
         .input-card { background: #fef0f3; padding: 20px; border-radius: 25px; margin: 20px 0; }
         input { border: none; background: transparent; font-size: 28px; width: 100%; text-align: center; color: var(--primary-pink); border-bottom: 2px solid #ffdae3; outline: none; }
-        .btn-main { background: var(--primary-pink); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; box-shadow: 0 6px #ffdae3; }
+        .btn-main { background: var(--primary-pink); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; box-shadow: 0 6px #ffdae3; transition: 0.1s; }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 3px #ffdae3; }
         .badge-wall { display: flex; justify-content: center; gap: 12px; margin-top: 20px; font-size: 22px; background: #fcfcfc; padding: 10px; border-radius: 15px; }
         .badge-wall span { filter: grayscale(1); opacity: 0.15; transition: 0.5s; }
         .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.1); }
         #profit-tip { font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: bold; height: 18px; }
         
-        /* 报表弹窗 */
         #report-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; padding:25px; box-sizing:border-box; overflow-y:auto; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dotted #eee; font-size: 13px; }
@@ -35,11 +35,14 @@
 
 <div class="app-container">
     <div class="top-nav">
-        <span id="date-display">2026/01/31</span>
-        <span onclick="toggleReport()" style="cursor:pointer">📊 报表中心</span>
+        <span id="date-display">加载中...</span>
+        <div>
+            <span onclick="updateBaseCost()" style="cursor:pointer; margin-right:10px;">⚙️ 成本</span>
+            <span onclick="toggleReport()" style="cursor:pointer">📊 报表</span>
+        </div>
     </div>
     
-    <div id="industry-logo" style="font-size: 13px; color: var(--primary-pink); font-weight: bold;">🦦 OTTER STATION</div>
+    <div id="industry-logo" style="font-size: 13px; color: var(--primary-pink); font-weight: bold;">🦦 STATION</div>
     <div id="health-score" class="health-score">0%</div>
     <div class="health-label">今日目标达成率</div>
     <div id="emoji-status">😴</div>
@@ -54,7 +57,7 @@
     <a href="ai_extract.html" class="ai-link" style="display:block; margin-top:15px; font-size:12px; color:#1cb0f6; text-decoration:none;">✨ 识别采购截图</a>
 
     <div class="badge-wall" id="badges">
-        <span id="badge-first_blood" title="首单入账">💰</span><span id="badge-profitable_king" title="盈利王者">👑</span><span id="badge-smart_buyer" title="精明猎手">🦊</span><span id="badge-anti_procrastination" title="拒绝拖延">🔥</span>
+        <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span>
     </div>
 </div>
 
@@ -64,7 +67,7 @@
         <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
     </div>
 
-    <div class="forecast-card" id="forecast-area">
+    <div class="forecast-card">
         <div style="font-size: 11px; color: #666; font-weight: bold;">🔮 月度利润预测 (基于近7日表现)</div>
         <div id="forecast-val" style="font-size: 20px; color: #4facfe; font-weight: bold; margin-top: 5px;">计算中...</div>
         <div id="forecast-desc" style="font-size: 10px; color: #999; margin-top: 3px;">保持当前状态，本月预计净收入</div>
@@ -72,7 +75,7 @@
 
     <div style="margin:10px 0;"><canvas id="trendChart"></canvas></div>
     <div id="history-list"></div>
-    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全量 CSV 报表</button>
+    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出 CSV 报表</button>
 </div>
 
 <script src="accounting.js"></script>
@@ -81,15 +84,24 @@
 <script>
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
 
-    const DAILY_COST = parseFloat(localStorage.getItem('dailyCost')) || 1;
+    // 重新获取成本，确保快捷修改后能生效
+    const getDailyCost = () => parseFloat(localStorage.getItem('dailyCost')) || 1;
     let totalRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+
+    function updateBaseCost() {
+        const current = getDailyCost();
+        const next = prompt("修改每日固定成本 (房租+人工+杂费):", current);
+        if (next !== null && !isNaN(parseFloat(next))) {
+            localStorage.setItem('dailyCost', parseFloat(next).toFixed(2));
+            location.reload(); 
+        }
+    }
 
     function applyIndustry() {
         const config = IndustryAdapter.getCurrent();
         document.documentElement.style.setProperty('--primary-pink', config.theme);
         document.getElementById('industry-logo').innerHTML = `🦦 ${config.icon} ${config.name.toUpperCase()} STATION`;
         document.getElementById('unit-tip').innerText = `今天接待了新的${config.unit}吗？`;
-        document.getElementById('record-btn').style.boxShadow = `0 6px ${config.theme}44`;
     }
 
     function record() {
@@ -103,7 +115,6 @@
             totalRev += val;
             localStorage.setItem('todayRev', totalRev);
             
-            // 立即存入快照并执行勋章检查
             AccountingEngine.saveDailySnapshot(totalRev); 
             if (typeof AchievementSystem !== 'undefined') AchievementSystem.check();
 
@@ -114,44 +125,32 @@
     }
 
     function showProfitFeedback(net, mat) {
-        const tip = document.getElementById('profit-tip');
-        tip.innerText = `✨ 纯赚 ¥${net} (物料 ¥${mat})`;
-        setTimeout(() => { tip.innerText = ""; }, 3000);
+        document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${net} (物料 ¥${mat})`;
+        setTimeout(() => { document.getElementById('profit-tip').innerText = ""; }, 3000);
     }
 
     function toggleReport() {
         const modal = document.getElementById('report-modal');
         const isOpening = modal.style.display !== 'block';
         modal.style.display = isOpening ? 'block' : 'none';
-        if(isOpening) { 
-            renderChart(); 
-            renderHistoryList(); 
-            calculateForecast();
-        }
+        if(isOpening) { renderChart(); renderHistoryList(); calculateForecast(); }
     }
 
     function calculateForecast() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         const dates = Object.keys(history);
+        if (dates.length === 0) { document.getElementById('forecast-val').innerText = "暂无历史"; return; }
+
         const now = new Date();
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const daysPassed = now.getDate();
-        const remainingDays = daysInMonth - daysPassed;
+        const remainingDays = daysInMonth - now.getDate();
 
-        if (dates.length < 1) {
-            document.getElementById('forecast-val').innerText = "暂无数据";
-            return;
-        }
-
-        // 取近7日均值
-        const recentData = dates.slice(-7).map(d => parseFloat(history[d].profit));
-        const avgDailyProfit = recentData.reduce((a, b) => a + b, 0) / recentData.length;
+        const recentProfits = dates.slice(-7).map(d => parseFloat(history[d].profit));
+        const avgProfit = recentProfits.reduce((a, b) => a + b, 0) / recentProfits.length;
+        const currentTotal = dates.reduce((sum, d) => sum + parseFloat(history[d].profit), 0);
         
-        // 当前已获利 + (均值 * 剩余天数)
-        const currentTotalProfit = dates.reduce((sum, d) => sum + parseFloat(history[d].profit), 0);
-        const estimatedTotal = currentTotalProfit + (avgDailyProfit * remainingDays);
-
-        document.getElementById('forecast-val').innerText = `¥ ${estimatedTotal.toFixed(2)}`;
+        const forecast = currentTotal + (avgProfit * remainingDays);
+        document.getElementById('forecast-val').innerText = `¥ ${forecast.toFixed(2)}`;
     }
 
     function renderChart() {
@@ -172,8 +171,7 @@
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         let html = '<h3 style="font-size:14px; margin:20px 0 10px; color:#666;">历史账单</h3>';
         Object.keys(history).reverse().forEach(date => {
-            const h = history[date];
-            html += `<div class="history-item"><span>${date}</span><strong>¥${h.revenue} (${h.achievement}%)</strong></div>`;
+            html += `<div class="history-item"><span>${date}</span><strong>¥${history[date].revenue} (${history[date].achievement}%)</strong></div>`;
         });
         document.getElementById('history-list').innerHTML = html;
     }
@@ -185,12 +183,13 @@
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `otter_report_${new Date().toLocaleDateString()}.csv`;
+        link.download = `report_${new Date().toLocaleDateString()}.csv`;
         link.click();
     }
 
     function render() {
-        const score = Math.floor((totalRev / DAILY_COST) * 100);
+        const currentDailyCost = getDailyCost();
+        const score = Math.floor((totalRev / currentDailyCost) * 100);
         const scoreEl = document.getElementById('health-score');
         scoreEl.innerText = score + '%';
         scoreEl.style.color = score >= 100 ? "var(--success-green)" : "var(--primary-pink)";
@@ -202,10 +201,7 @@
         else emoji.innerText = "💎";
 
         const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
-        earned.forEach(id => { 
-            const el = document.getElementById('badge-'+id);
-            if(el) el.classList.add('active-badge'); 
-        });
+        earned.forEach(id => { if(document.getElementById('badge-'+id)) document.getElementById('badge-'+id).classList.add('active-badge'); });
     }
 
     const today = new Date().toLocaleDateString();
