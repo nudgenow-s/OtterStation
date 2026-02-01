@@ -1,3 +1,4 @@
+帮我检查main.html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -21,14 +22,9 @@
         .btn-main { background: var(--primary-pink); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; box-shadow: 0 6px #ffdae3; transition: 0.1s; }
         .btn-main:active { transform: translateY(2px); box-shadow: 0 3px #ffdae3; }
         .badge-wall { display: flex; justify-content: center; gap: 12px; margin-top: 20px; font-size: 22px; background: #fcfcfc; padding: 10px; border-radius: 15px; }
-    
+        .badge-wall span { filter: grayscale(1); opacity: 0.15; }
         /* 勋章激活样式增强 */
-        /* 默认状态：置灰并半透明 */
-        .badge-wall span { filter: grayscale(100%);  opacity: 0.3;   display: inline-block; transition: all 0.3s ease;}
-
-        /* 激活状态 */
-        .active-badge { filter: none !important; opacity: 1 !important;  transform: scale(1.1); }
-
+        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.1); }
         #profit-tip { font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: bold; height: 18px; }
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center; }
         #report-modal { background:white; width:100%; height:100%; padding:25px; box-sizing:border-box; overflow-y:auto; animation: slideUp 0.4s ease; display:none; position:fixed; top:0; left:0; z-index:2500; }
@@ -59,13 +55,6 @@
         <div id="profit-tip"></div>
     </div>
     <button class="btn-main" onclick="record()">记录成交</button>
-    <div style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-    <button onclick="triggerVision()" style="background:none; border:1px solid #ffdae3; border-radius:15px; padding:8px 15px; color:#999; font-size:12px; cursor:pointer;">
-        📷 扫描耗材收据
-    </button>
-    <input type="file" id="vision-upload" accept="image/*" style="display:none" onchange="handleVision(this)">
-</div>
-
     <div class="badge-wall" id="badges">
         <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span>
     </div>
@@ -135,50 +124,37 @@
     }
 
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
-    function triggerVision() {
-    document.getElementById('vision-upload').click();
-}
-
-async function handleVision(input) {
-    if (input.files && input.files[0]) {
-        document.getElementById('profit-tip').innerText = "🔍 正在识别收据内容...";
-        
-        // 这里模拟 OCR 后的文本传入（实际环境需配合 OCR 库）
-        // 假设获取到了文本 rawText
-        const rawText = "实付 128.00 数量 1"; 
-        
-        if (window.UniversalVision) {
-            const data = await UniversalVision.parseAnyReceipt(rawText);
-            if (data.totalCost > 0) {
-                // 自动填入你刚才提到的“支出”框
-                document.getElementById('expense-input').value = data.totalCost;
-                document.getElementById('profit-tip').innerText = `✅ 已识别: ${data.itemName || '项目'} ¥${data.totalCost}`;
-            }
-        }
-    }
-}
 
     function record() {
-        const input = document.getElementById('revenue-input');
-        const val = parseFloat(input.value);
-        if (val > 0) {
-            let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            rev += val;
-            localStorage.setItem('todayRev', rev);
-            const result = AccountingEngine.calculateProfit(val);
-            AccountingEngine.saveDailySnapshot(rev);
+    const input = document.getElementById('revenue-input');
+    const val = parseFloat(input.value);
+    if (val > 0) {
+        let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        rev += val;
+        localStorage.setItem('todayRev', rev);
+        
+        const result = AccountingEngine.calculateProfit(val);
+        AccountingEngine.saveDailySnapshot(rev);
 
-            // 【新增联动】触发勋章判定
-            if (window.AchievementEngine) {
+        // 【强力联动】不再判断 window，直接尝试调用并捕获错误
+        try {
+            if (typeof AchievementEngine !== 'undefined') {
+                // 必须传入 val (单次金额) 而不是 rev (今日总额) 
+                // 这样 recordCount (记录次数) 才会准确自增
                 AchievementEngine.check(val);
+            } else {
+                console.error("勋章引擎尚未加载");
             }
-
-            document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${result.netProfit}`;
-            setTimeout(() => document.getElementById('profit-tip').innerText="", 3000);
-            input.value = ''; 
-            render();
+        } catch (e) {
+            console.error("勋章判定执行出错:", e);
         }
+
+        document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${result.netProfit}`;
+        setTimeout(() => document.getElementById('profit-tip').innerText="", 3000);
+        input.value = ''; 
+        render();
     }
+}
 
     function toggleReport() {
         const modal = document.getElementById('report-modal');
@@ -300,7 +276,7 @@ async function handleVision(input) {
             const badgeEl = document.getElementById('badge-'+id);
             if(badgeEl) badgeEl.classList.add('active-badge'); 
         });
-    
+    }
 
     const config = IndustryAdapter.getCurrent();
     document.documentElement.style.setProperty('--primary-pink', config.theme);
