@@ -48,12 +48,6 @@
     <div id="health-score" class="health-score">0%</div>
     <div class="health-label">今日目标达成率</div>
     <div id="emoji-status">😴</div>
-    <div class="input-card" style="background: #fff5f5; margin-top: 10px;">
-      <input type="number" id="expense-input" inputmode="decimal" placeholder="¥ 支出金额">
-      <div style="font-size: 12px; color: #ccabb3; margin-top: 10px;">记录今日采购/杂项支出</div>
-    </div>
-    <button class="btn-main" style="background: #ffb1c1; margin-bottom: 10px;" onclick="recordExpense()">记录支出</button>
-
     <div class="input-card">
         <input type="number" id="revenue-input" inputmode="decimal" placeholder="¥ 0.00">
         <div id="unit-tip" style="font-size: 12px; color: #ccabb3; margin-top: 10px;">记录成交金额</div>
@@ -108,21 +102,6 @@
 <script>
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
 
-    function checkAndResetDay() {
-    const todayStr = new Date().toLocaleDateString();
-    const lastDate = localStorage.getItem('lastRecordDate');
-
-    if (lastDate !== todayStr) {
-        // 发现跨天，强制双清零
-        localStorage.setItem('todayRev', 0);
-        localStorage.setItem('todayExp', 0);
-        localStorage.setItem('lastRecordDate', todayStr);
-        console.log(`[系统] 检测到新的一天 ${todayStr}，已初始化账目。`);
-        return true;
-    }
-    return false;
-}
-
     function validateBoss(target) {
         if (prompt("请输入老板锁密码：") === "0000") {
             if (target === 'cost') {
@@ -148,61 +127,36 @@
 
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
 
-    function recordExpense() {
-    const input = document.getElementById('expense-input');
-    const val = parseFloat(input.value);
-    if (!(val > 0)) return;
-
-    // 1. 执行日期校验
-    checkAndResetDay();
-
-    // 2. 累加支出
-    let dailyExp = parseFloat(localStorage.getItem('todayExp')) || 0;
-    dailyExp += val;
-    localStorage.setItem('todayExp', dailyExp);
-    
-    // 3. 更新快照
-    const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    AccountingEngine.saveDailySnapshot(rev, dailyExp);
-    
-    alert(`✅ 已记录支出: ¥${val}`);
-    input.value = '';
-    render();
-}
-
-
-    
- function record() {
+    function record() {
     const input = document.getElementById('revenue-input');
     const val = parseFloat(input.value);
-    if (!(val > 0)) return;
+    if (val > 0) {
+        let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        rev += val;
+        localStorage.setItem('todayRev', rev);
+        
+        const result = AccountingEngine.calculateProfit(val);
+        AccountingEngine.saveDailySnapshot(rev);
 
-    // 1. 执行日期校验
-    checkAndResetDay();
+        // 【强力联动】不再判断 window，直接尝试调用并捕获错误
+        try {
+            if (typeof AchievementEngine !== 'undefined') {
+                // 必须传入 val (单次金额) 而不是 rev (今日总额) 
+                // 这样 recordCount (记录次数) 才会准确自增
+                AchievementEngine.check(val);
+            } else {
+                console.error("勋章引擎尚未加载");
+            }
+        } catch (e) {
+            console.error("勋章判定执行出错:", e);
+        }
 
-    // 2. 累加营收
-    let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    rev += val;
-    localStorage.setItem('todayRev', rev);
-    
-    // 3. 核心计算与保存
-    const dailyExp = parseFloat(localStorage.getItem('todayExp')) || 0;
-    const result = AccountingEngine.calculateProfit(val);
-    // 注意：这里必须同时传入当前的累计营收和累计支出
-    AccountingEngine.saveDailySnapshot(rev, dailyExp);
-
-    // 勋章与 UI 反馈
-    try {
-        if (typeof AchievementEngine !== 'undefined') AchievementEngine.check(val);
-    } catch (e) { console.error("勋章错误:", e); }
-
-    document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${result.netProfit}`;
-    setTimeout(() => document.getElementById('profit-tip').innerText="", 3000);
-    input.value = ''; 
-    render();
+        document.getElementById('profit-tip').innerText = `✨ 纯赚 ¥${result.netProfit}`;
+        setTimeout(() => document.getElementById('profit-tip').innerText="", 3000);
+        input.value = ''; 
+        render();
+    }
 }
-
-
 
     function toggleReport() {
         const modal = document.getElementById('report-modal');
@@ -259,34 +213,29 @@
         document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${totalProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
     }
 
-        function exportCSV() {
+    function exportCSV() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        // 【修正】确保导出时变量被正确抓取
         const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
         const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
         const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
         const dFixed = (r + s + o) / 30;
 
-        let csv = "日期,总营收,每日采购支出,当日毛利,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        
+        let csv = "日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
         Object.keys(history).forEach(d => {
             const h = history[d];
-            const rev = parseFloat(h.revenue) || 0;
-            const exp = parseFloat(h.expense) || 0;
             const net = parseFloat(h.profit) || 0;
-            
-            // 逻辑修正：毛利 = 营收 - 采购支出
-            const gross = (rev - exp).toFixed(2); 
-            
-            csv += `${d},${rev},${exp},${gross},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
+            const rev = parseFloat(h.revenue) || 0;
+            let gross = (net + dFixed).toFixed(2);
+            if(parseFloat(gross) > rev) gross = rev.toFixed(2);
+            csv += `${d},${rev},${gross},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
         });
-        
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `Precision_Report_${new Date().toLocaleDateString()}.csv`;
         link.click();
     }
-
 
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
@@ -335,18 +284,7 @@
     document.documentElement.style.setProperty('--primary-pink', config.theme);
     document.getElementById('industry-logo').innerText = `🦦 ${config.icon} ${config.name.toUpperCase()} STATION`;
 
- window.onload = () => {
-    // 1. 先检查是否跨天并清零
-    checkAndResetDay(); 
-    // 2. 渲染 UI
-    render();
-    // 3. 执行一次自动快照（确保房租被扣除）
-    const currentRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    const currentExp = parseFloat(localStorage.getItem('todayExp')) || 0;
-    AccountingEngine.saveDailySnapshot(currentRev, currentExp);
-};
-
-
+    window.onload = render;
 </script>
 </body>
 </html>
