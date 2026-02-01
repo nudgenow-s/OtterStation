@@ -228,7 +228,7 @@
             const rev = parseFloat(h.revenue) || 0;
             let gross = (net + dFixed).toFixed(2);
             if(parseFloat(gross) > rev) gross = rev.toFixed(2);
-            csv += `${d},${rev},${gross},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
+            csv += `${d},${rev},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
         });
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
