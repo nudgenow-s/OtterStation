@@ -36,6 +36,38 @@
 </head>
 <body>
 
+    <!-- ===== 每日激励弹窗 ===== -->
+<div id="motivation-modal" class="modal-overlay" style="z-index:3000;">
+  <div style="
+      background:white;
+      padding:22px;
+      border-radius:26px;
+      width:300px;
+      box-shadow:0 20px 40px rgba(255,133,162,0.2);
+      animation: slideUp 0.35s ease;
+  ">
+    <div style="font-size:16px;margin-bottom:12px;color:#ff85a2;font-weight:bold;">
+      🦦 今日行动建议
+    </div>
+
+    <div id="motivation-text"
+         style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">
+    </div>
+
+    <button class="btn-main"
+            style="font-size:14px;margin-bottom:10px;"
+            onclick="jumpToRecord()">
+      ✍️ 直接记一笔
+    </button>
+
+    <button class="btn-main"
+            style="background:#eee;color:#666;font-size:13px;box-shadow:none;"
+            onclick="closeMotivation()">
+      我知道了
+    </button>
+  </div>
+</div>
+    
 <div class="app-container">
     <div class="top-nav">
         <span id="date-display"></span>
@@ -101,7 +133,94 @@
 <script src="achievement.js"></script>
 <script>
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
+    // ====== 新增：跨天自动重置 ======
+   (function resetNewDay(){
+      const today = new Date().toLocaleDateString();
 
+      const lastDate = localStorage.getItem('lastVisitDate');
+
+      if (lastDate !== today) {
+        // 新的一天 → 清零今日数据
+        localStorage.setItem('todayRev', '0');
+
+        // 如果你希望“当日记录次数”也重置（配合勋章）
+        localStorage.setItem('todayRecordCount', '0');
+    }
+
+    localStorage.setItem('lastVisitDate', today);
+})();
+
+    // ====== 每日激励智能版 ======
+function getYesterdayProfit(){
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    const keys = Object.keys(history).sort();
+    if(keys.length === 0) return null;
+
+    const y = history[keys[keys.length-1]];
+    return parseFloat(y.profit) || 0;
+}
+
+function buildMotivation(){
+    const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
+    const yProfit = getYesterdayProfit();
+
+    // 无成本
+    if(!daily){
+        return `还没设定成本哦～  
+先点右上角 🔒 成本  
+我才能帮你算「今日达成率」🧮`;
+    }
+
+    // 无历史
+    if(yProfit === null){
+        return `今天目标：  
+👉 ¥${daily.toFixed(2)} = 已打平成本  
+再多一块，都是你抢来的利润 💰`;
+    }
+
+    // 昨天亏
+    if(yProfit < 0){
+        return `昨天小亏 ¥${Math.abs(yProfit).toFixed(2)}  
+👉 今天只要比昨天多【1笔】就是反杀  
+不要完美，只要开始 🔥`;
+    }
+
+    // 昨天赚
+    return `昨天已盈利 ¥${yProfit.toFixed(2)} 🎉  
+👉 今天核心：保持节奏  
+👉 先完成 ¥${daily.toFixed(2)} 基础线`;
+}
+
+(function dailyMotivationUI(){
+    const today = new Date().toLocaleDateString();
+    if(localStorage.getItem('motivationShown') === today) return;
+
+    const text = buildMotivation();
+    document.getElementById('motivation-text').innerText = text;
+
+    setTimeout(()=>{
+        document.getElementById('motivation-modal').style.display = 'flex';
+    }, 600);
+
+    localStorage.setItem('motivationShown', today);
+})();
+
+function closeMotivation(){
+    document.getElementById('motivation-modal').style.display = 'none';
+}
+
+function jumpToRecord(){
+    closeMotivation();
+
+    // 直接聚焦你的输入框 → 完全不改原逻辑
+    document.getElementById('revenue-input').focus();
+
+    // 给一个小动画提示
+    document.getElementById('revenue-input').style.transform = 'scale(1.05)';
+    setTimeout(()=>{
+        document.getElementById('revenue-input').style.transform = '';
+    },300);
+}
     function validateBoss(target) {
         if (prompt("请输入老板锁密码：") === "0000") {
             if (target === 'cost') {
