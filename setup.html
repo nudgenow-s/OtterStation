@@ -78,6 +78,15 @@
     </div>
 
     <script>
+        // 路由守卫：检查是否激活
+(function securityCheck() {
+    const isActivated = localStorage.getItem('isActivated');
+    if (isActivated !== 'true') {
+        // 如果没激活，强制重定向回大门，且不让用户通过“返回”跳过
+        window.location.replace('gate.html');
+    }
+})();
+
         // 路由守卫
         if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
         
