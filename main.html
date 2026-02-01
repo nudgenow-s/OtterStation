@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="common.css">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>水獭能量站</title>
     <script src="config.js"></script>
@@ -233,7 +232,7 @@ function jumpToRecord(){
     },300);
 }
     function validateBoss(target) {
-        if (prompt("请输入老板锁密码：") === "0000") {
+        if (prompt("请输入密码：") === "0000") {
             if (target === 'cost') {
                 document.getElementById('edit-rent').value = localStorage.getItem('monthlyRent');
                 document.getElementById('edit-salary').value = localStorage.getItem('monthlySalary');
@@ -460,7 +459,6 @@ setTimeout(() => {
     window.onload = render;
 </script>
     <script src="i18n-engine.js"></script>
-    <script src="footer.js"></script>
     
 
 
