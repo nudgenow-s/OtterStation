@@ -259,32 +259,34 @@
         document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${totalProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
     }
 
-    function exportCSV() {
+        function exportCSV() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        // 【修正】确保导出时变量被正确抓取
         const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
         const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
         const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
         const dFixed = (r + s + o) / 30;
 
-        let csv = "日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+        let csv = "日期,总营收,每日采购支出,当日毛利,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+        
         Object.keys(history).forEach(d => {
             const h = history[d];
-            const net = parseFloat(h.profit) || 0;
             const rev = parseFloat(h.revenue) || 0;
             const exp = parseFloat(h.expense) || 0;
-            const gross = (rev - exp).toFixed(2); // 计算毛利
+            const net = parseFloat(h.profit) || 0;
             
-            let gross = (net + dFixed).toFixed(2);
-            if(parseFloat(gross) > rev) gross = rev.toFixed(2);
-            csv += `${d},${rev},${gross},${h.achievement}%,${exp},${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
+            // 逻辑修正：毛利 = 营收 - 采购支出
+            const gross = (rev - exp).toFixed(2); 
+            
+            csv += `${d},${rev},${exp},${gross},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
         });
+        
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `Precision_Report_${new Date().toLocaleDateString()}.csv`;
         link.click();
     }
+
 
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
@@ -334,6 +336,11 @@
     document.getElementById('industry-logo').innerText = `🦦 ${config.icon} ${config.name.toUpperCase()} STATION`;
 
     window.onload = render;
+    // 在 render() 结尾加入，确保即便不录入，当天的房租扣除也会记录
+   const currentRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+   const currentExp = parseFloat(localStorage.getItem('todayExp')) || 0;
+   AccountingEngine.saveDailySnapshot(currentRev, currentExp);
+
 </script>
 </body>
 </html>
