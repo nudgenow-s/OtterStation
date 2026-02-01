@@ -21,9 +21,14 @@
         .btn-main { background: var(--primary-pink); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; box-shadow: 0 6px #ffdae3; transition: 0.1s; }
         .btn-main:active { transform: translateY(2px); box-shadow: 0 3px #ffdae3; }
         .badge-wall { display: flex; justify-content: center; gap: 12px; margin-top: 20px; font-size: 22px; background: #fcfcfc; padding: 10px; border-radius: 15px; }
-        .badge-wall span { filter: grayscale(1); opacity: 0.15; }
+    
         /* 勋章激活样式增强 */
-        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.1); }
+        /* 默认状态：置灰并半透明 */
+        .badge-wall span { filter: grayscale(100%);  opacity: 0.3;   display: inline-block; transition: all 0.3s ease;}
+
+        /* 激活状态 */
+        .active-badge { filter: none !important; opacity: 1 !important;  transform: scale(1.1); }
+
         #profit-tip { font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: bold; height: 18px; }
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center; }
         #report-modal { background:white; width:100%; height:100%; padding:25px; box-sizing:border-box; overflow-y:auto; animation: slideUp 0.4s ease; display:none; position:fixed; top:0; left:0; z-index:2500; }
@@ -62,7 +67,7 @@
 </div>
 
     <div class="badge-wall" id="badges">
-        <span id="first_blood">💰</span><span id="profitable_king">👑</span><span id="smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span>
+        <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span>
     </div>
 </div>
 
@@ -295,7 +300,7 @@ async function handleVision(input) {
             const badgeEl = document.getElementById('badge-'+id);
             if(badgeEl) badgeEl.classList.add('active-badge'); 
         });
-    }
+    
 
     const config = IndustryAdapter.getCurrent();
     document.documentElement.style.setProperty('--primary-pink', config.theme);
