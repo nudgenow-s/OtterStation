@@ -372,7 +372,7 @@ setTimeout(() => {
         const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
         const dFixed = (r + s + o) / 30;
 
-        let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+        let csv = "日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
         Object.keys(history).forEach(d => {
             const h = history[d];
             const net = parseFloat(h.profit) || 0;
