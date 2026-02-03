@@ -45,11 +45,11 @@ const i18nConfig = {
         // === 补充词条：解决 ROI 未完全翻译的问题 ===
         '进度': 'Progress',
         '累计纯利': 'Total Profit',
-        '还需': 'Need',
+    
         '回本': 'to ROI',
         '预计还需': 'Estimated',
-        '天回本': 'days to ROI',
-        '（约': '(Est.',
+        '天': 'days',
+        '约': 'Est.',
 
         // === 补充词条：解决 CSV 导出翻译的问题 ===
         '日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利': 'Date,Revenue,Gross,Achievement,Rent/D,Salary/D,Misc/D,Net Profit',
