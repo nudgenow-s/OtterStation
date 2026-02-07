@@ -72,6 +72,7 @@
     <div class="top-nav">
         <span id="date-display"></span>
         <div>
+            <span onclick="StellarockDataHub.exportData()" style="cursor:pointer; margin-right:12px;color:var(--primary-pink);font-weight:bold;">📤备份</span>
             <span onclick="validateBoss('cost')" style="cursor:pointer; margin-right:12px;">🔒 成本</span>
             <span onclick="validateBoss('report')" style="cursor:pointer">📊 报表</span>
         </div>
@@ -241,6 +242,40 @@ function jumpToRecord(){
             } else toggleReport();
         }
     }
+
+        // ====== 追加在原有代码最底部，确保不影响顶部的安全校验 ======
+    const StellarockDataHub = {
+        exportData: function() {
+            try {
+                const allData = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    allData[key] = localStorage.getItem(key);
+                }
+                
+                // 增加校验：如果没有数据，提醒用户
+                if (Object.keys(allData).length === 0) {
+                    alert("🦦 财库空空，先记几笔再备份吧！");
+                    return;
+                }
+
+                const backupDate = new Date().toISOString().slice(0, 10);
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Stellarock_Vault_${backupDate}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                alert("🦦 备份成功！请妥善保存该 JSON 文件。");
+            } catch (e) {
+                alert("❌ 备份失败，请检查浏览器权限。");
+            }
+        }
+    };
+    // ======================================================
+
+
 
     function saveCostDetails() {
         const r = parseFloat(document.getElementById('edit-rent').value) || 0;
