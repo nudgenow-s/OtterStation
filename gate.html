@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head<!DOCTYPE html>
-<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -160,148 +158,10 @@
     }
 
     if (localStorage.getItem('isActivated') === 'true') {
-        
+        // 如果已激活，直接进引导页（或直接进App，根据你的PM逻辑决定）
         showGuide();
     }
     updateUI();
 </script>
-</body>
-</html>
->
-     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>水獭能量站</title>
-    <script src="config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --primary-pink: #ff85a2; --bg: #fff9fa; }
-        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 310px; background: white; border-radius: 35px; padding: 30px; box-shadow: 0 15px 40px rgba(255,133,162,0.1); text-align: center; position: relative; }
-        .logo { font-size: 70px; margin-bottom: 20px; }
-        h2 { color: var(--primary-pink); font-size: 20px; margin: 0 0 15px; }
-        input { width: 100%; border: none; background: #fef0f3; padding: 18px; border-radius: 20px; font-size: 20px; text-align: center; box-sizing: border-box; outline: none; color: var(--primary-pink); letter-spacing: 3px; font-weight: bold; }
-        .btn-go { width: 100%; background: var(--primary-pink); color: white; border: none; padding: 18px; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 25px; box-shadow: 0 6px #ffdae3; }
-        
-        /* 引导说明 */
-        #guide-box { display: none; }
-        .instruction { text-align: left; background: #fff9fa; padding: 20px; border-radius: 20px; margin: 20px 0; font-size: 13px; color: #777; line-height: 1.8; }
-        .highlight { color: var(--primary-pink); font-weight: bold; }
-        
-        /* 语言切换按钮 */
-        .lang-toggle { position: absolute; top: 15px; right: 20px; font-size: 12px; color: var(--primary-pink); font-weight: bold; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN</div>
-
-    <div id="auth-ui">
-        <div class="logo">🦦</div>
-        <h2 id="t-auth-title">激活您的能量站</h2>
-        <input type="text" id="activation-code" placeholder="ENTER CODE">
-        <button class="btn-go" onclick="handleVerify()" id="t-auth-btn">立即验证</button>
-    </div>
-
-    <div id="guide-box">
-        <div class="logo">📱</div>
-        <h2 id="t-guide-title">使用说明</h2>
-        <div class="instruction" id="t-instruction">
-            
-            1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span> (方块箭头)<br>
-            2️⃣ 向上滑动找到 <span class="highlight">“添加到主屏幕”</span><br>
-            3️⃣ 点击右上角 <span class="highlight">“添加”</span><br><br>
-            完成后从桌面图标进入。
-        </div>
-        <button class="btn-go" onclick="enterApp()" id="t-guide-btn">进入系统</button>
-    </div>
-</div>
-
-<script>
-    const CODES = ["PSGJFMQX","NVXGUFXX","T3QR5HXL","GHHUAYQQ","4U5TDPMC",
-"QMU7F2E2","2SR4HEU9","8DUWM4UW","2CCF7RDK","4QS4B7YX","77W44PWF","L5D82VZQ","YPU6PLT3","B4ENWZDX",
-"S5NSAJ4G","CCQG7B6R","BBT8FTJH","546RMDX5","Z7C9SDJZ","K9YLBHYS","2F3X2QQQ","7SUZKH4N","E9NEYJJC",
-"343U9DNA","D7W82QQF","2QLF26D4","JXSCTLG3","L69SJAH3","TZZ5ZFVT","USMD7744","ZJWWTQDR","YBR3USQ9",
-"K7TRTGL4","WXNG6HSB","894TSGX8","RQ6XLKUG","AG7Z88SE","2YJYHWTW","FKWK38L5","5XT54EP4","HLDNJSPL","DS49PWEH",
-"E7UFKNCF","F6D65UUJ","HRCUE477","J2CRTFZ4","XV4B7PX4","ND8ELKAT","BJ75JAFR","DB8HATFA","CVXRR8VS",
-"NSDUUGL5","XBHQFSCB","26WWR9VU","ABNSMU5A","CFXLZWYJ","65J85WQP","QRKH2MVP","TFH86Z9V","RYWV4W93","EE438L6G","WU8T2NPF","MYPPAZ77",
-"6GX5447N","ZX74KSG5","WGES64DB","NR6H8XX6","QB3N9YTZ","TF6WJZ67","XWV4KZHX","XSYCDLHB","QMABA2GY","J32TYB5D","QFGLC6MJ",
-"G6C797BN","2W394327","FM2G6ART","44ET8X2M","H27M5UH4","TCFSZ7GP","8SNV5SMH","MD7AYYNV","75XG2E3R","NKAEYBXQ","6ZAGFG35",
-"EZM5RNGY","5PDX9587","UM359UGD","2Y5DC65R","YX8BCKJ2","RTVLDGSJ","8ZWME5DY","9J2XAMLL","2ZQQ33UX","WKJJL2ZJ",
-"XY9EP4DN","FNQXNADX","C37PNA5D","RQVZNYS3"]; // 激活码库
-    // 黑名单数组
-const BLACKLIST = ["KDRBLCC9"]; 
-    let currentLang = localStorage.getItem('lang') || 'zh';
-
-    const translations = {
-        'zh': {
-            'btn': 'EN',
-            'authTitle': '激活您的能量站',
-            'authBtn': '立即验证',
-            'guideTitle': '使用说明',
-            'guideBtn': '进入系统',
-            'instruction': '为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">“添加到主屏幕”</span><br>3️⃣ 点击右上角 <span class="highlight">“添加”</span><br><br>完成后从桌面图标进入。',
-            'error': '激活码错误，请联系主理人 🦦'
-        },
-        'en': {
-            'btn': '中文',
-            'authTitle': 'Activate Station',
-            'authBtn': 'Verify Now',
-            'guideTitle': 'Instructions',
-            'guideBtn': 'Enter System',
-            'instruction': 'To <span class="highlight">Hide Address Bar</span> and get the App experience:<br><br>1️⃣ Click the <span class="highlight">Share Icon</span> at the bottom<br>2️⃣ Scroll down to <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on the top right.<br><br>Then open from your home screen.',
-            'error': 'Invalid Code. Please contact the owner. 🦦'
-        }
-    };
-
-    function updateUI() {
-        const t = translations[currentLang];
-        document.getElementById('lang-btn').innerText = t.btn;
-        document.getElementById('t-auth-title').innerText = t.authTitle;
-        document.getElementById('t-auth-btn').innerText = t.authBtn;
-        document.getElementById('t-guide-title').innerText = t.guideTitle;
-        document.getElementById('t-guide-btn').innerText = t.guideBtn;
-        document.getElementById('t-instruction').innerHTML = t.instruction;
-    }
-
-    function toggleLang() {
-        currentLang = currentLang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('lang', currentLang);
-        updateUI();
-    }
-
-    function handleVerify() {
-        const input = document.getElementById('activation-code').value.trim().toUpperCase();
-         if (BLACKLIST.includes(input)) {
-        alert(currentLang === 'zh' ? "该激活码已作废或已被禁用 🦦" : "This code has been disabled. 🦦");
-        return; // 直接拦截，不进行后续比对
-    }
-
-        if (CODES.includes(input)) {
-            localStorage.setItem('isActivated', 'true');
-            showGuide();
-        } else {
-            alert(translations[currentLang].error);
-        }
-    }
-
-    function showGuide() {
-        document.getElementById('auth-ui').style.display = 'none';
-        document.getElementById('guide-box').style.display = 'block';
-    }
-
-    function enterApp() {
-        // 跳转到你原本的 index.html
-        window.location.replace('index.html');
-    }
-
-    // 初始化检查
-    if (localStorage.getItem('isActivated') === 'true') showGuide();
-    updateUI();
-</script>
-
-    
 </body>
 </html>
