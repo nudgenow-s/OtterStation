@@ -23,6 +23,7 @@ const i18nConfig = {
         '完成并进入水獭能量站': 'Finish & Enter Station',
 
         // === main.html 专属 ===
+        '📤备份':'📤Backup',
         '🔒 成本': '🔒 Cost',
         '📊 报表': '📊 Report',
         '今日目标达成率': 'Daily Goal Progress',
@@ -35,6 +36,7 @@ const i18nConfig = {
         '✍️ 直接记一笔': '✍️ Record Now',
         '回本进度': 'ROI Progress',
         '总投入': 'Total Investment',
+        '智能':'Smart',
         '月度利润预测': 'Monthly Forecast',
         '基于近7日表现预测本月净盈余': 'Forecast based on last 7 days',
         '导出全维度 CSV 报表': 'Export CSV',
@@ -55,15 +57,29 @@ const i18nConfig = {
         '日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利': 'Date,Revenue,Gross,Achievement,Rent/D,Salary/D,Misc/D,Net Profit',
 
         // === 动态匹配关键词 ===
+        '⏳ 需保持盈利以预测回本期':'Profitability is required to project the payback period.',
         '⏳ 距离打平还差': '⏳ Gap to breakeven:',
         '🎯 已打平成本！从现在开始都是利润': '🎯 Breakeven reached! Profit starts now',
         '✨ 纯赚': '✨ Net Profit:',
         '还没设定成本哦～': 'Costs not set yet...',
         '先点右上角': 'Please click top-right',
         '我才能帮你算': 'to calculate progress',
-        '今天目标：': 'Today\'s Goal:',
+        '今天目标：': 'Today Goal:',
         '已打平成本': 'Breakeven',
-        '再多一块，都是你抢来的利润': 'Every extra dollar is your profit'
+        '再多一块，都是你抢来的利润': 'Every extra dollar is your profit',
+        // === achievement ===
+        '解锁成就':'Achievement Unlocked',
+        '收下勋章':'Claim Medal',
+        '精准记帐，每一分钱都有据可查':'Precise tracking: every cent is accounted for.',
+        '精明猎手':'Shrewd Hunter',
+        '黄金选手':'Gold Player',
+        '超绝主理人':'Elite Manager',
+        '首单入账':'First Sale',
+        '打破鸭蛋':'Zero Broken',
+        '开工大吉':'Off to a flying start',
+        
+        
+        
     }
 };
 
@@ -131,7 +147,7 @@ const i18nConfig = {
         // B. 特殊属性处理 (Placeholder)
         const placeholders = {
             '月房租': 'Monthly Rent', '月工资': 'Salary', '月杂费': 'Utilities', 
-            '初始总投入': 'Startup Cost', '请输入老板锁密码：': 'Enter Boss Password:'
+            '初始总投入': 'Startup Cost', '请输入密码：': 'Enter Password:','🦦备份成功！请妥善保存该JSON文件。':'🦦Backup successful! Please keep this JSON file safe.'
         };
         document.querySelectorAll('input').forEach(input => {
             if (placeholders[input.placeholder]) {
