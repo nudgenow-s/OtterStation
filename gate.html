@@ -67,9 +67,8 @@
     });
 }
 
-    
-    const CODES = ["PSGJFMQX","NVXGUFXX","T3QR5HXL","GHHUAYQQ","4U5TDPMC","QMU7F2E2","2SR4HEU9","8DUWM4UW","2CCF7RDK","4QS4B7YX","77W44PWF","L5D82VZQ","YPU6PLT3","B4ENWZDX","S5NSAJ4G","CCQG7B6R","BBT8FTJH","546RMDX5","Z7C9SDJZ","K9YLBHYS","2F3X2QQQ","7SUZKH4N","E9NEYJJC","343U9DNA","D7W82QQF","2QLF26D4","JXSCTLG3","L69SJAH3","TZZ5ZFVT","USMD7744","ZJWWTQDR","YBR3USQ9","K7TRTGL4","WXNG6HSB","894TSGX8","RQ6XLKUG","AG7Z88SE","2YJYHWTW","FKWK38L5","5XT54EP4","HLDNJSPL","DS49PWEH","E7UFKNCF","F6D65UUJ","HRCUE477","J2CRTFZ4","XV4B7PX4","ND8ELKAT","BJ75JAFR","DB8HATFA","CVXRR8VS","NSDUUGL5","XBHQFSCB","26WWR9VU","ABNSMU5A","CFXLZWYJ","65J85WQP","QRKH2MVP","TFH86Z9V","RYWV4W93","EE438L6G","WU8T2NPF","MYPPAZ77","6GX5447N","ZX74KSG5","WGES64DB","NR6H8XX6","QB3N9YTZ","TF6WJZ67","XWV4KZHX","XSYCDLHB","QMABA2GY","J32TYB5D","QFGLC6MJ","G6C797BN","2W394327","FM2G6ART","44ET8X2M","H27M5UH4","TCFSZ7GP","8SNV5SMH","MD7AYYNV","75XG2E3R","NKAEYBXQ","6ZAGFG35","EZM5RNGY","5PDX9587","UM359UGD","2Y5DC65R","YX8BCKJ2","RTVLDGSJ","8ZWME5DY","9J2XAMLL","2ZQQ33UX","WKJJL2ZJ","XY9EP4DN","FNQXNADX","C37PNA5D","RQVZNYS3"]; 
-    const BLACKLIST = ["KDRBLCC9"]; 
+    const PRIVATE_SALT = "INTJ_ARCHITECT_2026_PRO";
+
     let currentLang = localStorage.getItem('lang') || 'zh';
 
     const translations = {
@@ -98,7 +97,8 @@
             'importError': '❌ Invalid Backup File.'
         }
     };
-
+    
+    
     function updateUI() {
         const t = translations[currentLang];
         document.getElementById('lang-btn').innerText = t.btn;
@@ -116,14 +116,42 @@
         updateUI();
     }
 
-    function handleVerify() {
-        const input = document.getElementById('activation-code').value.trim().toUpperCase();
-        if (BLACKLIST.includes(input)) {
-            alert(currentLang === 'zh' ? "该激活码已作废 🦦" : "Code disabled. 🦦");
-            return;
+    function generateDeviceFingerprint() {
+        const info = [
+            navigator.userAgent,
+            screen.width + "x" + screen.height,
+            navigator.language
+        ].join('|');
+        let hash = 0;
+        for (let i = 0; i < info.length; i++) {
+            hash = ((hash << 5) - hash) + info.charCodeAt(i);
+            hash |= 0;
         }
-        if (CODES.includes(input)) {
+        return Math.abs(hash).toString(36).toUpperCase();
+    }
+
+    async function validateLicense(code) {
+        if (!code || code.length !== 20) return false;
+        const prefix = code.substring(0,12).toUpperCase();
+        const suffix = code.substring(12).toLowerCase();
+        const msgUint8 = new TextEncoder().encode(prefix + PRIVATE_SALT);
+        const hashBuffer = await crypto.subtle.digest('SHA-256',msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const expectedSuffix = hashArray.map(b => b.toString(16).padStart(2,'0')).join('').substring(0,8);
+
+        return suffix === expectedSuffix;
+    }
+    
+    async function handleVerify() {
+        const input = document.getElementById('activation-code');
+        const code = input.value.trim().toUpperCase();
+        const isValid = await validateLicense(code);
+      
+        if (isValid) {
             localStorage.setItem('isActivated', 'true');
+            localStorage.setItem('license_key', code);
+            localStorage.setItem('bound_device_id',generateDeviceFingerprint());
+            
             showGuide();
         } else {
             alert(translations[currentLang].error);
