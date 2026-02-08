@@ -1,5 +1,6 @@
 const CACHE_NAME = 'precision-manager-v1';
 const ASSETS = [
+  './',
   './gate.html',
   './index.html',
   './main.html',
