@@ -144,10 +144,24 @@
     
     async function handleVerify() {
         const input = document.getElementById('activation-code');
+        const btn = document.getElementById('t-auth-btn');
+        if (btn.disabled) return;
+        
         const code = input.value.trim().toUpperCase();
         const isValid = await validateLicense(code);
       
         if (isValid) {
+            try {
+                btn.disabled = true;
+                const deviceID = generateDeviceFingerprint();
+                const WORKER_URL = 'https://stellarock-auth.jingyi950917.workers.dev';
+                const response = await fetch(WORKER_URL,{
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code,deviceID })
+                });
+                const result = await response.json();
+                if (response.ok && result.status === 'success') {
             localStorage.setItem('isActivated', 'true');
             localStorage.setItem('license_key', code);
             localStorage.setItem('bound_device_id',generateDeviceFingerprint());
@@ -155,6 +169,15 @@
             showGuide();
         } else {
             alert(translations[currentLang].error);
+                    btn.disabled = false;
+        }
+            } catch (err) {
+                alert(currentLang === 'zh' ? "请检查网络连接" : "Network required.");
+                btn.disabled = false;
+            }
+        } else {
+            alert(translations[currentLang].error);
+           
         }
     }
 
