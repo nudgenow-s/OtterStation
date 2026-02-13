@@ -5,9 +5,9 @@ const i18nConfig = {
     'en': {
         // === setup.html 专属 ===
         '🏷️ 选择行业身份': '🏷️ Select Industry',
-        '美甲美睫': 'Nail & Lash',
-        '小吃摆摊': 'Street Food',
-        '服装零售': 'Retail',
+        '美业': 'Beauty Industry',
+        '餐饮': 'F&B',
+        '零售': 'Retail',
         '确认身份': 'Confirm',
         '🏠 房租与物业': '🏠 Rent & Property',
         '房租是生存的第一道坎。请输入每月固定支出：': 'Rent is your first hurdle. Enter monthly fixed costs:',
