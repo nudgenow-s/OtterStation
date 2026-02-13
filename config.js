@@ -5,21 +5,21 @@
 const IndustryAdapter = {
     registry: {
         "nail": { 
-            name: "美甲美睫", 
+            name: "美业", 
             theme: "#ff85a2", 
             icon: "💅", 
             unit: "位顾客",
             slogan: "让美力变现 ✨" 
         },
         "food": { 
-            name: "小吃摆摊", 
+            name: "餐饮", 
             theme: "#ffb347", 
             icon: "🌭", 
             unit: "份餐点",
             slogan: "人间烟火气，最抚主理人 🍳"
         },
         "retail": { 
-            name: "服装零售", 
+            name: "零售", 
             theme: "#4facfe", 
             icon: "👗", 
             unit: "件衣服",
