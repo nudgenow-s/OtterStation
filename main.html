@@ -432,28 +432,33 @@ setTimeout(() => {
 
 
 function exportCSV() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        // 【修正】确保导出时变量被正确抓取
-        const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
-        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
-        const dFixed = (r + s + o) / 30;
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    
+    // 【兜底值】
+    const rDef = (parseFloat(localStorage.getItem('monthlyRent')) || 0) / 30;
+    const sDef = (parseFloat(localStorage.getItem('monthlySalary')) || 0) / 30;
+    const oDef = (parseFloat(localStorage.getItem('monthlyOther')) || 0) / 30;
 
-        let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        Object.keys(history).forEach(d => {
-            const h = history[d];
-            const net = parseFloat(h.profit) || 0;
-            const rev = parseFloat(h.revenue) || 0;
-            let gross = (net + dFixed).toFixed(2);
-            if(parseFloat(gross) > rev) gross = rev.toFixed(2);
-            csv += `${d},${rev},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
-        });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Precision_Report_${new Date().toLocaleDateString()}.csv`;
-        link.click();
-    }
+    let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+    
+    Object.keys(history).forEach(d => {
+        const h = history[d];
+        const net = parseFloat(h.profit) || 0;
+        const rev = parseFloat(h.revenue) || 0;
+        const R = h.rDay || rDef.toFixed(2);
+        const S = h.sDay || sDef.toFixed(2);
+        const O = h.oDay || oDef.toFixed(2);
+
+        csv += `${d},${rev},${h.achievement}%,${R},${S},${O},${net}\n`;
+    });
+
+    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Precision_Report_${new Date().toLocaleDateString()}.csv`;
+    link.click();
+}
+
 
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
