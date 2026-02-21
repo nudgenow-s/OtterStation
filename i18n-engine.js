@@ -44,17 +44,9 @@ const i18nConfig = {
         '保存': 'Save',
         '取消': 'Cancel',
 
-        // === 补充词条：解决 ROI 未完全翻译的问题 ===
-        '进度': 'Progress',
-        '累计纯利': 'Total Profit',
-    
-        '回本': 'to ROI',
-        '预计还需': 'Estimated',
-        '天': 'days',
-        '约': 'Est.',
-
+       
         // === 补充词条：解决 CSV 导出翻译的问题 ===
-        '日期,总营收,毛利,达成率,日均房租,日均人工,日均杂费,绝对净利': 'Date,Revenue,Gross,Achievement,Rent/D,Salary/D,Misc/D,Net Profit',
+        '日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利': 'Date,Revenue,Achievement,Rent/D,Salary/D,Misc/D,Net Profit',
 
         // === 动态匹配关键词 ===
         '⏳ 需保持盈利以预测回本期':'Profitability is required to project the payback period.',
@@ -77,6 +69,15 @@ const i18nConfig = {
         '首单入账':'First Sale',
         '打破鸭蛋':'Zero Broken',
         '开工大吉':'Off to a flying start',
+         // === 补充词条：解决 ROI 未完全翻译的问题 ===
+        '进度': 'Progress',
+        '累计纯利': 'Total Profit',
+    
+        '回本': 'to ROI',
+        '预计还需': 'Estimated',
+        '天': 'days',
+        '约': 'Est.'
+
         
         
         
