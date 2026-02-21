@@ -282,21 +282,7 @@ function jumpToRecord(){
         const s = parseFloat(document.getElementById('edit-salary').value) || 0;
         const o = parseFloat(document.getElementById('edit-other').value) || 0;
         const st = parseFloat(document.getElementById('edit-startup').value) || 0;
-        // 获取当前日期作为起始点
-        const versionDate = new Date().toISOString().split('T')[0];
-        let costHistory = JSON.parse(localStorage.getItem('cost_history')) || [];
-        const existingIndex = costHistory.findIndex(v => v.startDate === versionDate);
-        const newVersion = { startDate: versionDate,r,s,o };
-
-        if (existingIndex > -1){
-            costHistory[existingIndex] = newVersion;
-        } else {  
-            costHistory.push(newVersion);
-        }
-
-        costHistory.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
-
-        localStorage.setItem('cost_history',JSON.stringify(costHistory));
+        
         localStorage.setItem('monthlyRent', r); 
         localStorage.setItem('monthlySalary', s);
         localStorage.setItem('monthlyOther', o);
@@ -444,39 +430,23 @@ setTimeout(() => {
         document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${totalProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
     }
 
-    function exportCSV() {
+
+function exportCSV() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const costHistory = JSON.parse(localStorage.getItem('cost_history')) || [];
-        
         // 【修正】确保导出时变量被正确抓取
-        const defaultR = parseFloat(localStorage.getItem('monthlyRent')) || 0;
-        const defaultS = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const defaultO = parseFloat(localStorage.getItem('monthlyOther')) || 0;
-    
+        const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
+        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+        const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
+        const dFixed = (r + s + o) / 30;
 
         let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        Object.keys(history).sort().forEach(d => {
+        Object.keys(history).forEach(d => {
             const h = history[d];
-            const rowDate = new Date(d);
             const net = parseFloat(h.profit) || 0;
             const rev = parseFloat(h.revenue) || 0;
-
-            let match = null;
-            for (let i = costHistory.length -1; i >= 0; i--) {
-                if (new Date(costHistory[i].startDate) <= rowDate){
-                    match = costHistory[i];
-                    break;
-                }
-            }
-            const r = match ? match.r : defaultR;
-            const s = match ? match.s : defaultS;
-            const o = match ? match.o : defaultO;
-
-            const rDay = (r / 30).toFixed(2);
-            const sDay = (s / 30).toFixed(2);
-            const oDay = (o / 30).toFixed(2);
-            
-            csv += `${d},${rev},${h.achievement}%,${rDay},${sDay},${oDay},${net}\n`;
+            let gross = (net + dFixed).toFixed(2);
+            if(parseFloat(gross) > rev) gross = rev.toFixed(2);
+            csv += `${d},${rev},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
         });
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
