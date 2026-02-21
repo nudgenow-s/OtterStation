@@ -44,17 +44,12 @@ const AccountingEngine = {
         const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 1;
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         const today = new Date().toLocaleDateString();
-        const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
-        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
+      
         // 记录当日终盘数据
         history[today] = {
             revenue: totalRev.toFixed(2),
             profit: (totalRev - dailyCost).toFixed(2),
-            achievement: Math.floor((totalRev / dailyCost) * 100),
-            rDay: (r / 30).toFixed(2),
-            sDay: (s / 30).toFixed(2),
-            oDay: (o / 30).toFixed(2)
+            achievement: Math.floor((totalRev / dailyCost) * 100)
         };
             
         
