@@ -459,27 +459,52 @@ setTimeout(() => {
 
 
 function exportCSV() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        // 【修正】确保导出时变量被正确抓取
-        const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
-        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
-        const dFixed = (r + s + o) / 30;
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    
+    // 获取当前的成本作为历史快照缺失时的“兜底”
+    const currentR = parseFloat(localStorage.getItem('monthlyRent')) || 0;
+    const currentS = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+    const currentO = parseFloat(localStorage.getItem('monthlyOther')) || 0;
 
-        let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        Object.keys(history).forEach(d => {
-            const h = history[d];
-            const net = parseFloat(h.profit) || 0;
-            const rev = parseFloat(h.revenue) || 0;
-           
-            csv += `${d},${rev},${h.achievement}%,${(r/30).toFixed(2)},${(s/30).toFixed(2)},${(o/30).toFixed(2)},${net}\n`;
-        });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Precision_Report_${new Date().toLocaleDateString()}.csv`;
-        link.click();
-    }
+    let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+    
+    // 按照时间顺序对 Key 进行排序，确保报表从旧到新
+    const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+
+    sortedDates.forEach(d => {
+        const h = history[d];
+        const rev = parseFloat(h.revenue) || 0;
+        const net = parseFloat(h.profit) || 0;
+        
+        // 核心对齐逻辑：
+        // 如果快照里存了当时的 dailyCost，我们反向推算出当时的比例
+        // 如果没存（旧数据），则用当前的成本兜底
+        const dCost = parseFloat(h.dailyCost) || (currentR + currentS + currentO) / 30;
+        
+        // 假设租金/人工/杂费比例固定，按比例分配当日成本（或者直接显示总固定成本）
+        const totalC = currentR + currentS + currentO || 1;
+        const rPart = (dCost * (currentR / totalC)).toFixed(2);
+        const sPart = (dCost * (currentS / totalC)).toFixed(2);
+        const oPart = (dCost * (currentO / totalC)).toFixed(2);
+
+        csv += `${d},${rev},${h.achievement}%,${rPart},${sPart},${oPart},${net}\n`;
+    });
+
+    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    
+    // 针对移动端浏览器的稳定性处理
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    const backupDate = new Date().toLocaleDateString().replace(/\//g, '-');
+    link.download = `Otter_Financial_Report_${backupDate}.csv`;
+    
+    document.body.appendChild(link); // 兼容某些移动端浏览器
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 
 
     function renderChart() {
