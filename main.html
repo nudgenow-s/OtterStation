@@ -426,27 +426,35 @@ setTimeout(() => {
 }
 
 
-    function calculateROI(avgDailyProfit, totalProfit) {
-        const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
-        const progress = startup > 0 ? Math.min((totalProfit / startup) * 100, 100).toFixed(1) : 100;
-        const remainingCost = Math.max(startup - totalProfit, 0);
+    function calculateROI(avgDailyProfit) {
+    const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    
+    // 核心修复：不再依赖传入的局部 totalProfit，而是计算全量历史纯利
+    let cumulativeProfit = 0;
+    Object.values(history).forEach(day => {
+        cumulativeProfit += (parseFloat(day.profit) || 0);
+    });
 
-        let countdownText = "";
-        if (remainingCost <= 0) {
-            countdownText = "🎉 恭喜！已完全回本";
-        } else if (avgDailyProfit <= 0) {
-            countdownText = "⏳ 需保持盈利以预测回本期";
-        } else {
-            const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
-            const roiDate = new Date();
-            roiDate.setDate(roiDate.getDate() + daysToROI);
-            countdownText = `预计还需 **${daysToROI}** 天回本 (约 ${roiDate.toLocaleDateString()})`;
-        }
+    const progress = startup > 0 ? Math.min((cumulativeProfit / startup) * 100, 100).toFixed(1) : 100;
+    const remainingCost = Math.max(startup - cumulativeProfit, 0);
 
-        document.getElementById('roi-total').innerText = startup.toLocaleString();
-        document.getElementById('roi-progress').style.width = progress + '%';
-        document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${totalProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
+    let countdownText = "";
+    if (remainingCost <= 0) {
+        countdownText = "🎉 恭喜！已完全回本";
+    } else if (avgDailyProfit <= 0) {
+        countdownText = "⏳ 需保持盈利以预测回本期";
+    } else {
+        const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
+        const roiDate = new Date();
+        roiDate.setDate(roiDate.getDate() + daysToROI);
+        countdownText = `预计还需 **${daysToROI}** 天回本 (约 ${roiDate.toLocaleDateString()})`;
     }
+
+    document.getElementById('roi-total').innerText = startup.toLocaleString();
+    document.getElementById('roi-progress').style.width = progress + '%';
+    document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${cumulativeProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
+}
 
 
 
