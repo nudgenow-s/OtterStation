@@ -163,12 +163,30 @@
     // ====== 每日激励智能版 ======
 function getYesterdayProfit(){
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-    const keys = Object.keys(history).sort();
-    if(keys.length === 0) return null;
+    
+    // 获取真正的昨天日期字符串（确保与你存入时的格式一致）
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString();
 
-    const y = history[keys[keys.length-1]];
-    return parseFloat(y.profit) || 0;
+    // 直接从对象中精准提取昨天的记录
+    if(history[yesterdayStr]){
+        return parseFloat(history[yesterdayStr].profit) || 0;
+    }
+
+    // 如果昨天没记录，再退而求其次寻找最近的一个历史记录
+    const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    if(keys.length === 0) return null;
+    
+    // 排除掉今天的 key，找到最后一个历史 key
+    const todayStr = new Date().toLocaleDateString();
+    const historyKeys = keys.filter(k => k !== todayStr);
+    
+    if(historyKeys.length === 0) return null;
+    const lastKey = historyKeys[historyKeys.length - 1];
+    return parseFloat(history[lastKey].profit) || 0;
 }
+
 
 function buildMotivation(){
     const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
