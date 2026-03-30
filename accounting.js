@@ -12,19 +12,29 @@ const AccountingEngine = {
 
     // 2. 存档逻辑：固化历史成本，防止未来 CSV 报表随参数变动
     saveDailySnapshot(totalRev) {
-        const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const today = new Date().toLocaleDateString(); // 3/30/2026
-      
-        history[today] = {
-            revenue: parseFloat(totalRev).toFixed(2),
-            dailyCost: dailyCost.toFixed(2), // 固化这一天的成本
-            profit: (parseFloat(totalRev) - dailyCost).toFixed(2),
-            achievement: dailyCost > 0 ? Math.floor((totalRev / dailyCost) * 100) : 100
-        };
-            
-        localStorage.setItem('revenue_history', JSON.stringify(history));
-    },
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    const today = new Date().toLocaleDateString();
+
+    // 在存入瞬间，抓取当时的配置
+    const r = parseFloat(localStorage.getItem('monthlyRent')) || 0;
+    const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+    const o = parseFloat(localStorage.getItem('monthlyOther')) || 0;
+    const dCost = (r + s + o) / 30;
+
+    history[today] = {
+        revenue: parseFloat(totalRev).toFixed(2),
+        profit: (totalRev - dCost).toFixed(2),
+        achievement: dCost > 0 ? Math.floor((totalRev / dCost) * 100) : 100,
+        // 核心：存入成本快照，从此这天的数据不再受未来修改的影响
+        fixedCosts: {
+            rent: (r / 30).toFixed(2),
+            salary: (s / 30).toFixed(2),
+            other: (o / 30).toFixed(2)
+        }
+    };
+    
+    localStorage.setItem('revenue_history', JSON.stringify(history));
+},
 
     // 3. 趋势数据
     getTrendData() {
