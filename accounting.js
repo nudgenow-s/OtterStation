@@ -1,65 +1,36 @@
-/**
- * 模块：水獭主理人财务内核 (Accounting Engine V4.0)
- * 功能：深度整合固定成本、耗材追踪、以及历史数据快照
- */
 const AccountingEngine = {
-    
-    // 1. 同步采购
-    syncPurchase(name, unitPrice, qty) {
-        let lib = JSON.parse(localStorage.getItem('cost_lib')) || {};
-        lib[name] = { 
-            unitPrice: parseFloat(unitPrice), 
-            stock: parseInt(qty), 
-            total: parseInt(qty),
-            lastUpdate: new Date().toLocaleDateString()
-        };
-        localStorage.setItem('cost_lib', JSON.stringify(lib));
-    },
-
-    // 2. 核心核算逻辑
-    calculateProfit(revenue, itemName = null) {
-        let lib = JSON.parse(localStorage.getItem('cost_lib')) || {};
-        let materialCost = 0;
-
-        if (itemName && lib[itemName]) {
-            materialCost = parseFloat(lib[itemName].unitPrice);
-            if (lib[itemName].stock > 0) {
-                lib[itemName].stock--;
-                localStorage.setItem('cost_lib', JSON.stringify(lib));
-            }
-        }
-
+    // 1. 核心核算：只算营收与固定成本的差值
+    calculateProfit(revenue) {
         const dailyBaseCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const netProfit = (revenue - materialCost).toFixed(2);
-
+        const netProfit = (parseFloat(revenue) - dailyBaseCost).toFixed(2);
+        
         return {
             netProfit: netProfit,
-            materialCost: materialCost,
-            remainingStock: itemName && lib[itemName] ? lib[itemName].stock : "N/A"
+            dailyCost: dailyBaseCost
         };
     },
 
-    // 3. 新增：保存每日快照（用于报表）
+    // 2. 存档逻辑：固化历史成本，防止未来 CSV 报表随参数变动
     saveDailySnapshot(totalRev) {
-        const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 1;
+        const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const today = new Date().toLocaleDateString();
+        const today = new Date().toLocaleDateString(); // 3/30/2026
       
-        // 记录当日终盘数据
         history[today] = {
-            revenue: totalRev.toFixed(2),
-            profit: (totalRev - dailyCost).toFixed(2),
-            achievement: Math.floor((totalRev / dailyCost) * 100)
+            revenue: parseFloat(totalRev).toFixed(2),
+            dailyCost: dailyCost.toFixed(2), // 固化这一天的成本
+            profit: (parseFloat(totalRev) - dailyCost).toFixed(2),
+            achievement: dailyCost > 0 ? Math.floor((totalRev / dailyCost) * 100) : 100
         };
             
-        
         localStorage.setItem('revenue_history', JSON.stringify(history));
     },
 
-    // 4. 新增：获取最近 7 天趋势数据
+    // 3. 趋势数据
     getTrendData() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const labels = Object.keys(history).slice(-7);
+        const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+        const labels = keys.slice(-7);
         const data = labels.map(date => history[date].revenue);
         return { labels, data };
     }
