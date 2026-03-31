@@ -20,14 +20,35 @@ const AchievementEngine = {
         let stats = this.getStats();
         const today = new Date().toLocaleDateString();
         const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 1;
-        const currentTodayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
 
         // 核心更新：增加累计销售额和记录次数
         stats.totalSales = (parseFloat(stats.totalSales) || 0) + parseFloat(newAmount);
         stats.recordCount = (parseInt(stats.recordCount) || 0) + 1;
 
-        // 今日目标达成判定
-        if (currentTodayRev >= dailyCost) {
+        // [修复1] 日期变更时重置每日状态，并更新 streak
+        if (stats.lastDate !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toLocaleDateString();
+
+            if (stats.lastDate === yesterdayStr) {
+                // 昨天有记录，连击+1
+                stats.streak = (parseInt(stats.streak) || 0) + 1;
+            } else {
+                // 超过一天没记录，连击归1
+                stats.streak = 1;
+            }
+
+            // [修复3] 新的一天，重置今日目标状态
+            stats.isDailyGoalMet = false;
+            stats.lastDate = today;
+        }
+
+        // [修复2] 先将本次金额累加到 todayRev，再判定今日目标
+        const updatedTodayRev = (parseFloat(localStorage.getItem('todayRev')) || 0) + parseFloat(newAmount);
+        localStorage.setItem('todayRev', updatedTodayRev);
+
+        if (updatedTodayRev >= dailyCost) {
             stats.isDailyGoalMet = true;
         }
 
