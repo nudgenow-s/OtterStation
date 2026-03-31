@@ -155,6 +155,15 @@
 
         localStorage.setItem('todayRev', '0');
         localStorage.setItem('todayRecordCount', '0');
+        localStorage.removeItem('earned_badges');
+
+        try {
+            let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
+            stats.isDailyGoalMet = false;
+            stats.totalSales = 0;
+            stats.recordCount = 0;
+            localStorage.setItem('user_stats',JSON.stringify(stats));
+        }catch (e) {}
     }
 
     localStorage.setItem('lastVisitDate', today);
