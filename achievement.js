@@ -1,14 +1,13 @@
 const AchievementEngine = {
     badges: [
         { id: 'first_blood', name: '首单入账', icon: '💰', desc: '打破鸭蛋，开工大吉！', condition: (s) => s.totalSales > 0 },
-        { id: 'profitable_king', name: '盈利王者', icon: '👑', desc: '连续达标，你是房东克星！', condition: (s) => s.streak >= 3 },
+        { id: 'profitable_king', name: '盈利王者', icon: '👑', desc: '连续达标，你是房东克星！', condition: (s) => s.totalSales >= s.dailyCost * 3 },
         { id: 'smart_buyer', name: '精明猎手', icon: '🦊', desc: '精准记账，每一分钱都有据可查。', condition: (s) => s.recordCount >= 5 },
         { id: 'anti_procrastination', name: '黄金选手', icon: '🔥', desc: '超绝主理人！今日目标已达成。', condition: (s) => s.isDailyGoalMet === true }
-        
     ],
 
     getStats() {
-        const defaultStats = { totalSales: 0, streak: 0, recordCount: 0, lastDate: null, isDailyGoalMet: false };
+        const defaultStats = { totalSales: 0, streak: 0, recordCount: 0, lastDate: null, isDailyGoalMet: false, dailyCost: 0 };
         try {
             return JSON.parse(localStorage.getItem('user_stats')) || defaultStats;
         } catch (e) {
@@ -25,6 +24,9 @@ const AchievementEngine = {
         stats.totalSales = (parseFloat(stats.totalSales) || 0) + parseFloat(newAmount);
         stats.recordCount = (parseInt(stats.recordCount) || 0) + 1;
 
+        // ✅ 把 dailyCost 写入 stats，供 condition 使用
+        stats.dailyCost = dailyCost;
+
         // [修复1] 日期变更时重置每日状态，并更新 streak
         if (stats.lastDate !== today) {
             const yesterday = new Date();
@@ -32,14 +34,11 @@ const AchievementEngine = {
             const yesterdayStr = yesterday.toLocaleDateString();
 
             if (stats.lastDate === yesterdayStr) {
-                // 昨天有记录，连击+1
                 stats.streak = (parseInt(stats.streak) || 0) + 1;
             } else {
-                // 超过一天没记录，连击归1
                 stats.streak = 1;
             }
 
-            // [修复3] 新的一天，重置今日目标状态
             stats.isDailyGoalMet = false;
             stats.lastDate = today;
         }
@@ -76,7 +75,6 @@ const AchievementEngine = {
     },
 
     showBadgeModal(badge) {
-        // 直接从界面获取主色调，确保视觉一致
         const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-pink').trim() || '#ff85a2';
         
         const modalHtml = `
