@@ -143,15 +143,18 @@
 
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
     // ====== 新增：跨天自动重置 ======
-   (function resetNewDay(){
+ (function resetNewDay(){
     const today = new Date().toLocaleDateString();
     const lastDate = localStorage.getItem('lastVisitDate');
 
     if (lastDate && lastDate !== today) {
-
-        // 👇 关键：把昨天最后状态写入历史
         const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-        AccountingEngine.saveDailySnapshot(yesterdayRev);
+        
+        // ✅ 补上昨天日期参数
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toLocaleDateString();
+        AccountingEngine.saveDailySnapshot(yesterdayRev, yesterdayStr);
 
         localStorage.setItem('todayRev', '0');
         localStorage.setItem('todayRecordCount', '0');
@@ -162,12 +165,13 @@
             stats.isDailyGoalMet = false;
             stats.totalSales = 0;
             stats.recordCount = 0;
-            localStorage.setItem('user_stats',JSON.stringify(stats));
-        }catch (e) {}
+            localStorage.setItem('user_stats', JSON.stringify(stats));
+        } catch(e) {}
     }
 
     localStorage.setItem('lastVisitDate', today);
 })();
+
 
     // ====== 每日激励智能版 ======
 function getYesterdayProfit(){
@@ -178,7 +182,7 @@ function getYesterdayProfit(){
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toLocaleDateString();
 
-    AccountingEngine.saveDailySnapshot(yesterdayRev,yesterdayStr);
+    
     
 
     // 直接从对象中精准提取昨天的记录
