@@ -178,6 +178,9 @@ function getYesterdayProfit(){
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toLocaleDateString();
 
+    AccountingEngine.saveDailySnapshot(yesterdayRev,yesterdayStr);
+    
+
     // 直接从对象中精准提取昨天的记录
     if(history[yesterdayStr]){
         return parseFloat(history[yesterdayStr].profit) || 0;
@@ -305,18 +308,36 @@ function jumpToRecord(){
 
 
     function saveCostDetails() {
-        const r = parseFloat(document.getElementById('edit-rent').value) || 0;
-        const s = parseFloat(document.getElementById('edit-salary').value) || 0;
-        const o = parseFloat(document.getElementById('edit-other').value) || 0;
-        const st = parseFloat(document.getElementById('edit-startup').value) || 0;
-        
-        localStorage.setItem('monthlyRent', r); 
-        localStorage.setItem('monthlySalary', s);
-        localStorage.setItem('monthlyOther', o);
-        localStorage.setItem('startupCost', st);
-        localStorage.setItem('dailyCost', ((r+s+o)/30).toFixed(2));
-        location.reload();
-    }
+    // ✅ 先读取旧值，用于补全历史快照
+    const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
+    const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
+    const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
+
+    // ✅ 把所有缺失 costSnapshot 的历史记录，用旧值补全固化
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    let changed = false;
+    Object.keys(history).forEach(date => {
+        if (!history[date].costSnapshot) {
+            history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
+            changed = true;
+        }
+    });
+    if (changed) localStorage.setItem('revenue_history', JSON.stringify(history));
+
+    // 原有逻辑不变，写入新值
+    const r = parseFloat(document.getElementById('edit-rent').value) || 0;
+    const s = parseFloat(document.getElementById('edit-salary').value) || 0;
+    const o = parseFloat(document.getElementById('edit-other').value) || 0;
+    const st = parseFloat(document.getElementById('edit-startup').value) || 0;
+    
+    localStorage.setItem('monthlyRent', r); 
+    localStorage.setItem('monthlySalary', s);
+    localStorage.setItem('monthlyOther', o);
+    localStorage.setItem('startupCost', st);
+    localStorage.setItem('dailyCost', ((r+s+o)/30).toFixed(2));
+    location.reload();
+}
+
 
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
 
