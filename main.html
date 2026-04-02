@@ -307,36 +307,49 @@ function jumpToRecord(){
 
 
 
-    function saveCostDetails() {
-    // ✅ 先读取旧值，用于补全历史快照
+ function saveCostDetails() {
     const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
     const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
     const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
 
-    // ✅ 把所有缺失 costSnapshot 的历史记录，用旧值补全固化
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-    let changed = false;
+    
+    // 补全所有没有快照的历史记录（用旧值）
     Object.keys(history).forEach(date => {
         if (!history[date].costSnapshot) {
             history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
-            changed = true;
         }
     });
-    if (changed) localStorage.setItem('revenue_history', JSON.stringify(history));
 
-    // 原有逻辑不变，写入新值
+    // 读取新值
     const r = parseFloat(document.getElementById('edit-rent').value) || 0;
     const s = parseFloat(document.getElementById('edit-salary').value) || 0;
     const o = parseFloat(document.getElementById('edit-other').value) || 0;
     const st = parseFloat(document.getElementById('edit-startup').value) || 0;
-    
+    const newDailyCost = (r + s + o) / 30;
+    const newR = (r / 30).toFixed(2);
+    const newS = (s / 30).toFixed(2);
+    const newO = (o / 30).toFixed(2);
+
+    // ✅ 强制更新今天的快照为新成本
+    const today = new Date().toLocaleDateString();
+    if (history[today]) {
+        const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        history[today].costSnapshot = { rent: newR, salary: newS, other: newO };
+        history[today].profit = (todayRev - newDailyCost).toFixed(2);
+        history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
+    }
+
+    localStorage.setItem('revenue_history', JSON.stringify(history));
+
     localStorage.setItem('monthlyRent', r); 
     localStorage.setItem('monthlySalary', s);
     localStorage.setItem('monthlyOther', o);
     localStorage.setItem('startupCost', st);
-    localStorage.setItem('dailyCost', ((r+s+o)/30).toFixed(2));
+    localStorage.setItem('dailyCost', newDailyCost.toFixed(2));
     location.reload();
 }
+
 
 
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
@@ -491,27 +504,41 @@ setTimeout(() => {
 function exportCSV() {
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
     
-    // 兜底数据（仅用于处理没有快照的老数据）
-    const curR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
-    const curS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
-    const curO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
-
     let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-    
     const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    
+    if (sortedDates.length === 0) return;
 
-    sortedDates.forEach(d => {
+    // ✅ 生成从第一条记录到今天的完整日期序列
+    const startDate = new Date(sortedDates[0]);
+    const endDate = new Date();
+    const allDates = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        allDates.push(new Date(d).toLocaleDateString());
+    }
+
+    let lastSnapshot = {
+        rent: (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2),
+        salary: (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2),
+        other: (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2)
+    };
+
+    allDates.forEach(d => {
         const h = history[d];
-        const rev = parseFloat(h.revenue) || 0;
-        const net = parseFloat(h.profit) || 0;
-        const ach = h.achievement || 0;
 
-        // 优先读取存证，没存证则用当前值兜底
-        const r = h.costSnapshot ? h.costSnapshot.rent : curR;
-        const s = h.costSnapshot ? h.costSnapshot.salary : curS;
-        const o = h.costSnapshot ? h.costSnapshot.other : curO;
-
-        csv += `${d},${rev},${ach}%,${r},${s},${o},${net}\n`;
+        if (h) {
+            // 有记录的日期
+            const rev = parseFloat(h.revenue) || 0;
+            const net = parseFloat(h.profit) || 0;
+            const ach = h.achievement || 0;
+            const snap = h.costSnapshot || lastSnapshot;
+            if (h.costSnapshot) lastSnapshot = h.costSnapshot;
+            csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${net}\n`;
+        } else {
+            // ✅ 无记录日期：收入为0，继承上一条快照的成本，净利为负成本
+            const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
+            csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)}\n`;
+        }
     });
 
     const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
@@ -524,6 +551,7 @@ function exportCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
+
 
 
 
