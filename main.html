@@ -469,19 +469,46 @@ setTimeout(() => {
      document.getElementById('trend-icon').innerText = avgDailyInertia > 0 ? "📈" : "📉";
 
     // 联动计算 ROI 进度
-    calculateROI(avgDailyInertia, currentMonthProfit);
-}
-
-
     function calculateROI(avgDailyProfit) {
     const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-    
-    // 核心修复：不再依赖传入的局部 totalProfit，而是计算全量历史纯利
+
+    const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    if (sortedDates.length === 0) {
+        // 无历史数据，直接渲染初始状态
+        document.getElementById('roi-total').innerText = startup.toLocaleString();
+        document.getElementById('roi-progress').style.width = '0%';
+        document.getElementById('roi-desc').innerHTML = '暂无数据';
+        return;
+    }
+
+    // ✅ 补全从第一天到今天的完整日期序列
+    const startDate = new Date(sortedDates[0]);
+    const endDate = new Date();
+    let lastSnapshot = {
+        rent: parseFloat(localStorage.getItem('monthlyRent')) / 30 || 0,
+        salary: parseFloat(localStorage.getItem('monthlySalary')) / 30 || 0,
+        other: parseFloat(localStorage.getItem('monthlyOther')) / 30 || 0
+    };
+
     let cumulativeProfit = 0;
-    Object.values(history).forEach(day => {
-        cumulativeProfit += (parseFloat(day.profit) || 0);
-    });
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toLocaleDateString();
+        const h = history[dateStr];
+
+        if (h) {
+            // 有记录：用快照成本
+            if (h.costSnapshot) lastSnapshot = h.costSnapshot;
+            cumulativeProfit += parseFloat(h.profit) || 0;
+        } else {
+            // ✅ 无记录：收入0，成本照跑
+            const dailyCost = parseFloat(lastSnapshot.rent) + 
+                              parseFloat(lastSnapshot.salary) + 
+                              parseFloat(lastSnapshot.other);
+            cumulativeProfit -= dailyCost;
+        }
+    }
 
     const progress = startup > 0 ? Math.min((cumulativeProfit / startup) * 100, 100).toFixed(1) : 100;
     const remainingCost = Math.max(startup - cumulativeProfit, 0);
@@ -495,13 +522,14 @@ setTimeout(() => {
         const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
         const roiDate = new Date();
         roiDate.setDate(roiDate.getDate() + daysToROI);
-        countdownText = `预计还需 **${daysToROI}** 天回本 (约 ${roiDate.toLocaleDateString()})`;
+        countdownText = `预计还需 <strong>${daysToROI}</strong> 天回本 (约 ${roiDate.toLocaleDateString()})`;
     }
 
     document.getElementById('roi-total').innerText = startup.toLocaleString();
     document.getElementById('roi-progress').style.width = progress + '%';
     document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${cumulativeProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
 }
+
 
 
 
