@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!DOCTYPE html><html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -36,7 +35,9 @@
 </head>
 <body>
 
-    <!-- ===== 每日激励弹窗 ===== -->
+<!-- ===== 每日激励弹窗 ===== -->
+
+
 <div id="motivation-modal" class="modal-overlay" style="z-index:3000;">
   <div style="
       background:white;
@@ -50,25 +51,25 @@
       🦦 今日行动建议
     </div>
 
-    <div id="motivation-text"
-         style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">
-    </div>
-
-    <button class="btn-main"
-            style="font-size:14px;margin-bottom:10px;"
-            onclick="jumpToRecord()">
-      ✍️ 直接记一笔
-    </button>
-
-    <button class="btn-main"
-            style="background:#eee;color:#666;font-size:13px;box-shadow:none;"
-            onclick="closeMotivation()">
-      我知道了
-    </button>
-  </div>
+<div id="motivation-text"
+     style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">
 </div>
-    
-<div class="app-container">
+
+<button class="btn-main"
+        style="font-size:14px;margin-bottom:10px;"
+        onclick="jumpToRecord()">
+  ✍️ 直接记一笔
+</button>
+
+<button class="btn-main"
+        style="background:#eee;color:#666;font-size:13px;box-shadow:none;"
+        onclick="closeMotivation()">
+  我知道了
+</button>
+
+
+</div>
+</div><div class="app-container">
     <div class="top-nav">
         <span id="date-display"></span>
         <div>
@@ -90,34 +91,33 @@
     <div class="badge-wall" id="badges">
         <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span><a href="https://nudgenow-s.github.io/Otter-miner/"> <span id="badge-otterminer">🦦</span></a><a href="https://nudgenow-s.github.io/Gaaame/"> <span id="badge-game">🎮</span></a>
 
-
-    </div>
 </div>
 
-<div id="report-modal">
+
+</div><div id="report-modal">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="color:var(--primary-pink); margin:0;">数据复盘</h2>
         <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
     </div>
-    
-    <div class="forecast-card" style="border-left-color: var(--success-green);">
-        <div style="font-size: 11px; color: #666; font-weight: bold;">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
-        <div class="roi-bar-container"><div id="roi-progress"></div></div>
-        <div id="roi-desc" style="font-size: 10px; color: #999; line-height: 1.5;">累计纯利 ¥0，还需 ¥0 回本</div>
-    </div>
 
-    <div class="forecast-card">
-        <div style="font-size: 11px; color: #666; font-weight: bold;">🔮 智能月度利润预测<span id="trend-icon"></span></div>
-        <div id="forecast-val" style="font-size: 20px; color: #4facfe; font-weight: bold; margin-top: 5px;">计算中...</div>
-        <div style="font-size: 10px; color: #999; margin-top: 3px;">基于近7日表现预测本月净盈余</div>
-    </div>
-    
-    <canvas id="trendChart" style="margin:20px 0;"></canvas>
-    <div id="history-list"></div>
-    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全维度 CSV 报表</button>
+<div class="forecast-card" style="border-left-color: var(--success-green);">
+    <div style="font-size: 11px; color: #666; font-weight: bold;">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
+    <div class="roi-bar-container"><div id="roi-progress"></div></div>
+    <div id="roi-desc" style="font-size: 10px; color: #999; line-height: 1.5;">累计纯利 ¥0，还需 ¥0 回本</div>
 </div>
 
-<div id="cost-detail-modal" class="modal-overlay">
+<div class="forecast-card">
+    <div style="font-size: 11px; color: #666; font-weight: bold;">🔮 智能月度利润预测<span id="trend-icon"></span></div>
+    <div id="forecast-val" style="font-size: 20px; color: #4facfe; font-weight: bold; margin-top: 5px;">计算中...</div>
+    <div style="font-size: 10px; color: #999; margin-top: 3px;">基于近7日表现预测本月净盈余</div>
+</div>
+
+<canvas id="trendChart" style="margin:20px 0;"></canvas>
+<div id="history-list"></div>
+<button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全维度 CSV 报表</button>
+
+
+</div><div id="cost-detail-modal" class="modal-overlay">
     <div style="background:white; padding:25px; border-radius:30px; width:300px;">
         <h3 style="margin:0 0 15px; color:var(--primary-pink);">⚙️ 成本细项微调</h3>
         <input type="number" id="edit-rent" placeholder="月房租"><br>
@@ -127,118 +127,140 @@
         <button class="btn-main" onclick="saveCostDetails()">保存</button>
         <button class="btn-main" style="background:#ccc; margin-top:10px;" onclick="closeCostModal()">取消</button>
     </div>
-</div>
-
-<script src="accounting.js"></script>
-
-<script src="achievement.js"></script>
-
-<script>
+</div><script src="accounting.js"></script><script src="achievement.js"></script><script>
     // 路由守卫：检查是否激活
-    (function securityCheck() {
-        const isActivated = localStorage.getItem('isActivated');
-        if (isActivated !== 'true') {
-            window.location.replace('gate.html');
-        }
-    })();
+(function securityCheck() {
+    const isActivated = localStorage.getItem('isActivated');
+    if (isActivated !== 'true') {
+        // 如果没激活，强制重定向回大门，且不让用户通过“返回”跳过
+        window.location.replace('gate.html');
+    }
+})();
 
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
+    // ====== 新增：跨天自动重置 ======
+ (function resetNewDay(){
+    const today = new Date().toLocaleDateString();
+    const lastDate = localStorage.getItem('lastVisitDate');
 
-    // ====== 跨天自动重置 ======
-    (function resetNewDay() {
-        const today = new Date().toLocaleDateString();
-        const lastDate = localStorage.getItem('lastVisitDate');
-
-        if (lastDate && lastDate !== today) {
-            const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toLocaleDateString();
-            AccountingEngine.saveDailySnapshot(yesterdayRev, yesterdayStr);
-
-            localStorage.setItem('todayRev', '0');
-            localStorage.setItem('todayRecordCount', '0');
-            localStorage.removeItem('earned_badges');
-
-            try {
-                let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
-                stats.isDailyGoalMet = false;
-                stats.totalSales = 0;
-                stats.recordCount = 0;
-                localStorage.setItem('user_stats', JSON.stringify(stats));
-            } catch (e) {}
-        }
-
-        localStorage.setItem('lastVisitDate', today);
-    })();
-
-    // ====== 每日激励 ======
-    function getYesterdayProfit() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-
+    if (lastDate && lastDate !== today) {
+        const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        
+        // ✅ 补上昨天日期参数
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toLocaleDateString();
+        AccountingEngine.saveDailySnapshot(yesterdayRev, yesterdayStr);
 
-        if (history[yesterdayStr]) {
-            return parseFloat(history[yesterdayStr].profit) || 0;
-        }
+        localStorage.setItem('todayRev', '0');
+        localStorage.setItem('todayRecordCount', '0');
+        localStorage.removeItem('earned_badges');
 
-        const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
-        if (keys.length === 0) return null;
-
-        const todayStr = new Date().toLocaleDateString();
-        const historyKeys = keys.filter(k => k !== todayStr);
-
-        if (historyKeys.length === 0) return null;
-        const lastKey = historyKeys[historyKeys.length - 1];
-        return parseFloat(history[lastKey].profit) || 0;
+        try {
+            let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
+            stats.isDailyGoalMet = false;
+            stats.totalSales = 0;
+            stats.recordCount = 0;
+            localStorage.setItem('user_stats', JSON.stringify(stats));
+        } catch(e) {}
     }
 
-    function buildMotivation() {
-        const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const yProfit = getYesterdayProfit();
+    localStorage.setItem('lastVisitDate', today);
+})();
 
-        if (!daily) {
-            return `还没设定成本哦～\n先点右上角 🔒 成本\n我才能帮你算「今日达成率」🧮`;
-        }
-        if (yProfit === null) {
-            return `今天目标：\n👉 ¥${daily.toFixed(2)} = 已打平成本\n再多一块，都是你抢来的利润 💰`;
-        }
-        if (yProfit < 0) {
-            return `昨天小亏 ¥${Math.abs(yProfit).toFixed(2)}\n👉 今天只要比昨天多【1笔】就是反杀\n不要完美，只要开始 🔥`;
-        }
-        return `昨天已盈利 ¥${yProfit.toFixed(2)} 🎉\n👉 今天核心：保持节奏\n👉 先完成 ¥${daily.toFixed(2)} 基础线`;
+
+    // ====== 每日激励智能版 ======
+function getYesterdayProfit(){
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    
+    // 获取真正的昨天日期字符串（确保与你存入时的格式一致）
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString();
+
+    
+    
+
+    // 直接从对象中精准提取昨天的记录
+    if(history[yesterdayStr]){
+        return parseFloat(history[yesterdayStr].profit) || 0;
     }
 
-    (function dailyMotivationUI() {
-        const today = new Date().toLocaleDateString();
-        if (localStorage.getItem('motivationShown') === today) return;
+    // 如果昨天没记录，再退而求其次寻找最近的一个历史记录
+    const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    if(keys.length === 0) return null;
+    
+    // 排除掉今天的 key，找到最后一个历史 key
+    const todayStr = new Date().toLocaleDateString();
+    const historyKeys = keys.filter(k => k !== todayStr);
+    
+    if(historyKeys.length === 0) return null;
+    const lastKey = historyKeys[historyKeys.length - 1];
+    return parseFloat(history[lastKey].profit) || 0;
+}
 
-        const text = buildMotivation();
-        document.getElementById('motivation-text').innerText = text;
 
-        setTimeout(() => {
-            document.getElementById('motivation-modal').style.display = 'flex';
-        }, 600);
+function buildMotivation(){
+    const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
+    const yProfit = getYesterdayProfit();
 
-        localStorage.setItem('motivationShown', today);
-    })();
-
-    function closeMotivation() {
-        document.getElementById('motivation-modal').style.display = 'none';
+    // 无成本
+    if(!daily){
+        return `还没设定成本哦～  
+先点右上角 🔒 成本  
+我才能帮你算「今日达成率」🧮`;
     }
 
-    function jumpToRecord() {
-        closeMotivation();
-        document.getElementById('revenue-input').focus();
-        document.getElementById('revenue-input').style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            document.getElementById('revenue-input').style.transform = '';
-        }, 300);
+    // 无历史
+    if(yProfit === null){
+        return `今天目标：  
+👉 ¥${daily.toFixed(2)} = 已打平成本  
+再多一块，都是你抢来的利润 💰`;
     }
 
+    // 昨天亏
+    if(yProfit < 0){
+        return `昨天小亏 ¥${Math.abs(yProfit).toFixed(2)}  
+👉 今天只要比昨天多【1笔】就是反杀  
+不要完美，只要开始 🔥`;
+    }
+
+    // 昨天赚
+    return `昨天已盈利 ¥${yProfit.toFixed(2)} 🎉  
+👉 今天核心：保持节奏  
+👉 先完成 ¥${daily.toFixed(2)} 基础线`;
+}
+
+(function dailyMotivationUI(){
+    const today = new Date().toLocaleDateString();
+    if(localStorage.getItem('motivationShown') === today) return;
+
+    const text = buildMotivation();
+    document.getElementById('motivation-text').innerText = text;
+
+    setTimeout(()=>{
+        document.getElementById('motivation-modal').style.display = 'flex';
+    }, 600);
+
+    localStorage.setItem('motivationShown', today);
+})();
+
+function closeMotivation(){
+    document.getElementById('motivation-modal').style.display = 'none';
+}
+
+function jumpToRecord(){
+    closeMotivation();
+
+    // 直接聚焦你的输入框 → 完全不改原逻辑
+    document.getElementById('revenue-input').focus();
+
+    // 给一个小动画提示
+    document.getElementById('revenue-input').style.transform = 'scale(1.05)';
+    setTimeout(()=>{
+        document.getElementById('revenue-input').style.transform = '';
+    },300);
+}
     function validateBoss(target) {
         if (prompt("请输入密码：") === "0000") {
             if (target === 'cost') {
@@ -247,25 +269,26 @@
                 document.getElementById('edit-other').value = localStorage.getItem('monthlyOther');
                 document.getElementById('edit-startup').value = localStorage.getItem('startupCost');
                 document.getElementById('cost-detail-modal').style.display = 'flex';
-            } else {
-                toggleReport();
-            }
+            } else toggleReport();
         }
     }
 
-    // ====== 备份 ======
+        // ====== 追加在原有代码最底部，确保不影响顶部的安全校验 ======
     const StellarockDataHub = {
-        exportData: function () {
+        exportData: function() {
             try {
                 const allData = {};
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
                     allData[key] = localStorage.getItem(key);
                 }
+                
+                // 增加校验：如果没有数据，提醒用户
                 if (Object.keys(allData).length === 0) {
                     alert("🦦 财库空空，先记几笔再备份吧！");
                     return;
                 }
+
                 const backupDate = new Date().toISOString().slice(0, 10);
                 const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -280,250 +303,263 @@
             }
         }
     };
+    // ======================================================
 
-    // ====== 成本修改 ======
-    function saveCostDetails() {
-        const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
-        const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
-        const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
 
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
 
-        Object.keys(history).forEach(date => {
-            if (!history[date].costSnapshot) {
-                history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
-            }
-        });
+ function saveCostDetails() {
+    const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
+    const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
+    const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
 
-        const r = parseFloat(document.getElementById('edit-rent').value) || 0;
-        const s = parseFloat(document.getElementById('edit-salary').value) || 0;
-        const o = parseFloat(document.getElementById('edit-other').value) || 0;
-        const st = parseFloat(document.getElementById('edit-startup').value) || 0;
-        const newDailyCost = (r + s + o) / 30;
-        const newR = (r / 30).toFixed(2);
-        const newS = (s / 30).toFixed(2);
-        const newO = (o / 30).toFixed(2);
-
-        const today = new Date().toLocaleDateString();
-        if (history[today]) {
-            const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            history[today].costSnapshot = { rent: newR, salary: newS, other: newO };
-            history[today].profit = (todayRev - newDailyCost).toFixed(2);
-            history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    
+    // 补全所有没有快照的历史记录（用旧值）
+    Object.keys(history).forEach(date => {
+        if (!history[date].costSnapshot) {
+            history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
         }
+    });
 
-        localStorage.setItem('revenue_history', JSON.stringify(history));
-        localStorage.setItem('monthlyRent', r);
-        localStorage.setItem('monthlySalary', s);
-        localStorage.setItem('monthlyOther', o);
-        localStorage.setItem('startupCost', st);
-        localStorage.setItem('dailyCost', newDailyCost.toFixed(2));
-        location.reload();
+    // 读取新值
+    const r = parseFloat(document.getElementById('edit-rent').value) || 0;
+    const s = parseFloat(document.getElementById('edit-salary').value) || 0;
+    const o = parseFloat(document.getElementById('edit-other').value) || 0;
+    const st = parseFloat(document.getElementById('edit-startup').value) || 0;
+    const newDailyCost = (r + s + o) / 30;
+    const newR = (r / 30).toFixed(2);
+    const newS = (s / 30).toFixed(2);
+    const newO = (o / 30).toFixed(2);
+
+    // ✅ 强制更新今天的快照为新成本
+    const today = new Date().toLocaleDateString();
+    if (history[today]) {
+        const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        history[today].costSnapshot = { rent: newR, salary: newS, other: newO };
+        history[today].profit = (todayRev - newDailyCost).toFixed(2);
+        history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
     }
 
-    function closeCostModal() {
-        document.getElementById('cost-detail-modal').style.display = 'none';
-    }
+    localStorage.setItem('revenue_history', JSON.stringify(history));
 
-    // ====== 记录成交 ======
+    localStorage.setItem('monthlyRent', r); 
+    localStorage.setItem('monthlySalary', s);
+    localStorage.setItem('monthlyOther', o);
+    localStorage.setItem('startupCost', st);
+    localStorage.setItem('dailyCost', newDailyCost.toFixed(2));
+    location.reload();
+}
+
+
+
+    function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
+
     function record() {
-        const input = document.getElementById('revenue-input');
-        const val = parseFloat(input.value);
-        if (val > 0) {
-            let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            rev += val;
-            localStorage.setItem('todayRev', rev);
+    const input = document.getElementById('revenue-input');
+    const val = parseFloat(input.value);
+    if (val > 0) {
+        let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        rev += val;
+        localStorage.setItem('todayRev', rev);
+        
+        const result = AccountingEngine.calculateProfit(val);
+        AccountingEngine.saveDailySnapshot(rev);
 
-            AccountingEngine.calculateProfit(val);
-            AccountingEngine.saveDailySnapshot(rev);
-
-            try {
-                if (typeof AchievementEngine !== 'undefined') {
-                    AchievementEngine.check(val);
-                } else {
-                    console.error("勋章引擎尚未加载");
-                }
-            } catch (e) {
-                console.error("勋章判定执行出错:", e);
-            }
-
-            const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
-            let tip = "";
-
-            if (todayRev === 0) {
-                tip = "";
-            } else if (todayRev < dailyCost) {
-                tip = `⏳ 距离打平还差 ¥${(dailyCost - todayRev).toFixed(2)}`;
-            } else if (todayRev === dailyCost) {
-                tip = "🎯 已打平成本！从现在开始都是利润";
+        // 【强力联动】不再判断 window，直接尝试调用并捕获错误
+        try {
+            if (typeof AchievementEngine !== 'undefined') {
+                // 必须传入 val (单次金额) 而不是 rev (今日总额) 
+                // 这样 recordCount (记录次数) 才会准确自增
+                AchievementEngine.check(val);
             } else {
-                tip = `✨ 纯赚 ¥${(todayRev - dailyCost).toFixed(2)}`;
+                console.error("勋章引擎尚未加载");
             }
-
-            document.getElementById('profit-tip').innerText = tip;
-            setTimeout(() => {
-                document.getElementById('profit-tip').innerText = "";
-            }, 3000);
-
-            input.value = '';
-            render();
+        } catch (e) {
+            console.error("勋章判定执行出错:", e);
         }
-    }
 
-    // ====== 报表 ======
+        const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
+
+let tip = "";
+
+if (todayRev === 0) {
+    tip = "";                                    // 刚进来啥也不说
+}
+else if (todayRev < dailyCost) {
+    const gap = dailyCost - todayRev;
+    tip = `⏳ 距离打平还差 ¥${gap.toFixed(2)}`;
+}
+else if (todayRev === dailyCost) {
+    tip = "🎯 已打平成本！从现在开始都是利润";
+}
+else {
+    const net = todayRev - dailyCost;
+    tip = `✨ 纯赚 ¥${net.toFixed(2)}`;
+}
+
+document.getElementById('profit-tip').innerText = tip;
+
+setTimeout(() => {
+    document.getElementById('profit-tip').innerText = "";
+}, 3000);
+        input.value = ''; 
+        render();
+    }
+}
+
     function toggleReport() {
         const modal = document.getElementById('report-modal');
         const isOpening = modal.style.display !== 'block';
         modal.style.display = isOpening ? 'block' : 'none';
-        if (isOpening) {
-            renderChart();
-            renderHistoryList();
-            calculateForecast();
+        if(isOpening) { 
+            renderChart(); 
+            renderHistoryList(); 
+            calculateForecast(); 
         }
     }
 
-    // ====== 月度预测 ======
-    function calculateForecast() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const dates = Object.keys(history).sort();
-        if (dates.length === 0) return;
+ function calculateForecast() {
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    const dates = Object.keys(history).sort();
+    if (dates.length === 0) return;
 
-        const now = new Date();
-        const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const remainingDays = totalDaysInMonth - now.getDate();
+    const now = new Date();
+    const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const currentDay = now.getDate();
+    const remainingDays = totalDaysInMonth - currentDay;
 
-        let currentMonthProfit = 0;
-        let last7DaysProfits = [];
+    let currentMonthProfit = 0;
+    let last7DaysProfits = [];
 
-        dates.forEach(d => {
-            const h = history[d];
-            const p = parseFloat(h.profit) || 0;
-            if (new Date(d).getMonth() === now.getMonth() && new Date(d).getFullYear() === now.getFullYear()) {
-                currentMonthProfit += p;
-            }
-            last7DaysProfits.push(p);
-        });
-
-        const recentSample = last7DaysProfits.slice(-7);
-        const avgDailyInertia = recentSample.reduce((a, b) => a + b, 0) / (recentSample.length || 1);
-        const estimatedTotal = currentMonthProfit + (avgDailyInertia * remainingDays);
-
-        const forecastEl = document.getElementById('forecast-val');
-        forecastEl.innerText = `¥ ${estimatedTotal.toFixed(2)}`;
-        forecastEl.style.color = estimatedTotal > 0 ? "#4facfe" : "#ff85a2";
-        document.getElementById('trend-icon').innerText = avgDailyInertia > 0 ? "📈" : "📉";
-
-        calculateROI(avgDailyInertia);
-    }
-
-    // ====== ROI 回本计算 ======
-    function calculateROI(avgDailyProfit) {
-        const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-
-        const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
-        if (sortedDates.length === 0) {
-            document.getElementById('roi-total').innerText = startup.toLocaleString();
-            document.getElementById('roi-progress').style.width = '0%';
-            document.getElementById('roi-desc').innerHTML = '暂无数据';
-            return;
+    dates.forEach(d => {
+        const h = history[d];
+        const p = parseFloat(h.profit) || 0;
+        if (new Date(d).getMonth() === now.getMonth() && new Date(d).getFullYear() === now.getFullYear()) {
+            currentMonthProfit += p;
         }
+        last7DaysProfits.push(p);
+    });
 
-        const startDate = new Date(sortedDates[0]);
-        const endDate = new Date();
-        let lastSnapshot = {
-            rent: parseFloat(localStorage.getItem('monthlyRent')) / 30 || 0,
-            salary: parseFloat(localStorage.getItem('monthlySalary')) / 30 || 0,
-            other: parseFloat(localStorage.getItem('monthlyOther')) / 30 || 0
-        };
+    const recentSample = last7DaysProfits.slice(-7);
+    const avgDailyInertia = recentSample.reduce((a, b) => a + b, 0) / (recentSample.length || 1);
+    const estimatedTotal = currentMonthProfit + (avgDailyInertia * remainingDays);
 
-        let cumulativeProfit = 0;
+    const forecastEl = document.getElementById('forecast-val');
+    forecastEl.innerText = `¥ ${estimatedTotal.toFixed(2)}`;
+    forecastEl.style.color = estimatedTotal > 0 ? "#4facfe" : "#ff85a2";
+    document.getElementById('trend-icon').innerText = avgDailyInertia > 0 ? "📈" : "📉";
 
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toLocaleDateString();
-            const h = history[dateStr];
+    calculateROI(avgDailyInertia); // ✅ 调用，不嵌套
+}
 
-            if (h) {
-                if (h.costSnapshot) lastSnapshot = h.costSnapshot;
-                cumulativeProfit += parseFloat(h.profit) || 0;
-            } else {
-                const dailyCost = parseFloat(lastSnapshot.rent) +
-                                  parseFloat(lastSnapshot.salary) +
-                                  parseFloat(lastSnapshot.other);
-                cumulativeProfit -= dailyCost;
-            }
-        }
+function calculateROI(avgDailyProfit) {
+    const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
 
-        const progress = startup > 0 ? Math.min((cumulativeProfit / startup) * 100, 100).toFixed(1) : 100;
-        const remainingCost = Math.max(startup - cumulativeProfit, 0);
-
-        let countdownText = "";
-        if (remainingCost <= 0) {
-            countdownText = "🎉 恭喜！已完全回本";
-        } else if (avgDailyProfit <= 0) {
-            countdownText = "⏳ 需保持盈利以预测回本期";
-        } else {
-            const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
-            const roiDate = new Date();
-            roiDate.setDate(roiDate.getDate() + daysToROI);
-            countdownText = `预计还需 <strong>${daysToROI}</strong> 天回本 (约 ${roiDate.toLocaleDateString()})`;
-        }
-
+    const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    if (sortedDates.length === 0) {
         document.getElementById('roi-total').innerText = startup.toLocaleString();
-        document.getElementById('roi-progress').style.width = progress + '%';
-        document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${cumulativeProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
+        document.getElementById('roi-progress').style.width = '0%';
+        document.getElementById('roi-desc').innerHTML = '暂无数据';
+        return;
     }
 
-    // ====== CSV 导出 ======
-    function exportCSV() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+    const startDate = new Date(sortedDates[0]);
+    const endDate = new Date();
+    let lastSnapshot = {
+        rent: parseFloat(localStorage.getItem('monthlyRent')) / 30 || 0,
+        salary: parseFloat(localStorage.getItem('monthlySalary')) / 30 || 0,
+        other: parseFloat(localStorage.getItem('monthlyOther')) / 30 || 0
+    };
 
-        let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+    let cumulativeProfit = 0;
 
-        if (sortedDates.length === 0) return;
-
-        const startDate = new Date(sortedDates[0]);
-        const endDate = new Date();
-        const allDates = [];
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            allDates.push(new Date(d).toLocaleDateString());
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toLocaleDateString();
+        const h = history[dateStr];
+        if (h) {
+            if (h.costSnapshot) lastSnapshot = h.costSnapshot;
+            cumulativeProfit += parseFloat(h.profit) || 0;
+        } else {
+            const dailyCost = parseFloat(lastSnapshot.rent) +
+                              parseFloat(lastSnapshot.salary) +
+                              parseFloat(lastSnapshot.other);
+            cumulativeProfit -= dailyCost;
         }
-
-        let lastSnapshot = {
-            rent: (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2),
-            salary: (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2),
-            other: (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2)
-        };
-
-        allDates.forEach(d => {
-            const h = history[d];
-            if (h) {
-                const rev = parseFloat(h.revenue) || 0;
-                const net = parseFloat(h.profit) || 0;
-                const ach = h.achievement || 0;
-                const snap = h.costSnapshot || lastSnapshot;
-                if (h.costSnapshot) lastSnapshot = h.costSnapshot;
-                csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${net}\n`;
-            } else {
-                const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
-                csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)}\n`;
-            }
-        });
-
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Precision_Report_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
     }
 
-    // ====== 图表 ======
+    const progress = startup > 0 ? Math.min((cumulativeProfit / startup) * 100, 100).toFixed(1) : 100;
+    const remainingCost = Math.max(startup - cumulativeProfit, 0);
+
+    let countdownText = "";
+    if (remainingCost <= 0) {
+        countdownText = "🎉 恭喜！已完全回本";
+    } else if (avgDailyProfit <= 0) {
+        countdownText = "⏳ 需保持盈利以预测回本期";
+    } else {
+        const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
+        const roiDate = new Date();
+        roiDate.setDate(roiDate.getDate() + daysToROI);
+        countdownText = `预计还需 <strong>${daysToROI}</strong> 天回本 (约 ${roiDate.toLocaleDateString()})`;
+    }
+
+    document.getElementById('roi-total').innerText = startup.toLocaleString();
+    document.getElementById('roi-progress').style.width = progress + '%';
+    document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${cumulativeProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
+}
+
+function exportCSV() {
+    const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+
+    let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+    const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
+
+    if (sortedDates.length === 0) return;
+
+    const startDate = new Date(sortedDates[0]);
+    const endDate = new Date();
+    const allDates = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        allDates.push(new Date(d).toLocaleDateString());
+    }
+
+    let lastSnapshot = {
+        rent: (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2),
+        salary: (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2),
+        other: (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2)
+    };
+
+    allDates.forEach(d => {
+        const h = history[d];
+        if (h) {
+            const rev = parseFloat(h.revenue) || 0;
+            const net = parseFloat(h.profit) || 0;
+            const ach = h.achievement || 0;
+            const snap = h.costSnapshot || lastSnapshot;
+            if (h.costSnapshot) lastSnapshot = h.costSnapshot;
+            csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${net}\n`;
+        } else {
+            const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
+            csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)}\n`;
+        }
+    });
+
+    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Precision_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+
+
+
+
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
         const trend = AccountingEngine.getTrendData();
@@ -532,57 +568,58 @@
             type: 'line',
             data: {
                 labels: trend.labels,
-                datasets: [{
-                    label: '营收',
-                    data: trend.data,
-                    borderColor: '#ff85a2',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(255,133,162,0.1)'
-                }]
+                datasets: [{ label: '营收', data: trend.data, borderColor: '#ff85a2', tension: 0.4, fill: true, backgroundColor: 'rgba(255,133,162,0.1)' }]
             },
             options: { plugins: { legend: { display: false } } }
         });
     }
 
-    // ====== 历史账单 ======
-    function renderHistoryList() {
+   function renderHistoryList() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const dates = Object.keys(history).sort((a, b) => new Date(b) - new Date(a));
 
-        let html = '<h3 style="font-size:14px; margin:20px 0 10px; color:#666;">历史账单</h3>';
-        dates.forEach(date => {
-            const h = history[date] || {};
-            const rev = parseFloat(h.revenue) || 0;
-            const ach = parseFloat(h.achievement) || 0;
-            html += `
-                <div class="history-item">
-                    <span>${date}</span>
-                    <strong>¥${rev.toFixed(2)} (${ach}%)</strong>
-                </div>`;
+        // 稳定按日期排序
+        const dates = Object.keys(history).sort((a,b)=>{
+            return new Date(b) - new Date(a);
         });
 
-        document.getElementById('history-list').innerHTML = html;
-    }
+        let html = '<h3 style="font-size:14px; margin:20px 0 10px; color:#666;">历史账单</h3>';
 
-    // ====== 主渲染 ======
+        dates.forEach(date => {
+
+           const h = history[date] || {};
+
+           const rev = parseFloat(h.revenue) || 0;
+           const ach = parseFloat(h.achievement) || 0;
+
+           html += `
+          <div class="history-item">
+            <span>${date}</span>
+            <strong>
+                ¥${rev.toFixed(2)} (${ach}%)
+            </strong>
+        </div>`;
+    });
+
+    document.getElementById('history-list').innerHTML = html;
+}
+
     function render() {
         const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
         const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
         const score = Math.floor((rev / daily) * 100);
         document.getElementById('health-score').innerText = score + '%';
         document.getElementById('date-display').innerText = new Date().toLocaleDateString();
-
         const emoji = document.getElementById('emoji-status');
-        if (score === 0) emoji.innerText = "😴";
-        else if (score < 100) emoji.innerText = "🦦";
+        if(score === 0) emoji.innerText = "😴";
+        else if(score < 100) emoji.innerText = "🦦";
         else emoji.innerText = "💎";
 
+        // 【增强】勋章渲染
         const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
         document.querySelectorAll('.badge-wall span').forEach(el => el.classList.remove('active-badge'));
-        earned.forEach(id => {
-            const badgeEl = document.getElementById('badge-' + id);
-            if (badgeEl) badgeEl.classList.add('active-badge');
+        earned.forEach(id => { 
+            const badgeEl = document.getElementById('badge-'+id);
+            if(badgeEl) badgeEl.classList.add('active-badge'); 
         });
     }
 
@@ -592,8 +629,8 @@
 
     window.onload = render;
 </script>
-    <script src="i18n-engine.js"></script>
-    
+
+<script src="i18n-engine.js"></script>
 
 
 </body>
