@@ -44,8 +44,7 @@ const AchievementEngine = {
         }
 
         // [修复2] 先将本次金额累加到 todayRev，再判定今日目标
-        const updatedTodayRev = (parseFloat(localStorage.getItem('todayRev')) || 0) + parseFloat(newAmount);
-        localStorage.setItem('todayRev', updatedTodayRev);
+        const updatedTodayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
 
         if (updatedTodayRev >= dailyCost) {
             stats.isDailyGoalMet = true;
