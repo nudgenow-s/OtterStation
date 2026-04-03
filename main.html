@@ -33,7 +33,7 @@
         .roi-bar-container { height: 10px; background: #eee; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         #roi-progress { height: 100%; background: var(--success-green); width: 0%; transition: 1s; }
 
-```
+
     /* ===== 进货弹窗（与成本弹窗统一样式） ===== */
     .modal-box { background: white; padding: 25px; border-radius: 30px; width: 300px; }
     .modal-box h3 { margin: 0 0 15px; color: var(--primary-pink); }
@@ -45,7 +45,7 @@
     #variable-cost-tag { display: inline-block; font-size: 10px; color: #ff85a2; background: #fff0f3; border-radius: 8px; padding: 2px 7px; margin-top: 4px; opacity: 0; transition: opacity 0.4s; }
     #variable-cost-tag.visible { opacity: 1; }
 </style>
-```
+
 
 </head>
 <body>
@@ -90,7 +90,7 @@ onclick="closeMotivation()">
   <div class="modal-box">
     <h3>📦 进货记录</h3>
 
-```
+
 <label class="field-label">本次进货金额 (¥)</label>
 <input type="number" id="proc-amount" inputmode="decimal" placeholder="0.00"><br>
 
@@ -106,7 +106,7 @@ onclick="closeMotivation()">
 
 <button class="btn-main" onclick="saveProcurement()">确认进货</button>
 <button class="btn-main" style="background:#ccc; margin-top:10px;" onclick="closeProcurementModal()">取消</button>
-```
+
 
   </div>
 </div>
@@ -132,7 +132,7 @@ onclick="closeMotivation()">
     </div>
     <button class="btn-main" onclick="record()">记录成交</button>
 
-```
+
 <!-- 变动成本标签 -->
 <div style="margin-top:8px; min-height:20px; text-align:center;">
     <span id="variable-cost-tag"></span>
@@ -140,15 +140,17 @@ onclick="closeMotivation()">
 
 <div class="badge-wall" id="badges">
     <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span><a href="https://nudgenow-s.github.io/Otter-miner/"> <span id="badge-otterminer">🦦</span></a><a href="https://nudgenow-s.github.io/Gaaame/"> <span id="badge-game">🎮</span></a>
-```
+
 
 </div>
 
-</div><div id="report-modal">
+<div id="report-modal">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="color:var(--primary-pink); margin:0;">数据复盘</h2>
         <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
     </div>
+</div>
+    
 
 <div class="forecast-card" style="border-left-color: var(--success-green);">
     <div style="font-size: 11px; color: #666; font-weight: bold;">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
