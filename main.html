@@ -1,4 +1,5 @@
 <!DOCTYPE html><html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -31,12 +32,25 @@
         .forecast-card { background: #f8f9ff; padding: 15px; border-radius: 20px; margin: 15px 0; border-left: 5px solid #4facfe; text-align: left; }
         .roi-bar-container { height: 10px; background: #eee; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         #roi-progress { height: 100%; background: var(--success-green); width: 0%; transition: 1s; }
-    </style>
+
+```
+    /* ===== 进货弹窗（与成本弹窗统一样式） ===== */
+    .modal-box { background: white; padding: 25px; border-radius: 30px; width: 300px; }
+    .modal-box h3 { margin: 0 0 15px; color: var(--primary-pink); }
+    .modal-box input { font-size: 18px; }
+    .field-label { font-size: 11px; color: #bbb; text-align: left; display: block; margin: 10px 0 2px; }
+    .proc-history-item { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; padding: 5px 0; border-bottom: 1px dotted #f0e0e4; }
+
+    /* 变动成本标签 */
+    #variable-cost-tag { display: inline-block; font-size: 10px; color: #ff85a2; background: #fff0f3; border-radius: 8px; padding: 2px 7px; margin-top: 4px; opacity: 0; transition: opacity 0.4s; }
+    #variable-cost-tag.visible { opacity: 1; }
+</style>
+```
+
 </head>
 <body>
 
 <!-- ===== 每日激励弹窗 ===== -->
-
 
 <div id="motivation-modal" class="modal-overlay" style="z-index:3000;">
   <div style="
@@ -56,24 +70,55 @@
 </div>
 
 <button class="btn-main"
-        style="font-size:14px;margin-bottom:10px;"
-        onclick="jumpToRecord()">
-  ✍️ 直接记一笔
+style="font-size:14px;margin-bottom:10px;"
+onclick="jumpToRecord()">
+✍️ 直接记一笔
 </button>
 
 <button class="btn-main"
-        style="background:#eee;color:#666;font-size:13px;box-shadow:none;"
-        onclick="closeMotivation()">
-  我知道了
+style="background:#eee;color:#666;font-size:13px;box-shadow:none;"
+onclick="closeMotivation()">
+我知道了
 </button>
 
-
 </div>
-</div><div class="app-container">
+</div>
+
+<!-- ===== 进货记录弹窗 ===== -->
+
+<div id="procurement-modal" class="modal-overlay" style="z-index:3500;">
+  <div class="modal-box">
+    <h3>📦 进货记录</h3>
+
+```
+<label class="field-label">本次进货金额 (¥)</label>
+<input type="number" id="proc-amount" inputmode="decimal" placeholder="0.00"><br>
+
+<label class="field-label">参考消耗天数（估计几天卖完）</label>
+<input type="number" id="proc-days" inputmode="numeric" placeholder="7"><br>
+
+<!-- 近期进货日志 -->
+<div id="proc-history-wrap" style="display:none; margin:14px 0 4px;">
+  <div style="font-size:10px;color:#ccc;margin-bottom:4px;">最近进货记录</div>
+  <div id="proc-history-list"></div>
+</div>
+
+<!-- 卡尔曼结果提示 -->
+<div id="kalman-result" style="display:none;background:#f0fff4;border-radius:14px;padding:10px 12px;font-size:11px;color:#4caf50;margin:12px 0;line-height:1.7;text-align:left;"></div>
+
+<button class="btn-main" onclick="saveProcurement()">确认进货</button>
+<button class="btn-main" style="background:#ccc; margin-top:10px;" onclick="closeProcurementModal()">取消</button>
+```
+
+  </div>
+</div>
+
+<div class="app-container">
     <div class="top-nav">
         <span id="date-display"></span>
         <div>
             <span onclick="StellarockDataHub.exportData()" style="cursor:pointer; margin-right:12px;color:var(--primary-pink);font-weight:bold;">📤备份</span>
+            <span onclick="openProcurementModal()" style="cursor:pointer; margin-right:12px;">📦 进货</span>
             <span onclick="validateBoss('cost')" style="cursor:pointer; margin-right:12px;">🔒 成本</span>
             <span onclick="validateBoss('report')" style="cursor:pointer">📊 报表</span>
         </div>
@@ -88,13 +133,21 @@
         <div id="profit-tip"></div>
     </div>
     <button class="btn-main" onclick="record()">记录成交</button>
-    <div class="badge-wall" id="badges">
-        <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span><a href="https://nudgenow-s.github.io/Otter-miner/"> <span id="badge-otterminer">🦦</span></a><a href="https://nudgenow-s.github.io/Gaaame/"> <span id="badge-game">🎮</span></a>
+
+```
+<!-- 变动成本标签 -->
+<div style="margin-top:8px; min-height:20px; text-align:center;">
+    <span id="variable-cost-tag"></span>
+</div>
+
+<div class="badge-wall" id="badges">
+    <span id="badge-first_blood">💰</span><span id="badge-profitable_king">👑</span><span id="badge-smart_buyer">🦊</span><span id="badge-anti_procrastination">🔥</span><a href="https://nudgenow-s.github.io/Otter-miner/"> <span id="badge-otterminer">🦦</span></a><a href="https://nudgenow-s.github.io/Gaaame/"> <span id="badge-game">🎮</span></a>
+</div>
+```
 
 </div>
 
-
-</div><div id="report-modal">
+<div id="report-modal">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="color:var(--primary-pink); margin:0;">数据复盘</h2>
         <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
@@ -113,11 +166,13 @@
 </div>
 
 <canvas id="trendChart" style="margin:20px 0;"></canvas>
+
 <div id="history-list"></div>
 <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全维度 CSV 报表</button>
 
+</div>
 
-</div><div id="cost-detail-modal" class="modal-overlay">
+<div id="cost-detail-modal" class="modal-overlay">
     <div style="background:white; padding:25px; border-radius:30px; width:300px;">
         <h3 style="margin:0 0 15px; color:var(--primary-pink);">⚙️ 成本细项微调</h3>
         <input type="number" id="edit-rent" placeholder="月房租"><br>
@@ -127,17 +182,91 @@
         <button class="btn-main" onclick="saveCostDetails()">保存</button>
         <button class="btn-main" style="background:#ccc; margin-top:10px;" onclick="closeCostModal()">取消</button>
     </div>
-</div><script src="accounting.js"></script><script src="achievement.js"></script><script>
+</div>
+
+<script src="kalman-engine.js"></script>
+
+<script src="accounting.js"></script>
+
+<script src="achievement.js"></script>
+
+<script>
+    // ===== 进货弹窗 UI =====
+    function openProcurementModal() {
+        renderProcHistory();
+        document.getElementById('kalman-result').style.display = 'none';
+        document.getElementById('procurement-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('proc-amount').focus(), 200);
+    }
+
+    function closeProcurementModal() {
+        document.getElementById('procurement-modal').style.display = 'none';
+        document.getElementById('proc-amount').value = '';
+        document.getElementById('proc-days').value = '';
+        document.getElementById('kalman-result').style.display = 'none';
+    }
+
+    function saveProcurement() {
+        const amount = parseFloat(document.getElementById('proc-amount').value);
+        const days = parseFloat(document.getElementById('proc-days').value) || 7;
+        if (!amount || amount <= 0) {
+            const el = document.getElementById('proc-amount');
+            el.style.borderBottomColor = '#ff4444';
+            setTimeout(() => el.style.borderBottomColor = '#ffdae3', 1500);
+            return;
+        }
+        const result = KalmanVariableCostEngine.recordPurchase(amount, days);
+        const resultEl = document.getElementById('kalman-result');
+        resultEl.style.display = 'block';
+        resultEl.innerHTML =
+            `✅ 变动成本已更新<br>` +
+            `本次信号：¥${result.observation.toFixed(2)}/天<br>` +
+            `融合后估计：¥${result.dailyCost.toFixed(2)}/天<br>` +
+            `<span style="color:#aaa">信任度 ${(result.gain * 100).toFixed(0)}% 参考本次进货</span>`;
+        renderProcHistory();
+        // 重新存快照，让变动成本写入今日记录
+        const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        AccountingEngine.saveDailySnapshot(rev);
+        render();
+        setTimeout(() => closeProcurementModal(), 2400);
+    }
+
+    function renderProcHistory() {
+        const logs = KalmanVariableCostEngine.getLogs();
+        const wrap = document.getElementById('proc-history-wrap');
+        const list = document.getElementById('proc-history-list');
+        if (logs.length === 0) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+        list.innerHTML = logs.slice(0, 4).map(l =>
+            `<div class="proc-history-item">
+                <span>${l.date}</span>
+                <span>¥${l.amount} / ${l.refDays}天</span>
+                <span style="color:var(--primary-pink)">≈¥${l.kalmanEst}/天</span>
+            </div>`
+        ).join('');
+    }
+
+    function updateKalmanStatusUI() {
+        const varCost = KalmanVariableCostEngine.getCurrentDailyVariableCost();
+        const tag = document.getElementById('variable-cost-tag');
+        if (varCost > 0.5) {
+            tag.textContent = `📦 变动成本 ¥${varCost.toFixed(2)}/天 已计入`;
+            tag.classList.add('visible');
+        } else {
+            tag.classList.remove('visible');
+        }
+    }
+
     // 路由守卫：检查是否激活
 (function securityCheck() {
     const isActivated = localStorage.getItem('isActivated');
     if (isActivated !== 'true') {
-        // 如果没激活，强制重定向回大门，且不让用户通过“返回”跳过
         window.location.replace('gate.html');
     }
 })();
 
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
+
     // ====== 新增：跨天自动重置 ======
  (function resetNewDay(){
     const today = new Date().toLocaleDateString();
@@ -146,7 +275,6 @@
     if (lastDate && lastDate !== today) {
         const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
         
-        // ✅ 补上昨天日期参数
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toLocaleDateString();
@@ -155,6 +283,7 @@
         localStorage.setItem('todayRev', '0');
         localStorage.setItem('todayRecordCount', '0');
         localStorage.removeItem('earned_badges');
+        localStorage.removeItem('kalman_sales_updated');
 
         try {
             let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
@@ -173,24 +302,17 @@
 function getYesterdayProfit(){
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
     
-    // 获取真正的昨天日期字符串（确保与你存入时的格式一致）
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toLocaleDateString();
 
-    
-    
-
-    // 直接从对象中精准提取昨天的记录
     if(history[yesterdayStr]){
         return parseFloat(history[yesterdayStr].profit) || 0;
     }
 
-    // 如果昨天没记录，再退而求其次寻找最近的一个历史记录
     const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
     if(keys.length === 0) return null;
     
-    // 排除掉今天的 key，找到最后一个历史 key
     const todayStr = new Date().toLocaleDateString();
     const historyKeys = keys.filter(k => k !== todayStr);
     
@@ -252,15 +374,14 @@ function closeMotivation(){
 function jumpToRecord(){
     closeMotivation();
 
-    // 直接聚焦你的输入框 → 完全不改原逻辑
     document.getElementById('revenue-input').focus();
 
-    // 给一个小动画提示
     document.getElementById('revenue-input').style.transform = 'scale(1.05)';
     setTimeout(()=>{
         document.getElementById('revenue-input').style.transform = '';
     },300);
 }
+
     function validateBoss(target) {
         if (prompt("请输入密码：") === "0000") {
             if (target === 'cost') {
@@ -273,7 +394,6 @@ function jumpToRecord(){
         }
     }
 
-        // ====== 追加在原有代码最底部，确保不影响顶部的安全校验 ======
     const StellarockDataHub = {
         exportData: function() {
             try {
@@ -283,7 +403,6 @@ function jumpToRecord(){
                     allData[key] = localStorage.getItem(key);
                 }
                 
-                // 增加校验：如果没有数据，提醒用户
                 if (Object.keys(allData).length === 0) {
                     alert("🦦 财库空空，先记几笔再备份吧！");
                     return;
@@ -303,9 +422,6 @@ function jumpToRecord(){
             }
         }
     };
-    // ======================================================
-
-
 
  function saveCostDetails() {
     const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
@@ -314,14 +430,12 @@ function jumpToRecord(){
 
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
     
-    // 补全所有没有快照的历史记录（用旧值）
     Object.keys(history).forEach(date => {
         if (!history[date].costSnapshot) {
             history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
         }
     });
 
-    // 读取新值
     const r = parseFloat(document.getElementById('edit-rent').value) || 0;
     const s = parseFloat(document.getElementById('edit-salary').value) || 0;
     const o = parseFloat(document.getElementById('edit-other').value) || 0;
@@ -331,13 +445,18 @@ function jumpToRecord(){
     const newS = (s / 30).toFixed(2);
     const newO = (o / 30).toFixed(2);
 
-    // ✅ 强制更新今天的快照为新成本
     const today = new Date().toLocaleDateString();
     if (history[today]) {
         const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        const varCost = (typeof KalmanVariableCostEngine !== 'undefined')
+            ? KalmanVariableCostEngine.getCurrentDailyVariableCost()
+            : 0;
         history[today].costSnapshot = { rent: newR, salary: newS, other: newO };
-        history[today].profit = (todayRev - newDailyCost).toFixed(2);
-        history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
+        history[today].profit = (todayRev - newDailyCost - varCost).toFixed(2);
+        history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / (newDailyCost + varCost)) * 100) : 100;
+        history[today].variableCost = varCost.toFixed(2);
+        history[today].grossMargin = todayRev > 0 ? (((todayRev - varCost) / todayRev) * 100).toFixed(1) : '0.0';
+        history[today].netMargin = todayRev > 0 ? (((todayRev - newDailyCost - varCost) / todayRev) * 100).toFixed(1) : '0.0';
     }
 
     localStorage.setItem('revenue_history', JSON.stringify(history));
@@ -350,8 +469,6 @@ function jumpToRecord(){
     location.reload();
 }
 
-
-
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
 
     function record() {
@@ -361,15 +478,16 @@ function jumpToRecord(){
         let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
         rev += val;
         localStorage.setItem('todayRev', rev);
+
+        // 卡尔曼销售信号修正消耗速度
+        KalmanVariableCostEngine.updateWithSales(rev);
         
         const result = AccountingEngine.calculateProfit(val);
+        // saveDailySnapshot 现在会自动读取卡尔曼变动成本并写入所有字段
         AccountingEngine.saveDailySnapshot(rev);
 
-        // 【强力联动】不再判断 window，直接尝试调用并捕获错误
         try {
             if (typeof AchievementEngine !== 'undefined') {
-                // 必须传入 val (单次金额) 而不是 rev (今日总额) 
-                // 这样 recordCount (记录次数) 才会准确自增
                 AchievementEngine.check(val);
             } else {
                 console.error("勋章引擎尚未加载");
@@ -379,30 +497,32 @@ function jumpToRecord(){
         }
 
         const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        const varCost = KalmanVariableCostEngine.getCurrentDailyVariableCost();
+        const totalCost = dailyCost + varCost;
 
-let tip = "";
+        let tip = "";
 
-if (todayRev === 0) {
-    tip = "";                                    // 刚进来啥也不说
-}
-else if (todayRev < dailyCost) {
-    const gap = dailyCost - todayRev;
-    tip = `⏳ 距离打平还差 ¥${gap.toFixed(2)}`;
-}
-else if (todayRev === dailyCost) {
-    tip = "🎯 已打平成本！从现在开始都是利润";
-}
-else {
-    const net = todayRev - dailyCost;
-    tip = `✨ 纯赚 ¥${net.toFixed(2)}`;
-}
+        if (todayRev === 0) {
+            tip = "";
+        }
+        else if (todayRev < totalCost) {
+            const gap = totalCost - todayRev;
+            tip = `⏳ 距离打平还差 ¥${gap.toFixed(2)}`;
+        }
+        else if (todayRev === totalCost) {
+            tip = "🎯 已打平成本！从现在开始都是利润";
+        }
+        else {
+            const net = todayRev - totalCost;
+            tip = `✨ 纯赚 ¥${net.toFixed(2)}`;
+        }
 
-document.getElementById('profit-tip').innerText = tip;
+        document.getElementById('profit-tip').innerText = tip;
 
-setTimeout(() => {
-    document.getElementById('profit-tip').innerText = "";
-}, 3000);
+        setTimeout(() => {
+            document.getElementById('profit-tip').innerText = "";
+        }, 3000);
         input.value = ''; 
         render();
     }
@@ -450,7 +570,7 @@ setTimeout(() => {
     forecastEl.style.color = estimatedTotal > 0 ? "#4facfe" : "#ff85a2";
     document.getElementById('trend-icon').innerText = avgDailyInertia > 0 ? "📈" : "📉";
 
-    calculateROI(avgDailyInertia); // ✅ 调用，不嵌套
+    calculateROI(avgDailyInertia);
 }
 
 function calculateROI(avgDailyProfit) {
@@ -512,7 +632,8 @@ function calculateROI(avgDailyProfit) {
 function exportCSV() {
     const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
 
-    let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
+    // 原有列不动，追加三列：每日原材料损耗、毛利率、净利率
+    let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,每日原材料损耗,绝对净利,毛利率,净利率\n";
     const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
 
     if (sortedDates.length === 0) return;
@@ -538,10 +659,20 @@ function exportCSV() {
             const ach = h.achievement || 0;
             const snap = h.costSnapshot || lastSnapshot;
             if (h.costSnapshot) lastSnapshot = h.costSnapshot;
-            csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${net}\n`;
+
+            // 新增三列：从快照读取，若历史记录无此字段则回退计算
+            const varCost = parseFloat(h.variableCost) || 0;
+            const grossMargin = h.grossMargin != null
+                ? h.grossMargin
+                : (rev > 0 ? (((rev - varCost) / rev) * 100).toFixed(1) : '0.0');
+            const netMargin = h.netMargin != null
+                ? h.netMargin
+                : (rev > 0 ? ((net / rev) * 100).toFixed(1) : '0.0');
+
+            csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${varCost.toFixed(2)},${net},${grossMargin}%,${netMargin}%\n`;
         } else {
             const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
-            csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)}\n`;
+            csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)},0.00,—,—\n`;
         }
     });
 
@@ -555,10 +686,6 @@ function exportCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
-
-
-
-
 
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
@@ -605,8 +732,10 @@ function exportCSV() {
 
     function render() {
         const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-        const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
-        const score = Math.floor((rev / daily) * 100);
+        const fixedCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        const varCost = KalmanVariableCostEngine.getCurrentDailyVariableCost();
+        const totalCost = fixedCost + varCost || 1;
+        const score = Math.floor((rev / totalCost) * 100);
         document.getElementById('health-score').innerText = score + '%';
         document.getElementById('date-display').innerText = new Date().toLocaleDateString();
         const emoji = document.getElementById('emoji-status');
@@ -614,13 +743,16 @@ function exportCSV() {
         else if(score < 100) emoji.innerText = "🦦";
         else emoji.innerText = "💎";
 
-        // 【增强】勋章渲染
+        // 勋章渲染
         const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
         document.querySelectorAll('.badge-wall span').forEach(el => el.classList.remove('active-badge'));
         earned.forEach(id => { 
             const badgeEl = document.getElementById('badge-'+id);
             if(badgeEl) badgeEl.classList.add('active-badge'); 
         });
+
+        // 变动成本标签
+        updateKalmanStatusUI();
     }
 
     const config = IndustryAdapter.getCurrent();
@@ -631,7 +763,6 @@ function exportCSV() {
 </script>
 
 <script src="i18n-engine.js"></script>
-
 
 </body>
 </html>
