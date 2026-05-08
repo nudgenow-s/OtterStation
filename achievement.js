@@ -1,9 +1,35 @@
 const AchievementEngine = {
     badges: [
-        { id: 'first_blood', name: '首单入账', icon: '💰', desc: '打破鸭蛋，开工大吉！', condition: (s) => s.totalSales > 0 },
-        { id: 'profitable_king', name: '盈利王者', icon: '👑', desc: '连续达标，你是房东克星！', condition: (s) => s.totalSales >= s.dailyCost * 3 },
-        { id: 'smart_buyer', name: '精明猎手', icon: '🦊', desc: '精准记账，每一分钱都有据可查。', condition: (s) => s.recordCount >= 5 },
-        { id: 'anti_procrastination', name: '黄金选手', icon: '🔥', desc: '超绝主理人！今日目标已达成。', condition: (s) => s.isDailyGoalMet === true }
+        {
+            id: 'first_blood',
+            name: '首单入账',
+            icon: '💰',
+            desc: '打破鸭蛋，开工大吉！',
+            condition: (s) => s.totalSales > 0
+        },
+        {
+            id: 'profitable_king',
+            name: '盈利王者',
+            icon: '👑',
+            desc: '连续达标，你是房东克星！',
+            condition: (s) => s.totalSales >= s.dailyCost * 3
+        },
+        {
+            id: 'smart_buyer',
+            name: '精明猎手',
+            icon: '🦊',
+            // 修复：原文"记帐"改为"记账"，与i18n字典保持一致
+            desc: '精准记账，每一分钱都有据可查。',
+            condition: (s) => s.recordCount >= 5
+        },
+        {
+            id: 'anti_procrastination',
+            name: '黄金选手',
+            icon: '🔥',
+            // 修复：拆分为两句，便于i18n walker逐句匹配
+            desc: '超绝主理人，今日目标已达成。',
+            condition: (s) => s.isDailyGoalMet === true
+        }
     ],
 
     getStats() {
@@ -20,14 +46,10 @@ const AchievementEngine = {
         const today = new Date().toLocaleDateString();
         const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 1;
 
-        // 核心更新：增加累计销售额和记录次数
         stats.totalSales = (parseFloat(stats.totalSales) || 0) + parseFloat(newAmount);
         stats.recordCount = (parseInt(stats.recordCount) || 0) + 1;
-
-        // ✅ 把 dailyCost 写入 stats，供 condition 使用
         stats.dailyCost = dailyCost;
 
-        // [修复1] 日期变更时重置每日状态，并更新 streak
         if (stats.lastDate !== today) {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
@@ -43,17 +65,13 @@ const AchievementEngine = {
             stats.lastDate = today;
         }
 
-        // [修复2] 先将本次金额累加到 todayRev，再判定今日目标
         const updatedTodayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-
         if (updatedTodayRev >= dailyCost) {
             stats.isDailyGoalMet = true;
         }
 
-        // 保存更新后的统计
         localStorage.setItem('user_stats', JSON.stringify(stats));
 
-        // 检查并点亮勋章
         let earned = [];
         try {
             earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
@@ -75,7 +93,7 @@ const AchievementEngine = {
 
     showBadgeModal(badge) {
         const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-pink').trim() || '#ff85a2';
-        
+
         const modalHtml = `
             <div id="badge-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.98); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; animation: badgePop 0.5s ease-out;">
                 <div style="font-size:100px; margin-bottom:20px;">${badge.icon}</div>
