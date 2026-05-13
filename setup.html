@@ -5,139 +5,406 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>能量基石 - Setup</title>
+    <title>初始配置 — 主理人工作台</title>
     <script src="config.js"></script>
     <style>
-        :root { --main-color: #ff85a2; --bg: #fff9fa; }
-        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { width: 340px; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
-        .logo { font-size: 60px; margin-bottom: 10px; transition: 0.3s; }
-        .progress { height: 6px; background: #eee; border-radius: 3px; margin: 20px 0; overflow: hidden; }
-        #bar { height: 100%; width: 20%; background: var(--main-color); transition: 0.5s; }
-        .step { display: none; animation: fadeIn 0.4s; text-align: left; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        h2 { color: var(--main-color); font-size: 20px; margin-top: 0; }
-        p { font-size: 13px; color: #888; line-height: 1.6; }
-        .industry-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .industry-item { border: 2px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .industry-item.selected { border-color: var(--main-color); background: #fdf0f2; }
-        .industry-item span { font-size: 24px; display: block; }
-        .industry-item label { font-size: 11px; color: #666; font-weight: bold; }
-        input { width: 100%; border: none; background: #fdf0f2; padding: 15px; border-radius: 15px; font-size: 18px; margin: 15px 0; box-sizing: border-box; outline: none; color: var(--main-color); }
-        button { width: 100%; background: var(--main-color); color: white; border: none; padding: 15px; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .back-link { display: block; text-align: center; font-size: 12px; color: #ccc; margin-top: 15px; text-decoration: none; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #8B1A2F;
+            --gold: #C9A84C;
+            --gold-light: #E8D08A;
+            --bg-dark: #160810;
+            --bg-card: #1E0E13;
+            --bg-input: rgba(255,255,255,0.04);
+            --border: rgba(201,168,76,0.18);
+            --text: rgba(255,255,255,0.85);
+            --text-muted: rgba(255,255,255,0.35);
+            --text-dim: rgba(201,168,76,0.45);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'PingFang SC', sans-serif;
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,26,47,0.3) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(92,51,23,0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .card {
+            width: 340px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 32px 28px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 1px rgba(201,168,76,0.05),
+                0 32px 64px rgba(0,0,0,0.55),
+                inset 0 1px 0 rgba(201,168,76,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 80px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .logo {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 8px;
+            transition: 0.4s;
+        }
+        .brand-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            letter-spacing: 5px;
+            color: var(--gold);
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* Progress */
+        .progress {
+            height: 2px;
+            background: rgba(201,168,76,0.1);
+            border-radius: 1px;
+            margin: 20px 0 24px;
+            overflow: visible;
+            position: relative;
+        }
+        #bar {
+            height: 100%;
+            width: 20%;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+            border-radius: 1px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        #bar::after {
+            content: '';
+            position: absolute;
+            right: -3px; top: -3px;
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(201,168,76,0.6);
+        }
+
+        /* Steps */
+        .step { display: none; animation: fadeUp 0.4s ease; }
+        .step.active { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        /* Industry Grid */
+        .industry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 16px 0 24px;
+        }
+        .industry-item {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: var(--bg-input);
+        }
+        .industry-item:hover {
+            border-color: rgba(201,168,76,0.35);
+            background: rgba(201,168,76,0.05);
+        }
+        .industry-item.selected {
+            border-color: var(--gold);
+            background: rgba(201,168,76,0.1);
+            box-shadow: 0 0 0 1px rgba(201,168,76,0.15), 0 4px 16px rgba(201,168,76,0.1);
+        }
+        .industry-item span {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .industry-item label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+        .industry-item.selected label { color: var(--gold); }
+
+        /* Input */
+        .input-wrap {
+            position: relative;
+            margin: 16px 0;
+        }
+        .input-prefix {
+            position: absolute;
+            left: 16px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--gold);
+            opacity: 0.5;
+            font-weight: 300;
+        }
+        input[type="number"] {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            padding: 16px 16px 16px 36px;
+            border-radius: 14px;
+            font-size: 20px;
+            color: var(--gold-light);
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-weight: 300;
+        }
+        input[type="number"]:focus {
+            border-color: rgba(201,168,76,0.45);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.07);
+        }
+        input[type="number"]::placeholder { color: rgba(201,168,76,0.2); font-size: 15px; }
+
+        /* Buttons */
+        button.btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #8B1A2F 0%, #6B1220 60%, #8B2A1A 100%);
+            color: var(--gold-light);
+            border: 1px solid rgba(201,168,76,0.3);
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 8px;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        button.btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+            transition: left 0.5s;
+        }
+        button.btn-primary:hover::before { left: 100%; }
+        button.btn-primary:hover {
+            border-color: rgba(201,168,76,0.55);
+            box-shadow: 0 8px 24px rgba(139,26,47,0.35), 0 0 0 1px rgba(201,168,76,0.15);
+            transform: translateY(-1px);
+        }
+        button.btn-primary:active { transform: translateY(0); }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--gold); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 10px;
+            margin: 20px 0;
+        }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-diamond {
+            width: 4px; height: 4px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo" id="main-logo">🦦</div>
-        <div class="progress"><div id="bar"></div></div>
-        
-        <div class="step active" id="s0">
-            <h2>🏷️ 选择行业身份</h2>
-            <div class="industry-grid" id="industry-selector">
-                <div class="industry-item selected" onclick="selectType('nail', this)"><span>💅</span><label>美业</label></div>
-                <div class="industry-item" onclick="selectType('food', this)"><span>🌭</span><label>餐饮</label></div>
-                <div class="industry-item" onclick="selectType('retail', this)"><span>👗</span><label>零售</label></div>
-            </div>
-            <button onclick="move(1)">确认身份</button>
-        </div>
-
-        <div class="step" id="s1">
-            <h2>🏠 房租与物业</h2>
-            <p>房租是生存的第一道坎。请输入每月固定支出：</p>
-            <input type="number" id="rent" placeholder="¥ 5000">
-            <button onclick="move(2)">下一步</button>
-            <span class="back-link" onclick="move(0)">返回上一步</span>
-        </div>
-
-        <div class="step" id="s2">
-            <h2>👸 你的专属工资</h2>
-            <p>如果你不发工资，那你只是在自我剥削：</p>
-            <input type="number" id="salary" placeholder="¥ 8000">
-            <button onclick="move(3)">下一步</button>
-            <span class="back-link" onclick="move(1)">返回上一步</span>
-        </div>
-
-        <div class="step" id="s3">
-            <h2>🔋 杂费与折旧</h2>
-            <p>水电、材料折旧。算出日均运营成本：</p>
-            <input type="number" id="misc" placeholder="¥ 1000">
-            <button onclick="move(4)">最后一步</button>
-            <span class="back-link" onclick="move(2)">返回上一步</span>
-        </div>
-
-        <div class="step" id="s4">
-            <h2>🏗️ 初始投入成本</h2>
-            <p>装修、设备、加盟费等沉没成本：</p>
-            <input type="number" id="startup" placeholder="¥ 50000">
-            <button onclick="save()">完成并进入水獭能量站</button>
-            <span class="back-link" onclick="move(3)">返回上一步</span>
-        </div>
+<div class="card">
+    <div class="header">
+        <span class="logo" id="main-logo">🦦</span>
+        <div class="brand-name">Prestige Station</div>
     </div>
 
-    <script>
-        // 路由守卫：检查是否激活
-(function securityCheck() {
-    const isActivated = localStorage.getItem('isActivated');
-    if (isActivated !== 'true') {
-        // 如果没激活，强制重定向回大门，且不让用户通过“返回”跳过
-        window.location.replace('gate.html');
+    <div class="progress"><div id="bar"></div></div>
+
+    <!-- Step 0: Industry -->
+    <div class="step active" id="s0">
+        <div class="step-label">Step 01 / 05</div>
+        <h2>选择行业身份</h2>
+        <p>我们将根据您的行业定制专属计量与分析模型。</p>
+        <div class="industry-grid" id="industry-selector">
+            <div class="industry-item selected" onclick="selectType('nail', this)">
+                <span>💅</span><label>美业</label>
+            </div>
+            <div class="industry-item" onclick="selectType('food', this)">
+                <span>🌭</span><label>餐饮</label>
+            </div>
+            <div class="industry-item" onclick="selectType('retail', this)">
+                <span>👗</span><label>零售</label>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="move(1)">确认并继续</button>
+    </div>
+
+    <!-- Step 1: Rent -->
+    <div class="step" id="s1">
+        <div class="step-label">Step 02 / 05</div>
+        <h2>房租与物业</h2>
+        <p>固定成本是生存的第一道关卡。请输入每月房租总额。</p>
+        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <div class="input-wrap">
+            <span class="input-prefix">¥</span>
+            <input type="number" id="rent" placeholder="5000">
+        </div>
+        <button class="btn-primary" onclick="move(2)">下一步</button>
+        <span class="back-link" onclick="move(0)">← 返回上一步</span>
+    </div>
+
+    <!-- Step 2: Salary -->
+    <div class="step" id="s2">
+        <div class="step-label">Step 03 / 05</div>
+        <h2>您的专属薪酬</h2>
+        <p>主理人的劳动同样有价值。请设定您应得的月薪。</p>
+        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <div class="input-wrap">
+            <span class="input-prefix">¥</span>
+            <input type="number" id="salary" placeholder="8000">
+        </div>
+        <button class="btn-primary" onclick="move(3)">下一步</button>
+        <span class="back-link" onclick="move(1)">← 返回上一步</span>
+    </div>
+
+    <!-- Step 3: Misc -->
+    <div class="step" id="s3">
+        <div class="step-label">Step 04 / 05</div>
+        <h2>运营杂费</h2>
+        <p>水电、材料损耗与日常折旧。请估算月均总额。</p>
+        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <div class="input-wrap">
+            <span class="input-prefix">¥</span>
+            <input type="number" id="misc" placeholder="1000">
+        </div>
+        <button class="btn-primary" onclick="move(4)">下一步</button>
+        <span class="back-link" onclick="move(2)">← 返回上一步</span>
+    </div>
+
+    <!-- Step 4: Startup -->
+    <div class="step" id="s4">
+        <div class="step-label">Step 05 / 05</div>
+        <h2>初始总投入</h2>
+        <p>装修、设备、加盟费等沉没成本。系统将为您追踪回本进度。</p>
+        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <div class="input-wrap">
+            <span class="input-prefix">¥</span>
+            <input type="number" id="startup" placeholder="50000">
+        </div>
+        <button class="btn-primary" onclick="save()">完成配置 · 进入工作台</button>
+        <span class="back-link" onclick="move(3)">← 返回上一步</span>
+    </div>
+</div>
+
+<script>
+    (function securityCheck() {
+        if (localStorage.getItem('isActivated') !== 'true') { window.location.replace('gate.html'); }
+    })();
+
+    if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
+
+    let selectedIndustry = 'nail';
+
+    function selectType(type, el) {
+        selectedIndustry = type;
+        document.querySelectorAll('.industry-item').forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+        const cfg = IndustryAdapter.registry[type];
+        document.documentElement.style.setProperty('--primary', cfg.theme);
+        document.getElementById('main-logo').innerText = cfg.icon;
     }
-})();
 
-        // 路由守卫
-        if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
-        
-        let selectedIndustry = 'nail';
+    function move(s) {
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById('s' + s).classList.add('active');
+        document.getElementById('bar').style.width = ((s + 1) / 5 * 100) + '%';
+    }
 
-        function selectType(type, el) {
-            selectedIndustry = type;
-            document.querySelectorAll('.industry-item').forEach(item => item.classList.remove('selected'));
-            el.classList.add('selected');
-            const theme = IndustryAdapter.registry[type].theme;
-            document.documentElement.style.setProperty('--main-color', theme);
-            document.getElementById('main-logo').innerText = IndustryAdapter.registry[type].icon;
-        }
+    function save() {
+        const rent    = Number(document.getElementById('rent').value)    || 0;
+        const salary  = Number(document.getElementById('salary').value)  || 0;
+        const misc    = Number(document.getElementById('misc').value)    || 0;
+        const startup = Number(document.getElementById('startup').value) || 0;
 
-        function move(s) {
-            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-            document.getElementById('s' + s).classList.add('active');
-            // 5 段进度
-            document.getElementById('bar').style.width = ((s + 1) / 5 * 100) + '%';
-        }
+        localStorage.setItem('monthlyRent',    rent);
+        localStorage.setItem('monthlySalary',  salary);
+        localStorage.setItem('monthlyOther',   misc);
+        localStorage.setItem('startupCost',    startup);
 
-        function save() {
-            // 获取并校验输入数据
-            const rent = Number(document.getElementById('rent').value) || 0;
-            const salary = Number(document.getElementById('salary').value) || 0;
-            const misc = Number(document.getElementById('misc').value) || 0;
-            const startup = Number(document.getElementById('startup').value) || 0;
-            
-            // 1. 存储月度原子数据 (用于 main.html 的老板锁修改)
-            localStorage.setItem('monthlyRent', rent);
-            localStorage.setItem('monthlySalary', salary);
-            localStorage.setItem('monthlyOther', misc);
-            
-            // 2. 存储初始投入 (用于回本倒计时预测)
-            localStorage.setItem('startupCost', startup);
-            
-            // 3. 计算并存储核心日均成本
-            const daily = ((rent + salary + misc) / 30).toFixed(2);
-            localStorage.setItem('dailyCost', daily);
-            
-            // 4. 行业与环境初始化
-            localStorage.setItem('industry_type', selectedIndustry);
-            localStorage.setItem('hasSetup', 'true');
-            localStorage.setItem('todayRev', '0');
-            localStorage.setItem('last_active_date', new Date().toLocaleDateString());
-            
-            // 5. 跳转
-            window.location.href = 'main.html';
-        }
-    </script>
-    <script src="i18n-engine.js"></script>
+        const daily = ((rent + salary + misc) / 30).toFixed(2);
+        localStorage.setItem('dailyCost', daily);
+        localStorage.setItem('industry_type', selectedIndustry);
+        localStorage.setItem('hasSetup', 'true');
+        localStorage.setItem('todayRev', '0');
+        localStorage.setItem('last_active_date', new Date().toLocaleDateString());
 
+        window.location.href = 'main.html';
+    }
+</script>
+<script src="i18n-engine.js"></script>
 </body>
 </html>
