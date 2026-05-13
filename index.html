@@ -5,75 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>水獭主理人引导中...</title>
+    <title>主理人工作台</title>
     <style>
-        :root { --primary-pink: #ff85a2; }
-        body { 
-            background: #fff9fa; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: 'PingFang SC', sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #8B1A2F;
+            --gold: #C9A84C;
+            --bg-dark: #1A0A0D;
         }
-        /* 一个简单的加载动画，保持视觉一致性 */
-        .loading-container { text-align: center; }
-        .otter-icon { font-size: 50px; animation: bounce 1s infinite; }
-        .loading-text { color: var(--primary-pink); font-size: 14px; margin-top: 10px; font-weight: bold; }
-        
-        @keyframes bounce {
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'PingFang SC', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 背景纹理 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(139,26,47,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(92,51,23,0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .loading-container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 金色装饰线 */
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .ornament-line {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold));
+        }
+        .ornament-line.right {
+            background: linear-gradient(90deg, var(--gold), transparent);
+        }
+        .ornament-diamond {
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            transform: rotate(45deg);
+        }
+
+        .brand-mark {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+
+        .otter-icon {
+            font-size: 44px;
+            animation: float 2.5s ease-in-out infinite;
+            display: block;
+            margin-bottom: 28px;
+        }
+
+        .loading-bar-wrap {
+            width: 160px;
+            height: 1px;
+            background: rgba(201,168,76,0.2);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .loading-bar {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            animation: sweep 1.6s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-family: 'PingFang SC', sans-serif;
+            color: rgba(201,168,76,0.6);
+            font-size: 11px;
+            letter-spacing: 3px;
+            margin-top: 16px;
+        }
+
+        @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
     </style>
 </head>
 <body>
-
 <div class="loading-container">
-    <div class="otter-icon">🦦</div>
-    <div class="loading-text">正在同步能量基石...</div>
+    <div class="brand-mark">Prestige Station</div>
+    <div class="ornament">
+        <div class="ornament-line"></div>
+        <div class="ornament-diamond"></div>
+        <div class="ornament-line right"></div>
+    </div>
+    <span class="otter-icon">🦦</span>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+    <div class="loading-text">正在同步数据</div>
 </div>
 
 <script>
-    // ✅ SW 注册 + 更新检查（放在最前面）
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-            reg.update();
-        });
+        navigator.serviceWorker.register('/sw.js').then(reg => { reg.update(); });
     }
 </script>
 <script>
-    // 路由守卫：检查是否激活
-(function securityCheck() {
-    const isActivated = localStorage.getItem('isActivated');
-    if (isActivated !== 'true') {
-        // 如果没激活，强制重定向回大门，且不让用户通过“返回”跳过
-        window.location.replace('gate.html');
-    }
-})();
+    (function securityCheck() {
+        const isActivated = localStorage.getItem('isActivated');
+        if (isActivated !== 'true') { window.location.replace('gate.html'); }
+    })();
 
-    /**
-     * 核心路由逻辑：
-     * 1. 检查 localStorage 是否有完成初始化设置的标记
-     * 2. 使用 window.location.replace 防止用户点击“返回”时陷入死循环
-     */
     (function route() {
-        // 延迟 300ms 保证视觉上有个“启动”的感觉，也可以直接执行
         setTimeout(() => {
             const hasSetup = localStorage.getItem('hasSetup');
-
             if (hasSetup === 'true') {
-                // 已完成设置，直接进入主操作页
                 window.location.replace('main.html');
             } else {
-                // 新用户或清除了缓存，进入设置页
                 window.location.replace('setup.html');
             }
         }, 300);
     })();
 </script>
-
- 
 </body>
 </html>
