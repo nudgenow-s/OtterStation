@@ -5,42 +5,478 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>水獭能量站</title>
+    <title>主理人工作台</title>
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary-pink: #ff85a2; --bg: #fff9fa; --success-green: #58cc02; }
-        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .app-container { width: 340px; background: #fff; border-radius: 35px; box-shadow: 0 20px 40px rgba(255,133,162,0.1); padding: 25px; text-align: center; position: relative; }
-        .top-nav { display: flex; justify-content: space-between; font-size: 11px; color: #ccc; margin-bottom: 10px; }
-        #emoji-status { font-size: 90px; margin: 15px 0; transition: 0.5s; cursor: pointer; }
-        .health-score { font-size: 50px; font-weight: bold; color: var(--primary-pink); line-height: 1; }
-        .health-label { color: #999; font-size: 12px; margin-top: 5px; }
-        .input-card { background: #fef0f3; padding: 20px; border-radius: 25px; margin: 20px 0; }
-        input { border: none; background: transparent; font-size: 28px; width: 100%; text-align: center; color: var(--primary-pink); border-bottom: 2px solid #ffdae3; outline: none; }
-        .btn-main { background: var(--primary-pink); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; box-shadow: 0 6px #ffdae3; transition: 0.1s; }
-        .btn-main:active { transform: translateY(2px); box-shadow: 0 3px #ffdae3; }
-        .badge-wall { display: flex; justify-content: center; gap: 12px; margin-top: 20px; font-size: 22px; background: #fcfcfc; padding: 10px; border-radius: 15px; }
-        .badge-wall span { filter: grayscale(1); opacity: 0.15; }
-        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.1); }
-        #profit-tip { font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: bold; height: 18px; }
-        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center; }
-        #report-modal { background:white; width:100%; height:100%; padding:25px; box-sizing:border-box; overflow-y:auto; animation: slideUp 0.4s ease; display:none; position:fixed; top:0; left:0; z-index:2500; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #eee; font-size: 14px; }
-        .forecast-card { background: #f8f9ff; padding: 15px; border-radius: 20px; margin: 15px 0; border-left: 5px solid #4facfe; text-align: left; }
-        .roi-bar-container { height: 10px; background: #eee; border-radius: 5px; margin: 10px 0; overflow: hidden; }
-        #roi-progress { height: 100%; background: var(--success-green); width: 0%; transition: 1s; }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap');
 
-        /* ===== 补记日历弹窗样式 ===== */
-        #supplement-modal .modal-box {
-            background: white;
-            padding: 24px 20px 20px;
-            border-radius: 28px;
-            width: 320px;
-            box-shadow: 0 20px 40px rgba(255,133,162,0.2);
-            animation: slideUp 0.35s ease;
+        :root {
+            --primary: #8B1A2F;
+            --primary-pink: #8B1A2F; /* legacy alias */
+            --gold: #C9A84C;
+            --gold-light: #E8D08A;
+            --gold-dim: rgba(201,168,76,0.35);
+            --bg-dark: #130A0C;
+            --bg-card: #1C0E12;
+            --bg-surface: rgba(255,255,255,0.035);
+            --bg-input: rgba(255,255,255,0.04);
+            --border: rgba(201,168,76,0.15);
+            --border-hover: rgba(201,168,76,0.38);
+            --text: rgba(255,255,255,0.88);
+            --text-muted: rgba(255,255,255,0.35);
+            --text-dim: rgba(201,168,76,0.45);
+            --success: #4CAF76;
+            --success-green: #4CAF76; /* legacy */
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px 0 40px;
+        }
+
+        /* Ambient glow */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 80% 45% at 50% -10%, rgba(139,26,47,0.28) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 40% at 85% 100%, rgba(92,51,23,0.18) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== MAIN CARD ===== */
+        .app-container {
+            width: 340px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 1px rgba(201,168,76,0.05),
+                0 32px 80px rgba(0,0,0,0.65),
+                inset 0 1px 0 rgba(201,168,76,0.09);
+            padding: 0;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Top gold accent line */
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        /* ===== TOP NAV ===== */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 0;
+        }
+        #date-display {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 1.5px;
+        }
+        .nav-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .nav-btn {
+            font-size: 11px;
+            color: var(--text-dim);
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .nav-btn:hover { color: var(--gold); }
+        .nav-btn.accent { color: var(--gold); opacity: 0.8; }
+        .nav-btn.accent:hover { opacity: 1; }
+
+        /* ===== BRAND HEADER ===== */
+        .brand-header {
+            text-align: center;
+            padding: 16px 20px 0;
+        }
+        #industry-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 11px;
+            letter-spacing: 5px;
+            color: var(--gold);
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* ===== SCORE SECTION ===== */
+        .score-section {
+            text-align: center;
+            padding: 10px 20px 0;
+        }
+        #emoji-status {
+            font-size: 72px;
+            display: block;
+            margin: 8px 0 12px;
+            transition: 0.5s;
+            cursor: pointer;
+            filter: drop-shadow(0 4px 12px rgba(139,26,47,0.3));
+        }
+        .score-wrap {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 2px;
+        }
+        #health-score {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 56px;
+            font-weight: 300;
+            color: var(--gold-light);
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .health-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Thin divider */
+        .thin-rule {
+            margin: 18px 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+
+        /* ===== INPUT CARD ===== */
+        .input-card {
+            margin: 0 16px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 18px 16px;
+            position: relative;
+        }
+        .input-card-label {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .amount-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .currency-sign {
+            font-size: 22px;
+            color: var(--gold);
+            opacity: 0.5;
+            font-weight: 300;
+        }
+        input#revenue-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 30px;
+            font-weight: 300;
+            color: var(--gold-light);
+            outline: none;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+            transition: border-color 0.3s;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        input#revenue-input:focus { border-bottom-color: rgba(201,168,76,0.5); }
+        input#revenue-input::placeholder { color: rgba(201,168,76,0.2); font-size: 22px; }
+
+        #unit-tip {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+        #profit-tip {
+            font-size: 12px;
+            color: var(--success);
+            margin-top: 6px;
+            font-weight: 500;
+            height: 18px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== RECORD BUTTON ===== */
+        .btn-wrap { padding: 16px 16px; }
+        .btn-main {
+            background: linear-gradient(135deg, #8B1A2F 0%, #6B1220 55%, #8B2A1A 100%);
+            color: var(--gold-light);
+            border: 1px solid rgba(201,168,76,0.28);
+            padding: 17px;
+            border-radius: 50px;
+            font-size: 15px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-main::before {
+            content: '';
+            position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.12), transparent);
+            transition: left 0.45s;
+        }
+        .btn-main:hover::before { left: 100%; }
+        .btn-main:hover {
+            border-color: rgba(201,168,76,0.5);
+            box-shadow: 0 8px 28px rgba(139,26,47,0.4), 0 0 0 1px rgba(201,168,76,0.12);
+            transform: translateY(-1px);
+        }
+        .btn-main:active { transform: translateY(1px); box-shadow: none; }
+
+        /* ===== BADGE WALL ===== */
+        .badge-section {
+            margin: 0 16px 20px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 10px;
+        }
+        .badge-wall {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            font-size: 20px;
+        }
+        .badge-wall span { filter: grayscale(1); opacity: 0.12; transition: all 0.3s; }
+        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.15) !important; filter: drop-shadow(0 2px 8px rgba(201,168,76,0.4)) !important; }
+
+        /* ===== MOTIVATION MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px 24px;
+            width: 300px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201,168,76,0.1);
+            animation: slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+        }
+        .modal-card::before {
+            content: '';
+            position: absolute; top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 60px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: var(--gold);
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+        .modal-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 13px;
+            border-radius: 50px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: var(--border-hover); color: var(--text); }
+
+        /* ===== REPORT MODAL ===== */
+        #report-modal {
+            background: var(--bg-card);
+            width: 100%; height: 100%;
+            padding: 28px 22px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            animation: slideUp 0.4s ease;
+            display: none;
+            position: fixed; top: 0; left: 0;
+            z-index: 2500;
+        }
+        #report-modal::-webkit-scrollbar { width: 3px; }
+        #report-modal::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .report-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--gold-light);
+            letter-spacing: 2px;
+        }
+        .close-btn {
+            border: none;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            font-size: 20px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .close-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+        .forecast-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 16px 18px;
+            border-radius: 18px;
+            margin: 12px 0;
+            border-left: 3px solid var(--gold);
+            text-align: left;
+        }
+        .forecast-card.blue-accent { border-left-color: #4facfe; }
+        .forecast-card-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .roi-bar-container {
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        #roi-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 2px;
+        }
+        #roi-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        #forecast-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 300;
+            color: #7EC8E3;
+            margin: 6px 0 4px;
+            letter-spacing: 1px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(201,168,76,0.08);
+            font-size: 13px;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { color: var(--text-muted); font-size: 12px; letter-spacing: 0.5px; }
+        .history-val { color: var(--gold-light); font-weight: 500; }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin: 20px 0 10px;
+        }
+
+        /* ===== COST MODAL ===== */
+        #cost-detail-modal .modal-card {
+            width: 300px;
+        }
+        #cost-detail-modal input[type="number"] {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: var(--gold-light);
+            outline: none;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+        #cost-detail-modal input[type="number"]:focus { border-color: var(--border-hover); }
+        #cost-detail-modal input[type="number"]::placeholder { color: rgba(201,168,76,0.2); font-size: 13px; }
+
+        /* ===== SUPPLEMENT / CALENDAR MODAL ===== */
+        #supplement-modal .modal-card {
+            width: 320px;
+            max-height: 88vh;
+            overflow-y: auto;
+        }
+        #supplement-modal .modal-card::-webkit-scrollbar { width: 2px; }
+        #supplement-modal .modal-card::-webkit-scrollbar-thumb { background: var(--gold-dim); }
+
         .cal-header {
             display: flex;
             justify-content: space-between;
@@ -48,183 +484,206 @@
             margin-bottom: 14px;
         }
         .cal-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--primary-pink);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold);
+            letter-spacing: 1px;
         }
         .cal-nav-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-size: 16px;
             cursor: pointer;
-            color: var(--primary-pink);
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 8px;
-            transition: background 0.15s;
+            transition: all 0.15s;
         }
-        .cal-nav-btn:hover { background: #fef0f3; }
+        .cal-nav-btn:hover { background: rgba(201,168,76,0.08); border-color: var(--border-hover); }
+
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
             text-align: center;
         }
-        .cal-weekday {
-            font-size: 10px;
-            color: #bbb;
-            padding: 4px 0;
-        }
+        .cal-weekday { font-size: 9px; color: var(--text-muted); padding: 4px 0; letter-spacing: 0.5px; }
         .cal-day {
-            font-size: 13px;
-            padding: 7px 2px;
-            border-radius: 50%;
+            font-size: 12px;
+            padding: 8px 2px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.15s, color 0.15s;
-            color: #333;
+            transition: all 0.15s;
+            color: var(--text-muted);
         }
-        .cal-day:hover { background: #fef0f3; color: var(--primary-pink); }
-        .cal-day.today {
-            background: #ffdae3;
-            color: var(--primary-pink);
-            font-weight: bold;
-        }
-        .cal-day.has-record {
-            border-bottom: 2px solid var(--primary-pink);
-        }
-        .cal-day.selected {
-            background: var(--primary-pink);
-            color: white;
-        }
+        .cal-day:hover { background: rgba(201,168,76,0.08); color: var(--gold); }
+        .cal-day.today { background: rgba(139,26,47,0.3); color: var(--gold-light); font-weight: 600; border: 1px solid rgba(139,26,47,0.5); }
+        .cal-day.has-record { border-bottom: 2px solid var(--gold); }
+        .cal-day.selected { background: var(--primary); color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); }
         .cal-day.empty { cursor: default; }
-        .cal-day.future { color: #ddd; cursor: default; pointer-events: none; }
+        .cal-day.future { color: rgba(255,255,255,0.08); cursor: default; pointer-events: none; }
 
-        /* 补记金额输入区 */
         #supplement-amount-area {
             display: none;
             margin-top: 18px;
-            border-top: 1px dotted #ffdae3;
+            border-top: 1px solid var(--border);
             padding-top: 16px;
         }
-        #supplement-date-label {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 10px;
-        }
+        #supplement-date-label { font-size: 11px; color: var(--text-dim); margin-bottom: 10px; letter-spacing: 1px; }
         #supplement-input {
             border: none;
-            border-bottom: 2px solid #ffdae3;
+            border-bottom: 1px solid var(--border);
             font-size: 26px;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
             width: 100%;
             text-align: center;
-            color: var(--primary-pink);
+            color: var(--gold-light);
             outline: none;
             background: transparent;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+            transition: border-color 0.3s;
         }
+        #supplement-input:focus { border-bottom-color: rgba(201,168,76,0.5); }
+        #supplement-input::placeholder { color: rgba(201,168,76,0.2); font-size: 18px; }
+
+        /* Divider util */
+        .divider { display: flex; align-items: center; gap: 10px; margin: 8px 0 16px; }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-diamond { width: 4px; height: 4px; background: var(--gold); transform: rotate(45deg); opacity: 0.4; }
     </style>
 </head>
 <body>
 
-<!-- ===== 每日激励弹窗 ===== -->
+<!-- ===== MOTIVATION MODAL ===== -->
 <div id="motivation-modal" class="modal-overlay" style="z-index:3000;">
-  <div style="background:white;padding:22px;border-radius:26px;width:300px;box-shadow:0 20px 40px rgba(255,133,162,0.2);animation: slideUp 0.35s ease;">
-    <div style="font-size:16px;margin-bottom:12px;color:#ff85a2;font-weight:bold;">🦦 今日行动建议</div>
-    <div id="motivation-text" style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;"></div>
-    <button class="btn-main" style="font-size:14px;margin-bottom:10px;" onclick="jumpToRecord()">✍️ 直接记一笔</button>
-    <button class="btn-main" style="background:#eee;color:#666;font-size:13px;box-shadow:none;" onclick="closeMotivation()">我知道了</button>
-  </div>
+    <div class="modal-card">
+        <div class="modal-title">🦦 今日行动建议</div>
+        <div id="motivation-text" class="modal-text"></div>
+        <button class="btn-main" style="font-size:13px;" onclick="jumpToRecord()">✍️ 直接记一笔</button>
+        <button class="btn-secondary" onclick="closeMotivation()">知道了</button>
+    </div>
 </div>
 
-<!-- ===== 主界面 ===== -->
+<!-- ===== MAIN APP ===== -->
 <div class="app-container">
+
     <div class="top-nav">
         <span id="date-display"></span>
-        <div>
-            <span onclick="StellarockDataHub.exportData()" style="cursor:pointer; margin-right:8px;color:var(--primary-pink);font-weight:bold;">📤备份</span>
-            <span onclick="openSupplementCalendar()" style="cursor:pointer; margin-right:8px;color:var(--primary-pink);font-weight:bold;">📅 补记</span>
-            <span onclick="validateBoss('cost')" style="cursor:pointer; margin-right:8px;">🔒 成本</span>
-            <span onclick="validateBoss('report')" style="cursor:pointer">📊 报表</span>
+        <div class="nav-actions">
+            <span class="nav-btn accent" onclick="StellarockDataHub.exportData()">📤 备份</span>
+            <span class="nav-btn accent" onclick="openSupplementCalendar()">📅 补记</span>
+            <span class="nav-btn" onclick="validateBoss('cost')">🔒 成本</span>
+            <span class="nav-btn" onclick="validateBoss('report')">📊 报表</span>
         </div>
     </div>
-    <div id="industry-logo" style="font-size: 13px; color: var(--primary-pink); font-weight: bold;">🦦 STATION</div>
-    <div id="health-score" class="health-score">0%</div>
-    <div class="health-label">今日目标达成率</div>
-    <div id="emoji-status">😴</div>
+
+    <div class="brand-header">
+        <div id="industry-logo">🦦 PRESTIGE STATION</div>
+    </div>
+
+    <div class="score-section">
+        <span id="emoji-status">😴</span>
+        <div class="score-wrap">
+            <div id="health-score" class="health-score" style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--gold-light);">0%</div>
+        </div>
+        <div class="health-label">今日目标达成率</div>
+    </div>
+
+    <div class="thin-rule"></div>
+
     <div class="input-card">
-        <input type="number" id="revenue-input" inputmode="decimal" placeholder="¥ 0.00">
-        <div id="unit-tip" style="font-size: 12px; color: #ccabb3; margin-top: 10px;">记录成交金额</div>
+        <div class="input-card-label">记录成交金额</div>
+        <div class="amount-row">
+            <span class="currency-sign">¥</span>
+            <input type="number" id="revenue-input" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div id="unit-tip" style="font-size:11px;color:var(--text-muted);margin-top:10px;letter-spacing:0.5px;">输入本次成交金额</div>
         <div id="profit-tip"></div>
     </div>
-    <button class="btn-main" onclick="record()">记录成交</button>
-    <div class="badge-wall" id="badges">
-        <span id="badge-first_blood">💰</span>
-        <span id="badge-profitable_king">👑</span>
-        <span id="badge-smart_buyer">🦊</span>
-        <span id="badge-anti_procrastination">🔥</span>
-        <a href="https://nudgenow-s.github.io/Otter-miner/"><span id="badge-otterminer">🦦</span></a>
-        <a href="https://nudgenow-s.github.io/Gaaame/"><span id="badge-game">🎮</span></a>
-    </div>
-</div>
 
-<!-- ===== 报表弹窗 ===== -->
-<div id="report-modal">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="color:var(--primary-pink); margin:0;">数据复盘</h2>
-        <button onclick="toggleReport()" style="border:none; background:none; font-size:28px;">×</button>
+    <div class="btn-wrap">
+        <button class="btn-main" onclick="record()">记录成交</button>
     </div>
-    <div class="forecast-card" style="border-left-color: var(--success-green);">
-        <div style="font-size: 11px; color: #666; font-weight: bold;">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
-        <div class="roi-bar-container"><div id="roi-progress"></div></div>
-        <div id="roi-desc" style="font-size: 10px; color: #999; line-height: 1.5;">累计纯利 ¥0，还需 ¥0 回本</div>
-    </div>
-    <div class="forecast-card">
-        <div style="font-size: 11px; color: #666; font-weight: bold;">🔮 智能月度利润预测<span id="trend-icon"></span></div>
-        <div id="forecast-val" style="font-size: 20px; color: #4facfe; font-weight: bold; margin-top: 5px;">计算中...</div>
-        <div style="font-size: 10px; color: #999; margin-top: 3px;">基于近7日表现预测本月净盈余</div>
-    </div>
-    <canvas id="trendChart" style="margin:20px 0;"></canvas>
-    <div id="history-list"></div>
-    <button class="btn-main" style="margin-top:20px; font-size:14px;" onclick="exportCSV()">导出全维度 CSV 报表</button>
-</div>
 
-<!-- ===== 成本弹窗 ===== -->
-<div id="cost-detail-modal" class="modal-overlay">
-    <div style="background:white; padding:25px; border-radius:30px; width:300px;">
-        <h3 style="margin:0 0 15px; color:var(--primary-pink);">⚙️ 成本细项微调</h3>
-        <input type="number" id="edit-rent" placeholder="月房租"><br>
-        <input type="number" id="edit-salary" placeholder="月工资"><br>
-        <input type="number" id="edit-other" placeholder="月杂费"><br>
-        <input type="number" id="edit-startup" placeholder="初始总投入"><br>
-        <button class="btn-main" onclick="saveCostDetails()">保存</button>
-        <button class="btn-main" style="background:#ccc; margin-top:10px;" onclick="closeCostModal()">取消</button>
-    </div>
-</div>
-
-<!-- ===== 补记日历弹窗 ===== -->
-<div id="supplement-modal" class="modal-overlay">
-    <div class="modal-box">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div style="font-size:15px;font-weight:bold;color:var(--primary-pink);">📅 补记</div>
-            <button onclick="closeSupplementCalendar()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#ccc;">×</button>
+    <div class="badge-section">
+        <div class="badge-wall" id="badges">
+            <span id="badge-first_blood">💰</span>
+            <span id="badge-profitable_king">👑</span>
+            <span id="badge-smart_buyer">🦊</span>
+            <span id="badge-anti_procrastination">🔥</span>
+            <a href="https://nudgenow-s.github.io/Otter-miner/"><span id="badge-otterminer">🦦</span></a>
+            <a href="https://nudgenow-s.github.io/Gaaame/"><span id="badge-game">🎮</span></a>
         </div>
-        <div style="font-size:11px;color:#bbb;margin-bottom:12px;" id="supplement-hint">选择需要补记的日期</div>
+    </div>
 
-        <!-- 日历头部 -->
+</div>
+
+<!-- ===== REPORT MODAL ===== -->
+<div id="report-modal">
+    <div class="report-header">
+        <div class="report-title">数据复盘</div>
+        <button class="close-btn" onclick="toggleReport()">×</button>
+    </div>
+
+    <div class="forecast-card">
+        <div class="forecast-card-label">💰 回本进度 · 总投入 ¥<span id="roi-total">0</span></div>
+        <div class="roi-bar-container"><div id="roi-progress"></div></div>
+        <div id="roi-desc" style="font-size:11px;color:var(--text-muted);line-height:1.7;">累计纯利 ¥0，还需 ¥0 回本</div>
+    </div>
+
+    <div class="forecast-card blue-accent">
+        <div class="forecast-card-label">🔮 智能月度利润预测 <span id="trend-icon"></span></div>
+        <div id="forecast-val">计算中...</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">基于近7日表现预测本月净盈余</div>
+    </div>
+
+    <canvas id="trendChart" style="margin:20px 0;"></canvas>
+
+    <div class="section-label">历史账单</div>
+    <div id="history-list"></div>
+
+    <div style="padding-top:20px;">
+        <button class="btn-main" style="font-size:13px;" onclick="exportCSV()">导出全维度 CSV 报表</button>
+    </div>
+</div>
+
+<!-- ===== COST MODAL ===== -->
+<div id="cost-detail-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-title" style="margin-bottom:16px;">⚙️ 成本细项调整</div>
+        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <input type="number" id="edit-rent"    placeholder="月房租">
+        <input type="number" id="edit-salary"  placeholder="月工资">
+        <input type="number" id="edit-other"   placeholder="月杂费">
+        <input type="number" id="edit-startup" placeholder="初始总投入">
+        <button class="btn-main" onclick="saveCostDetails()" style="margin-top:4px;">保存</button>
+        <button class="btn-secondary" onclick="closeCostModal()">取消</button>
+    </div>
+</div>
+
+<!-- ===== SUPPLEMENT CALENDAR MODAL ===== -->
+<div id="supplement-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div class="modal-title" style="font-size:15px;margin:0;">📅 补记</div>
+            <button onclick="closeSupplementCalendar()" style="border:none;background:none;font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+        </div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:14px;letter-spacing:1px;" id="supplement-hint">选择需要补记的日期</div>
+
         <div class="cal-header">
             <button class="cal-nav-btn" onclick="calChangeMonth(-1)">‹</button>
             <div class="cal-title" id="cal-month-title"></div>
             <button class="cal-nav-btn" onclick="calChangeMonth(1)">›</button>
         </div>
 
-        <!-- 日历格 -->
         <div class="cal-grid" id="cal-weekdays"></div>
         <div class="cal-grid" id="cal-days"></div>
 
-        <!-- 金额输入区（选完日期后出现） -->
         <div id="supplement-amount-area">
             <div id="supplement-date-label"></div>
             <input type="number" id="supplement-input" inputmode="decimal" placeholder="¥ 当日总营收">
-            <button class="btn-main" style="font-size:15px;" onclick="saveSupplementRecord()">确认补记</button>
+            <button class="btn-main" style="font-size:14px;" onclick="saveSupplementRecord()">确认补记</button>
         </div>
     </div>
 </div>
@@ -232,15 +691,13 @@
 <script src="accounting.js"></script>
 <script src="achievement.js"></script>
 <script>
-    // 路由守卫
+    // ===== 路由守卫 =====
     (function securityCheck() {
-        const isActivated = localStorage.getItem('isActivated');
-        if (isActivated !== 'true') { window.location.replace('gate.html'); }
+        if (localStorage.getItem('isActivated') !== 'true') { window.location.replace('gate.html'); }
     })();
-
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
 
-    // 跨天自动重置
+    // ===== 跨天自动重置 =====
     (function resetNewDay(){
         const today = new Date().toLocaleDateString();
         const lastDate = localStorage.getItem('lastVisitDate');
@@ -248,52 +705,45 @@
             const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toLocaleDateString();
-            AccountingEngine.saveDailySnapshot(yesterdayRev, yesterdayStr);
+            AccountingEngine.saveDailySnapshot(yesterdayRev, yesterday.toLocaleDateString());
             localStorage.setItem('todayRev', '0');
             localStorage.setItem('todayRecordCount', '0');
             localStorage.removeItem('earned_badges');
             try {
                 let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
-                stats.isDailyGoalMet = false;
-                stats.totalSales = 0;
-                stats.recordCount = 0;
+                stats.isDailyGoalMet = false; stats.totalSales = 0; stats.recordCount = 0;
                 localStorage.setItem('user_stats', JSON.stringify(stats));
             } catch(e) {}
         }
         localStorage.setItem('lastVisitDate', today);
     })();
 
-    // ====== 每日激励 ======
+    // ===== 每日激励 =====
     function getYesterdayProfit(){
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toLocaleDateString();
-        if(history[yesterdayStr]) return parseFloat(history[yesterdayStr].profit) || 0;
-        const keys = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
-        if(keys.length === 0) return null;
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        const yStr = yesterday.toLocaleDateString();
+        if(history[yStr]) return parseFloat(history[yStr].profit) || 0;
+        const keys = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
         const todayStr = new Date().toLocaleDateString();
-        const historyKeys = keys.filter(k => k !== todayStr);
-        if(historyKeys.length === 0) return null;
-        const lastKey = historyKeys[historyKeys.length - 1];
-        return parseFloat(history[lastKey].profit) || 0;
+        const hKeys = keys.filter(k=>k!==todayStr);
+        if(!hKeys.length) return null;
+        return parseFloat(history[hKeys[hKeys.length-1]].profit) || 0;
     }
 
     function buildMotivation(){
         const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
         const yProfit = getYesterdayProfit();
-        if(!daily) return `还没设定成本哦～  \n先点右上角 🔒 成本  \n我才能帮你算「今日达成率」🧮`;
-        if(yProfit === null) return `今天目标：  \n👉 ¥${daily.toFixed(2)} = 已打平成本  \n再多一块，都是你抢来的利润 💰`;
-        if(yProfit < 0) return `昨天小亏 ¥${Math.abs(yProfit).toFixed(2)}  \n👉 今天只要比昨天多【1笔】就是反杀  \n不要完美，只要开始 🔥`;
-        return `昨天已盈利 ¥${yProfit.toFixed(2)} 🎉  \n👉 今天核心：保持节奏  \n👉 先完成 ¥${daily.toFixed(2)} 基础线`;
+        if(!daily) return `还没设定成本～\n点右上角 🔒 成本 完成配置\n系统才能计算您的达成率 🧮`;
+        if(yProfit === null) return `今日目标：\n👉 ¥${daily.toFixed(2)} = 打平成本\n超出的每一分，都是您的净利润 💰`;
+        if(yProfit < 0) return `昨日小亏 ¥${Math.abs(yProfit).toFixed(2)}\n👉 今天只需多一笔就是反转\n不必完美，只需开始 🔥`;
+        return `昨日盈利 ¥${yProfit.toFixed(2)} 🎉\n👉 今天保持节奏\n基础线：¥${daily.toFixed(2)}`;
     }
 
     (function dailyMotivationUI(){
         const today = new Date().toLocaleDateString();
         if(localStorage.getItem('motivationShown') === today) return;
-        const text = buildMotivation();
-        document.getElementById('motivation-text').innerText = text;
+        document.getElementById('motivation-text').innerText = buildMotivation();
         setTimeout(()=>{ document.getElementById('motivation-modal').style.display = 'flex'; }, 600);
         localStorage.setItem('motivationShown', today);
     })();
@@ -301,81 +751,75 @@
     function closeMotivation(){ document.getElementById('motivation-modal').style.display = 'none'; }
     function jumpToRecord(){
         closeMotivation();
-        document.getElementById('revenue-input').focus();
-        document.getElementById('revenue-input').style.transform = 'scale(1.05)';
-        setTimeout(()=>{ document.getElementById('revenue-input').style.transform = ''; }, 300);
+        const inp = document.getElementById('revenue-input');
+        inp.focus();
+        inp.style.transform = 'scale(1.03)';
+        setTimeout(()=>{ inp.style.transform = ''; }, 300);
     }
 
+    // ===== Boss Validate =====
     function validateBoss(target) {
         if (prompt("请输入密码：") === "0000") {
             if (target === 'cost') {
-                document.getElementById('edit-rent').value = localStorage.getItem('monthlyRent');
-                document.getElementById('edit-salary').value = localStorage.getItem('monthlySalary');
-                document.getElementById('edit-other').value = localStorage.getItem('monthlyOther');
+                document.getElementById('edit-rent').value    = localStorage.getItem('monthlyRent');
+                document.getElementById('edit-salary').value  = localStorage.getItem('monthlySalary');
+                document.getElementById('edit-other').value   = localStorage.getItem('monthlyOther');
                 document.getElementById('edit-startup').value = localStorage.getItem('startupCost');
                 document.getElementById('cost-detail-modal').style.display = 'flex';
-            } else toggleReport();
+            } else { toggleReport(); }
         }
     }
 
+    // ===== Data Export =====
     const StellarockDataHub = {
         exportData: function() {
             try {
                 const allData = {};
                 for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    allData[key] = localStorage.getItem(key);
+                    const key = localStorage.key(i); allData[key] = localStorage.getItem(key);
                 }
-                if (Object.keys(allData).length === 0) { alert("🦦 财库空空，先记几笔再备份吧！"); return; }
-                const backupDate = new Date().toISOString().slice(0, 10);
+                if (!Object.keys(allData).length) { alert("财库暂无数据，先记几笔再备份。"); return; }
+                const backupDate = new Date().toISOString().slice(0,10);
                 const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Stellarock_Vault_${backupDate}.json`;
-                a.click();
+                const a = document.createElement('a'); a.href = url;
+                a.download = `Stellarock_Vault_${backupDate}.json`; a.click();
                 URL.revokeObjectURL(url);
-                alert("🦦 备份成功！请妥善保存该 JSON 文件。");
-            } catch (e) { alert("❌ 备份失败，请检查浏览器权限。"); }
+                alert("备份成功！请妥善保存该 JSON 文件。");
+            } catch(e) { alert("备份失败，请检查浏览器权限。"); }
         }
     };
 
+    // ===== Cost Save =====
     function saveCostDetails() {
         const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
         const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
         const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         Object.keys(history).forEach(date => {
-            if (!history[date].costSnapshot) {
-                history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
-            }
+            if (!history[date].costSnapshot) history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
         });
-        const r = parseFloat(document.getElementById('edit-rent').value) || 0;
-        const s = parseFloat(document.getElementById('edit-salary').value) || 0;
-        const o = parseFloat(document.getElementById('edit-other').value) || 0;
+        const r  = parseFloat(document.getElementById('edit-rent').value)    || 0;
+        const s  = parseFloat(document.getElementById('edit-salary').value)  || 0;
+        const o  = parseFloat(document.getElementById('edit-other').value)   || 0;
         const st = parseFloat(document.getElementById('edit-startup').value) || 0;
         const newDailyCost = (r + s + o) / 30;
-        const newR = (r / 30).toFixed(2);
-        const newS = (s / 30).toFixed(2);
-        const newO = (o / 30).toFixed(2);
         const today = new Date().toLocaleDateString();
         if (history[today]) {
             const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            history[today].costSnapshot = { rent: newR, salary: newS, other: newO };
+            history[today].costSnapshot = { rent: (r/30).toFixed(2), salary: (s/30).toFixed(2), other: (o/30).toFixed(2) };
             history[today].profit = (todayRev - newDailyCost).toFixed(2);
             history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
         }
         localStorage.setItem('revenue_history', JSON.stringify(history));
-        localStorage.setItem('monthlyRent', r);
-        localStorage.setItem('monthlySalary', s);
-        localStorage.setItem('monthlyOther', o);
-        localStorage.setItem('startupCost', st);
+        localStorage.setItem('monthlyRent', r); localStorage.setItem('monthlySalary', s);
+        localStorage.setItem('monthlyOther', o); localStorage.setItem('startupCost', st);
         localStorage.setItem('dailyCost', newDailyCost.toFixed(2));
         location.reload();
     }
-
     function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
 
+    // ===== Record =====
     function record() {
         const input = document.getElementById('revenue-input');
         const val = parseFloat(input.value);
@@ -383,26 +827,22 @@
             let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
             rev += val;
             localStorage.setItem('todayRev', rev);
-            const result = AccountingEngine.calculateProfit(val);
+            AccountingEngine.calculateProfit(val);
             AccountingEngine.saveDailySnapshot(rev);
-            try {
-                if (typeof AchievementEngine !== 'undefined') { AchievementEngine.check(val); }
-                else { console.error("勋章引擎尚未加载"); }
-            } catch (e) { console.error("勋章判定执行出错:", e); }
+            try { if (typeof AchievementEngine !== 'undefined') AchievementEngine.check(val); } catch(e) {}
             const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
             const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
             let tip = "";
-            if (todayRev === 0) tip = "";
-            else if (todayRev < dailyCost) { const gap = dailyCost - todayRev; tip = `⏳ 距离打平还差 ¥${gap.toFixed(2)}`; }
-            else if (todayRev === dailyCost) tip = "🎯 已打平成本！从现在开始都是利润";
-            else { const net = todayRev - dailyCost; tip = `✨ 纯赚 ¥${net.toFixed(2)}`; }
+            if (todayRev > 0 && todayRev < dailyCost) { tip = `⏳ 距离打平还差 ¥${(dailyCost-todayRev).toFixed(2)}`; }
+            else if (todayRev >= dailyCost && dailyCost > 0) { tip = `✨ 纯盈 ¥${(todayRev-dailyCost).toFixed(2)}`; }
             document.getElementById('profit-tip').innerText = tip;
-            setTimeout(() => { document.getElementById('profit-tip').innerText = ""; }, 3000);
+            setTimeout(()=>{ document.getElementById('profit-tip').innerText = ""; }, 3500);
             input.value = '';
             render();
         }
     }
 
+    // ===== Report =====
     function toggleReport() {
         const modal = document.getElementById('report-modal');
         const isOpening = modal.style.display !== 'block';
@@ -413,68 +853,61 @@
     function calculateForecast() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         const dates = Object.keys(history).sort();
-        if (dates.length === 0) return;
+        if (!dates.length) return;
         const now = new Date();
-        const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const currentDay = now.getDate();
-        const remainingDays = totalDaysInMonth - currentDay;
-        let currentMonthProfit = 0;
-        let last7DaysProfits = [];
+        const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+        const remainingDays = totalDaysInMonth - now.getDate();
+        let currentMonthProfit = 0, last7 = [];
         dates.forEach(d => {
-            const h = history[d];
-            const p = parseFloat(h.profit) || 0;
-            if (new Date(d).getMonth() === now.getMonth() && new Date(d).getFullYear() === now.getFullYear()) { currentMonthProfit += p; }
-            last7DaysProfits.push(p);
+            const p = parseFloat(history[d].profit) || 0;
+            if (new Date(d).getMonth() === now.getMonth() && new Date(d).getFullYear() === now.getFullYear()) currentMonthProfit += p;
+            last7.push(p);
         });
-        const recentSample = last7DaysProfits.slice(-7);
-        const avgDailyInertia = recentSample.reduce((a, b) => a + b, 0) / (recentSample.length || 1);
-        const estimatedTotal = currentMonthProfit + (avgDailyInertia * remainingDays);
-        const forecastEl = document.getElementById('forecast-val');
-        forecastEl.innerText = `¥ ${estimatedTotal.toFixed(2)}`;
-        forecastEl.style.color = estimatedTotal > 0 ? "#4facfe" : "#ff85a2";
-        document.getElementById('trend-icon').innerText = avgDailyInertia > 0 ? "📈" : "📉";
-        calculateROI(avgDailyInertia);
+        const sample = last7.slice(-7);
+        const avg = sample.reduce((a,b)=>a+b,0) / (sample.length||1);
+        const est = currentMonthProfit + avg * remainingDays;
+        const el = document.getElementById('forecast-val');
+        el.innerText = `¥ ${est.toFixed(2)}`;
+        el.style.color = est > 0 ? '#7EC8E3' : '#C07070';
+        document.getElementById('trend-icon').innerText = avg > 0 ? '📈' : '📉';
+        calculateROI(avg);
     }
 
     function calculateROI(avgDailyProfit) {
         const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
-        if (sortedDates.length === 0) {
+        const sortedDates = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
+        if (!sortedDates.length) {
             document.getElementById('roi-total').innerText = startup.toLocaleString();
             document.getElementById('roi-progress').style.width = '0%';
-            document.getElementById('roi-desc').innerHTML = '暂无数据';
+            document.getElementById('roi-desc').innerHTML = '暂无历史数据';
             return;
         }
-        const startDate = new Date(sortedDates[0]);
-        const endDate = new Date();
         let lastSnapshot = {
-            rent: parseFloat(localStorage.getItem('monthlyRent')) / 30 || 0,
+            rent:   parseFloat(localStorage.getItem('monthlyRent'))   / 30 || 0,
             salary: parseFloat(localStorage.getItem('monthlySalary')) / 30 || 0,
-            other: parseFloat(localStorage.getItem('monthlyOther')) / 30 || 0
+            other:  parseFloat(localStorage.getItem('monthlyOther'))  / 30 || 0
         };
         let cumulativeProfit = 0;
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toLocaleDateString();
-            const h = history[dateStr];
+        for (let d = new Date(sortedDates[0]); d <= new Date(); d.setDate(d.getDate()+1)) {
+            const ds = d.toLocaleDateString();
+            const h  = history[ds];
             if (h) {
                 if (h.costSnapshot) lastSnapshot = h.costSnapshot;
                 cumulativeProfit += parseFloat(h.profit) || 0;
             } else {
-                const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
-                cumulativeProfit -= dailyCost;
+                cumulativeProfit -= parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
             }
         }
-        const progress = startup > 0 ? Math.min((cumulativeProfit / startup) * 100, 100).toFixed(1) : 100;
-        const remainingCost = Math.max(startup - cumulativeProfit, 0);
+        const progress = startup > 0 ? Math.min((cumulativeProfit / startup * 100), 100).toFixed(1) : 100;
+        const remaining = Math.max(startup - cumulativeProfit, 0);
         let countdownText = "";
-        if (remainingCost <= 0) { countdownText = "🎉 恭喜！已完全回本"; }
-        else if (avgDailyProfit <= 0) { countdownText = "⏳ 需保持盈利以预测回本期"; }
+        if (remaining <= 0) { countdownText = "🎉 已完全回本"; }
+        else if (avgDailyProfit <= 0) { countdownText = "⏳ 保持盈利以预测回本日"; }
         else {
-            const daysToROI = Math.ceil(remainingCost / avgDailyProfit);
-            const roiDate = new Date();
-            roiDate.setDate(roiDate.getDate() + daysToROI);
-            countdownText = `预计还需 <strong>${daysToROI}</strong> 天回本 (约 ${roiDate.toLocaleDateString()})`;
+            const days = Math.ceil(remaining / avgDailyProfit);
+            const roiDate = new Date(); roiDate.setDate(roiDate.getDate() + days);
+            countdownText = `预计还需 <strong style="color:var(--gold-light)">${days}</strong> 天回本（约 ${roiDate.toLocaleDateString()}）`;
         }
         document.getElementById('roi-total').innerText = startup.toLocaleString();
         document.getElementById('roi-progress').style.width = progress + '%';
@@ -484,124 +917,125 @@
     function exportCSV() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        const sortedDates = Object.keys(history).sort((a, b) => new Date(a) - new Date(b));
-        if (sortedDates.length === 0) return;
-        const startDate = new Date(sortedDates[0]);
-        const endDate = new Date();
-        const allDates = [];
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) { allDates.push(new Date(d).toLocaleDateString()); }
-        let lastSnapshot = {
-            rent: (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2),
+        const sortedDates = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
+        if (!sortedDates.length) return;
+        let lastSnap = {
+            rent:   (parseFloat(localStorage.getItem('monthlyRent'))   / 30).toFixed(2),
             salary: (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2),
-            other: (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2)
+            other:  (parseFloat(localStorage.getItem('monthlyOther'))  / 30).toFixed(2)
         };
+        const allDates = [];
+        for (let d = new Date(sortedDates[0]); d <= new Date(); d.setDate(d.getDate()+1)) allDates.push(new Date(d).toLocaleDateString());
         allDates.forEach(d => {
             const h = history[d];
             if (h) {
-                const rev = parseFloat(h.revenue) || 0;
-                const net = parseFloat(h.profit) || 0;
-                const ach = h.achievement || 0;
-                const snap = h.costSnapshot || lastSnapshot;
-                if (h.costSnapshot) lastSnapshot = h.costSnapshot;
-                csv += `${d},${rev},${ach}%,${snap.rent},${snap.salary},${snap.other},${net}\n`;
+                const snap = h.costSnapshot || lastSnap;
+                if (h.costSnapshot) lastSnap = h.costSnapshot;
+                csv += `${d},${parseFloat(h.revenue)||0},${h.achievement||0}%,${snap.rent},${snap.salary},${snap.other},${parseFloat(h.profit)||0}\n`;
             } else {
-                const dailyCost = parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
-                csv += `${d},0,0%,${lastSnapshot.rent},${lastSnapshot.salary},${lastSnapshot.other},${(-dailyCost).toFixed(2)}\n`;
+                const dc = parseFloat(lastSnap.rent)+parseFloat(lastSnap.salary)+parseFloat(lastSnap.other);
+                csv += `${d},0,0%,${lastSnap.rent},${lastSnap.salary},${lastSnap.other},${(-dc).toFixed(2)}\n`;
             }
         });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Precision_Report_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const blob = new Blob(["\ufeff"+csv], {type:'text/csv;charset=utf-8;'});
+        const url  = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href  = url; link.download = `Precision_Report_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }
 
     function renderChart() {
-        const ctx = document.getElementById('trendChart').getContext('2d');
+        const ctx   = document.getElementById('trendChart').getContext('2d');
         const trend = AccountingEngine.getTrendData();
         if (window.myChart) window.myChart.destroy();
         window.myChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: trend.labels,
-                datasets: [{ label: '营收', data: trend.data, borderColor: '#ff85a2', tension: 0.4, fill: true, backgroundColor: 'rgba(255,133,162,0.1)' }]
+                datasets: [{
+                    label: '营收',
+                    data: trend.data,
+                    borderColor: '#C9A84C',
+                    borderWidth: 1.5,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(201,168,76,0.06)',
+                    pointBackgroundColor: '#C9A84C',
+                    pointRadius: 3,
+                    pointBorderWidth: 0,
+                }]
             },
-            options: { plugins: { legend: { display: false } } }
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                    y: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+                }
+            }
         });
     }
 
     function renderHistoryList() {
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const dates = Object.keys(history).sort((a,b)=>{ return new Date(b) - new Date(a); });
-        let html = '<h3 style="font-size:14px; margin:20px 0 10px; color:#666;">历史账单</h3>';
+        const dates = Object.keys(history).sort((a,b)=>new Date(b)-new Date(a));
+        let html = '';
         dates.forEach(date => {
             const h = history[date] || {};
             const rev = parseFloat(h.revenue) || 0;
             const ach = parseFloat(h.achievement) || 0;
+            const profit = parseFloat(h.profit) || 0;
+            const profitColor = profit >= 0 ? 'var(--success)' : '#C07070';
             html += `
-            <div class="history-item" style="align-items:center;">
-                <span>${date}</span>
-                <strong>¥${rev.toFixed(2)} (${ach}%)</strong>
+            <div class="history-item">
+                <span class="history-date">${date}</span>
+                <span class="history-val">¥${rev.toFixed(2)}</span>
+                <span style="font-size:11px;color:${profitColor};">${ach}%</span>
             </div>`;
         });
-        document.getElementById('history-list').innerHTML = html;
+        document.getElementById('history-list').innerHTML = html || '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">暂无历史数据</div>';
     }
 
     function render() {
-        const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        const rev   = parseFloat(localStorage.getItem('todayRev')) || 0;
         const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
         const score = Math.floor((rev / daily) * 100);
         document.getElementById('health-score').innerText = score + '%';
         document.getElementById('date-display').innerText = new Date().toLocaleDateString();
         const emoji = document.getElementById('emoji-status');
-        if(score === 0) emoji.innerText = "😴";
-        else if(score < 100) emoji.innerText = "🦦";
-        else emoji.innerText = "💎";
+        if (score === 0)    emoji.innerText = "😴";
+        else if (score < 100) emoji.innerText = "🦦";
+        else                  emoji.innerText = "💎";
         const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
         document.querySelectorAll('.badge-wall span').forEach(el => el.classList.remove('active-badge'));
-        earned.forEach(id => {
-            const badgeEl = document.getElementById('badge-'+id);
-            if(badgeEl) badgeEl.classList.add('active-badge');
-        });
+        earned.forEach(id => { const el = document.getElementById('badge-'+id); if(el) el.classList.add('active-badge'); });
     }
 
+    // Init
     const config = IndustryAdapter.getCurrent();
+    document.documentElement.style.setProperty('--primary', config.theme);
     document.documentElement.style.setProperty('--primary-pink', config.theme);
-    document.getElementById('industry-logo').innerText = `🦦 ${config.icon} ${config.name.toUpperCase()} STATION`;
-
+    document.getElementById('industry-logo').innerText = `🦦 ${config.icon} ${config.name.toUpperCase()} · PRESTIGE`;
     window.onload = render;
 
-    // ====================================================
-    // ===== 补记日历模块 =====
-    // ====================================================
-
-    // 读取当前语言，决定日历 locale
+    // ===== SUPPLEMENT CALENDAR =====
     const _calLang = localStorage.getItem('lang') === 'en' ? 'en-US' : 'zh-CN';
     const _calLabels = {
-        hint: _calLang === 'en-US' ? 'Select a date to supplement' : '选择需要补记的日期',
-        title: _calLang === 'en-US' ? '📅 Supplement' : '📅 补记',
-        confirmBtn: _calLang === 'en-US' ? 'Confirm' : '确认补记',
-        placeholder: _calLang === 'en-US' ? '$ Total revenue of the day' : '¥ 当日总营收',
-        successMsg: (date) => _calLang === 'en-US' ? `✅ Supplemented: ${date}` : `✅ 补记成功：${date}`,
-        errorMsg: _calLang === 'en-US' ? 'Please enter a valid amount' : '请输入有效金额',
-        dateLabel: (date) => _calLang === 'en-US' ? `Date: ${date}` : `日期：${date}`
+        hint:        _calLang === 'en-US' ? 'Select a date to supplement' : '选择需要补记的日期',
+        confirmBtn:  _calLang === 'en-US' ? 'Confirm' : '确认补记',
+        placeholder: _calLang === 'en-US' ? '$ Total revenue' : '¥ 当日总营收',
+        successMsg:  (d) => _calLang === 'en-US' ? `✅ Supplemented: ${d}` : `✅ 补记成功：${d}`,
+        errorMsg:    _calLang === 'en-US' ? 'Please enter a valid amount' : '请输入有效金额',
+        dateLabel:   (d) => _calLang === 'en-US' ? `Date: ${d}` : `日期：${d}`
     };
 
-    // 应用多语言到弹窗静态文字
-    document.querySelector('#supplement-modal .modal-box > div:first-child div').innerText = _calLabels.title;
     document.getElementById('supplement-hint').innerText = _calLabels.hint;
     document.getElementById('supplement-input').placeholder = _calLabels.placeholder;
 
     let _calYear, _calMonth, _selectedSupplementDate = null;
 
     function openSupplementCalendar() {
-        const now = new Date();
-        _calYear = now.getFullYear();
-        _calMonth = now.getMonth();
+        const now = new Date(); _calYear = now.getFullYear(); _calMonth = now.getMonth();
         _selectedSupplementDate = null;
         document.getElementById('supplement-amount-area').style.display = 'none';
         document.getElementById('supplement-input').value = '';
@@ -617,7 +1051,7 @@
     function calChangeMonth(delta) {
         _calMonth += delta;
         if (_calMonth > 11) { _calMonth = 0; _calYear++; }
-        if (_calMonth < 0) { _calMonth = 11; _calYear--; }
+        if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
         _selectedSupplementDate = null;
         document.getElementById('supplement-amount-area').style.display = 'none';
         renderCalendar();
@@ -627,68 +1061,41 @@
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         const now = new Date();
         const todayStr = now.toLocaleDateString();
-
-        // 月份标题（根据语言）
-        const monthDate = new Date(_calYear, _calMonth, 1);
-        const monthTitle = monthDate.toLocaleDateString(_calLang, { year: 'numeric', month: 'long' });
-        document.getElementById('cal-month-title').innerText = monthTitle;
-
-        // 星期标题
-        const weekdays = _calLang === 'en-US'
-            ? ['Su','Mo','Tu','We','Th','Fr','Sa']
-            : ['日','一','二','三','四','五','六'];
-        document.getElementById('cal-weekdays').innerHTML = weekdays.map(d =>
-            `<div class="cal-weekday">${d}</div>`
-        ).join('');
-
-        // 计算当月天数和起始星期
+        const monthDate  = new Date(_calYear, _calMonth, 1);
+        document.getElementById('cal-month-title').innerText = monthDate.toLocaleDateString(_calLang, { year: 'numeric', month: 'long' });
+        const weekdays = _calLang === 'en-US' ? ['Su','Mo','Tu','We','Th','Fr','Sa'] : ['日','一','二','三','四','五','六'];
+        document.getElementById('cal-weekdays').innerHTML = weekdays.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
         const firstDay = new Date(_calYear, _calMonth, 1).getDay();
         const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
-
-        let daysHtml = '';
-        // 空格占位
-        for (let i = 0; i < firstDay; i++) {
-            daysHtml += `<div class="cal-day empty"></div>`;
-        }
-        // 日期格
+        let html = '';
+        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
         for (let day = 1; day <= daysInMonth; day++) {
             const dateObj = new Date(_calYear, _calMonth, day);
             const dateStr = dateObj.toLocaleDateString();
             const isFuture = dateObj > now && dateStr !== todayStr;
-            const isToday = dateStr === todayStr;
+            const isToday  = dateStr === todayStr;
             const hasRecord = !!history[dateStr];
             const isSelected = dateStr === _selectedSupplementDate;
-
             let cls = 'cal-day';
             if (isFuture) cls += ' future';
             else if (isSelected) cls += ' selected';
-            else if (isToday) cls += ' today';
+            else if (isToday)    cls += ' today';
             if (hasRecord && !isFuture) cls += ' has-record';
-
-            const clickAttr = isFuture ? '' : `onclick="selectSupplementDate('${dateStr}')"`;
-            daysHtml += `<div class="${cls}" ${clickAttr}>${day}</div>`;
+            const click = isFuture ? '' : `onclick="selectSupplementDate('${dateStr}')"`;
+            html += `<div class="${cls}" ${click}>${day}</div>`;
         }
-
-        document.getElementById('cal-days').innerHTML = daysHtml;
+        document.getElementById('cal-days').innerHTML = html;
     }
 
     function selectSupplementDate(dateStr) {
         _selectedSupplementDate = dateStr;
         renderCalendar();
-
-        // 显示金额输入区
         const area = document.getElementById('supplement-amount-area');
         document.getElementById('supplement-date-label').innerText = _calLabels.dateLabel(dateStr);
         document.getElementById('supplement-input').value = '';
         area.style.display = 'block';
-
-        // 如果该日期已有数据，预填
         const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        if (history[dateStr]) {
-            document.getElementById('supplement-input').value = parseFloat(history[dateStr].revenue) || '';
-        }
-
-        // 滚动到输入区
+        if (history[dateStr]) document.getElementById('supplement-input').value = parseFloat(history[dateStr].revenue) || '';
         setTimeout(() => {
             area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             document.getElementById('supplement-input').focus();
@@ -697,28 +1104,14 @@
 
     function saveSupplementRecord() {
         const val = parseFloat(document.getElementById('supplement-input').value);
-        if (!_selectedSupplementDate || isNaN(val) || val < 0) {
-            alert(_calLabels.errorMsg);
-            return;
-        }
-
-        // 保存快照
+        if (!_selectedSupplementDate || isNaN(val) || val < 0) { alert(_calLabels.errorMsg); return; }
         AccountingEngine.saveDailySnapshot(val, _selectedSupplementDate);
-
-        // 如果补记的是今天，同步 todayRev 并刷新主界面
         const todayStr = new Date().toLocaleDateString();
-        if (_selectedSupplementDate === todayStr) {
-            localStorage.setItem('todayRev', val);
-            render();
-        }
-
+        if (_selectedSupplementDate === todayStr) { localStorage.setItem('todayRev', val); render(); }
         alert(_calLabels.successMsg(_selectedSupplementDate));
         closeSupplementCalendar();
     }
-
 </script>
-
 <script src="i18n-engine.js"></script>
-
 </body>
 </html>
