@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#130A0C">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>主理人工作台</title>
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
 
         :root {
             --primary: #8B1A2F;
-            --primary-pink: #8B1A2F; /* legacy alias */
+            --primary-pink: #8B1A2F;
             --gold: #C9A84C;
             --gold-light: #E8D08A;
             --gold-dim: rgba(201,168,76,0.35);
@@ -27,18 +29,21 @@
             --text-muted: rgba(255,255,255,0.35);
             --text-dim: rgba(201,168,76,0.45);
             --success: #4CAF76;
-            --success-green: #4CAF76; /* legacy */
+            --success-green: #4CAF76;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+        html { background: #130A0C; min-height: 100%; }
+
         body {
             font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
-            background: var(--bg-dark);
+            background: #130A0C;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
+            min-height: 100dvh;
             padding: 20px 0 40px;
         }
 
@@ -236,7 +241,8 @@
             width: 100%;
             cursor: pointer;
             font-weight: 600;
-            letter-spacing: 3px;
+            letter-spacing: 1px;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
