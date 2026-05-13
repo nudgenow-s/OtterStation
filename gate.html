@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#160810">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>主理人工作台</title>
     <script src="config.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
 
         :root {
             --primary: #8B1A2F;
@@ -22,13 +24,20 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* 彻底铺满，消灭粉色露出 */
+        html {
+            background: #160810;
+            min-height: 100%;
+        }
+
         body {
-            font-family: 'PingFang SC', sans-serif;
-            background: var(--bg-dark);
+            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
+            background: #160810;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh; /* dynamic viewport，修复 Safari 地址栏导致的缝隙 */
             overflow: hidden;
         }
 
@@ -103,8 +112,8 @@
             animation: float 3s ease-in-out infinite;
         }
         .brand-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px;
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-size: 20px;
             font-weight: 400;
             color: var(--gold);
             letter-spacing: 5px;
@@ -112,6 +121,7 @@
             margin-bottom: 4px;
         }
         .brand-sub {
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
             font-size: 10px;
             color: var(--text-muted);
             letter-spacing: 3px;
@@ -185,12 +195,13 @@
             border: 1px solid rgba(201,168,76,0.3);
             padding: 16px;
             border-radius: 50px;
-            font-size: 14px;
+            font-size: 15px;
             cursor: pointer;
             font-weight: 600;
             margin-top: 20px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
+            /* 移除 text-transform:uppercase 和固定 letter-spacing，避免英文乱排 */
+            letter-spacing: 1px;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
