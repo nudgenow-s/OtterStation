@@ -5,26 +5,246 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>水獭能量站</title>
+    <title>主理人工作台</title>
     <script src="config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary-pink: #ff85a2; --bg: #fff9fa; }
-        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 310px; background: white; border-radius: 35px; padding: 30px; box-shadow: 0 15px 40px rgba(255,133,162,0.1); text-align: center; position: relative; }
-        .logo { font-size: 70px; margin-bottom: 20px; }
-        h2 { color: var(--primary-pink); font-size: 20px; margin: 0 0 15px; }
-        input { width: 100%; border: none; background: #fef0f3; padding: 18px; border-radius: 20px; font-size: 20px; text-align: center; box-sizing: border-box; outline: none; color: var(--primary-pink); letter-spacing: 3px; font-weight: bold; }
-        .btn-go { width: 100%; background: var(--primary-pink); color: white; border: none; padding: 18px; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 25px; box-shadow: 0 6px #ffdae3; }
-        
-        /* 恢复备份区域样式 */
-        .recovery-link { margin-top: 25px; font-size: 13px; color: #bbb; cursor: pointer; text-decoration: underline; transition: color 0.3s; }
-        .recovery-link:hover { color: var(--primary-pink); }
-        
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+        :root {
+            --primary: #8B1A2F;
+            --gold: #C9A84C;
+            --gold-light: #E8D08A;
+            --bg-dark: #160810;
+            --bg-card: #1F0F14;
+            --text-muted: rgba(201,168,76,0.45);
+            --border: rgba(201,168,76,0.18);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'PingFang SC', sans-serif;
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 环境光 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,26,47,0.35) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(92,51,23,0.25) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* 噪点纹理叠加 */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 320px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 36px 28px 32px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 1px rgba(201,168,76,0.06),
+                0 32px 64px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(201,168,76,0.12);
+        }
+
+        /* 顶部金线装饰 */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 80px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 0 0 2px 2px;
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 16px; right: 20px;
+            font-size: 11px;
+            color: var(--gold);
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .lang-toggle:hover { opacity: 1; }
+
+        /* Logo区 */
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .brand-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--gold);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .brand-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* 分隔线 */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .divider-diamond {
+            width: 5px; height: 5px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-family: 'PingFang SC', sans-serif;
+            color: rgba(255,255,255,0.85);
+            font-size: 15px;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* 输入框 */
+        .input-wrap {
+            position: relative;
+            margin-bottom: 6px;
+        }
+        input[type="text"] {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 18px;
+            text-align: center;
+            color: var(--gold-light);
+            letter-spacing: 4px;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        input[type="text"]:focus {
+            border-color: rgba(201,168,76,0.5);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.08), 0 0 20px rgba(201,168,76,0.08);
+        }
+        input[type="text"]::placeholder {
+            color: rgba(201,168,76,0.2);
+            letter-spacing: 2px;
+            font-size: 13px;
+        }
+
+        /* 主按钮 */
+        .btn-go {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #6B1220 50%, #8B2A1A 100%);
+            color: var(--gold-light);
+            border: 1px solid rgba(201,168,76,0.3);
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-go::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+            transition: left 0.5s;
+        }
+        .btn-go:hover::before { left: 100%; }
+        .btn-go:hover {
+            border-color: rgba(201,168,76,0.6);
+            box-shadow: 0 8px 24px rgba(139,26,47,0.4), 0 0 0 1px rgba(201,168,76,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-go:active { transform: translateY(0); }
+
+        /* 恢复链接 */
+        .recovery-link {
+            margin-top: 20px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .recovery-link:hover { color: var(--gold); }
+
+        /* Guide box */
         #guide-box { display: none; }
-        .instruction { text-align: left; background: #fff9fa; padding: 20px; border-radius: 20px; margin: 20px 0; font-size: 13px; color: #777; line-height: 1.8; }
-        .highlight { color: var(--primary-pink); font-weight: bold; }
-        .lang-toggle { position: absolute; top: 15px; right: 20px; font-size: 12px; color: var(--primary-pink); font-weight: bold; cursor: pointer; }
+
+        .instruction {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 16px 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            line-height: 2;
+            text-align: left;
+        }
+        .highlight { color: var(--gold); font-weight: 600; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
     </style>
 </head>
 <body>
@@ -33,11 +253,26 @@
     <div class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN</div>
 
     <div id="auth-ui">
-        <div class="logo">🦦</div>
-        <h2 id="t-auth-title">激活您的能量站</h2>
-        <input type="text" id="activation-code" placeholder="ENTER CODE">
+        <div class="logo-area">
+            <span class="logo-icon">🦦</span>
+            <div class="brand-name">Prestige</div>
+            <div class="brand-sub">Business Station</div>
+        </div>
+
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-diamond"></div>
+            <div class="divider-line"></div>
+        </div>
+
+        <h2 id="t-auth-title">激活您的专属能量站</h2>
+
+        <div class="input-wrap">
+            <input type="text" id="activation-code" placeholder="ENTER CODE">
+        </div>
+
         <button class="btn-go" onclick="handleVerify()" id="t-auth-btn">立即验证</button>
-        
+
         <div class="recovery-link" onclick="document.getElementById('restore-file').click()" id="t-recover">
             通过备份文件复原数据
         </div>
@@ -45,12 +280,23 @@
     </div>
 
     <div id="guide-box">
-        <div class="logo">📱</div>
+        <div class="logo-area">
+            <span class="logo-icon">📱</span>
+            <div class="brand-name">Installation</div>
+            <div class="brand-sub">Add to Home Screen</div>
+        </div>
+
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-diamond"></div>
+            <div class="divider-line"></div>
+        </div>
+
         <h2 id="t-guide-title">使用说明</h2>
         <div class="instruction" id="t-instruction">
-            1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span> (方块箭头)<br>
-            2️⃣ 向上滑动找到 <span class="highlight">“添加到主屏幕”</span><br>
-            3️⃣ 点击右上角 <span class="highlight">“添加”</span><br><br>
+            1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>
+            2️⃣ 找到 <span class="highlight">"添加到主屏幕"</span><br>
+            3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>
             完成后从桌面图标进入。
         </div>
         <button class="btn-go" onclick="enterApp()" id="t-guide-btn">进入系统</button>
@@ -58,47 +304,44 @@
 </div>
 
 <script>
-
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('门禁管家已就位', reg.scope))
-            .catch(err => console.log('管家罢工了', err));
-    });
-}
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW ready', reg.scope))
+                .catch(err => console.log('SW failed', err));
+        });
+    }
 
     const PRIVATE_SALT = "INTJ_ARCHITECT_2026_PRO";
-
     let currentLang = localStorage.getItem('lang') || 'zh';
 
     const translations = {
         'zh': {
             'btn': 'EN',
-            'authTitle': '激活您的能量站',
+            'authTitle': '激活您的专属能量站',
             'authBtn': '立即验证',
             'recover': '通过备份文件复原数据',
             'guideTitle': '使用说明',
             'guideBtn': '进入系统',
-            'instruction': '为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">“添加到主屏幕”</span><br>3️⃣ 点击右上角 <span class="highlight">“添加”</span><br><br>完成后从桌面图标进入。',
-            'error': '激活码错误🦦',
+            'instruction': '为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">"添加到主屏幕"</span><br>3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>完成后从桌面图标进入。',
+            'error': '激活码错误 🦦',
             'importSuccess': '✅ 资产还原成功，欢迎回来！',
             'importError': '❌ 无效的备份文件。'
         },
         'en': {
             'btn': '中文',
-            'authTitle': 'Activate Station',
+            'authTitle': 'Activate Your Station',
             'authBtn': 'Verify Now',
             'recover': 'Restore from Backup File',
             'guideTitle': 'Instructions',
             'guideBtn': 'Enter System',
-            'instruction': 'To <span class="highlight">App Experience</span>:<br><br>1️⃣ Click the <span class="highlight">Share Icon</span><br>2️⃣ Tap <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on the top right.<br><br>Then open from home screen.',
+            'instruction': 'To get the <span class="highlight">App</span> experience:<br><br>1️⃣ Tap the <span class="highlight">Share Icon</span> at bottom<br>2️⃣ Find <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on top right.<br><br>Then open from your home screen.',
             'error': 'Invalid Code. 🦦',
             'importSuccess': '✅ Assets Restored! Welcome back.',
             'importError': '❌ Invalid Backup File.'
         }
     };
-    
-    
+
     function updateUI() {
         const t = translations[currentLang];
         document.getElementById('lang-btn').innerText = t.btn;
@@ -117,16 +360,9 @@
     }
 
     function generateDeviceFingerprint() {
-        const info = [
-            navigator.userAgent,
-            screen.width + "x" + screen.height,
-            navigator.language
-        ].join('|');
+        const info = [navigator.userAgent, screen.width + "x" + screen.height, navigator.language].join('|');
         let hash = 0;
-        for (let i = 0; i < info.length; i++) {
-            hash = ((hash << 5) - hash) + info.charCodeAt(i);
-            hash |= 0;
-        }
+        for (let i = 0; i < info.length; i++) { hash = ((hash << 5) - hash) + info.charCodeAt(i); hash |= 0; }
         return Math.abs(hash).toString(36).toUpperCase();
     }
 
@@ -135,53 +371,47 @@
         const prefix = code.substring(0,12).toUpperCase();
         const suffix = code.substring(12).toLowerCase();
         const msgUint8 = new TextEncoder().encode(prefix + PRIVATE_SALT);
-        const hashBuffer = await crypto.subtle.digest('SHA-256',msgUint8);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const expectedSuffix = hashArray.map(b => b.toString(16).padStart(2,'0')).join('').substring(0,8);
-
         return suffix === expectedSuffix;
     }
-    
+
     async function handleVerify() {
         const input = document.getElementById('activation-code');
         const btn = document.getElementById('t-auth-btn');
         if (btn.disabled) return;
-        
         const code = input.value.trim().toUpperCase();
         const isValid = await validateLicense(code);
-      
         if (isValid) {
             try {
                 btn.disabled = true;
                 const deviceID = generateDeviceFingerprint();
                 const WORKER_URL = 'https://auth.nudgenow.xyz';
-                const response = await fetch(WORKER_URL,{
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code,deviceID })
+                    body: JSON.stringify({ code, deviceID })
                 });
                 const result = await response.json();
                 if (response.ok && result.status === 'success') {
-            localStorage.setItem('isActivated', 'true');
-            localStorage.setItem('license_key', code);
-            localStorage.setItem('bound_device_id',generateDeviceFingerprint());
-            
-            showGuide();
-        } else {
-            alert(translations[currentLang].error);
+                    localStorage.setItem('isActivated', 'true');
+                    localStorage.setItem('license_key', code);
+                    localStorage.setItem('bound_device_id', generateDeviceFingerprint());
+                    showGuide();
+                } else {
+                    alert(translations[currentLang].error);
                     btn.disabled = false;
-        }
+                }
             } catch (err) {
                 alert(currentLang === 'zh' ? "请检查网络连接" : "Network required.");
                 btn.disabled = false;
             }
         } else {
             alert(translations[currentLang].error);
-           
         }
     }
 
-    // --- 数据资产还原核心引擎 ---
     function importStellarockData(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -189,22 +419,14 @@
         reader.onload = function(e) {
             try {
                 const data = JSON.parse(e.target.result);
-                // 验证是否为有效的 Stellarock 备份（必须包含激活标记或历史数据）
                 if (data.isActivated === 'true' || data.revenue_history) {
                     localStorage.clear();
-                    for (let key in data) {
-                        localStorage.setItem(key, data[key]);
-                    }
-                    // 强制确保激活状态
+                    for (let key in data) { localStorage.setItem(key, data[key]); }
                     localStorage.setItem('isActivated', 'true');
                     alert(translations[currentLang].importSuccess);
-                    enterApp(); // 直接进入，无需看引导
-                } else {
-                    throw new Error();
-                }
-            } catch (err) {
-                alert(translations[currentLang].importError);
-            }
+                    enterApp();
+                } else { throw new Error(); }
+            } catch (err) { alert(translations[currentLang].importError); }
         };
         reader.readAsText(file);
     }
@@ -214,14 +436,9 @@
         document.getElementById('guide-box').style.display = 'block';
     }
 
-    function enterApp() {
-        window.location.replace('index.html');
-    }
+    function enterApp() { window.location.replace('index.html'); }
 
-    if (localStorage.getItem('isActivated') === 'true') {
-        // 如果已激活，直接进引导页（或直接进App，根据你的PM逻辑决定）
-        showGuide();
-    }
+    if (localStorage.getItem('isActivated') === 'true') { showGuide(); }
     updateUI();
 </script>
 </body>
