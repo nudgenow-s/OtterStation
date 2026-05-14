@@ -3,161 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1A0A0D">
+    <meta name="theme-color" content="#9B2335">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>主理人工作台</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
-
         :root {
-            --primary: #8B1A2F;
-            --gold: #C9A84C;
-            --bg-dark: #1A0A0D;
+            --bg-page: #F7F3EE;
+            --crimson:  #9B2335;
+            --gold:     #B8963E;
+            --text-secondary: #6B5C4C;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html { background: var(--bg-dark); min-height: 100%; }
-
+        html { background: var(--bg-page); min-height: 100%; }
         body {
-            background: var(--bg-dark);
+            background: var(--bg-page);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            height: 100dvh;
-            margin: 0;
-            font-family: 'PingFang SC', sans-serif;
-            overflow: hidden;
+            height: 100vh; height: 100dvh;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
         }
+        .wrap { text-align: center; }
 
-        /* 背景纹理 */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse at 30% 20%, rgba(139,26,47,0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 80%, rgba(92,51,23,0.2) 0%, transparent 60%);
-            pointer-events: none;
-        }
+        .logo { font-size: 48px; animation: float 2s ease-in-out infinite; display: block; margin-bottom: 28px; }
 
-        .loading-container {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
+        /* 品牌名 */
+        .brand { font-size: 11px; letter-spacing: 5px; color: var(--gold); font-weight: 500; margin-bottom: 32px; }
 
-        /* 金色装饰线 */
-        .ornament {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        .ornament-line {
-            width: 60px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold));
-        }
-        .ornament-line.right {
-            background: linear-gradient(90deg, var(--gold), transparent);
-        }
-        .ornament-diamond {
-            width: 6px;
-            height: 6px;
-            background: var(--gold);
-            transform: rotate(45deg);
-        }
-
-        .brand-mark {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 13px;
-            letter-spacing: 6px;
-            color: var(--gold);
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            opacity: 0.85;
-        }
-
-        .otter-icon {
-            font-size: 44px;
-            animation: float 2.5s ease-in-out infinite;
-            display: block;
-            margin-bottom: 28px;
-        }
-
-        .loading-bar-wrap {
-            width: 160px;
-            height: 1px;
-            background: rgba(201,168,76,0.2);
+        /* 进度条 */
+        .bar-track {
+            width: 120px; height: 2px;
+            background: rgba(107,66,38,0.12);
+            border-radius: 1px;
             margin: 0 auto;
-            position: relative;
             overflow: hidden;
         }
-        .loading-bar {
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%;
+        .bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            animation: sweep 1.6s ease-in-out infinite;
+            background: linear-gradient(90deg, var(--crimson), var(--gold));
+            border-radius: 1px;
+            animation: load 1.4s ease-in-out infinite;
         }
+        .tip { margin-top: 16px; font-size: 11px; color: var(--text-secondary); letter-spacing: 1px; }
 
-        .loading-text {
-            font-family: 'PingFang SC', sans-serif;
-            color: rgba(201,168,76,0.6);
-            font-size: 11px;
-            letter-spacing: 3px;
-            margin-top: 16px;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        @keyframes sweep {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes load  { 0%{width:0;opacity:1} 80%{width:100%;opacity:1} 100%{width:100%;opacity:0} }
     </style>
 </head>
 <body>
-<div class="loading-container">
-    <div class="brand-mark">Prestige Station</div>
-    <div class="ornament">
-        <div class="ornament-line"></div>
-        <div class="ornament-diamond"></div>
-        <div class="ornament-line right"></div>
-    </div>
-    <span class="otter-icon">🦦</span>
-    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
-    <div class="loading-text">正在同步数据</div>
+<div class="wrap">
+    <span class="logo">🦦</span>
+    <div class="brand">PRESTIGE STATION</div>
+    <div class="bar-track"><div class="bar-fill"></div></div>
+    <div class="tip">正在同步数据...</div>
 </div>
-
 <script>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(reg => { reg.update(); });
+        navigator.serviceWorker.register('/sw.js').then(r => r.update());
     }
-</script>
-<script>
-    (function securityCheck() {
-        const isActivated = localStorage.getItem('isActivated');
-        if (isActivated !== 'true') { window.location.replace('gate.html'); }
-    })();
-
-    (function route() {
+    (function() {
+        if (localStorage.getItem('isActivated') !== 'true') { window.location.replace('gate.html'); return; }
         setTimeout(() => {
-            const hasSetup = localStorage.getItem('hasSetup');
-            if (hasSetup === 'true') {
-                window.location.replace('main.html');
-            } else {
-                window.location.replace('setup.html');
-            }
+            window.location.replace(localStorage.getItem('hasSetup') === 'true' ? 'main.html' : 'setup.html');
         }, 300);
     })();
 </script>
