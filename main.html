@@ -600,7 +600,7 @@
         const today=new Date().toLocaleDateString();
         if(history[today]){
             const tr=parseFloat(localStorage.getItem('todayRev'))||0;
-            history[today].costSnapshot={(rent:(r/30).toFixed(2),salary:(s/30).toFixed(2),other:(o/30).toFixed(2))};
+            history[today].costSnapshot={rent:(r/30).toFixed(2),salary:(s/30).toFixed(2),other:(o/30).toFixed(2)};
             history[today].profit=(tr-dc).toFixed(2);
             history[today].achievement=dc>0?Math.floor((tr/dc)*100):100;
         }
