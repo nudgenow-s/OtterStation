@@ -3,276 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#9B2335">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>初始配置 — 主理人工作台</title>
     <script src="config.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
         :root {
-            --primary: #8B1A2F;
-            --gold: #C9A84C;
-            --gold-light: #E8D08A;
-            --bg-dark: #160810;
-            --bg-card: #1E0E13;
-            --bg-input: rgba(255,255,255,0.04);
-            --border: rgba(201,168,76,0.18);
-            --text: rgba(255,255,255,0.85);
-            --text-muted: rgba(255,255,255,0.35);
-            --text-dim: rgba(201,168,76,0.45);
+            --bg-page:   #F7F3EE;
+            --bg-card:   #FFFFFF;
+            --bg-surface:#FAF8F5;
+            --bg-input:  #F4F0EB;
+            --crimson:   #9B2335;
+            --crimson-dk:#7A1828;
+            --gold:      #B8963E;
+            --brown:     #6B4226;
+            --text-1:    #1A1208;
+            --text-2:    #6B5C4C;
+            --text-3:    #A89880;
+            --border:    rgba(107,66,38,0.10);
+            --border-md: rgba(107,66,38,0.18);
+            --shadow-card: 0 4px 24px rgba(107,66,38,0.08), 0 1px 4px rgba(107,66,38,0.04);
+            --shadow-btn:  0 4px 16px rgba(155,35,53,0.28);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background: var(--bg-page); min-height: 100%; }
         body {
-            font-family: 'PingFang SC', sans-serif;
-            background: var(--bg-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background:
-                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,26,47,0.3) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(92,51,23,0.2) 0%, transparent 60%);
-            pointer-events: none;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
+            background: var(--bg-page);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; min-height: 100dvh;
         }
 
         .card {
             width: 340px;
             background: var(--bg-card);
-            border-radius: 24px;
-            padding: 32px 28px;
+            border-radius: 28px;
+            padding: 32px 28px 28px;
+            box-shadow: var(--shadow-card);
             border: 1px solid var(--border);
-            box-shadow:
-                0 0 0 1px rgba(201,168,76,0.05),
-                0 32px 64px rgba(0,0,0,0.55),
-                inset 0 1px 0 rgba(201,168,76,0.1);
             position: relative;
-            z-index: 1;
         }
 
+        /* 顶部酒红短线 */
         .card::before {
             content: '';
             position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 80px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 48px; height: 3px;
+            background: var(--crimson);
+            border-radius: 0 0 3px 3px;
         }
 
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .logo {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 8px;
-            transition: 0.4s;
-        }
+        /* 品牌头 */
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 46px; display: block; margin-bottom: 10px; transition: 0.4s; }
         .brand-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
-            letter-spacing: 5px;
-            color: var(--gold);
-            text-transform: uppercase;
-            opacity: 0.8;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 13px; letter-spacing: 5px;
+            color: var(--gold); text-transform: uppercase; font-weight: 400;
         }
 
-        /* Progress */
+        /* 进度条 */
         .progress {
-            height: 2px;
-            background: rgba(201,168,76,0.1);
-            border-radius: 1px;
-            margin: 20px 0 24px;
-            overflow: visible;
-            position: relative;
+            height: 3px;
+            background: var(--bg-input);
+            border-radius: 2px;
+            margin: 18px 0 22px;
+            overflow: hidden;
         }
         #bar {
-            height: 100%;
-            width: 20%;
-            background: linear-gradient(90deg, var(--primary), var(--gold));
-            border-radius: 1px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        #bar::after {
-            content: '';
-            position: absolute;
-            right: -3px; top: -3px;
-            width: 8px; height: 8px;
-            background: var(--gold);
-            border-radius: 50%;
-            box-shadow: 0 0 8px rgba(201,168,76,0.6);
+            height: 100%; width: 20%;
+            background: linear-gradient(90deg, var(--crimson), var(--gold));
+            border-radius: 2px;
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* Steps */
-        .step { display: none; animation: fadeUp 0.4s ease; }
+        /* 步骤 */
+        .step { display: none; animation: fadeUp 0.35s ease; }
         .step.active { display: block; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .step-tag {
+            display: inline-block;
+            font-size: 10px; letter-spacing: 2px;
+            color: var(--crimson); font-weight: 600;
+            background: rgba(155,35,53,0.07);
+            padding: 3px 10px; border-radius: 20px;
+            margin-bottom: 12px;
         }
 
-        .step-label {
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
+        h2 { font-size: 19px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+        p  { font-size: 12px; color: var(--text-3); line-height: 1.7; margin-bottom: 20px; }
 
-        h2 {
-            color: var(--text);
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 6px;
-            letter-spacing: 0.3px;
-        }
-
-        p {
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 20px;
-        }
-
-        /* Industry Grid */
-        .industry-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin: 16px 0 24px;
-        }
+        /* 行业选择 */
+        .industry-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 22px; }
         .industry-item {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s;
-            background: var(--bg-input);
+            border: 1.5px solid var(--border);
+            border-radius: 16px; padding: 14px 8px;
+            text-align: center; cursor: pointer;
+            background: var(--bg-surface);
+            transition: all 0.22s;
         }
         .industry-item:hover {
-            border-color: rgba(201,168,76,0.35);
-            background: rgba(201,168,76,0.05);
+            border-color: rgba(155,35,53,0.3);
+            background: rgba(155,35,53,0.04);
         }
         .industry-item.selected {
-            border-color: var(--gold);
-            background: rgba(201,168,76,0.1);
-            box-shadow: 0 0 0 1px rgba(201,168,76,0.15), 0 4px 16px rgba(201,168,76,0.1);
+            border-color: var(--crimson);
+            background: rgba(155,35,53,0.06);
+            box-shadow: 0 0 0 3px rgba(155,35,53,0.08);
         }
-        .industry-item span {
-            font-size: 22px;
-            display: block;
-            margin-bottom: 6px;
-        }
-        .industry-item label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-        }
-        .industry-item.selected label { color: var(--gold); }
+        .industry-item span   { font-size: 24px; display: block; margin-bottom: 6px; }
+        .industry-item label  { font-size: 11px; color: var(--text-2); font-weight: 500; cursor: pointer; }
+        .industry-item.selected label { color: var(--crimson); }
 
-        /* Input */
-        .input-wrap {
-            position: relative;
-            margin: 16px 0;
-        }
+        /* 输入框 */
+        .input-wrap { position: relative; margin: 14px 0; }
         .input-prefix {
-            position: absolute;
-            left: 16px; top: 50%;
+            position: absolute; left: 16px; top: 50%;
             transform: translateY(-50%);
-            font-size: 16px;
-            color: var(--gold);
-            opacity: 0.5;
-            font-weight: 300;
+            font-size: 17px; color: var(--text-3); font-weight: 300;
         }
         input[type="number"] {
             width: 100%;
-            border: 1px solid var(--border);
             background: var(--bg-input);
-            padding: 16px 16px 16px 36px;
+            border: 1.5px solid transparent;
             border-radius: 14px;
-            font-size: 20px;
-            color: var(--gold-light);
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            font-weight: 300;
+            padding: 15px 15px 15px 36px;
+            font-size: 20px; color: var(--text-1);
+            outline: none; font-weight: 500;
+            transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
         }
         input[type="number"]:focus {
-            border-color: rgba(201,168,76,0.45);
-            box-shadow: 0 0 0 3px rgba(201,168,76,0.07);
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 3px rgba(155,35,53,0.08);
+            background: #fff;
         }
-        input[type="number"]::placeholder { color: rgba(201,168,76,0.2); font-size: 15px; }
+        input[type="number"]::placeholder { color: var(--text-3); font-size: 15px; font-weight: 400; }
 
-        /* Buttons */
-        button.btn-primary {
+        /* 主按钮 */
+        .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #8B1A2F 0%, #6B1220 60%, #8B2A1A 100%);
-            color: var(--gold-light);
-            border: 1px solid rgba(201,168,76,0.3);
-            padding: 16px;
-            border-radius: 50px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 8px;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            background: var(--crimson);
+            color: #fff; border: none;
+            padding: 16px; border-radius: 50px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; margin-top: 4px;
+            letter-spacing: 0.5px;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
+            box-shadow: var(--shadow-btn);
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        button.btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
-            transition: left 0.5s;
-        }
-        button.btn-primary:hover::before { left: 100%; }
-        button.btn-primary:hover {
-            border-color: rgba(201,168,76,0.55);
-            box-shadow: 0 8px 24px rgba(139,26,47,0.35), 0 0 0 1px rgba(201,168,76,0.15);
-            transform: translateY(-1px);
-        }
-        button.btn-primary:active { transform: translateY(0); }
+        .btn-primary:hover { background: var(--crimson-dk); box-shadow: 0 6px 20px rgba(155,35,53,0.35); }
+        .btn-primary:active { transform: scale(0.98); box-shadow: none; }
 
         .back-link {
-            display: block;
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-top: 14px;
-            cursor: pointer;
-            letter-spacing: 1px;
+            display: block; text-align: center;
+            font-size: 12px; color: var(--text-3);
+            margin-top: 14px; cursor: pointer;
             transition: color 0.2s;
         }
-        .back-link:hover { color: var(--gold); }
+        .back-link:hover { color: var(--crimson); }
 
-        /* Divider */
-        .divider {
-            display: flex; align-items: center; gap: 10px;
-            margin: 20px 0;
-        }
-        .divider-line { flex: 1; height: 1px; background: var(--border); }
-        .divider-diamond {
-            width: 4px; height: 4px;
-            background: var(--gold);
-            transform: rotate(45deg);
-            opacity: 0.4;
-        }
+        /* 分隔线 */
+        .rule { height: 1px; background: var(--border); margin: 18px 0; }
     </style>
 </head>
 <body>
@@ -281,100 +180,78 @@
         <span class="logo" id="main-logo">🦦</span>
         <div class="brand-name">Prestige Station</div>
     </div>
-
     <div class="progress"><div id="bar"></div></div>
 
-    <!-- Step 0: Industry -->
+    <!-- Step 0 -->
     <div class="step active" id="s0">
-        <div class="step-label">Step 01 / 05</div>
+        <div class="step-tag">01 / 05</div>
         <h2>选择行业身份</h2>
         <p>我们将根据您的行业定制专属计量与分析模型。</p>
         <div class="industry-grid" id="industry-selector">
-            <div class="industry-item selected" onclick="selectType('nail', this)">
-                <span>💅</span><label>美业</label>
-            </div>
-            <div class="industry-item" onclick="selectType('food', this)">
-                <span>🌭</span><label>餐饮</label>
-            </div>
-            <div class="industry-item" onclick="selectType('retail', this)">
-                <span>👗</span><label>零售</label>
-            </div>
+            <div class="industry-item selected" onclick="selectType('nail',this)"><span>💅</span><label>美业</label></div>
+            <div class="industry-item"          onclick="selectType('food',this)"><span>🌭</span><label>餐饮</label></div>
+            <div class="industry-item"          onclick="selectType('retail',this)"><span>👗</span><label>零售</label></div>
         </div>
         <button class="btn-primary" onclick="move(1)">确认并继续</button>
     </div>
 
-    <!-- Step 1: Rent -->
+    <!-- Step 1 -->
     <div class="step" id="s1">
-        <div class="step-label">Step 02 / 05</div>
+        <div class="step-tag">02 / 05</div>
         <h2>房租与物业</h2>
-        <p>固定成本是生存的第一道关卡。请输入每月房租总额。</p>
-        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
-        <div class="input-wrap">
-            <span class="input-prefix">¥</span>
-            <input type="number" id="rent" placeholder="5000">
-        </div>
+        <p>固定成本是生存的第一道关卡，请输入每月房租总额。</p>
+        <div class="rule"></div>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="rent" placeholder="5000"></div>
         <button class="btn-primary" onclick="move(2)">下一步</button>
-        <span class="back-link" onclick="move(0)">← 返回上一步</span>
+        <span class="back-link" onclick="move(0)">← 返回</span>
     </div>
 
-    <!-- Step 2: Salary -->
+    <!-- Step 2 -->
     <div class="step" id="s2">
-        <div class="step-label">Step 03 / 05</div>
+        <div class="step-tag">03 / 05</div>
         <h2>您的专属薪酬</h2>
-        <p>主理人的劳动同样有价值。请设定您应得的月薪。</p>
-        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
-        <div class="input-wrap">
-            <span class="input-prefix">¥</span>
-            <input type="number" id="salary" placeholder="8000">
-        </div>
+        <p>主理人的劳动同样有价值，请设定您应得的月薪。</p>
+        <div class="rule"></div>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="salary" placeholder="8000"></div>
         <button class="btn-primary" onclick="move(3)">下一步</button>
-        <span class="back-link" onclick="move(1)">← 返回上一步</span>
+        <span class="back-link" onclick="move(1)">← 返回</span>
     </div>
 
-    <!-- Step 3: Misc -->
+    <!-- Step 3 -->
     <div class="step" id="s3">
-        <div class="step-label">Step 04 / 05</div>
+        <div class="step-tag">04 / 05</div>
         <h2>运营杂费</h2>
-        <p>水电、材料损耗与日常折旧。请估算月均总额。</p>
-        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
-        <div class="input-wrap">
-            <span class="input-prefix">¥</span>
-            <input type="number" id="misc" placeholder="1000">
-        </div>
+        <p>水电、材料损耗与日常折旧，请估算月均总额。</p>
+        <div class="rule"></div>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="misc" placeholder="1000"></div>
         <button class="btn-primary" onclick="move(4)">下一步</button>
-        <span class="back-link" onclick="move(2)">← 返回上一步</span>
+        <span class="back-link" onclick="move(2)">← 返回</span>
     </div>
 
-    <!-- Step 4: Startup -->
+    <!-- Step 4 -->
     <div class="step" id="s4">
-        <div class="step-label">Step 05 / 05</div>
+        <div class="step-tag">05 / 05</div>
         <h2>初始总投入</h2>
-        <p>装修、设备、加盟费等沉没成本。系统将为您追踪回本进度。</p>
-        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
-        <div class="input-wrap">
-            <span class="input-prefix">¥</span>
-            <input type="number" id="startup" placeholder="50000">
-        </div>
+        <p>装修、设备、加盟费等沉没成本，系统将为您追踪回本进度。</p>
+        <div class="rule"></div>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="startup" placeholder="50000"></div>
         <button class="btn-primary" onclick="save()">完成配置 · 进入工作台</button>
-        <span class="back-link" onclick="move(3)">← 返回上一步</span>
+        <span class="back-link" onclick="move(3)">← 返回</span>
     </div>
 </div>
 
 <script>
-    (function securityCheck() {
-        if (localStorage.getItem('isActivated') !== 'true') { window.location.replace('gate.html'); }
-    })();
-
+    (function() { if (localStorage.getItem('isActivated') !== 'true') window.location.replace('gate.html'); })();
     if (localStorage.getItem('hasSetup') === 'true') window.location.href = 'main.html';
 
     let selectedIndustry = 'nail';
 
     function selectType(type, el) {
         selectedIndustry = type;
-        document.querySelectorAll('.industry-item').forEach(item => item.classList.remove('selected'));
+        document.querySelectorAll('.industry-item').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
         const cfg = IndustryAdapter.registry[type];
-        document.documentElement.style.setProperty('--primary', cfg.theme);
+        document.documentElement.style.setProperty('--crimson', cfg.theme);
         document.getElementById('main-logo').innerText = cfg.icon;
     }
 
@@ -382,6 +259,7 @@
         document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
         document.getElementById('s' + s).classList.add('active');
         document.getElementById('bar').style.width = ((s + 1) / 5 * 100) + '%';
+        window.scrollTo(0, 0);
     }
 
     function save() {
@@ -389,19 +267,15 @@
         const salary  = Number(document.getElementById('salary').value)  || 0;
         const misc    = Number(document.getElementById('misc').value)    || 0;
         const startup = Number(document.getElementById('startup').value) || 0;
-
-        localStorage.setItem('monthlyRent',    rent);
-        localStorage.setItem('monthlySalary',  salary);
-        localStorage.setItem('monthlyOther',   misc);
-        localStorage.setItem('startupCost',    startup);
-
-        const daily = ((rent + salary + misc) / 30).toFixed(2);
-        localStorage.setItem('dailyCost', daily);
+        localStorage.setItem('monthlyRent',   rent);
+        localStorage.setItem('monthlySalary', salary);
+        localStorage.setItem('monthlyOther',  misc);
+        localStorage.setItem('startupCost',   startup);
+        localStorage.setItem('dailyCost', ((rent + salary + misc) / 30).toFixed(2));
         localStorage.setItem('industry_type', selectedIndustry);
         localStorage.setItem('hasSetup', 'true');
         localStorage.setItem('todayRev', '0');
         localStorage.setItem('last_active_date', new Date().toLocaleDateString());
-
         window.location.href = 'main.html';
     }
 </script>
