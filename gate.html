@@ -3,307 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#160810">
+    <meta name="theme-color" content="#9B2335">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>主理人工作台</title>
     <script src="config.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
         :root {
-            --primary: #8B1A2F;
-            --gold: #C9A84C;
-            --gold-light: #E8D08A;
-            --bg-dark: #160810;
-            --bg-card: #1F0F14;
-            --text-muted: rgba(201,168,76,0.45);
-            --border: rgba(201,168,76,0.18);
+            --bg-page:   #F7F3EE;
+            --bg-card:   #FFFFFF;
+            --bg-input:  #F4F0EB;
+            --crimson:   #9B2335;
+            --crimson-dk:#7A1828;
+            --gold:      #B8963E;
+            --gold-lt:   #D4AC5A;
+            --brown:     #6B4226;
+            --text-1:    #1A1208;
+            --text-2:    #6B5C4C;
+            --text-3:    #A89880;
+            --border:    rgba(107,66,38,0.10);
+            --border-md: rgba(107,66,38,0.18);
+            --shadow-card: 0 4px 24px rgba(107,66,38,0.08), 0 1px 4px rgba(107,66,38,0.04);
+            --shadow-btn:  0 4px 16px rgba(155,35,53,0.28);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        /* 彻底铺满，消灭粉色露出 */
-        html {
-            background: #160810;
-            min-height: 100%;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background: var(--bg-page); min-height: 100%; }
         body {
-            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
-            background: #160810;
+            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
+            background: var(--bg-page);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            min-height: 100dvh; /* dynamic viewport，修复 Safari 地址栏导致的缝隙 */
-            overflow: hidden;
+            min-height: 100dvh;
         }
 
-        /* 环境光 */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,26,47,0.35) 0%, transparent 70%),
-                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(92,51,23,0.25) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        /* 噪点纹理叠加 */
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
+        /* ── 卡片 ── */
         .container {
             width: 320px;
             background: var(--bg-card);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 36px 28px 32px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
             position: relative;
             z-index: 1;
-            border: 1px solid var(--border);
-            box-shadow:
-                0 0 0 1px rgba(201,168,76,0.06),
-                0 32px 64px rgba(0,0,0,0.6),
-                inset 0 1px 0 rgba(201,168,76,0.12);
         }
 
-        /* 顶部金线装饰 */
+        /* 顶部酒红细线 */
         .container::before {
             content: '';
             position: absolute;
             top: 0; left: 50%;
             transform: translateX(-50%);
-            width: 80px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 0 0 2px 2px;
+            width: 56px; height: 3px;
+            background: var(--crimson);
+            border-radius: 0 0 3px 3px;
         }
 
+        /* 语言切换 */
         .lang-toggle {
             position: absolute;
-            top: 16px; right: 20px;
-            font-size: 11px;
-            color: var(--gold);
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 1px;
-            opacity: 0.7;
-            transition: opacity 0.2s;
+            top: 18px; right: 22px;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-3);
+            cursor: pointer; letter-spacing: 1px;
+            transition: color 0.2s;
         }
-        .lang-toggle:hover { opacity: 1; }
+        .lang-toggle:hover { color: var(--crimson); }
 
         /* Logo区 */
-        .logo-area {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+        .logo-area { text-align: center; margin-bottom: 24px; }
         .logo-icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
+            font-size: 52px; display: block;
+            margin-bottom: 14px;
             animation: float 3s ease-in-out infinite;
         }
         .brand-name {
-            font-family: 'Cormorant Garamond', 'Georgia', serif;
-            font-size: 20px;
-            font-weight: 400;
-            color: var(--gold);
-            letter-spacing: 5px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 22px; font-weight: 400;
+            color: var(--crimson);
+            letter-spacing: 6px;
             text-transform: uppercase;
             margin-bottom: 4px;
         }
         .brand-sub {
-            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 3px;
+            font-size: 10px; letter-spacing: 3px;
+            color: var(--text-3);
             text-transform: uppercase;
         }
 
-        /* 分隔线 */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .divider-line {
-            flex: 1;
+        /* 分隔 */
+        .rule {
             height: 1px;
             background: var(--border);
+            margin: 22px 0;
+            position: relative;
         }
-        .divider-diamond {
+        .rule::after {
+            content: '';
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
             width: 5px; height: 5px;
-            background: var(--gold);
-            transform: rotate(45deg);
-            opacity: 0.5;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-md);
+            border-radius: 1px;
+            rotate: 45deg;
         }
 
-        h2 {
-            font-family: 'PingFang SC', sans-serif;
-            color: rgba(255,255,255,0.85);
-            font-size: 15px;
-            font-weight: 400;
+        /* 标题 */
+        .section-title {
             text-align: center;
-            margin-bottom: 20px;
-            letter-spacing: 0.5px;
+            font-size: 15px; font-weight: 500;
+            color: var(--text-1);
+            margin-bottom: 18px;
+            letter-spacing: 0.3px;
         }
 
         /* 输入框 */
-        .input-wrap {
-            position: relative;
-            margin-bottom: 6px;
-        }
         input[type="text"] {
             width: 100%;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px 20px;
-            font-size: 18px;
+            background: var(--bg-input);
+            border: 1.5px solid transparent;
+            border-radius: 14px;
+            padding: 15px 18px;
+            font-size: 17px;
             text-align: center;
-            color: var(--gold-light);
+            color: var(--text-1);
             letter-spacing: 4px;
             font-weight: 600;
             outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
             font-family: 'Courier New', monospace;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
         input[type="text"]:focus {
-            border-color: rgba(201,168,76,0.5);
-            box-shadow: 0 0 0 3px rgba(201,168,76,0.08), 0 0 20px rgba(201,168,76,0.08);
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 3px rgba(155,35,53,0.08);
+            background: #fff;
         }
         input[type="text"]::placeholder {
-            color: rgba(201,168,76,0.2);
-            letter-spacing: 2px;
-            font-size: 13px;
+            color: var(--text-3);
+            font-size: 12px; letter-spacing: 2px;
         }
 
         /* 主按钮 */
         .btn-go {
             width: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, #6B1220 50%, #8B2A1A 100%);
-            color: var(--gold-light);
-            border: 1px solid rgba(201,168,76,0.3);
+            background: var(--crimson);
+            color: #fff;
+            border: none;
             padding: 16px;
             border-radius: 50px;
-            font-size: 15px;
+            font-size: 15px; font-weight: 600;
             cursor: pointer;
-            font-weight: 600;
-            margin-top: 20px;
-            /* 移除 text-transform:uppercase 和固定 letter-spacing，避免英文乱排 */
+            margin-top: 16px;
             letter-spacing: 1px;
             font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            box-shadow: var(--shadow-btn);
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        .btn-go::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
-            transition: left 0.5s;
-        }
-        .btn-go:hover::before { left: 100%; }
         .btn-go:hover {
-            border-color: rgba(201,168,76,0.6);
-            box-shadow: 0 8px 24px rgba(139,26,47,0.4), 0 0 0 1px rgba(201,168,76,0.2);
-            transform: translateY(-1px);
+            background: var(--crimson-dk);
+            box-shadow: 0 6px 20px rgba(155,35,53,0.35);
         }
-        .btn-go:active { transform: translateY(0); }
+        .btn-go:active { transform: scale(0.98); box-shadow: none; }
 
         /* 恢复链接 */
         .recovery-link {
-            margin-top: 20px;
-            font-size: 11px;
-            color: var(--text-muted);
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            display: block;
-            letter-spacing: 1px;
+            display: block; text-align: center;
+            margin-top: 18px;
+            font-size: 12px; color: var(--text-3);
+            cursor: pointer; letter-spacing: 0.3px;
             transition: color 0.2s;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            text-underline-offset: 3px;
         }
-        .recovery-link:hover { color: var(--gold); }
+        .recovery-link:hover { color: var(--crimson); text-decoration-color: var(--crimson); }
 
-        /* Guide box */
+        /* 说明盒子 */
         #guide-box { display: none; }
-
         .instruction {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
+            background: var(--bg-input);
             border-radius: 16px;
-            padding: 20px;
+            padding: 18px 20px;
             margin: 16px 0;
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            color: var(--text-2);
             line-height: 2;
             text-align: left;
         }
-        .highlight { color: var(--gold); font-weight: 600; }
+        .highlight { color: var(--crimson); font-weight: 600; }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN</div>
 
+    <!-- 激活区 -->
     <div id="auth-ui">
         <div class="logo-area">
             <span class="logo-icon">🦦</span>
             <div class="brand-name">Prestige</div>
             <div class="brand-sub">Business Station</div>
         </div>
-
-        <div class="divider">
-            <div class="divider-line"></div>
-            <div class="divider-diamond"></div>
-            <div class="divider-line"></div>
-        </div>
-
-        <h2 id="t-auth-title">激活您的专属能量站</h2>
-
-        <div class="input-wrap">
-            <input type="text" id="activation-code" placeholder="ENTER CODE">
-        </div>
-
+        <div class="rule"></div>
+        <div class="section-title" id="t-auth-title">激活您的专属能量站</div>
+        <input type="text" id="activation-code" placeholder="ENTER CODE">
         <button class="btn-go" onclick="handleVerify()" id="t-auth-btn">立即验证</button>
-
-        <div class="recovery-link" onclick="document.getElementById('restore-file').click()" id="t-recover">
-            通过备份文件复原数据
-        </div>
+        <div class="recovery-link" onclick="document.getElementById('restore-file').click()" id="t-recover">通过备份文件复原数据</div>
         <input type="file" id="restore-file" accept=".json" onchange="importStellarockData(event)" style="display:none;">
     </div>
 
+    <!-- 引导区 -->
     <div id="guide-box">
         <div class="logo-area">
             <span class="logo-icon">📱</span>
-            <div class="brand-name">Installation</div>
+            <div class="brand-name">Install</div>
             <div class="brand-sub">Add to Home Screen</div>
         </div>
-
-        <div class="divider">
-            <div class="divider-line"></div>
-            <div class="divider-diamond"></div>
-            <div class="divider-line"></div>
-        </div>
-
-        <h2 id="t-guide-title">使用说明</h2>
+        <div class="rule"></div>
+        <div class="section-title" id="t-guide-title">使用说明</div>
         <div class="instruction" id="t-instruction">
             1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>
             2️⃣ 找到 <span class="highlight">"添加到主屏幕"</span><br>
@@ -317,9 +244,7 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW ready', reg.scope))
-                .catch(err => console.log('SW failed', err));
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
     }
 
@@ -327,29 +252,17 @@
     let currentLang = localStorage.getItem('lang') || 'zh';
 
     const translations = {
-        'zh': {
-            'btn': 'EN',
-            'authTitle': '激活您的专属能量站',
-            'authBtn': '立即验证',
-            'recover': '通过备份文件复原数据',
-            'guideTitle': '使用说明',
-            'guideBtn': '进入系统',
-            'instruction': '为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">"添加到主屏幕"</span><br>3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>完成后从桌面图标进入。',
-            'error': '激活码错误 🦦',
-            'importSuccess': '✅ 资产还原成功，欢迎回来！',
-            'importError': '❌ 无效的备份文件。'
+        zh: {
+            btn:'EN', authTitle:'激活您的专属能量站', authBtn:'立即验证',
+            recover:'通过备份文件复原数据', guideTitle:'使用说明', guideBtn:'进入系统',
+            instruction:'为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">"添加到主屏幕"</span><br>3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>完成后从桌面图标进入。',
+            error:'激活码错误 🦦', importSuccess:'✅ 资产还原成功，欢迎回来！', importError:'❌ 无效的备份文件。'
         },
-        'en': {
-            'btn': '中文',
-            'authTitle': 'Activate Your Station',
-            'authBtn': 'Verify Now',
-            'recover': 'Restore from Backup File',
-            'guideTitle': 'Instructions',
-            'guideBtn': 'Enter System',
-            'instruction': 'To get the <span class="highlight">App</span> experience:<br><br>1️⃣ Tap the <span class="highlight">Share Icon</span> at bottom<br>2️⃣ Find <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on top right.<br><br>Then open from your home screen.',
-            'error': 'Invalid Code. 🦦',
-            'importSuccess': '✅ Assets Restored! Welcome back.',
-            'importError': '❌ Invalid Backup File.'
+        en: {
+            btn:'中文', authTitle:'Activate Your Station', authBtn:'Verify Now',
+            recover:'Restore from Backup File', guideTitle:'Instructions', guideBtn:'Enter System',
+            instruction:'To get the <span class="highlight">App</span> experience:<br><br>1️⃣ Tap the <span class="highlight">Share Icon</span> at bottom<br>2️⃣ Find <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on top right.<br><br>Then open from your home screen.',
+            error:'Invalid Code. 🦦', importSuccess:'✅ Assets Restored! Welcome back.', importError:'❌ Invalid Backup File.'
         }
     };
 
@@ -371,7 +284,7 @@
     }
 
     function generateDeviceFingerprint() {
-        const info = [navigator.userAgent, screen.width + "x" + screen.height, navigator.language].join('|');
+        const info = [navigator.userAgent, screen.width + 'x' + screen.height, navigator.language].join('|');
         let hash = 0;
         for (let i = 0; i < info.length; i++) { hash = ((hash << 5) - hash) + info.charCodeAt(i); hash |= 0; }
         return Math.abs(hash).toString(36).toUpperCase();
@@ -390,7 +303,7 @@
 
     async function handleVerify() {
         const input = document.getElementById('activation-code');
-        const btn = document.getElementById('t-auth-btn');
+        const btn   = document.getElementById('t-auth-btn');
         if (btn.disabled) return;
         const code = input.value.trim().toUpperCase();
         const isValid = await validateLicense(code);
@@ -398,8 +311,7 @@
             try {
                 btn.disabled = true;
                 const deviceID = generateDeviceFingerprint();
-                const WORKER_URL = 'https://auth.nudgenow.xyz';
-                const response = await fetch(WORKER_URL, {
+                const response = await fetch('https://auth.nudgenow.xyz', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code, deviceID })
@@ -415,7 +327,7 @@
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert(currentLang === 'zh' ? "请检查网络连接" : "Network required.");
+                alert(currentLang === 'zh' ? '请检查网络连接' : 'Network required.');
                 btn.disabled = false;
             }
         } else {
@@ -432,12 +344,12 @@
                 const data = JSON.parse(e.target.result);
                 if (data.isActivated === 'true' || data.revenue_history) {
                     localStorage.clear();
-                    for (let key in data) { localStorage.setItem(key, data[key]); }
+                    for (let key in data) localStorage.setItem(key, data[key]);
                     localStorage.setItem('isActivated', 'true');
                     alert(translations[currentLang].importSuccess);
                     enterApp();
-                } else { throw new Error(); }
-            } catch (err) { alert(translations[currentLang].importError); }
+                } else throw new Error();
+            } catch { alert(translations[currentLang].importError); }
         };
         reader.readAsText(file);
     }
@@ -446,10 +358,9 @@
         document.getElementById('auth-ui').style.display = 'none';
         document.getElementById('guide-box').style.display = 'block';
     }
-
     function enterApp() { window.location.replace('index.html'); }
 
-    if (localStorage.getItem('isActivated') === 'true') { showGuide(); }
+    if (localStorage.getItem('isActivated') === 'true') showGuide();
     updateUI();
 </script>
 </body>
