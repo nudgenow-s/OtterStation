@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#130A0C">
+    <meta name="theme-color" content="#9B2335">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,557 +11,366 @@
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
         :root {
-            --primary: #8B1A2F;
-            --primary-pink: #8B1A2F;
-            --gold: #C9A84C;
-            --gold-light: #E8D08A;
-            --gold-dim: rgba(201,168,76,0.35);
-            --bg-dark: #130A0C;
-            --bg-card: #1C0E12;
-            --bg-surface: rgba(255,255,255,0.035);
-            --bg-input: rgba(255,255,255,0.04);
-            --border: rgba(201,168,76,0.15);
-            --border-hover: rgba(201,168,76,0.38);
-            --text: rgba(255,255,255,0.88);
-            --text-muted: rgba(255,255,255,0.35);
-            --text-dim: rgba(201,168,76,0.45);
-            --success: #4CAF76;
-            --success-green: #4CAF76;
+            --bg-page:   #F7F3EE;
+            --bg-card:   #FFFFFF;
+            --bg-surface:#FAF8F5;
+            --bg-input:  #F4F0EB;
+            --crimson:   #9B2335;
+            --crimson-dk:#7A1828;
+            --gold:      #B8963E;
+            --gold-lt:   #D4AC5A;
+            --brown:     #6B4226;
+            --text-1:    #1A1208;
+            --text-2:    #6B5C4C;
+            --text-3:    #A89880;
+            --border:    rgba(107,66,38,0.10);
+            --border-md: rgba(107,66,38,0.18);
+            --success:   #2D7D52;
+            /* legacy aliases */
+            --primary:      #9B2335;
+            --primary-pink: #9B2335;
+            --success-green:#2D7D52;
+            --shadow-card: 0 4px 24px rgba(107,66,38,0.08), 0 1px 4px rgba(107,66,38,0.04);
+            --shadow-btn:  0 4px 16px rgba(155,35,53,0.28);
+            --shadow-modal:0 24px 64px rgba(107,66,38,0.18), 0 4px 16px rgba(107,66,38,0.08);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        html { background: #130A0C; min-height: 100%; }
-
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html { background: var(--bg-page); min-height: 100%; }
         body {
-            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
-            background: #130A0C;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            min-height: 100dvh;
-            padding: 20px 0 40px;
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
+            background: var(--bg-page);
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; min-height: 100dvh;
+            padding: 24px 0 48px;
         }
 
-        /* Ambient glow */
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background:
-                radial-gradient(ellipse 80% 45% at 50% -10%, rgba(139,26,47,0.28) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 40% at 85% 100%, rgba(92,51,23,0.18) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ===== MAIN CARD ===== */
+        /* ═══════════════════ MAIN CARD ═══════════════════ */
         .app-container {
             width: 340px;
             background: var(--bg-card);
-            border-radius: 24px;
+            border-radius: 28px;
             border: 1px solid var(--border);
-            box-shadow:
-                0 0 0 1px rgba(201,168,76,0.05),
-                0 32px 80px rgba(0,0,0,0.65),
-                inset 0 1px 0 rgba(201,168,76,0.09);
-            padding: 0;
-            position: relative;
-            z-index: 1;
+            box-shadow: var(--shadow-card);
             overflow: hidden;
+            position: relative;
         }
-
-        /* Top gold accent line */
+        /* 酒红顶线 */
         .app-container::before {
             content: '';
-            position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 56px; height: 3px;
+            background: var(--crimson);
+            border-radius: 0 0 3px 3px;
         }
 
-        /* ===== TOP NAV ===== */
+        /* ── Top Nav ── */
         .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 20px 0;
         }
-        #date-display {
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: 1.5px;
-        }
-        .nav-actions {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-        }
+        #date-display { font-size: 11px; color: var(--text-3); letter-spacing: 0.5px; }
+        .nav-actions  { display: flex; gap: 12px; align-items: center; }
         .nav-btn {
-            font-size: 11px;
-            color: var(--text-dim);
-            cursor: pointer;
-            letter-spacing: 0.5px;
+            font-size: 11px; color: var(--text-3);
+            cursor: pointer; letter-spacing: 0.3px;
             transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 3px;
         }
-        .nav-btn:hover { color: var(--gold); }
-        .nav-btn.accent { color: var(--gold); opacity: 0.8; }
-        .nav-btn.accent:hover { opacity: 1; }
+        .nav-btn:hover { color: var(--crimson); }
+        .nav-btn.accent { color: var(--crimson); font-weight: 600; }
 
-        /* ===== BRAND HEADER ===== */
-        .brand-header {
-            text-align: center;
-            padding: 16px 20px 0;
-        }
+        /* ── Brand ── */
+        .brand-header { text-align: center; padding: 14px 20px 0; }
         #industry-logo {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 11px;
-            letter-spacing: 5px;
-            color: var(--gold);
-            text-transform: uppercase;
-            opacity: 0.7;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 11px; letter-spacing: 5px;
+            color: var(--gold); text-transform: uppercase; opacity: 0.85;
         }
 
-        /* ===== SCORE SECTION ===== */
-        .score-section {
-            text-align: center;
-            padding: 10px 20px 0;
-        }
+        /* ── Score ── */
+        .score-section { text-align: center; padding: 8px 20px 0; }
         #emoji-status {
-            font-size: 72px;
-            display: block;
-            margin: 8px 0 12px;
-            transition: 0.5s;
-            cursor: pointer;
-            filter: drop-shadow(0 4px 12px rgba(139,26,47,0.3));
-        }
-        .score-wrap {
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-            gap: 2px;
+            font-size: 72px; display: block;
+            margin: 6px 0 10px;
+            transition: 0.5s; cursor: pointer;
         }
         #health-score {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 56px;
-            font-weight: 300;
-            color: var(--gold-light);
-            line-height: 1;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 58px; font-weight: 300;
+            color: var(--crimson); line-height: 1;
             letter-spacing: -1px;
         }
         .health-label {
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            margin-top: 4px;
+            font-size: 10px; color: var(--text-3);
+            letter-spacing: 2px; margin-top: 4px;
             text-transform: uppercase;
         }
 
-        /* Thin divider */
-        .thin-rule {
-            margin: 18px 20px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border), transparent);
-        }
+        /* 分隔 */
+        .rule { height: 1px; background: var(--border); margin: 18px 20px; }
 
-        /* ===== INPUT CARD ===== */
+        /* ── Input Card ── */
         .input-card {
             margin: 0 16px;
             background: var(--bg-surface);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 20px 18px 16px;
-            position: relative;
+            border-radius: 20px;
+            padding: 18px 18px 14px;
         }
         .input-card-label {
-            font-size: 9px;
-            letter-spacing: 3px;
-            color: var(--text-dim);
-            text-transform: uppercase;
+            font-size: 10px; letter-spacing: 2px;
+            color: var(--text-3); text-transform: uppercase;
             margin-bottom: 10px;
         }
-        .amount-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .currency-sign {
-            font-size: 22px;
-            color: var(--gold);
-            opacity: 0.5;
-            font-weight: 300;
-        }
-        input#revenue-input {
-            flex: 1;
-            border: none;
+        .amount-row { display: flex; align-items: center; gap: 6px; }
+        .currency-sign { font-size: 20px; color: var(--text-3); font-weight: 300; }
+        #revenue-input {
+            flex: 1; border: none;
             background: transparent;
-            font-size: 30px;
-            font-weight: 300;
-            color: var(--gold-light);
-            outline: none;
-            border-bottom: 1px solid var(--border);
+            font-size: 30px; font-weight: 300;
+            color: var(--text-1); outline: none;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            border-bottom: 1.5px solid var(--border-md);
             padding-bottom: 4px;
-            transition: border-color 0.3s;
-            font-family: 'Cormorant Garamond', serif;
+            transition: border-color 0.2s;
         }
-        input#revenue-input:focus { border-bottom-color: rgba(201,168,76,0.5); }
-        input#revenue-input::placeholder { color: rgba(201,168,76,0.2); font-size: 22px; }
-
-        #unit-tip {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 10px;
-            letter-spacing: 0.5px;
-        }
+        #revenue-input:focus { border-bottom-color: var(--crimson); }
+        #revenue-input::placeholder { color: var(--text-3); font-size: 22px; }
+        #unit-tip { font-size: 11px; color: var(--text-3); margin-top: 10px; }
         #profit-tip {
-            font-size: 12px;
-            color: var(--success);
-            margin-top: 6px;
-            font-weight: 500;
-            height: 18px;
-            letter-spacing: 0.3px;
+            font-size: 12px; color: var(--success);
+            margin-top: 6px; font-weight: 600; height: 18px;
         }
 
-        /* ===== RECORD BUTTON ===== */
-        .btn-wrap { padding: 16px 16px; }
+        /* ── CTA Button ── */
+        .btn-wrap { padding: 14px 16px 0; }
         .btn-main {
-            background: linear-gradient(135deg, #8B1A2F 0%, #6B1220 55%, #8B2A1A 100%);
-            color: var(--gold-light);
-            border: 1px solid rgba(201,168,76,0.28);
-            padding: 17px;
-            border-radius: 50px;
-            font-size: 15px;
-            width: 100%;
-            cursor: pointer;
-            font-weight: 600;
-            letter-spacing: 1px;
-            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            background: var(--crimson); color: #fff; border: none;
+            padding: 17px; border-radius: 50px;
+            font-size: 15px; width: 100%;
+            cursor: pointer; font-weight: 600;
+            letter-spacing: 0.5px;
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
+            box-shadow: var(--shadow-btn);
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        .btn-main::before {
-            content: '';
-            position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.12), transparent);
-            transition: left 0.45s;
-        }
-        .btn-main:hover::before { left: 100%; }
-        .btn-main:hover {
-            border-color: rgba(201,168,76,0.5);
-            box-shadow: 0 8px 28px rgba(139,26,47,0.4), 0 0 0 1px rgba(201,168,76,0.12);
-            transform: translateY(-1px);
-        }
-        .btn-main:active { transform: translateY(1px); box-shadow: none; }
+        .btn-main:hover { background: var(--crimson-dk); box-shadow: 0 6px 20px rgba(155,35,53,0.35); }
+        .btn-main:active { transform: scale(0.98); box-shadow: none; }
 
-        /* ===== BADGE WALL ===== */
+        /* ── Badge Wall ── */
         .badge-section {
-            margin: 0 16px 20px;
+            margin: 14px 16px 20px;
             background: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 14px 10px;
         }
-        .badge-wall {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            font-size: 20px;
-        }
-        .badge-wall span { filter: grayscale(1); opacity: 0.12; transition: all 0.3s; }
-        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.15) !important; filter: drop-shadow(0 2px 8px rgba(201,168,76,0.4)) !important; }
+        .badge-wall { display: flex; justify-content: center; gap: 14px; font-size: 20px; }
+        .badge-wall span { filter: grayscale(1); opacity: 0.15; transition: all 0.3s; }
+        .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.15) !important; }
 
-        /* ===== MOTIVATION MODAL ===== */
+        /* ═══════════════════ MODALS ═══════════════════ */
         .modal-overlay {
-            display: none;
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            display: none; position: fixed; inset: 0;
+            background: rgba(26,18,8,0.45);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(4px);
+            justify-content: center; align-items: center;
         }
 
         .modal-card {
             background: var(--bg-card);
-            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 28px 24px;
             width: 300px;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201,168,76,0.1);
-            animation: slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: var(--shadow-modal);
+            border: 1px solid var(--border);
+            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
             position: relative;
         }
         .modal-card::before {
             content: '';
-            position: absolute; top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 60px; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 3px;
+            background: var(--crimson);
+            border-radius: 0 0 3px 3px;
         }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        @keyframes popIn { from{opacity:0;transform:scale(0.92) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
         .modal-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
-            color: var(--gold);
-            margin-bottom: 14px;
-            letter-spacing: 1px;
+            font-size: 16px; font-weight: 600; color: var(--text-1);
+            margin-bottom: 12px;
         }
         .modal-text {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.8;
-            margin-bottom: 20px;
+            font-size: 13px; color: var(--text-2);
+            line-height: 1.8; margin-bottom: 18px;
             white-space: pre-line;
         }
-
         .btn-secondary {
             width: 100%;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 13px;
-            border-radius: 50px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 10px;
-            letter-spacing: 1px;
-            transition: all 0.2s;
+            background: var(--bg-input); border: 1px solid var(--border);
+            color: var(--text-2); padding: 13px; border-radius: 50px;
+            font-size: 13px; cursor: pointer; margin-top: 10px;
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
+            transition: background 0.2s, border-color 0.2s;
         }
-        .btn-secondary:hover { border-color: var(--border-hover); color: var(--text); }
+        .btn-secondary:hover { background: #EDE8E1; border-color: var(--border-md); }
 
-        /* ===== REPORT MODAL ===== */
+        /* ── Report Modal ── */
         #report-modal {
-            background: var(--bg-card);
+            background: var(--bg-page);
             width: 100%; height: 100%;
             padding: 28px 22px;
             box-sizing: border-box;
             overflow-y: auto;
-            animation: slideUp 0.4s ease;
+            animation: slideUp 0.38s ease;
             display: none;
-            position: fixed; top: 0; left: 0;
-            z-index: 2500;
+            position: fixed; inset: 0; z-index: 2500;
         }
         #report-modal::-webkit-scrollbar { width: 3px; }
-        #report-modal::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+        #report-modal::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
 
         .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
         }
         .report-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 22px;
-            font-weight: 400;
-            color: var(--gold-light);
-            letter-spacing: 2px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 26px; font-weight: 400; color: var(--text-1); letter-spacing: 1px;
         }
         .close-btn {
-            border: none;
-            background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
-            font-size: 20px;
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border); background: var(--bg-input);
+            color: var(--text-2); font-size: 18px;
+            width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.2s;
         }
-        .close-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+        .close-btn:hover { background: var(--bg-surface); border-color: var(--border-md); }
 
-        .forecast-card {
-            background: var(--bg-surface);
+        /* 数据卡片 */
+        .data-card {
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 16px 18px;
-            border-radius: 18px;
-            margin: 12px 0;
+            border-radius: 18px; padding: 16px 18px;
+            margin: 10px 0;
             border-left: 3px solid var(--gold);
-            text-align: left;
         }
-        .forecast-card.blue-accent { border-left-color: #4facfe; }
-        .forecast-card-label {
-            font-size: 10px;
-            color: var(--text-dim);
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+        .data-card.accent { border-left-color: var(--crimson); }
+        .data-card-label {
+            font-size: 10px; color: var(--text-3);
+            font-weight: 600; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        #forecast-val {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 30px; font-weight: 300;
+            color: var(--crimson); margin: 6px 0 4px;
         }
 
+        /* ROI bar */
         .roi-bar-container {
-            height: 4px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 2px;
-            margin: 10px 0;
-            overflow: hidden;
+            height: 5px; background: var(--bg-input);
+            border-radius: 3px; margin: 10px 0; overflow: hidden;
         }
         #roi-progress {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--gold));
-            width: 0%;
+            background: linear-gradient(90deg, var(--crimson), var(--gold-lt));
+            width: 0%; border-radius: 3px;
             transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-            border-radius: 2px;
         }
-        #roi-desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.7;
-        }
+        #roi-desc { font-size: 11px; color: var(--text-2); line-height: 1.7; }
 
-        #forecast-val {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 28px;
-            font-weight: 300;
-            color: #7EC8E3;
-            margin: 6px 0 4px;
-            letter-spacing: 1px;
+        /* history */
+        .section-label {
+            font-size: 10px; letter-spacing: 2px; color: var(--text-3);
+            text-transform: uppercase; margin: 20px 0 10px;
         }
-
         .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 13px 0;
-            border-bottom: 1px solid rgba(201,168,76,0.08);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border);
             font-size: 13px;
         }
         .history-item:last-child { border-bottom: none; }
-        .history-date { color: var(--text-muted); font-size: 12px; letter-spacing: 0.5px; }
-        .history-val { color: var(--gold-light); font-weight: 500; }
+        .history-date { color: var(--text-3); font-size: 12px; }
+        .history-val  { color: var(--text-1); font-weight: 600; }
 
-        .section-label {
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            margin: 20px 0 10px;
-        }
-
-        /* ===== COST MODAL ===== */
-        #cost-detail-modal .modal-card {
-            width: 300px;
-        }
+        /* ── Cost Modal inputs ── */
         #cost-detail-modal input[type="number"] {
-            width: 100%;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 16px;
-            color: var(--gold-light);
-            outline: none;
-            margin-bottom: 10px;
-            transition: border-color 0.3s;
+            width: 100%; background: var(--bg-input);
+            border: 1.5px solid transparent;
+            border-radius: 12px; padding: 13px 15px;
+            font-size: 16px; color: var(--text-1);
+            outline: none; margin-bottom: 10px;
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
+            transition: border-color 0.2s;
         }
-        #cost-detail-modal input[type="number"]:focus { border-color: var(--border-hover); }
-        #cost-detail-modal input[type="number"]::placeholder { color: rgba(201,168,76,0.2); font-size: 13px; }
+        #cost-detail-modal input[type="number"]:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 3px rgba(155,35,53,0.07);
+            background: #fff;
+        }
+        #cost-detail-modal input[type="number"]::placeholder { color: var(--text-3); font-size: 13px; }
 
-        /* ===== SUPPLEMENT / CALENDAR MODAL ===== */
-        #supplement-modal .modal-card {
-            width: 320px;
-            max-height: 88vh;
-            overflow-y: auto;
-        }
+        /* ── Calendar Modal ── */
+        #supplement-modal .modal-card { width: 320px; max-height: 88vh; overflow-y: auto; }
         #supplement-modal .modal-card::-webkit-scrollbar { width: 2px; }
-        #supplement-modal .modal-card::-webkit-scrollbar-thumb { background: var(--gold-dim); }
 
-        .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .cal-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--gold);
-            letter-spacing: 1px;
-        }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .cal-title  { font-size: 13px; font-weight: 600; color: var(--text-1); }
         .cal-nav-btn {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            font-size: 16px;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 8px;
+            background: var(--bg-input); border: 1px solid var(--border);
+            color: var(--text-2); font-size: 16px;
+            cursor: pointer; padding: 4px 10px; border-radius: 8px;
             transition: all 0.15s;
         }
-        .cal-nav-btn:hover { background: rgba(201,168,76,0.08); border-color: var(--border-hover); }
+        .cal-nav-btn:hover { background: var(--bg-surface); border-color: var(--border-md); color: var(--crimson); }
 
-        .cal-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            text-align: center;
-        }
-        .cal-weekday { font-size: 9px; color: var(--text-muted); padding: 4px 0; letter-spacing: 0.5px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; text-align: center; }
+        .cal-weekday { font-size: 9px; color: var(--text-3); padding: 4px 0; letter-spacing: 0.5px; }
         .cal-day {
-            font-size: 12px;
-            padding: 8px 2px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.15s;
-            color: var(--text-muted);
+            font-size: 12px; padding: 8px 2px;
+            border-radius: 8px; cursor: pointer;
+            color: var(--text-2); transition: all 0.15s;
         }
-        .cal-day:hover { background: rgba(201,168,76,0.08); color: var(--gold); }
-        .cal-day.today { background: rgba(139,26,47,0.3); color: var(--gold-light); font-weight: 600; border: 1px solid rgba(139,26,47,0.5); }
+        .cal-day:hover { background: rgba(155,35,53,0.07); color: var(--crimson); }
+        .cal-day.today {
+            background: rgba(155,35,53,0.08);
+            color: var(--crimson); font-weight: 700;
+            border: 1px solid rgba(155,35,53,0.2);
+        }
         .cal-day.has-record { border-bottom: 2px solid var(--gold); }
-        .cal-day.selected { background: var(--primary); color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); }
-        .cal-day.empty { cursor: default; }
-        .cal-day.future { color: rgba(255,255,255,0.08); cursor: default; pointer-events: none; }
+        .cal-day.selected  { background: var(--crimson); color: #fff; }
+        .cal-day.empty     { cursor: default; }
+        .cal-day.future    { color: var(--border-md); cursor: default; pointer-events: none; }
 
         #supplement-amount-area {
-            display: none;
-            margin-top: 18px;
-            border-top: 1px solid var(--border);
-            padding-top: 16px;
+            display: none; margin-top: 18px;
+            border-top: 1px solid var(--border); padding-top: 16px;
         }
-        #supplement-date-label { font-size: 11px; color: var(--text-dim); margin-bottom: 10px; letter-spacing: 1px; }
+        #supplement-date-label { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
         #supplement-input {
-            border: none;
-            border-bottom: 1px solid var(--border);
-            font-size: 26px;
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 300;
-            width: 100%;
-            text-align: center;
-            color: var(--gold-light);
-            outline: none;
-            background: transparent;
-            margin-bottom: 16px;
-            transition: border-color 0.3s;
+            border: none; border-bottom: 1.5px solid var(--border-md);
+            font-size: 26px; font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 300; width: 100%; text-align: center;
+            color: var(--text-1); outline: none; background: transparent;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
         }
-        #supplement-input:focus { border-bottom-color: rgba(201,168,76,0.5); }
-        #supplement-input::placeholder { color: rgba(201,168,76,0.2); font-size: 18px; }
+        #supplement-input:focus { border-bottom-color: var(--crimson); }
+        #supplement-input::placeholder { color: var(--text-3); font-size: 18px; }
 
-        /* Divider util */
-        .divider { display: flex; align-items: center; gap: 10px; margin: 8px 0 16px; }
-        .divider-line { flex: 1; height: 1px; background: var(--border); }
-        .divider-diamond { width: 4px; height: 4px; background: var(--gold); transform: rotate(45deg); opacity: 0.4; }
+        .divider-rule { height: 1px; background: var(--border); margin: 10px 0 16px; }
     </style>
 </head>
 <body>
 
-<!-- ===== MOTIVATION MODAL ===== -->
+<!-- ═══ Motivation Modal ═══ -->
 <div id="motivation-modal" class="modal-overlay" style="z-index:3000;">
     <div class="modal-card">
         <div class="modal-title">🦦 今日行动建议</div>
@@ -571,9 +380,8 @@
     </div>
 </div>
 
-<!-- ===== MAIN APP ===== -->
+<!-- ═══ Main App ═══ -->
 <div class="app-container">
-
     <div class="top-nav">
         <span id="date-display"></span>
         <div class="nav-actions">
@@ -590,21 +398,19 @@
 
     <div class="score-section">
         <span id="emoji-status">😴</span>
-        <div class="score-wrap">
-            <div id="health-score" class="health-score" style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--gold-light);">0%</div>
-        </div>
+        <div id="health-score">0%</div>
         <div class="health-label">今日目标达成率</div>
     </div>
 
-    <div class="thin-rule"></div>
+    <div class="rule"></div>
 
     <div class="input-card">
-        <div class="input-card-label">记录成交金额</div>
+        <div class="input-card-label">记录成交</div>
         <div class="amount-row">
             <span class="currency-sign">¥</span>
             <input type="number" id="revenue-input" inputmode="decimal" placeholder="0.00">
         </div>
-        <div id="unit-tip" style="font-size:11px;color:var(--text-muted);margin-top:10px;letter-spacing:0.5px;">输入本次成交金额</div>
+        <div id="unit-tip">输入本次成交金额</div>
         <div id="profit-tip"></div>
     </div>
 
@@ -622,26 +428,25 @@
             <a href="https://nudgenow-s.github.io/Gaaame/"><span id="badge-game">🎮</span></a>
         </div>
     </div>
-
 </div>
 
-<!-- ===== REPORT MODAL ===== -->
+<!-- ═══ Report Modal ═══ -->
 <div id="report-modal">
     <div class="report-header">
         <div class="report-title">数据复盘</div>
         <button class="close-btn" onclick="toggleReport()">×</button>
     </div>
 
-    <div class="forecast-card">
-        <div class="forecast-card-label">💰 回本进度 · 总投入 ¥<span id="roi-total">0</span></div>
+    <div class="data-card accent">
+        <div class="data-card-label">💰 回本进度 · 总投入 ¥<span id="roi-total">0</span></div>
         <div class="roi-bar-container"><div id="roi-progress"></div></div>
-        <div id="roi-desc" style="font-size:11px;color:var(--text-muted);line-height:1.7;">累计纯利 ¥0，还需 ¥0 回本</div>
+        <div id="roi-desc">累计纯利 ¥0，还需 ¥0 回本</div>
     </div>
 
-    <div class="forecast-card blue-accent">
-        <div class="forecast-card-label">🔮 智能月度利润预测 <span id="trend-icon"></span></div>
+    <div class="data-card">
+        <div class="data-card-label">🔮 智能月度利润预测 <span id="trend-icon"></span></div>
         <div id="forecast-val">计算中...</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">基于近7日表现预测本月净盈余</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:4px;">基于近7日表现预测本月净盈余</div>
     </div>
 
     <canvas id="trendChart" style="margin:20px 0;"></canvas>
@@ -654,11 +459,11 @@
     </div>
 </div>
 
-<!-- ===== COST MODAL ===== -->
+<!-- ═══ Cost Modal ═══ -->
 <div id="cost-detail-modal" class="modal-overlay">
     <div class="modal-card">
-        <div class="modal-title" style="margin-bottom:16px;">⚙️ 成本细项调整</div>
-        <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+        <div class="modal-title">⚙️ 成本细项调整</div>
+        <div class="divider-rule"></div>
         <input type="number" id="edit-rent"    placeholder="月房租">
         <input type="number" id="edit-salary"  placeholder="月工资">
         <input type="number" id="edit-other"   placeholder="月杂费">
@@ -668,21 +473,20 @@
     </div>
 </div>
 
-<!-- ===== SUPPLEMENT CALENDAR MODAL ===== -->
+<!-- ═══ Supplement Calendar Modal ═══ -->
 <div id="supplement-modal" class="modal-overlay">
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div class="modal-title" style="font-size:15px;margin:0;">📅 补记</div>
-            <button onclick="closeSupplementCalendar()" style="border:none;background:none;font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+            <div class="modal-title" style="margin:0;font-size:15px;">📅 补记</div>
+            <button onclick="closeSupplementCalendar()" style="border:none;background:none;font-size:22px;cursor:pointer;color:var(--text-3);line-height:1;">×</button>
         </div>
-        <div style="font-size:10px;color:var(--text-dim);margin-bottom:14px;letter-spacing:1px;" id="supplement-hint">选择需要补记的日期</div>
+        <div style="font-size:10px;color:var(--text-3);margin-bottom:14px;letter-spacing:1px;" id="supplement-hint">选择需要补记的日期</div>
 
         <div class="cal-header">
             <button class="cal-nav-btn" onclick="calChangeMonth(-1)">‹</button>
             <div class="cal-title" id="cal-month-title"></div>
             <button class="cal-nav-btn" onclick="calChangeMonth(1)">›</button>
         </div>
-
         <div class="cal-grid" id="cal-weekdays"></div>
         <div class="cal-grid" id="cal-days"></div>
 
@@ -697,425 +501,332 @@
 <script src="accounting.js"></script>
 <script src="achievement.js"></script>
 <script>
-    // ===== 路由守卫 =====
-    (function securityCheck() {
-        if (localStorage.getItem('isActivated') !== 'true') { window.location.replace('gate.html'); }
-    })();
+    (function() { if (localStorage.getItem('isActivated') !== 'true') window.location.replace('gate.html'); })();
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
 
-    // ===== 跨天自动重置 =====
+    /* ── 跨天重置 ── */
     (function resetNewDay(){
         const today = new Date().toLocaleDateString();
-        const lastDate = localStorage.getItem('lastVisitDate');
-        if (lastDate && lastDate !== today) {
-            const yesterdayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            AccountingEngine.saveDailySnapshot(yesterdayRev, yesterday.toLocaleDateString());
-            localStorage.setItem('todayRev', '0');
-            localStorage.setItem('todayRecordCount', '0');
+        const last  = localStorage.getItem('lastVisitDate');
+        if (last && last !== today) {
+            const yRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+            const yDay = new Date(); yDay.setDate(yDay.getDate()-1);
+            AccountingEngine.saveDailySnapshot(yRev, yDay.toLocaleDateString());
+            localStorage.setItem('todayRev','0');
+            localStorage.setItem('todayRecordCount','0');
             localStorage.removeItem('earned_badges');
             try {
-                let stats = JSON.parse(localStorage.getItem('user_stats')) || {};
-                stats.isDailyGoalMet = false; stats.totalSales = 0; stats.recordCount = 0;
-                localStorage.setItem('user_stats', JSON.stringify(stats));
-            } catch(e) {}
+                let s = JSON.parse(localStorage.getItem('user_stats')) || {};
+                s.isDailyGoalMet=false; s.totalSales=0; s.recordCount=0;
+                localStorage.setItem('user_stats', JSON.stringify(s));
+            } catch(e){}
         }
         localStorage.setItem('lastVisitDate', today);
     })();
 
-    // ===== 每日激励 =====
+    /* ── 每日激励 ── */
     function getYesterdayProfit(){
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        const yStr = yesterday.toLocaleDateString();
-        if(history[yStr]) return parseFloat(history[yStr].profit) || 0;
-        const keys = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
-        const todayStr = new Date().toLocaleDateString();
-        const hKeys = keys.filter(k=>k!==todayStr);
-        if(!hKeys.length) return null;
-        return parseFloat(history[hKeys[hKeys.length-1]].profit) || 0;
+        const h = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        const y = new Date(); y.setDate(y.getDate()-1);
+        const yStr = y.toLocaleDateString();
+        if(h[yStr]) return parseFloat(h[yStr].profit)||0;
+        const keys = Object.keys(h).sort((a,b)=>new Date(a)-new Date(b));
+        const hk = keys.filter(k=>k!==new Date().toLocaleDateString());
+        return hk.length ? parseFloat(h[hk[hk.length-1]].profit)||0 : null;
     }
-
     function buildMotivation(){
-        const daily = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const yProfit = getYesterdayProfit();
-        if(!daily) return `还没设定成本～\n点右上角 🔒 成本 完成配置\n系统才能计算您的达成率 🧮`;
-        if(yProfit === null) return `今日目标：\n👉 ¥${daily.toFixed(2)} = 打平成本\n超出的每一分，都是您的净利润 💰`;
-        if(yProfit < 0) return `昨日小亏 ¥${Math.abs(yProfit).toFixed(2)}\n👉 今天只需多一笔就是反转\n不必完美，只需开始 🔥`;
-        return `昨日盈利 ¥${yProfit.toFixed(2)} 🎉\n👉 今天保持节奏\n基础线：¥${daily.toFixed(2)}`;
+        const d = parseFloat(localStorage.getItem('dailyCost'))||0;
+        const y = getYesterdayProfit();
+        if(!d) return `还没设定成本～\n点右上角 🔒 成本 完成配置\n系统才能计算您的达成率 🧮`;
+        if(y===null) return `今日目标：\n👉 ¥${d.toFixed(2)} = 打平成本\n超出的每一分，都是您的净利润 💰`;
+        if(y<0) return `昨日小亏 ¥${Math.abs(y).toFixed(2)}\n👉 今天只需多一笔就是反转\n不必完美，只需开始 🔥`;
+        return `昨日盈利 ¥${y.toFixed(2)} 🎉\n👉 今天保持节奏\n基础线：¥${d.toFixed(2)}`;
     }
-
-    (function dailyMotivationUI(){
+    (function dailyMotivation(){
         const today = new Date().toLocaleDateString();
-        if(localStorage.getItem('motivationShown') === today) return;
+        if(localStorage.getItem('motivationShown')===today) return;
         document.getElementById('motivation-text').innerText = buildMotivation();
-        setTimeout(()=>{ document.getElementById('motivation-modal').style.display = 'flex'; }, 600);
+        setTimeout(()=>{ document.getElementById('motivation-modal').style.display='flex'; }, 600);
         localStorage.setItem('motivationShown', today);
     })();
-
-    function closeMotivation(){ document.getElementById('motivation-modal').style.display = 'none'; }
+    function closeMotivation(){ document.getElementById('motivation-modal').style.display='none'; }
     function jumpToRecord(){
         closeMotivation();
         const inp = document.getElementById('revenue-input');
         inp.focus();
-        inp.style.transform = 'scale(1.03)';
-        setTimeout(()=>{ inp.style.transform = ''; }, 300);
+        inp.style.transform='scale(1.02)';
+        setTimeout(()=>{ inp.style.transform=''; },300);
     }
 
-    // ===== Boss Validate =====
-    function validateBoss(target) {
-        if (prompt("请输入密码：") === "0000") {
-            if (target === 'cost') {
+    /* ── Boss ── */
+    function validateBoss(target){
+        if(prompt('请输入密码：')==='0000'){
+            if(target==='cost'){
                 document.getElementById('edit-rent').value    = localStorage.getItem('monthlyRent');
                 document.getElementById('edit-salary').value  = localStorage.getItem('monthlySalary');
                 document.getElementById('edit-other').value   = localStorage.getItem('monthlyOther');
                 document.getElementById('edit-startup').value = localStorage.getItem('startupCost');
-                document.getElementById('cost-detail-modal').style.display = 'flex';
-            } else { toggleReport(); }
+                document.getElementById('cost-detail-modal').style.display='flex';
+            } else toggleReport();
         }
     }
 
-    // ===== Data Export =====
+    /* ── Data export ── */
     const StellarockDataHub = {
-        exportData: function() {
+        exportData(){
             try {
-                const allData = {};
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i); allData[key] = localStorage.getItem(key);
-                }
-                if (!Object.keys(allData).length) { alert("财库暂无数据，先记几笔再备份。"); return; }
-                const backupDate = new Date().toISOString().slice(0,10);
-                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url;
-                a.download = `Stellarock_Vault_${backupDate}.json`; a.click();
-                URL.revokeObjectURL(url);
-                alert("备份成功！请妥善保存该 JSON 文件。");
-            } catch(e) { alert("备份失败，请检查浏览器权限。"); }
+                const d={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); d[k]=localStorage.getItem(k); }
+                if(!Object.keys(d).length){ alert('财库暂无数据，先记几笔再备份。'); return; }
+                const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+                const url=URL.createObjectURL(blob); const a=document.createElement('a');
+                a.href=url; a.download=`Stellarock_Vault_${new Date().toISOString().slice(0,10)}.json`; a.click();
+                URL.revokeObjectURL(url); alert('备份成功！请妥善保存。');
+            } catch{ alert('备份失败，请检查浏览器权限。'); }
         }
     };
 
-    // ===== Cost Save =====
-    function saveCostDetails() {
-        const oldR = (parseFloat(localStorage.getItem('monthlyRent')) / 30).toFixed(2);
-        const oldS = (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2);
-        const oldO = (parseFloat(localStorage.getItem('monthlyOther')) / 30).toFixed(2);
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        Object.keys(history).forEach(date => {
-            if (!history[date].costSnapshot) history[date].costSnapshot = { rent: oldR, salary: oldS, other: oldO };
-        });
-        const r  = parseFloat(document.getElementById('edit-rent').value)    || 0;
-        const s  = parseFloat(document.getElementById('edit-salary').value)  || 0;
-        const o  = parseFloat(document.getElementById('edit-other').value)   || 0;
-        const st = parseFloat(document.getElementById('edit-startup').value) || 0;
-        const newDailyCost = (r + s + o) / 30;
-        const today = new Date().toLocaleDateString();
-        if (history[today]) {
-            const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            history[today].costSnapshot = { rent: (r/30).toFixed(2), salary: (s/30).toFixed(2), other: (o/30).toFixed(2) };
-            history[today].profit = (todayRev - newDailyCost).toFixed(2);
-            history[today].achievement = newDailyCost > 0 ? Math.floor((todayRev / newDailyCost) * 100) : 100;
+    /* ── Cost save ── */
+    function saveCostDetails(){
+        const oldR=(parseFloat(localStorage.getItem('monthlyRent'))/30).toFixed(2);
+        const oldS=(parseFloat(localStorage.getItem('monthlySalary'))/30).toFixed(2);
+        const oldO=(parseFloat(localStorage.getItem('monthlyOther'))/30).toFixed(2);
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        Object.keys(history).forEach(date=>{ if(!history[date].costSnapshot) history[date].costSnapshot={rent:oldR,salary:oldS,other:oldO}; });
+        const r=parseFloat(document.getElementById('edit-rent').value)||0;
+        const s=parseFloat(document.getElementById('edit-salary').value)||0;
+        const o=parseFloat(document.getElementById('edit-other').value)||0;
+        const st=parseFloat(document.getElementById('edit-startup').value)||0;
+        const dc=(r+s+o)/30;
+        const today=new Date().toLocaleDateString();
+        if(history[today]){
+            const tr=parseFloat(localStorage.getItem('todayRev'))||0;
+            history[today].costSnapshot={(rent:(r/30).toFixed(2),salary:(s/30).toFixed(2),other:(o/30).toFixed(2))};
+            history[today].profit=(tr-dc).toFixed(2);
+            history[today].achievement=dc>0?Math.floor((tr/dc)*100):100;
         }
-        localStorage.setItem('revenue_history', JSON.stringify(history));
-        localStorage.setItem('monthlyRent', r); localStorage.setItem('monthlySalary', s);
-        localStorage.setItem('monthlyOther', o); localStorage.setItem('startupCost', st);
-        localStorage.setItem('dailyCost', newDailyCost.toFixed(2));
+        localStorage.setItem('revenue_history',JSON.stringify(history));
+        localStorage.setItem('monthlyRent',r); localStorage.setItem('monthlySalary',s);
+        localStorage.setItem('monthlyOther',o); localStorage.setItem('startupCost',st);
+        localStorage.setItem('dailyCost',dc.toFixed(2));
         location.reload();
     }
-    function closeCostModal() { document.getElementById('cost-detail-modal').style.display = 'none'; }
+    function closeCostModal(){ document.getElementById('cost-detail-modal').style.display='none'; }
 
-    // ===== Record =====
-    function record() {
-        const input = document.getElementById('revenue-input');
-        const val = parseFloat(input.value);
-        if (val > 0) {
-            let rev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            rev += val;
-            localStorage.setItem('todayRev', rev);
+    /* ── Record ── */
+    function record(){
+        const input=document.getElementById('revenue-input');
+        const val=parseFloat(input.value);
+        if(val>0){
+            let rev=(parseFloat(localStorage.getItem('todayRev'))||0)+val;
+            localStorage.setItem('todayRev',rev);
             AccountingEngine.calculateProfit(val);
             AccountingEngine.saveDailySnapshot(rev);
-            try { if (typeof AchievementEngine !== 'undefined') AchievementEngine.check(val); } catch(e) {}
-            const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-            const dailyCost = parseFloat(localStorage.getItem('dailyCost')) || 0;
-            let tip = "";
-            if (todayRev > 0 && todayRev < dailyCost) { tip = `⏳ 距离打平还差 ¥${(dailyCost-todayRev).toFixed(2)}`; }
-            else if (todayRev >= dailyCost && dailyCost > 0) { tip = `✨ 纯盈 ¥${(todayRev-dailyCost).toFixed(2)}`; }
-            document.getElementById('profit-tip').innerText = tip;
-            setTimeout(()=>{ document.getElementById('profit-tip').innerText = ""; }, 3500);
-            input.value = '';
-            render();
+            try{ if(typeof AchievementEngine!=='undefined') AchievementEngine.check(val); }catch(e){}
+            const dc=parseFloat(localStorage.getItem('dailyCost'))||0;
+            let tip='';
+            if(rev>0&&rev<dc) tip=`⏳ 距离打平还差 ¥${(dc-rev).toFixed(2)}`;
+            else if(rev>=dc&&dc>0) tip=`✨ 纯盈 ¥${(rev-dc).toFixed(2)}`;
+            document.getElementById('profit-tip').innerText=tip;
+            setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
+            input.value=''; render();
         }
     }
 
-    // ===== Report =====
-    function toggleReport() {
-        const modal = document.getElementById('report-modal');
-        const isOpening = modal.style.display !== 'block';
-        modal.style.display = isOpening ? 'block' : 'none';
-        if(isOpening) { renderChart(); renderHistoryList(); calculateForecast(); }
+    /* ── Report ── */
+    function toggleReport(){
+        const m=document.getElementById('report-modal');
+        const opening=m.style.display!=='block';
+        m.style.display=opening?'block':'none';
+        if(opening){ renderChart(); renderHistoryList(); calculateForecast(); }
     }
-
-    function calculateForecast() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const dates = Object.keys(history).sort();
-        if (!dates.length) return;
-        const now = new Date();
-        const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-        const remainingDays = totalDaysInMonth - now.getDate();
-        let currentMonthProfit = 0, last7 = [];
-        dates.forEach(d => {
-            const p = parseFloat(history[d].profit) || 0;
-            if (new Date(d).getMonth() === now.getMonth() && new Date(d).getFullYear() === now.getFullYear()) currentMonthProfit += p;
+    function calculateForecast(){
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        const dates=Object.keys(history).sort();
+        if(!dates.length) return;
+        const now=new Date();
+        const totalDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+        const remaining=totalDays-now.getDate();
+        let monthProfit=0, last7=[];
+        dates.forEach(d=>{
+            const p=parseFloat(history[d].profit)||0;
+            if(new Date(d).getMonth()===now.getMonth()&&new Date(d).getFullYear()===now.getFullYear()) monthProfit+=p;
             last7.push(p);
         });
-        const sample = last7.slice(-7);
-        const avg = sample.reduce((a,b)=>a+b,0) / (sample.length||1);
-        const est = currentMonthProfit + avg * remainingDays;
-        const el = document.getElementById('forecast-val');
-        el.innerText = `¥ ${est.toFixed(2)}`;
-        el.style.color = est > 0 ? '#7EC8E3' : '#C07070';
-        document.getElementById('trend-icon').innerText = avg > 0 ? '📈' : '📉';
+        const sample=last7.slice(-7);
+        const avg=sample.reduce((a,b)=>a+b,0)/(sample.length||1);
+        const est=monthProfit+avg*remaining;
+        const el=document.getElementById('forecast-val');
+        el.innerText=`¥ ${est.toFixed(2)}`;
+        el.style.color=est>0?'var(--crimson)':'#B05040';
+        document.getElementById('trend-icon').innerText=avg>0?'📈':'📉';
         calculateROI(avg);
     }
-
-    function calculateROI(avgDailyProfit) {
-        const startup = parseFloat(localStorage.getItem('startupCost')) || 0;
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const sortedDates = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
-        if (!sortedDates.length) {
-            document.getElementById('roi-total').innerText = startup.toLocaleString();
-            document.getElementById('roi-progress').style.width = '0%';
-            document.getElementById('roi-desc').innerHTML = '暂无历史数据';
-            return;
+    function calculateROI(avg){
+        const startup=parseFloat(localStorage.getItem('startupCost'))||0;
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        const sorted=Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
+        if(!sorted.length){
+            document.getElementById('roi-total').innerText=startup.toLocaleString();
+            document.getElementById('roi-progress').style.width='0%';
+            document.getElementById('roi-desc').innerHTML='暂无历史数据'; return;
         }
-        let lastSnapshot = {
-            rent:   parseFloat(localStorage.getItem('monthlyRent'))   / 30 || 0,
-            salary: parseFloat(localStorage.getItem('monthlySalary')) / 30 || 0,
-            other:  parseFloat(localStorage.getItem('monthlyOther'))  / 30 || 0
-        };
-        let cumulativeProfit = 0;
-        for (let d = new Date(sortedDates[0]); d <= new Date(); d.setDate(d.getDate()+1)) {
-            const ds = d.toLocaleDateString();
-            const h  = history[ds];
-            if (h) {
-                if (h.costSnapshot) lastSnapshot = h.costSnapshot;
-                cumulativeProfit += parseFloat(h.profit) || 0;
-            } else {
-                cumulativeProfit -= parseFloat(lastSnapshot.rent) + parseFloat(lastSnapshot.salary) + parseFloat(lastSnapshot.other);
-            }
+        let snap={rent:parseFloat(localStorage.getItem('monthlyRent'))/30||0,salary:parseFloat(localStorage.getItem('monthlySalary'))/30||0,other:parseFloat(localStorage.getItem('monthlyOther'))/30||0};
+        let cum=0;
+        for(let d=new Date(sorted[0]);d<=new Date();d.setDate(d.getDate()+1)){
+            const ds=d.toLocaleDateString(),h=history[ds];
+            if(h){ if(h.costSnapshot) snap=h.costSnapshot; cum+=parseFloat(h.profit)||0; }
+            else cum-=parseFloat(snap.rent)+parseFloat(snap.salary)+parseFloat(snap.other);
         }
-        const progress = startup > 0 ? Math.min((cumulativeProfit / startup * 100), 100).toFixed(1) : 100;
-        const remaining = Math.max(startup - cumulativeProfit, 0);
-        let countdownText = "";
-        if (remaining <= 0) { countdownText = "🎉 已完全回本"; }
-        else if (avgDailyProfit <= 0) { countdownText = "⏳ 保持盈利以预测回本日"; }
-        else {
-            const days = Math.ceil(remaining / avgDailyProfit);
-            const roiDate = new Date(); roiDate.setDate(roiDate.getDate() + days);
-            countdownText = `预计还需 <strong style="color:var(--gold-light)">${days}</strong> 天回本（约 ${roiDate.toLocaleDateString()}）`;
-        }
-        document.getElementById('roi-total').innerText = startup.toLocaleString();
-        document.getElementById('roi-progress').style.width = progress + '%';
-        document.getElementById('roi-desc').innerHTML = `累计纯利 ¥${cumulativeProfit.toFixed(2)}，进度 ${progress}%<br>${countdownText}`;
+        const pct=startup>0?Math.min((cum/startup*100),100).toFixed(1):100;
+        const rem=Math.max(startup-cum,0);
+        let ct='';
+        if(rem<=0) ct='🎉 已完全回本';
+        else if(avg<=0) ct='⏳ 保持盈利以预测回本日';
+        else{ const days=Math.ceil(rem/avg),dt=new Date(); dt.setDate(dt.getDate()+days); ct=`预计还需 <strong>${days}</strong> 天回本（约 ${dt.toLocaleDateString()}）`; }
+        document.getElementById('roi-total').innerText=startup.toLocaleString();
+        document.getElementById('roi-progress').style.width=pct+'%';
+        document.getElementById('roi-desc').innerHTML=`累计纯利 ¥${cum.toFixed(2)}，进度 ${pct}%<br>${ct}`;
     }
-
-    function exportCSV() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        let csv = "日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n";
-        const sortedDates = Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
-        if (!sortedDates.length) return;
-        let lastSnap = {
-            rent:   (parseFloat(localStorage.getItem('monthlyRent'))   / 30).toFixed(2),
-            salary: (parseFloat(localStorage.getItem('monthlySalary')) / 30).toFixed(2),
-            other:  (parseFloat(localStorage.getItem('monthlyOther'))  / 30).toFixed(2)
-        };
-        const allDates = [];
-        for (let d = new Date(sortedDates[0]); d <= new Date(); d.setDate(d.getDate()+1)) allDates.push(new Date(d).toLocaleDateString());
-        allDates.forEach(d => {
-            const h = history[d];
-            if (h) {
-                const snap = h.costSnapshot || lastSnap;
-                if (h.costSnapshot) lastSnap = h.costSnapshot;
-                csv += `${d},${parseFloat(h.revenue)||0},${h.achievement||0}%,${snap.rent},${snap.salary},${snap.other},${parseFloat(h.profit)||0}\n`;
-            } else {
-                const dc = parseFloat(lastSnap.rent)+parseFloat(lastSnap.salary)+parseFloat(lastSnap.other);
-                csv += `${d},0,0%,${lastSnap.rent},${lastSnap.salary},${lastSnap.other},${(-dc).toFixed(2)}\n`;
-            }
+    function exportCSV(){
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        let csv='日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n';
+        const sorted=Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
+        if(!sorted.length) return;
+        let snap={rent:(parseFloat(localStorage.getItem('monthlyRent'))/30).toFixed(2),salary:(parseFloat(localStorage.getItem('monthlySalary'))/30).toFixed(2),other:(parseFloat(localStorage.getItem('monthlyOther'))/30).toFixed(2)};
+        const all=[];
+        for(let d=new Date(sorted[0]);d<=new Date();d.setDate(d.getDate()+1)) all.push(new Date(d).toLocaleDateString());
+        all.forEach(d=>{
+            const h=history[d];
+            if(h){ const s=h.costSnapshot||snap; if(h.costSnapshot) snap=h.costSnapshot; csv+=`${d},${parseFloat(h.revenue)||0},${h.achievement||0}%,${s.rent},${s.salary},${s.other},${parseFloat(h.profit)||0}\n`; }
+            else{ const dc=parseFloat(snap.rent)+parseFloat(snap.salary)+parseFloat(snap.other); csv+=`${d},0,0%,${snap.rent},${snap.salary},${snap.other},${(-dc).toFixed(2)}\n`; }
         });
-        const blob = new Blob(["\ufeff"+csv], {type:'text/csv;charset=utf-8;'});
-        const url  = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href  = url; link.download = `Precision_Report_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+        const url=URL.createObjectURL(blob),link=document.createElement('a');
+        link.href=url; link.download=`Precision_Report_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
     }
-
-    function renderChart() {
-        const ctx   = document.getElementById('trendChart').getContext('2d');
-        const trend = AccountingEngine.getTrendData();
-        if (window.myChart) window.myChart.destroy();
-        window.myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: trend.labels,
-                datasets: [{
-                    label: '营收',
-                    data: trend.data,
-                    borderColor: '#C9A84C',
-                    borderWidth: 1.5,
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(201,168,76,0.06)',
-                    pointBackgroundColor: '#C9A84C',
-                    pointRadius: 3,
-                    pointBorderWidth: 0,
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-                    y: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    function renderChart(){
+        const ctx=document.getElementById('trendChart').getContext('2d');
+        const trend=AccountingEngine.getTrendData();
+        if(window.myChart) window.myChart.destroy();
+        window.myChart=new Chart(ctx,{
+            type:'line',
+            data:{ labels:trend.labels, datasets:[{
+                label:'营收', data:trend.data,
+                borderColor:'#9B2335', borderWidth:2,
+                tension:0.4, fill:true,
+                backgroundColor:'rgba(155,35,53,0.06)',
+                pointBackgroundColor:'#9B2335', pointRadius:3, pointBorderWidth:0
+            }]},
+            options:{ plugins:{legend:{display:false}},
+                scales:{
+                    x:{ticks:{color:'#A89880',font:{size:10}},grid:{color:'rgba(107,66,38,0.06)'}},
+                    y:{ticks:{color:'#A89880',font:{size:10}},grid:{color:'rgba(107,66,38,0.06)'}}
                 }
             }
         });
     }
-
-    function renderHistoryList() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const dates = Object.keys(history).sort((a,b)=>new Date(b)-new Date(a));
-        let html = '';
-        dates.forEach(date => {
-            const h = history[date] || {};
-            const rev = parseFloat(h.revenue) || 0;
-            const ach = parseFloat(h.achievement) || 0;
-            const profit = parseFloat(h.profit) || 0;
-            const profitColor = profit >= 0 ? 'var(--success)' : '#C07070';
-            html += `
-            <div class="history-item">
+    function renderHistoryList(){
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        const dates=Object.keys(history).sort((a,b)=>new Date(b)-new Date(a));
+        let html='';
+        dates.forEach(date=>{
+            const h=history[date]||{};
+            const rev=parseFloat(h.revenue)||0, ach=parseFloat(h.achievement)||0, p=parseFloat(h.profit)||0;
+            html+=`<div class="history-item">
                 <span class="history-date">${date}</span>
                 <span class="history-val">¥${rev.toFixed(2)}</span>
-                <span style="font-size:11px;color:${profitColor};">${ach}%</span>
+                <span style="font-size:11px;color:${p>=0?'var(--success)':'#C05040'};">${ach}%</span>
             </div>`;
         });
-        document.getElementById('history-list').innerHTML = html || '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">暂无历史数据</div>';
+        document.getElementById('history-list').innerHTML=html||'<div style="color:var(--text-3);font-size:12px;padding:12px 0;">暂无历史数据</div>';
     }
 
-    function render() {
-        const rev   = parseFloat(localStorage.getItem('todayRev')) || 0;
-        const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
-        const score = Math.floor((rev / daily) * 100);
-        document.getElementById('health-score').innerText = score + '%';
-        document.getElementById('date-display').innerText = new Date().toLocaleDateString();
-        const emoji = document.getElementById('emoji-status');
-        if (score === 0)    emoji.innerText = "😴";
-        else if (score < 100) emoji.innerText = "🦦";
-        else                  emoji.innerText = "💎";
-        const earned = JSON.parse(localStorage.getItem('earned_badges')) || [];
-        document.querySelectorAll('.badge-wall span').forEach(el => el.classList.remove('active-badge'));
-        earned.forEach(id => { const el = document.getElementById('badge-'+id); if(el) el.classList.add('active-badge'); });
+    /* ── Render main ── */
+    function render(){
+        const rev=parseFloat(localStorage.getItem('todayRev'))||0;
+        const d=parseFloat(localStorage.getItem('dailyCost'))||1;
+        const score=Math.floor((rev/d)*100);
+        document.getElementById('health-score').innerText=score+'%';
+        document.getElementById('date-display').innerText=new Date().toLocaleDateString();
+        const e=document.getElementById('emoji-status');
+        if(score===0) e.innerText='😴';
+        else if(score<100) e.innerText='🦦';
+        else e.innerText='💎';
+        const earned=JSON.parse(localStorage.getItem('earned_badges'))||[];
+        document.querySelectorAll('.badge-wall span').forEach(el=>el.classList.remove('active-badge'));
+        earned.forEach(id=>{ const el=document.getElementById('badge-'+id); if(el) el.classList.add('active-badge'); });
     }
 
-    // Init
-    const config = IndustryAdapter.getCurrent();
-    document.documentElement.style.setProperty('--primary', config.theme);
-    document.documentElement.style.setProperty('--primary-pink', config.theme);
-    document.getElementById('industry-logo').innerText = `🦦 ${config.icon} ${config.name.toUpperCase()} · PRESTIGE`;
-    window.onload = render;
+    /* Init */
+    const cfg=IndustryAdapter.getCurrent();
+    document.documentElement.style.setProperty('--crimson', cfg.theme);
+    document.documentElement.style.setProperty('--primary', cfg.theme);
+    document.documentElement.style.setProperty('--primary-pink', cfg.theme);
+    document.getElementById('industry-logo').innerText=`🦦 ${cfg.icon} ${cfg.name.toUpperCase()} · STATION`;
+    window.onload=render;
 
-    // ===== SUPPLEMENT CALENDAR =====
-    const _calLang = localStorage.getItem('lang') === 'en' ? 'en-US' : 'zh-CN';
-    const _calLabels = {
-        hint:        _calLang === 'en-US' ? 'Select a date to supplement' : '选择需要补记的日期',
-        confirmBtn:  _calLang === 'en-US' ? 'Confirm' : '确认补记',
-        placeholder: _calLang === 'en-US' ? '$ Total revenue' : '¥ 当日总营收',
-        successMsg:  (d) => _calLang === 'en-US' ? `✅ Supplemented: ${d}` : `✅ 补记成功：${d}`,
-        errorMsg:    _calLang === 'en-US' ? 'Please enter a valid amount' : '请输入有效金额',
-        dateLabel:   (d) => _calLang === 'en-US' ? `Date: ${d}` : `日期：${d}`
+    /* ── Calendar ── */
+    const _cLang=localStorage.getItem('lang')==='en'?'en-US':'zh-CN';
+    const _cL={
+        hint:    _cLang==='en-US'?'Select a date':'选择需要补记的日期',
+        ph:      _cLang==='en-US'?'$ Total revenue':'¥ 当日总营收',
+        ok:      (d)=>_cLang==='en-US'?`✅ Supplemented: ${d}`:`✅ 补记成功：${d}`,
+        err:     _cLang==='en-US'?'Please enter a valid amount':'请输入有效金额',
+        dateL:   (d)=>_cLang==='en-US'?`Date: ${d}`:`日期：${d}`
     };
+    document.getElementById('supplement-hint').innerText=_cL.hint;
+    document.getElementById('supplement-input').placeholder=_cL.ph;
 
-    document.getElementById('supplement-hint').innerText = _calLabels.hint;
-    document.getElementById('supplement-input').placeholder = _calLabels.placeholder;
+    let _cy,_cm,_sel=null;
 
-    let _calYear, _calMonth, _selectedSupplementDate = null;
-
-    function openSupplementCalendar() {
-        const now = new Date(); _calYear = now.getFullYear(); _calMonth = now.getMonth();
-        _selectedSupplementDate = null;
-        document.getElementById('supplement-amount-area').style.display = 'none';
-        document.getElementById('supplement-input').value = '';
+    function openSupplementCalendar(){
+        const now=new Date(); _cy=now.getFullYear(); _cm=now.getMonth(); _sel=null;
+        document.getElementById('supplement-amount-area').style.display='none';
+        document.getElementById('supplement-input').value='';
         renderCalendar();
-        document.getElementById('supplement-modal').style.display = 'flex';
+        document.getElementById('supplement-modal').style.display='flex';
     }
-
-    function closeSupplementCalendar() {
-        document.getElementById('supplement-modal').style.display = 'none';
-        _selectedSupplementDate = null;
+    function closeSupplementCalendar(){ document.getElementById('supplement-modal').style.display='none'; _sel=null; }
+    function calChangeMonth(d){
+        _cm+=d; if(_cm>11){_cm=0;_cy++;} if(_cm<0){_cm=11;_cy--;}
+        _sel=null; document.getElementById('supplement-amount-area').style.display='none'; renderCalendar();
     }
-
-    function calChangeMonth(delta) {
-        _calMonth += delta;
-        if (_calMonth > 11) { _calMonth = 0; _calYear++; }
-        if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
-        _selectedSupplementDate = null;
-        document.getElementById('supplement-amount-area').style.display = 'none';
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        const now = new Date();
-        const todayStr = now.toLocaleDateString();
-        const monthDate  = new Date(_calYear, _calMonth, 1);
-        document.getElementById('cal-month-title').innerText = monthDate.toLocaleDateString(_calLang, { year: 'numeric', month: 'long' });
-        const weekdays = _calLang === 'en-US' ? ['Su','Mo','Tu','We','Th','Fr','Sa'] : ['日','一','二','三','四','五','六'];
-        document.getElementById('cal-weekdays').innerHTML = weekdays.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
-        const firstDay = new Date(_calYear, _calMonth, 1).getDay();
-        const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
-        let html = '';
-        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateObj = new Date(_calYear, _calMonth, day);
-            const dateStr = dateObj.toLocaleDateString();
-            const isFuture = dateObj > now && dateStr !== todayStr;
-            const isToday  = dateStr === todayStr;
-            const hasRecord = !!history[dateStr];
-            const isSelected = dateStr === _selectedSupplementDate;
-            let cls = 'cal-day';
-            if (isFuture) cls += ' future';
-            else if (isSelected) cls += ' selected';
-            else if (isToday)    cls += ' today';
-            if (hasRecord && !isFuture) cls += ' has-record';
-            const click = isFuture ? '' : `onclick="selectSupplementDate('${dateStr}')"`;
-            html += `<div class="${cls}" ${click}>${day}</div>`;
+    function renderCalendar(){
+        const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        const now=new Date(), todayStr=now.toLocaleDateString();
+        document.getElementById('cal-month-title').innerText=new Date(_cy,_cm,1).toLocaleDateString(_cLang,{year:'numeric',month:'long'});
+        const wd=_cLang==='en-US'?['Su','Mo','Tu','We','Th','Fr','Sa']:['日','一','二','三','四','五','六'];
+        document.getElementById('cal-weekdays').innerHTML=wd.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
+        const fd=new Date(_cy,_cm,1).getDay(), dim=new Date(_cy,_cm+1,0).getDate();
+        let html=''; for(let i=0;i<fd;i++) html+=`<div class="cal-day empty"></div>`;
+        for(let day=1;day<=dim;day++){
+            const obj=new Date(_cy,_cm,day), ds=obj.toLocaleDateString();
+            const fut=obj>now&&ds!==todayStr, isT=ds===todayStr, hasR=!!history[ds], isSel=ds===_sel;
+            let cls='cal-day';
+            if(fut) cls+=' future'; else if(isSel) cls+=' selected'; else if(isT) cls+=' today';
+            if(hasR&&!fut) cls+=' has-record';
+            const cl=fut?'':`onclick="selectSupplementDate('${ds}')"`;
+            html+=`<div class="${cls}" ${cl}>${day}</div>`;
         }
-        document.getElementById('cal-days').innerHTML = html;
+        document.getElementById('cal-days').innerHTML=html;
     }
-
-    function selectSupplementDate(dateStr) {
-        _selectedSupplementDate = dateStr;
-        renderCalendar();
-        const area = document.getElementById('supplement-amount-area');
-        document.getElementById('supplement-date-label').innerText = _calLabels.dateLabel(dateStr);
-        document.getElementById('supplement-input').value = '';
-        area.style.display = 'block';
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        if (history[dateStr]) document.getElementById('supplement-input').value = parseFloat(history[dateStr].revenue) || '';
-        setTimeout(() => {
-            area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            document.getElementById('supplement-input').focus();
-        }, 100);
+    function selectSupplementDate(ds){
+        _sel=ds; renderCalendar();
+        const area=document.getElementById('supplement-amount-area');
+        document.getElementById('supplement-date-label').innerText=_cL.dateL(ds);
+        document.getElementById('supplement-input').value='';
+        area.style.display='block';
+        const h=JSON.parse(localStorage.getItem('revenue_history'))||{};
+        if(h[ds]) document.getElementById('supplement-input').value=parseFloat(h[ds].revenue)||'';
+        setTimeout(()=>{ area.scrollIntoView({behavior:'smooth',block:'nearest'}); document.getElementById('supplement-input').focus(); },100);
     }
-
-    function saveSupplementRecord() {
-        const val = parseFloat(document.getElementById('supplement-input').value);
-        if (!_selectedSupplementDate || isNaN(val) || val < 0) { alert(_calLabels.errorMsg); return; }
-        AccountingEngine.saveDailySnapshot(val, _selectedSupplementDate);
-        const todayStr = new Date().toLocaleDateString();
-        if (_selectedSupplementDate === todayStr) { localStorage.setItem('todayRev', val); render(); }
-        alert(_calLabels.successMsg(_selectedSupplementDate));
-        closeSupplementCalendar();
+    function saveSupplementRecord(){
+        const val=parseFloat(document.getElementById('supplement-input').value);
+        if(!_sel||isNaN(val)||val<0){ alert(_cL.err); return; }
+        AccountingEngine.saveDailySnapshot(val,_sel);
+        if(_sel===new Date().toLocaleDateString()){ localStorage.setItem('todayRev',val); render(); }
+        alert(_cL.ok(_sel)); closeSupplementCalendar();
     }
 </script>
 <script src="i18n-engine.js"></script>
