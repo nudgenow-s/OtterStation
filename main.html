@@ -691,7 +691,7 @@
         const rem=Math.max(startup-cum,0);
         let ct='';
         if(rem<=0) ct='🎉 已完全回本';
-        else if(avg<=0) ct='⏳ 保持盈利以预测回本日';
+        else if(avg<=0) ct='⏳ 需保持盈利以预测回本日';
         else{ const days=Math.ceil(rem/avg),dt=new Date(); dt.setDate(dt.getDate()+days); ct=`预计还需 <strong>${days}</strong> 天回本（约 ${dt.toLocaleDateString()}）`; }
         document.getElementById('roi-total').innerText=startup.toLocaleString();
         document.getElementById('roi-progress').style.width=pct+'%';
