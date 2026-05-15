@@ -185,58 +185,58 @@
     <!-- Step 0 -->
     <div class="step active" id="s0">
         <div class="step-tag">01 / 05</div>
-        <h2>选择行业身份</h2>
+        <h2>🏷️ 选择行业身份</h2>
         <p>我们将根据您的行业定制专属计量与分析模型。</p>
         <div class="industry-grid" id="industry-selector">
             <div class="industry-item selected" onclick="selectType('nail',this)"><span>💅</span><label>美业</label></div>
             <div class="industry-item"          onclick="selectType('food',this)"><span>🌭</span><label>餐饮</label></div>
             <div class="industry-item"          onclick="selectType('retail',this)"><span>👗</span><label>零售</label></div>
         </div>
-        <button class="btn-primary" onclick="move(1)">确认并继续</button>
+        <button class="btn-primary" onclick="move(1)">确认身份</button>
     </div>
 
     <!-- Step 1 -->
     <div class="step" id="s1">
         <div class="step-tag">02 / 05</div>
-        <h2>房租与物业</h2>
-        <p>固定成本是生存的第一道关卡，请输入每月房租总额。</p>
+        <h2>🏠 房租与物业</h2>
+        <p>房租是生存的第一道坎。请输入每月固定支出：</p>
         <div class="rule"></div>
         <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="rent" placeholder="5000"></div>
         <button class="btn-primary" onclick="move(2)">下一步</button>
-        <span class="back-link" onclick="move(0)">← 返回</span>
+        <span class="back-link" onclick="move(0)">返回上一步</span>
     </div>
 
     <!-- Step 2 -->
     <div class="step" id="s2">
         <div class="step-tag">03 / 05</div>
-        <h2>您的专属薪酬</h2>
-        <p>主理人的劳动同样有价值，请设定您应得的月薪。</p>
+        <h2>👸 你的专属工资</h2>
+        <p>如果你不发工资，那你只是在自我剥削：</p>
         <div class="rule"></div>
         <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="salary" placeholder="8000"></div>
         <button class="btn-primary" onclick="move(3)">下一步</button>
-        <span class="back-link" onclick="move(1)">← 返回</span>
+        <span class="back-link" onclick="move(1)">返回上一步</span>
     </div>
 
     <!-- Step 3 -->
     <div class="step" id="s3">
         <div class="step-tag">04 / 05</div>
-        <h2>运营杂费</h2>
-        <p>水电、材料损耗与日常折旧，请估算月均总额。</p>
+        <h2>🔋 杂费与折旧</h2>
+        <p>水电、材料折旧。算出日均运营成本：</p>
         <div class="rule"></div>
         <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="misc" placeholder="1000"></div>
-        <button class="btn-primary" onclick="move(4)">下一步</button>
-        <span class="back-link" onclick="move(2)">← 返回</span>
+        <button class="btn-primary" onclick="move(4)">最后一步</button>
+        <span class="back-link" onclick="move(2)">返回上一步</span>
     </div>
 
     <!-- Step 4 -->
     <div class="step" id="s4">
         <div class="step-tag">05 / 05</div>
-        <h2>初始总投入</h2>
-        <p>装修、设备、加盟费等沉没成本，系统将为您追踪回本进度。</p>
+        <h2>🏗️ 初始投入成本</h2>
+        <p>装修、设备、加盟费等沉没成本：</p>
         <div class="rule"></div>
         <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="startup" placeholder="50000"></div>
-        <button class="btn-primary" onclick="save()">完成配置 · 进入工作台</button>
-        <span class="back-link" onclick="move(3)">← 返回</span>
+        <button class="btn-primary" onclick="save()">完成并进入水獭能量站</button>
+        <span class="back-link" onclick="move(3)">返回上一步</span>
     </div>
 </div>
 
@@ -252,6 +252,11 @@
         el.classList.add('selected');
         const cfg = IndustryAdapter.registry[type];
         document.documentElement.style.setProperty('--crimson', cfg.theme);
+        // 按钮hover色：比主色深15%，用简单暗化
+        document.documentElement.style.setProperty('--crimson-dk', cfg.theme);
+        // 同步 theme-color meta（状态栏颜色）
+        let metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', cfg.theme);
         document.getElementById('main-logo').innerText = cfg.icon;
     }
 
