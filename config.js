@@ -12,7 +12,7 @@ const IndustryAdapter = {
         },
         "food": {
             name: "餐饮",
-            theme: "#7A3B1E",
+            theme: "#E8601C",   // 爱马仕橙 Hermès Orange
             icon: "🌭",
             unit: "份餐点",
             slogan: "人间烟火气，最抚主理人 🍳"
@@ -34,16 +34,16 @@ const IndustryAdapter = {
     setIndustry(type) {
         if (this.registry[type]) {
             localStorage.setItem('industry_type', type);
-            document.documentElement.style.setProperty('--crimson', this.registry[type].theme);
-            document.documentElement.style.setProperty('--primary', this.registry[type].theme);
-            document.documentElement.style.setProperty('--primary-pink', this.registry[type].theme);
+            document.documentElement.style.setProperty('--crimson',     this.registry[type].theme);
+            document.documentElement.style.setProperty('--primary',     this.registry[type].theme);
+            document.documentElement.style.setProperty('--primary-pink',this.registry[type].theme);
         }
     }
 };
 
 (function initTheme() {
     const config = IndustryAdapter.getCurrent();
-    document.documentElement.style.setProperty('--crimson', config.theme);
-    document.documentElement.style.setProperty('--primary', config.theme);
-    document.documentElement.style.setProperty('--primary-pink', config.theme);
+    document.documentElement.style.setProperty('--crimson',     config.theme);
+    document.documentElement.style.setProperty('--primary',     config.theme);
+    document.documentElement.style.setProperty('--primary-pink',config.theme);
 })();
