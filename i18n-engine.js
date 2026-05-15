@@ -60,7 +60,7 @@ const i18nConfig = {
 
         // === ROI 卡片 ===
         '🎉 恭喜！已完全回本': '🎉 Congrats! Fully recovered!',
-        '⏳ 需保持盈利以预测回本期': 'Maintain profitability to project ROI date',
+        '⏳ 需保持盈利以预测回本日': 'Maintain profitability to project ROI date',
         '暂无数据': 'No data yet',
         '💰 回本进度 (总投入: ¥': '💰 ROI Progress (Investment: $',
         '回本进度': 'ROI Progress',
