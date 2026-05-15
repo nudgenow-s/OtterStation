@@ -70,14 +70,18 @@
         /* ── Top Nav ── */
         .top-nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 20px 0;
+            padding: 20px 16px 0;
+            gap: 8px;
         }
-        #date-display { font-size: 11px; color: var(--text-3); letter-spacing: 0.5px; }
-        .nav-actions  { display: flex; gap: 12px; align-items: center; }
+        #date-display { font-size: 11px; color: var(--text-3); letter-spacing: 0.5px; flex-shrink: 0; }
+        .nav-actions  {
+            display: flex; gap: 8px; align-items: center;
+            flex-wrap: nowrap; flex-shrink: 0;
+        }
         .nav-btn {
             font-size: 11px; color: var(--text-3);
-            cursor: pointer; letter-spacing: 0.3px;
-            transition: color 0.2s;
+            cursor: pointer; white-space: nowrap;
+            transition: color 0.2s; letter-spacing: 0;
         }
         .nav-btn:hover { color: var(--crimson); }
         .nav-btn.accent { color: var(--crimson); font-weight: 600; }
@@ -416,7 +420,7 @@
             <span class="currency-sign">¥</span>
             <input type="number" id="revenue-input" inputmode="decimal" placeholder="0.00">
         </div>
-        <div id="unit-tip">输入本次成交金额</div>
+        <div id="unit-tip">记录成交金额</div>
         <div id="profit-tip"></div>
     </div>
 
