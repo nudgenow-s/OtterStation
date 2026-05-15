@@ -59,6 +59,9 @@ const i18nConfig = {
         '历史账单': 'History',
 
         // === ROI 卡片 ===
+        '🎉 恭喜！已完全回本': '🎉 Congrats! Fully recovered!',
+        '⏳ 需保持盈利以预测回本期': 'Maintain profitability to project ROI date',
+        '暂无数据': 'No data yet',
         '💰 回本进度 (总投入: ¥': '💰 ROI Progress (Investment: $',
         '回本进度': 'ROI Progress',
         '总投入': 'Total Investment',
@@ -69,9 +72,7 @@ const i18nConfig = {
         '天回本': 'days to ROI',
         '天': 'days',
         '约': 'approx.',
-        '🎉 恭喜！已完全回本': '🎉 Congrats! Fully recovered!',
-        '⏳ 需保持盈利以预测回本期': 'Maintain profitability to project ROI date',
-        '暂无数据': 'No data yet',
+       
 
         // === 预测卡片 ===
         '🔮 智能月度利润预测': '🔮 Smart Monthly Forecast',
