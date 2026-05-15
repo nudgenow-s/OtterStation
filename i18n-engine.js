@@ -24,7 +24,7 @@ const i18nConfig = {
         '完成并进入水獭能量站': 'Finish & Enter Station',
 
         // === main.html 导航 ===
-        '📤备份': '📤Backup',
+        '📤 备份': '📤 Backup',
         '📅 补记': '📅 Log Past',
         '🔒 成本': '🔒 Cost',
         '📊 报表': '📊 Report',
