@@ -43,9 +43,9 @@ const i18nConfig = {
         '先点右上角': 'Tap the top-right',
         '我才能帮你算': 'so I can calculate',
         '今日达成率': 'today\'s progress 🧮',
-        '今天目标：': 'Today\'s goal:',
-        '已打平成本': 'Breakeven reached',
-        '再多一块，都是你抢来的利润': 'Every extra dollar is pure profit 💰',
+        '今日目标：': 'Today\'s goal:',
+        '打平成本': 'Breakeven reached',
+        '超出的每一分，都是您的净利润': 'Every extra dollar is pure profit 💰',
         '昨天小亏': 'Yesterday you lost',
         '今天只要比昨天多【1笔】就是反杀': 'Just 1 more sale than yesterday = comeback',
         '不要完美，只要开始': 'Don\'t aim for perfect, just start 🔥',
@@ -70,7 +70,7 @@ const i18nConfig = {
         '回本': 'to ROI',
         '预计还需': 'Est.',
         '天回本': 'days to ROI',
-        '天': 'days',
+        '天': 'days ',
         '约': 'approx.',
        
 
