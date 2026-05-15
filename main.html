@@ -418,7 +418,7 @@
         <div class="input-card-label">记录成交金额</div>
         <div class="amount-row">
             <span class="currency-sign">¥</span>
-            <input type="number" id="revenue-input" inputmode="decimal" placeholder="0.00">
+            <input type="number" id="revenue-input" inputmode="decimal" placeholder="¥ 0.00">
         </div>
         <div id="unit-tip">记录成交金额</div>
         <div id="profit-tip"></div>
@@ -448,13 +448,13 @@
     </div>
 
     <div class="data-card accent">
-        <div class="data-card-label">💰 回本进度 · 总投入 ¥<span id="roi-total">0</span></div>
+        <div class="data-card-label">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
         <div class="roi-bar-container"><div id="roi-progress"></div></div>
-        <div id="roi-desc">累计纯利 ¥0，还需 ¥0 回本</div>
+        <div id="roi-desc" style="font-size:11px;color:var(--text-2);line-height:1.7;">累计纯利 ¥0，还需 ¥0 回本</div>
     </div>
 
     <div class="data-card">
-        <div class="data-card-label">🔮 智能月度利润预测 <span id="trend-icon"></span></div>
+        <div class="data-card-label">🔮 智能月度利润预测<span id="trend-icon"></span></div>
         <div id="forecast-val">计算中...</div>
         <div style="font-size:10px;color:var(--text-3);margin-top:4px;">基于近7日表现预测本月净盈余</div>
     </div>
@@ -472,7 +472,7 @@
 <!-- ═══ Cost Modal ═══ -->
 <div id="cost-detail-modal" class="modal-overlay">
     <div class="modal-card">
-        <div class="modal-title">⚙️ 成本细项调整</div>
+        <div class="modal-title">⚙️ 成本细项微调</div>
         <div class="divider-rule"></div>
         <input type="number" id="edit-rent"    placeholder="月房租">
         <input type="number" id="edit-salary"  placeholder="月工资">
@@ -719,14 +719,15 @@
         const ctx=document.getElementById('trendChart').getContext('2d');
         const trend=AccountingEngine.getTrendData();
         if(window.myChart) window.myChart.destroy();
+        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--crimson').trim() || '#9B2335';
         window.myChart=new Chart(ctx,{
             type:'line',
             data:{ labels:trend.labels, datasets:[{
                 label:'营收', data:trend.data,
-                borderColor:'#9B2335', borderWidth:2,
+                borderColor: themeColor, borderWidth:2,
                 tension:0.4, fill:true,
-                backgroundColor:'rgba(155,35,53,0.06)',
-                pointBackgroundColor:'#9B2335', pointRadius:3, pointBorderWidth:0
+                backgroundColor: themeColor.replace(')', ',0.06)').replace('rgb(','rgba(') || 'rgba(155,35,53,0.06)',
+                pointBackgroundColor: themeColor, pointRadius:3, pointBorderWidth:0
             }]},
             options:{ plugins:{legend:{display:false}},
                 scales:{
@@ -773,6 +774,9 @@
     document.documentElement.style.setProperty('--crimson', cfg.theme);
     document.documentElement.style.setProperty('--primary', cfg.theme);
     document.documentElement.style.setProperty('--primary-pink', cfg.theme);
+    // 同步状态栏颜色
+    const _metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (_metaTheme) _metaTheme.setAttribute('content', cfg.theme);
     document.getElementById('industry-logo').innerText=`🦦 ${cfg.icon} ${cfg.name.toUpperCase()} · STATION`;
     window.onload=render;
 
