@@ -635,7 +635,7 @@
             const dc=parseFloat(localStorage.getItem('dailyCost'))||0;
             let tip='';
             if(rev>0&&rev<dc) tip=`⏳ 距离打平还差 ¥${(dc-rev).toFixed(2)}`;
-            else if(rev>=dc&&dc>0) tip=`✨ 纯盈 ¥${(rev-dc).toFixed(2)}`;
+            else if(rev>=dc&&dc>0) tip=`✨ 纯赚 ¥${(rev-dc).toFixed(2)}`;
             document.getElementById('profit-tip').innerText=tip;
             setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
             input.value=''; render();
