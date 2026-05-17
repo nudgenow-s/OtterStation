@@ -37,6 +37,8 @@ const i18nConfig = {
 
         // === 激励弹窗标题（拆分匹配）===
         '今日行动建议': 'Action Advice',
+        '✍️ 直接记一笔': '✍️ Log a sale',
+        '知道了': 'Got it',
 
         // === buildMotivation 动态文字 — 全量覆盖 ===
         '还没设定成本～': 'Costs not set yet~',
@@ -116,7 +118,7 @@ const i18nConfig = {
 
         // === alert 弹窗文字 ===
         '🦦 财库空空，先记几笔再备份吧！': '🦦 Nothing to backup yet — log some sales first!',
-        '🦦 备份成功！请妥善保存该 JSON 文件。': '🦦 Backup successful! Keep this JSON file safe.',
+        '备份成功！请妥善保存。': 'Backup successful! Keep this JSON file safe.',
         '❌ 备份失败，请检查浏览器权限。': '❌ Backup failed. Please check browser permissions.',
         '请输入有效金额': 'Please enter a valid amount',
 
@@ -145,6 +147,12 @@ const i18nConfig = {
             } else {
                 _origAlert(msg);
             }
+        };
+        // 拦截 prompt()，翻译密码提示
+        const _origPrompt = window.prompt;
+        window.prompt = function(msg, def) {
+            const translated = (typeof msg === 'string' && dict[msg]) ? dict[msg] : msg;
+            return _origPrompt(translated, def);
         };
     }
 
