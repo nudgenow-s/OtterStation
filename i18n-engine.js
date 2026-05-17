@@ -49,7 +49,7 @@ const i18nConfig = {
         '昨天小亏': 'Yesterday you lost',
         '今天只需多一笔就是反转': 'Just 1 more sale than yesterday = comeback',
         '不必完美，只需开始': 'Don\'t aim for perfect, just start 🔥',
-        '昨天盈利': 'Yesterday\'s profit:',
+        '昨日盈利': 'Yesterday\'s profit:',
         '今天保持节奏': 'Today: keep the momentum',
         '先完成': 'First hit',
         '基础线': 'baseline',
