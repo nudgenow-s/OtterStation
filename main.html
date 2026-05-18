@@ -29,7 +29,6 @@
             --border:    rgba(107,66,38,0.10);
             --border-md: rgba(107,66,38,0.18);
             --success:   #2D7D52;
-            /* legacy aliases */
             --primary:      #9B2335;
             --primary-pink: #9B2335;
             --success-green:#2D7D52;
@@ -58,7 +57,6 @@
             overflow: hidden;
             position: relative;
         }
-        /* 酒红顶线 */
         .app-container::before {
             content: '';
             position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -74,10 +72,7 @@
             gap: 8px;
         }
         #date-display { font-size: 11px; color: var(--text-3); letter-spacing: 0.5px; flex-shrink: 0; }
-        .nav-actions  {
-            display: flex; gap: 8px; align-items: center;
-            flex-wrap: nowrap; flex-shrink: 0;
-        }
+        .nav-actions  { display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; flex-shrink: 0; }
         .nav-btn {
             font-size: 11px; color: var(--text-3);
             cursor: pointer; white-space: nowrap;
@@ -96,24 +91,14 @@
 
         /* ── Score ── */
         .score-section { text-align: center; padding: 8px 20px 0; }
-        #emoji-status {
-            font-size: 72px; display: block;
-            margin: 6px 0 10px;
-            transition: 0.5s; cursor: pointer;
-        }
+        #emoji-status { font-size: 72px; display: block; margin: 6px 0 10px; transition: 0.5s; cursor: pointer; }
         #health-score {
             font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
             font-size: 58px; font-weight: 700;
-            color: var(--crimson); line-height: 1;
-            letter-spacing: -2px;
+            color: var(--crimson); line-height: 1; letter-spacing: -2px;
         }
-        .health-label {
-            font-size: 10px; color: var(--text-3);
-            letter-spacing: 2px; margin-top: 4px;
-            text-transform: uppercase;
-        }
+        .health-label { font-size: 10px; color: var(--text-3); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; }
 
-        /* 分隔 */
         .rule { height: 1px; background: var(--border); margin: 18px 20px; }
 
         /* ── Input Card ── */
@@ -125,43 +110,27 @@
             padding: 18px 18px 14px;
             text-align: center;
         }
-        .input-card-label {
-            font-size: 10px; letter-spacing: 2px;
-            color: var(--text-3); text-transform: uppercase;
-            margin-bottom: 10px;
-            text-align: center;
-        }
+        .input-card-label { font-size: 10px; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin-bottom: 10px; text-align: center; }
         .amount-row { display: flex; align-items: center; justify-content: center; gap: 6px; }
         .currency-sign { font-size: 20px; color: var(--text-3); font-weight: 400; }
         #revenue-input {
-            width: 160px;
-            border: none;
-            background: transparent;
-            font-size: 32px; font-weight: 700;
-            color: var(--text-1); outline: none;
+            width: 160px; border: none; background: transparent;
+            font-size: 32px; font-weight: 700; color: var(--text-1); outline: none;
             font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
             border-bottom: 1.5px solid var(--border-md);
-            padding-bottom: 4px;
-            text-align: center;
-            transition: border-color 0.2s;
+            padding-bottom: 4px; text-align: center; transition: border-color 0.2s;
         }
         #revenue-input:focus { border-bottom-color: var(--crimson); }
         #revenue-input::placeholder { color: var(--text-3); font-size: 22px; font-weight: 400; text-align: center; }
         #unit-tip { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
-        #profit-tip {
-            font-size: 12px; color: var(--success);
-            margin-top: 6px; font-weight: 600; height: 18px;
-            text-align: center;
-        }
+        #profit-tip { font-size: 12px; color: var(--success); margin-top: 6px; font-weight: 600; height: 18px; text-align: center; }
 
         /* ── CTA Button ── */
         .btn-wrap { padding: 14px 16px 0; }
         .btn-main {
             background: var(--crimson); color: #fff; border: none;
-            padding: 17px; border-radius: 50px;
-            font-size: 15px; width: 100%;
-            cursor: pointer; font-weight: 600;
-            letter-spacing: 0.5px;
+            padding: 17px; border-radius: 50px; font-size: 15px; width: 100%;
+            cursor: pointer; font-weight: 600; letter-spacing: 0.5px;
             font-family: 'PingFang SC','Helvetica Neue',sans-serif;
             box-shadow: var(--shadow-btn);
             transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
@@ -170,13 +139,7 @@
         .btn-main:active { transform: scale(0.98); box-shadow: none; }
 
         /* ── Badge Wall ── */
-        .badge-section {
-            margin: 14px 16px 20px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 14px 10px;
-        }
+        .badge-section { margin: 14px 16px 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 10px; }
         .badge-wall { display: flex; justify-content: center; gap: 14px; font-size: 20px; }
         .badge-wall span { filter: grayscale(1); opacity: 0.15; transition: all 0.3s; }
         .active-badge { filter: none !important; opacity: 1 !important; transform: scale(1.15) !important; }
@@ -185,46 +148,27 @@
         .modal-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(26,18,8,0.45);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            z-index: 2000;
-            justify-content: center; align-items: center;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            z-index: 2000; justify-content: center; align-items: center;
         }
-
         .modal-card {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 28px 24px;
-            width: 300px;
-            box-shadow: var(--shadow-modal);
-            border: 1px solid var(--border);
-            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-            position: relative;
+            background: var(--bg-card); border-radius: 24px; padding: 28px 24px; width: 300px;
+            box-shadow: var(--shadow-modal); border: 1px solid var(--border);
+            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative;
         }
         .modal-card::before {
-            content: '';
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 40px; height: 3px;
-            background: var(--crimson);
-            border-radius: 0 0 3px 3px;
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 3px; background: var(--crimson); border-radius: 0 0 3px 3px;
         }
         @keyframes popIn { from{opacity:0;transform:scale(0.92) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
         @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
-        .modal-title {
-            font-size: 16px; font-weight: 600; color: var(--text-1);
-            margin-bottom: 12px;
-        }
-        .modal-text {
-            font-size: 13px; color: var(--text-2);
-            line-height: 1.8; margin-bottom: 18px;
-            white-space: pre-line;
-        }
+        .modal-title { font-size: 16px; font-weight: 600; color: var(--text-1); margin-bottom: 12px; }
+        .modal-text  { font-size: 13px; color: var(--text-2); line-height: 1.8; margin-bottom: 18px; white-space: pre-line; }
         .btn-secondary {
-            width: 100%;
-            background: var(--bg-input); border: 1px solid var(--border);
-            color: var(--text-2); padding: 13px; border-radius: 50px;
-            font-size: 13px; cursor: pointer; margin-top: 10px;
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            color: var(--text-2); padding: 13px; border-radius: 50px; font-size: 13px;
+            cursor: pointer; margin-top: 10px;
             font-family: 'PingFang SC','Helvetica Neue',sans-serif;
             transition: background 0.2s, border-color 0.2s;
         }
@@ -232,13 +176,9 @@
 
         /* ── Report Modal ── */
         #report-modal {
-            background: var(--bg-page);
-            width: 100%; height: 100%;
-            padding: 28px 22px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            animation: slideUp 0.38s ease;
-            display: none;
+            background: var(--bg-page); width: 100%; height: 100%;
+            padding: 28px 22px; box-sizing: border-box; overflow-y: auto;
+            animation: slideUp 0.38s ease; display: none;
             position: fixed; inset: 0; z-index: 2500;
         }
         #report-modal::-webkit-scrollbar { width: 3px; }
@@ -246,135 +186,82 @@
 
         .report-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
         }
-        .report-title {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 26px; font-weight: 400; color: var(--text-1); letter-spacing: 1px;
-        }
+        .report-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-weight: 400; color: var(--text-1); letter-spacing: 1px; }
         .close-btn {
-            border: 1px solid var(--border); background: var(--bg-input);
-            color: var(--text-2); font-size: 18px;
-            width: 36px; height: 36px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
+            border: 1px solid var(--border); background: var(--bg-input); color: var(--text-2);
+            font-size: 18px; width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
         .close-btn:hover { background: var(--bg-surface); border-color: var(--border-md); }
 
-        /* 数据卡片 */
-        .data-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px; padding: 16px 18px;
-            margin: 10px 0;
-            border-left: 3px solid var(--gold);
+        /* 同行对比条 */
+        .benchmark-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, rgba(155,35,53,0.05), rgba(184,150,62,0.05));
+            border: 1px solid rgba(155,35,53,0.12);
+            border-radius: 14px; padding: 12px 16px;
+            margin-bottom: 12px;
         }
-        .data-card.accent { border-left-color: var(--crimson); }
-        .data-card-label {
-            font-size: 10px; color: var(--text-3);
-            font-weight: 600; letter-spacing: 2px;
-            text-transform: uppercase; margin-bottom: 8px;
-        }
-        #forecast-val {
-            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
-            font-size: 30px; font-weight: 700;
-            color: var(--crimson); margin: 6px 0 4px;
-        }
+        .benchmark-icon { font-size: 20px; flex-shrink: 0; }
+        .benchmark-label { font-size: 10px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+        .benchmark-text { font-size: 13px; font-weight: 600; color: var(--crimson); }
+        .benchmark-text span { font-size: 17px; }
 
-        /* ROI bar */
-        .roi-bar-container {
-            height: 5px; background: var(--bg-input);
-            border-radius: 3px; margin: 10px 0; overflow: hidden;
-        }
-        #roi-progress {
-            height: 100%;
-            background: linear-gradient(90deg, var(--crimson), var(--gold-lt));
-            width: 0%; border-radius: 3px;
-            transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-        }
+        /* 数据卡片 */
+        .data-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; margin: 10px 0; border-left: 3px solid var(--gold); }
+        .data-card.accent { border-left-color: var(--crimson); }
+        .data-card-label { font-size: 10px; color: var(--text-3); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        #forecast-val { font-family: 'PingFang SC','Helvetica Neue',sans-serif; font-size: 30px; font-weight: 700; color: var(--crimson); margin: 6px 0 4px; }
+
+        .roi-bar-container { height: 5px; background: var(--bg-input); border-radius: 3px; margin: 10px 0; overflow: hidden; }
+        #roi-progress { height: 100%; background: linear-gradient(90deg, var(--crimson), var(--gold-lt)); width: 0%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
         #roi-desc { font-size: 11px; color: var(--text-2); line-height: 1.7; }
 
-        /* history */
-        .section-label {
-            font-size: 10px; letter-spacing: 2px; color: var(--text-3);
-            text-transform: uppercase; margin: 20px 0 10px;
-        }
-        .history-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
+        .section-label { font-size: 10px; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin: 20px 0 10px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
         .history-item:last-child { border-bottom: none; }
         .history-date { color: var(--text-3); font-size: 12px; }
         .history-val  { color: var(--text-1); font-weight: 600; }
 
         /* ── Cost Modal inputs ── */
         #cost-detail-modal input[type="number"] {
-            width: 100%; background: var(--bg-input);
-            border: 1.5px solid transparent;
-            border-radius: 12px; padding: 13px 15px;
-            font-size: 16px; color: var(--text-1);
+            width: 100%; background: var(--bg-input); border: 1.5px solid transparent;
+            border-radius: 12px; padding: 13px 15px; font-size: 16px; color: var(--text-1);
             outline: none; margin-bottom: 10px;
-            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
-            transition: border-color 0.2s;
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif; transition: border-color 0.2s;
         }
-        #cost-detail-modal input[type="number"]:focus {
-            border-color: var(--crimson);
-            box-shadow: 0 0 0 3px rgba(155,35,53,0.07);
-            background: #fff;
-        }
+        #cost-detail-modal input[type="number"]:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px rgba(155,35,53,0.07); background: #fff; }
         #cost-detail-modal input[type="number"]::placeholder { color: var(--text-3); font-size: 13px; }
 
         /* ── Calendar Modal ── */
         #supplement-modal .modal-card { width: 320px; max-height: 88vh; overflow-y: auto; }
         #supplement-modal .modal-card::-webkit-scrollbar { width: 2px; }
-
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .cal-title  { font-size: 13px; font-weight: 600; color: var(--text-1); }
-        .cal-nav-btn {
-            background: var(--bg-input); border: 1px solid var(--border);
-            color: var(--text-2); font-size: 16px;
-            cursor: pointer; padding: 4px 10px; border-radius: 8px;
-            transition: all 0.15s;
-        }
+        .cal-nav-btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-2); font-size: 16px; cursor: pointer; padding: 4px 10px; border-radius: 8px; transition: all 0.15s; }
         .cal-nav-btn:hover { background: var(--bg-surface); border-color: var(--border-md); color: var(--crimson); }
-
         .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; text-align: center; }
         .cal-weekday { font-size: 9px; color: var(--text-3); padding: 4px 0; letter-spacing: 0.5px; }
-        .cal-day {
-            font-size: 12px; padding: 8px 2px;
-            border-radius: 8px; cursor: pointer;
-            color: var(--text-2); transition: all 0.15s;
-        }
+        .cal-day { font-size: 12px; padding: 8px 2px; border-radius: 8px; cursor: pointer; color: var(--text-2); transition: all 0.15s; }
         .cal-day:hover { background: rgba(155,35,53,0.07); color: var(--crimson); }
-        .cal-day.today {
-            background: rgba(155,35,53,0.08);
-            color: var(--crimson); font-weight: 700;
-            border: 1px solid rgba(155,35,53,0.2);
-        }
+        .cal-day.today { background: rgba(155,35,53,0.08); color: var(--crimson); font-weight: 700; border: 1px solid rgba(155,35,53,0.2); }
         .cal-day.has-record { border-bottom: 2px solid var(--gold); }
         .cal-day.selected  { background: var(--crimson); color: #fff; }
         .cal-day.empty     { cursor: default; }
         .cal-day.future    { color: var(--border-md); cursor: default; pointer-events: none; }
-
-        #supplement-amount-area {
-            display: none; margin-top: 18px;
-            border-top: 1px solid var(--border); padding-top: 16px;
-        }
+        #supplement-amount-area { display: none; margin-top: 18px; border-top: 1px solid var(--border); padding-top: 16px; }
         #supplement-date-label { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
         #supplement-input {
             border: none; border-bottom: 1.5px solid var(--border-md);
-            font-size: 26px;
-            font-family: 'PingFang SC', 'Helvetica Neue', sans-serif;
+            font-size: 26px; font-family: 'PingFang SC','Helvetica Neue',sans-serif;
             font-weight: 700; width: 100%; text-align: center;
             color: var(--text-1); outline: none; background: transparent;
-            margin-bottom: 14px;
-            transition: border-color 0.2s;
+            margin-bottom: 14px; transition: border-color 0.2s;
         }
         #supplement-input:focus { border-bottom-color: var(--crimson); }
         #supplement-input::placeholder { color: var(--text-3); font-size: 18px; }
-
         .divider-rule { height: 1px; background: var(--border); margin: 10px 0 16px; }
     </style>
 </head>
@@ -447,6 +334,17 @@
         <button class="close-btn" onclick="toggleReport()">×</button>
     </div>
 
+    <!-- 同行对比 -->
+    <div class="benchmark-bar">
+        <span class="benchmark-icon">📊</span>
+        <div>
+            <div class="benchmark-label">同行对比</div>
+            <div class="benchmark-text" id="benchmark-text">
+                收益率跑赢同行 <span id="benchmark-pct">--</span>
+            </div>
+        </div>
+    </div>
+
     <div class="data-card accent">
         <div class="data-card-label">💰 回本进度 (总投入: ¥<span id="roi-total">0</span>)</div>
         <div class="roi-bar-container"><div id="roi-progress"></div></div>
@@ -491,7 +389,6 @@
             <button onclick="closeSupplementCalendar()" style="border:none;background:none;font-size:22px;cursor:pointer;color:var(--text-3);line-height:1;">×</button>
         </div>
         <div style="font-size:10px;color:var(--text-3);margin-bottom:14px;letter-spacing:1px;" id="supplement-hint">选择需要补记的日期</div>
-
         <div class="cal-header">
             <button class="cal-nav-btn" onclick="calChangeMonth(-1)">‹</button>
             <div class="cal-title" id="cal-month-title"></div>
@@ -499,7 +396,6 @@
         </div>
         <div class="cal-grid" id="cal-weekdays"></div>
         <div class="cal-grid" id="cal-days"></div>
-
         <div id="supplement-amount-area">
             <div id="supplement-date-label"></div>
             <input type="number" id="supplement-input" inputmode="decimal" placeholder="¥ 当日总营收">
@@ -510,6 +406,7 @@
 
 <script src="accounting.js"></script>
 <script src="achievement.js"></script>
+<script src="cloud-sync.js"></script>
 <script>
     (function() { if (localStorage.getItem('isActivated') !== 'true') window.location.replace('gate.html'); })();
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
@@ -639,6 +536,8 @@
             document.getElementById('profit-tip').innerText=tip;
             setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
             input.value=''; render();
+            // 记账后静默同步
+            if(typeof CloudSync!=='undefined') setTimeout(()=>CloudSync.silentSync(), 1500);
         }
     }
 
@@ -647,8 +546,34 @@
         const m=document.getElementById('report-modal');
         const opening=m.style.display!=='block';
         m.style.display=opening?'block':'none';
-        if(opening){ renderChart(); renderHistoryList(); calculateForecast(); }
+        if(opening){ renderChart(); renderHistoryList(); calculateForecast(); loadBenchmark(); }
     }
+
+    /* ── 同行对比 ── */
+    async function loadBenchmark(){
+        const pctEl = document.getElementById('benchmark-pct');
+        pctEl.innerText = '计算中...';
+        let pct = null;
+
+        // 优先联网获取
+        if(typeof CloudSync !== 'undefined') {
+            pct = await CloudSync.fetchBenchmark();
+        }
+
+        // 离线时用本地估算
+        if(pct === null && typeof CloudSync !== 'undefined') {
+            pct = CloudSync.estimateBenchmarkOffline();
+        } else if(pct === null) {
+            // CloudSync 未加载时的极简估算
+            const rev   = parseFloat(localStorage.getItem('todayRev'))  || 0;
+            const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
+            const ratio = Math.min(rev / daily, 2.5);
+            pct = Math.min(99.99, 45 + ratio * 25 + Math.random() * 8).toFixed(2);
+        }
+
+        pctEl.innerText = `${pct}%`;
+    }
+
     function calculateForecast(){
         const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
         const dates=Object.keys(history).sort();
@@ -726,7 +651,7 @@
                 label:'营收', data:trend.data,
                 borderColor: themeColor, borderWidth:2,
                 tension:0.4, fill:true,
-                backgroundColor: themeColor.replace(')', ',0.06)').replace('rgb(','rgba(') || 'rgba(155,35,53,0.06)',
+                backgroundColor: themeColor.replace(')' ,',0.06)').replace('rgb(','rgba(') || 'rgba(155,35,53,0.06)',
                 pointBackgroundColor: themeColor, pointRadius:3, pointBorderWidth:0
             }]},
             options:{ plugins:{legend:{display:false}},
@@ -769,25 +694,34 @@
         earned.forEach(id=>{ const el=document.getElementById('badge-'+id); if(el) el.classList.add('active-badge'); });
     }
 
-    /* Init */
+    /* ── Init ── */
     const cfg=IndustryAdapter.getCurrent();
     document.documentElement.style.setProperty('--crimson', cfg.theme);
     document.documentElement.style.setProperty('--primary', cfg.theme);
     document.documentElement.style.setProperty('--primary-pink', cfg.theme);
-    // 同步状态栏颜色
     const _metaTheme = document.querySelector('meta[name="theme-color"]');
     if (_metaTheme) _metaTheme.setAttribute('content', cfg.theme);
     document.getElementById('industry-logo').innerText=`🦦 ${cfg.icon} ${cfg.name.toUpperCase()} · STATION`;
-    window.onload=render;
+
+    window.onload = () => {
+        render();
+        // 页面加载后2秒静默同步（有账号时）
+        if(typeof CloudSync !== 'undefined') {
+            CloudSync.trackDuration('main');
+            if(localStorage.getItem('ps_user_id')) {
+                setTimeout(()=> CloudSync.silentSync(), 2000);
+            }
+        }
+    };
 
     /* ── Calendar ── */
     const _cLang=localStorage.getItem('lang')==='en'?'en-US':'zh-CN';
     const _cL={
-        hint:    _cLang==='en-US'?'Select a date':'选择需要补记的日期',
-        ph:      _cLang==='en-US'?'$ Total revenue':'¥ 当日总营收',
-        ok:      (d)=>_cLang==='en-US'?`✅ Supplemented: ${d}`:`✅ 补记成功：${d}`,
-        err:     _cLang==='en-US'?'Please enter a valid amount':'请输入有效金额',
-        dateL:   (d)=>_cLang==='en-US'?`Date: ${d}`:`日期：${d}`
+        hint:  _cLang==='en-US'?'Select a date':'选择需要补记的日期',
+        ph:    _cLang==='en-US'?'$ Total revenue':'¥ 当日总营收',
+        ok:    (d)=>_cLang==='en-US'?`✅ Supplemented: ${d}`:`✅ 补记成功：${d}`,
+        err:   _cLang==='en-US'?'Please enter a valid amount':'请输入有效金额',
+        dateL: (d)=>_cLang==='en-US'?`Date: ${d}`:`日期：${d}`
     };
     document.getElementById('supplement-hint').innerText=_cL.hint;
     document.getElementById('supplement-input').placeholder=_cL.ph;
