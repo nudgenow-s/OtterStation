@@ -1,10 +1,10 @@
 /**
- * 能量基石 - 全自动化双语引擎 (已整合 ROI 补齐 & CSV 劫持)
- * 修复版：补全所有缺漏翻译词条
+ * 能量基石 - 全自动化双语引擎
+ * 修复：prompt() 拦截 + 所有 alert key 与代码字符串对齐
  */
 const i18nConfig = {
     'en': {
-        // === setup.html 专属 ===
+        // === setup.html ===
         '🏷️ 选择行业身份': '🏷️ Select Industry',
         '美业': 'Beauty Industry',
         '餐饮': 'F&B',
@@ -35,57 +35,54 @@ const i18nConfig = {
         '记录成交': 'Log Transaction',
         '计算中...': 'Calculating...',
 
-        // === 激励弹窗标题（拆分匹配）===
+        // === 激励弹窗 ===
         '今日行动建议': 'Action Advice',
         '✍️ 直接记一笔': '✍️ Log a sale',
         '知道了': 'Got it',
 
-        // === buildMotivation 动态文字 — 全量覆盖 ===
+        // === buildMotivation 动态文字 ===
         '还没设定成本～': 'Costs not set yet~',
-        '点右上角 🔒 成本 完成配置': 'Tap the top-right 🔒 Cost ',
-        '系统才能计算您的达成率': 'so I can calculate',
-        '今日达成率': 'today\'s progress 🧮',
+        '点右上角 🔒 成本 完成配置': 'Tap the top-right 🔒 Cost',
+        '系统才能计算您的达成率 🧮': 'so I can calculate your progress 🧮',
         '今日目标：': 'Today\'s goal:',
-        '打平成本': 'Breakeven reached',
-        '超出的每一分，都是您的净利润': 'Every extra dollar is pure profit 💰',
-        '昨天小亏': 'Yesterday you lost',
-        '今天只需多一笔就是反转': 'Just 1 more sale than yesterday = comeback',
-        '不必完美，只需开始': 'Don\'t aim for perfect, just start 🔥',
-        '昨日盈利': 'Yesterday\'s profit:',
-        '今天保持节奏': 'Today: keep the momentum',
-        '先完成': 'First hit',
-        '基础线': 'baseline',
+        '= 打平成本': '= breakeven',
+        '超出的每一分，都是您的净利润 💰': 'Every extra dollar is pure profit 💰',
+        '昨日小亏 ¥': 'Yesterday -$',
+        '今天只需多一笔就是反转': 'One more sale = comeback',
+        '不必完美，只需开始 🔥': 'Don\'t aim for perfect, just start 🔥',
+        '昨日盈利 ¥': 'Yesterday +$',
+        ' 🎉': ' 🎉',
+        '今天保持节奏': 'Keep the momentum',
+        '基础线：¥': 'Baseline: $',
 
         // === 报表弹窗 ===
         '数据复盘': 'Data Review',
         '历史账单': 'History',
+        '暂无历史数据': 'No data yet',
+
+        // === 同行对比（新增）===
+        '收益率跑赢同行': 'Outperforming',
+        '的同行': '% of peers',
+        '暂无足够数据': 'Not enough data yet',
+        '（本地估算）': ' (est.)',
 
         // === ROI 卡片 ===
-        '🎉 恭喜！已完全回本': '🎉 Congrats! Fully recovered!',
-        '⏳ 需保持盈利以预测回本日': 'Maintain profitability to project ROI date',
-        '暂无数据': 'No data yet',
+        '🎉 已完全回本': '🎉 Fully recovered!',
+        '⏳ 需保持盈利以预测回本日': '⏳ Stay profitable to project ROI date',
         '💰 回本进度 (总投入: ¥': '💰 ROI Progress (Investment: $',
-        '回本进度': 'ROI Progress',
-        '总投入': 'Total Investment',
-        '累计纯利': 'Total Net Profit',
-        '进度': 'Progress',
-        '回本': 'to ROI',
+        '累计纯利 ¥': 'Net Profit $',
+        '，进度': ', Progress',
         '预计还需': 'Est.',
-        '天回本': 'days to ROI',
-        '天': 'days ',
-        '约': 'approx.',
-       
+        '天回本（约': 'days to ROI (approx.',
+        '）': ')',
 
         // === 预测卡片 ===
         '🔮 智能月度利润预测': '🔮 Smart Monthly Forecast',
-        '智能': 'Smart',
-        '月度利润预测': 'Monthly Forecast',
         '基于近7日表现预测本月净盈余': 'Forecast based on last 7 days',
 
         // === profit-tip 动态文字 ===
-        '⏳ 距离打平还差': '⏳ Gap to breakeven:',
-        '🎯 已打平成本！从现在开始都是利润': '🎯 Breakeven! Everything from now is profit',
-        '✨ 纯赚': '✨ Net profit:',
+        '⏳ 距离打平还差 ¥': '⏳ Gap to breakeven: $',
+        '✨ 纯赚 ¥': '✨ Net profit: $',
 
         // === 导出 ===
         '导出全维度 CSV 报表': 'Export CSV Report',
@@ -96,33 +93,31 @@ const i18nConfig = {
         '保存': 'Save',
         '取消': 'Cancel',
 
-        // === achievement.js 勋章弹窗 ===
+        // === 勋章弹窗 ===
         '解锁成就：': 'Achievement Unlocked: ',
         '解锁成就': 'Achievement Unlocked',
+        'Achievement Unlocked': 'Achievement Unlocked',
         '收下勋章': 'Claim Badge',
-
-        // === 勋章名称 ===
         '首单入账': 'First Sale',
         '盈利王者': 'Profit King',
         '精明猎手': 'Shrewd Hunter',
         '黄金选手': 'Gold Player',
-
-        // === 勋章描述（完整句子匹配）===
         '打破鸭蛋，开工大吉！': 'Zero broken — off to a flying start!',
         '连续达标，你是房东克星！': 'On a streak — the landlord\'s nemesis!',
         '精准记账，每一分钱都有据可查。': 'Precise tracking: every cent accounted for.',
         '超绝主理人，今日目标已达成。': 'Elite manager — today\'s goal is done.',
-
-        // === Chart.js dataset label（动态注入，walker扫不到，由劫持逻辑处理）===
         '营收': 'Revenue',
 
-        // === alert 弹窗文字 ===
-        '🦦 财库空空，先记几笔再备份吧！': '🦦 Nothing to backup yet — log some sales first!',
-        '备份成功！请妥善保存。': 'Backup successful! Keep this JSON file safe.',
-        '❌ 备份失败，请检查浏览器权限。': '❌ Backup failed. Please check browser permissions.',
+        // === alert 文字（与代码字符串完全一致）===
+        '财库暂无数据，先记几笔再备份。': 'Nothing to backup yet — log some sales first!',
+        '备份成功！请妥善保存。': 'Backup successful! Keep this file safe.',
+        '备份失败，请检查浏览器权限。': 'Backup failed. Check browser permissions.',
         '请输入有效金额': 'Please enter a valid amount',
 
-        // === 补记日历（已由_calLabels处理，此处备用）===
+        // === prompt 文字（与代码字符串完全一致）===
+        '请输入密码：': 'Enter Password:',
+
+        // === 补记日历 ===
         '选择需要补记的日期': 'Select a date to supplement',
         '确认补记': 'Confirm',
         '日期：': 'Date: ',
@@ -131,87 +126,83 @@ const i18nConfig = {
     }
 };
 
-(function() {
+(function () {
     let currentLang = localStorage.getItem('lang') || 'zh';
     const isEn = currentLang === 'en';
     const dict = i18nConfig['en'];
 
-    // ======================================================
-    // 【1】拦截 alert()，实现弹窗翻译
-    // ======================================================
+    // ══════════════════════════════════════════
+    // 【1】拦截 alert()
+    // ══════════════════════════════════════════
     if (isEn) {
         const _origAlert = window.alert;
-        window.alert = function(msg) {
-            if (typeof msg === 'string' && dict[msg]) {
-                _origAlert(dict[msg]);
-            } else {
-                _origAlert(msg);
-            }
+        window.alert = function (msg) {
+            _origAlert(typeof msg === 'string' && dict[msg] ? dict[msg] : msg);
         };
-        // 拦截 prompt()，翻译密码提示
+
+        // 【修复】拦截 prompt() — walker 扫不到 prompt 参数，必须在这里处理
         const _origPrompt = window.prompt;
-        window.prompt = function(msg, def) {
-            const translated = (typeof msg === 'string' && dict[msg]) ? dict[msg] : msg;
-            return _origPrompt(translated, def);
+        window.prompt = function (msg, def) {
+            const out = (typeof msg === 'string' && dict[msg]) ? dict[msg] : msg;
+            return _origPrompt(out, def);
         };
     }
 
-    // ======================================================
-    // 【2】拦截 Blob，翻译 CSV 数据流
-    // ======================================================
-    const originalBlob = window.Blob;
+    // ══════════════════════════════════════════
+    // 【2】拦截 Blob — CSV 翻译
+    // ══════════════════════════════════════════
     if (isEn) {
-        window.Blob = function(contentArray, options) {
+        const _origBlob = window.Blob;
+        window.Blob = function (contentArray, options) {
             if (options && options.type && options.type.includes('csv')) {
-                let csvContent = contentArray[0];
-                for (let zhKey in dict) {
-                    if (csvContent.includes(zhKey)) {
-                        csvContent = csvContent.split(zhKey).join(dict[zhKey]);
-                    }
+                let csv = contentArray[0];
+                for (const zh in dict) {
+                    if (csv.includes(zh)) csv = csv.split(zh).join(dict[zh]);
                 }
-                return new originalBlob([csvContent], options);
+                return new _origBlob([csv], options);
             }
-            return new originalBlob(contentArray, options);
+            return new _origBlob(contentArray, options);
         };
     }
 
-    // ======================================================
-    // 【3】拦截 Chart.js dataset label（在 new Chart() 之前注入）
-    // 通过劫持 CanvasRenderingContext2D 不可行，改为在翻译引擎里
-    // 把 '营收' 这个词加入 walker 扫描，Chart.js 图例文字在 DOM 里
-    // 会由 MutationObserver 扫到并翻译。
-    // ======================================================
-
-    // ======================================================
-    // 【4】UI 语言切换按钮
-    // ======================================================
+    // ══════════════════════════════════════════
+    // 【3】语言切换按钮
+    // ══════════════════════════════════════════
     const btn = document.createElement('div');
     btn.id = 'i18n-toggle-btn';
     btn.innerHTML = currentLang === 'zh' ? 'EN' : '中文';
     Object.assign(btn.style, {
         position: 'fixed', bottom: '25px', left: '20px',
-        background: 'var(--primary-pink, #ff85a2)',
+        background: 'var(--primary-pink, #9B2335)',
         color: 'white', padding: '6px 14px', borderRadius: '20px',
         fontSize: '11px', cursor: 'pointer', zIndex: '99999',
-        fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
     });
     document.body.appendChild(btn);
+    btn.onclick = () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        localStorage.setItem('lang', currentLang);
+        location.reload();
+    };
 
-    // ======================================================
-    // 【5】翻译引擎核心 — Text Walker
-    // ======================================================
+    // ══════════════════════════════════════════
+    // 【4】Text Walker 核心翻译
+    // ══════════════════════════════════════════
     function runTranslation() {
         if (currentLang === 'zh') return;
 
-        // A. 文字节点扫描替换
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         let node;
-        while (node = walker.nextNode()) {
+        while ((node = walker.nextNode())) {
+            // 跳过 script/style 标签内文字
+            const parent = node.parentElement;
+            if (parent && (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE')) continue;
+
             let val = node.nodeValue;
             let changed = false;
-            for (let zhKey in dict) {
-                if (val.includes(zhKey)) {
-                    val = val.split(zhKey).join(dict[zhKey]);
+            for (const zh in dict) {
+                if (val.includes(zh)) {
+                    val = val.split(zh).join(dict[zh]);
                     changed = true;
                 }
             }
@@ -220,47 +211,40 @@ const i18nConfig = {
             // ¥ → $
             if (node.nodeValue.includes('¥')) {
                 node.nodeValue = node.nodeValue.replace(/¥/g, '$');
+                changed = true;
             }
         }
 
-        // B. Placeholder 翻译
-        const placeholders = {
-            '月房租': 'Monthly Rent',
-            '月工资': 'Salary',
-            '月杂费': 'Utilities',
-            '初始总投入': 'Startup Cost',
-            '请输入密码：': 'Enter Password:',
-            '¥ 0.00': '$ 0.00',
-            '¥ 当日总营收': '$ Total revenue of the day'
+        // Placeholder 翻译
+        const ph = {
+            '月房租':   'Monthly Rent',
+            '月工资':   'Salary',
+            '月杂费':   'Utilities',
+            '初始总投入':'Startup Cost',
+            '请输入密码：':'Enter Password:',
+            '¥ 0.00':   '$ 0.00',
+            '¥ 当日总营收':'$ Total revenue of the day',
         };
         document.querySelectorAll('input').forEach(input => {
-            if (placeholders[input.placeholder]) {
-                input.placeholder = placeholders[input.placeholder];
-            } else if (input.placeholder.includes('¥')) {
-                input.placeholder = input.placeholder.replace(/¥/g, '$');
+            const p = input.placeholder;
+            if (ph[p]) {
+                input.placeholder = ph[p];
+            } else if (p.includes('¥')) {
+                input.placeholder = p.replace(/¥/g, '$');
             }
         });
     }
 
-    // ======================================================
-    // 【6】MutationObserver 监听动态内容（激励文字、勋章弹窗等）
-    // ======================================================
+    // ══════════════════════════════════════════
+    // 【5】MutationObserver — 监听动态内容
+    // ══════════════════════════════════════════
     const observer = new MutationObserver(() => {
         if (currentLang === 'en') runTranslation();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
-    // ======================================================
-    // 【7】点击切换语言
-    // ======================================================
-    btn.onclick = () => {
-        currentLang = currentLang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('lang', currentLang);
-        location.reload();
-    };
-
-    // ======================================================
-    // 【8】初始化执行
-    // ======================================================
+    // ══════════════════════════════════════════
+    // 【6】初始化
+    // ══════════════════════════════════════════
     setTimeout(runTranslation, 30);
 })();
