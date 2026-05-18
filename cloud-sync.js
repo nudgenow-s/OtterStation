@@ -8,7 +8,7 @@
  */
 
 const CloudSync = (() => {
-    const API = 'https://api.nudgenow.xyz'; // 替换为你的 Worker 域名
+    const API = 'https://prestige-api.jingyi950917.workers.dev'; // 替换为你的 Worker 域名
 
     // ── 工具 ─────────────────────────────────────────────
 
