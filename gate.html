@@ -200,6 +200,69 @@
         }
         .highlight { color: var(--crimson); font-weight: 600; }
 
+        /* 账号设置区 */
+        #account-setup { display: none; }
+        #cloud-restore-ui { display: none; }
+
+        .user-id-box {
+            background: var(--bg-input);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            margin: 14px 0;
+            position: relative;
+        }
+        .user-id-label {
+            font-size: 10px; letter-spacing: 2px;
+            color: var(--text-3); text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .user-id-value {
+            font-size: 26px; font-weight: 700;
+            color: var(--crimson); letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute; right: 12px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: 1px solid var(--border-md);
+            border-radius: 8px; padding: 5px 10px;
+            font-size: 11px; color: var(--text-2);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+
+        input[type="password"] {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1.5px solid transparent;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 16px;
+            color: var(--text-1);
+            outline: none;
+            font-family: 'PingFang SC', sans-serif;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            margin-top: 10px;
+        }
+        input[type="password"]:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 3px rgba(155,35,53,0.08);
+            background: #fff;
+        }
+        input[type="password"]::placeholder { color: var(--text-3); font-size: 13px; }
+
+        .switch-link {
+            display: block; text-align: center;
+            font-size: 12px; color: var(--text-3);
+            margin-top: 14px; cursor: pointer;
+            transition: color 0.2s;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-color: transparent;
+        }
+        .switch-link:hover { color: var(--crimson); text-decoration-color: var(--crimson); }
+
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
     </style>
 </head>
@@ -218,8 +281,44 @@
         <div class="section-title" id="t-auth-title">激活您的专属能量站</div>
         <input type="text" id="activation-code" placeholder="ENTER CODE">
         <button class="btn-go" onclick="handleVerify()" id="t-auth-btn">立即验证</button>
-        <div class="recovery-link" onclick="document.getElementById('restore-file').click()" id="t-recover">通过备份文件复原数据</div>
+        <div class="recovery-link" onclick="showCloudRestore()" id="t-recover">已有账号？输入 UserID 恢复数据</div>
+        <div class="recovery-link" style="margin-top:6px;" onclick="document.getElementById('restore-file').click()" id="t-recover-file">通过备份文件复原数据</div>
         <input type="file" id="restore-file" accept=".json" onchange="importStellarockData(event)" style="display:none;">
+    </div>
+
+    <!-- 账号设置区（激活成功后） -->
+    <div id="account-setup">
+        <div class="logo-area">
+            <span class="logo-icon">🔐</span>
+            <div class="brand-name">Account</div>
+            <div class="brand-sub">Set Your Password</div>
+        </div>
+        <div class="rule"></div>
+        <div class="section-title">您的专属 UserID</div>
+        <div class="user-id-box">
+            <div class="user-id-label">USER ID</div>
+            <div class="user-id-value" id="display-user-id">--------</div>
+            <button class="copy-btn" onclick="copyUserId()">复制</button>
+        </div>
+        <input type="password" id="new-password" placeholder="设置登录密码（至少4位）">
+        <input type="password" id="confirm-password" placeholder="再次确认密码">
+        <button class="btn-go" onclick="saveAccount()" style="margin-top:14px;">保存并继续</button>
+        <span class="switch-link" onclick="skipAccount()">跳过，稍后再说</span>
+    </div>
+
+    <!-- 云端恢复区 -->
+    <div id="cloud-restore-ui">
+        <div class="logo-area">
+            <span class="logo-icon">☁️</span>
+            <div class="brand-name">Restore</div>
+            <div class="brand-sub">Cloud Recovery</div>
+        </div>
+        <div class="rule"></div>
+        <div class="section-title">输入账号恢复数据</div>
+        <input type="text" id="restore-user-id" placeholder="UserID（8位数字）" style="letter-spacing:4px;font-size:20px;text-align:center;">
+        <input type="password" id="restore-password" placeholder="登录密码">
+        <button class="btn-go" onclick="doCloudRestore()" style="margin-top:14px;">恢复数据</button>
+        <span class="switch-link" onclick="showAuthUi()">← 返回激活</span>
     </div>
 
     <!-- 引导区 -->
@@ -321,7 +420,8 @@
                     localStorage.setItem('isActivated', 'true');
                     localStorage.setItem('license_key', code);
                     localStorage.setItem('bound_device_id', generateDeviceFingerprint());
-                    showGuide();
+                    // 激活成功后进入账号设置流程
+                    showAccountSetup(code);
                 } else {
                     alert(translations[currentLang].error);
                     btn.disabled = false;
@@ -354,12 +454,121 @@
         reader.readAsText(file);
     }
 
-    function showGuide() {
-        document.getElementById('auth-ui').style.display = 'none';
-        document.getElementById('guide-box').style.display = 'block';
+    // ── 面板切换 ──────────────────────────────────────────
+    function hideAll() {
+        ['auth-ui','account-setup','cloud-restore-ui','guide-box']
+            .forEach(id => document.getElementById(id).style.display = 'none');
     }
-    function enterApp() { window.location.replace('index.html'); }
+    function showAuthUi()       { hideAll(); document.getElementById('auth-ui').style.display = 'block'; }
+    function showCloudRestore() { hideAll(); document.getElementById('cloud-restore-ui').style.display = 'block'; }
+    function showGuide()        { hideAll(); document.getElementById('guide-box').style.display = 'block'; }
+    function enterApp()         { window.location.replace('index.html'); }
 
+    // ── 账号设置流程 ──────────────────────────────────────
+    const API_BASE = 'https://api.nudgenow.xyz'; // 替换为你的 Worker 域名
+
+    async function showAccountSetup(licenseKey) {
+        hideAll();
+        document.getElementById('account-setup').style.display = 'block';
+
+        // 先向 Worker 注册，拿到 UserID（用默认空密码占位，稍后更新）
+        // 这里先生成一个随机临时 userId 展示，实际在 saveAccount 时正式注册
+        const tempId = String(Math.floor(10000000 + Math.random() * 90000000));
+        document.getElementById('display-user-id').innerText = tempId;
+        localStorage.setItem('_tmp_pending_license', licenseKey);
+        localStorage.setItem('_tmp_pending_uid', tempId);
+    }
+
+    function copyUserId() {
+        const uid = document.getElementById('display-user-id').innerText;
+        navigator.clipboard.writeText(uid).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.innerText = '已复制 ✓';
+            setTimeout(() => { btn.innerText = '复制'; }, 2000);
+        });
+    }
+
+    async function saveAccount() {
+        const pwd1 = document.getElementById('new-password').value;
+        const pwd2 = document.getElementById('confirm-password').value;
+        if (!pwd1 || pwd1.length < 4) { alert('密码至少4位'); return; }
+        if (pwd1 !== pwd2)             { alert('两次密码不一致'); return; }
+
+        const licenseKey = localStorage.getItem('_tmp_pending_license');
+        const deviceId   = localStorage.getItem('bound_device_id');
+
+        try {
+            const res  = await fetch(`${API_BASE}/register`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ licenseKey, deviceId, password: pwd1 })
+            });
+            const data = await res.json();
+
+            if (data.status === 'success' || data.status === 'exists') {
+                localStorage.setItem('ps_user_id',  data.userId);
+                localStorage.setItem('ps_password', pwd1);
+                // 显示正式 UserID
+                document.getElementById('display-user-id').innerText = data.userId;
+                localStorage.removeItem('_tmp_pending_license');
+                localStorage.removeItem('_tmp_pending_uid');
+                // 短暂展示 UserID 后进入引导
+                setTimeout(showGuide, 1800);
+            } else {
+                alert('注册失败：' + (data.error || '未知错误'));
+            }
+        } catch {
+            alert('网络错误，请检查连接');
+        }
+    }
+
+    function skipAccount() {
+        localStorage.removeItem('_tmp_pending_license');
+        localStorage.removeItem('_tmp_pending_uid');
+        showGuide();
+    }
+
+    // ── 云端恢复流程 ──────────────────────────────────────
+    async function doCloudRestore() {
+        const userId   = document.getElementById('restore-user-id').value.trim();
+        const password = document.getElementById('restore-password').value;
+        if (!userId || !password) { alert('请填写 UserID 和密码'); return; }
+
+        const btn = document.querySelector('#cloud-restore-ui .btn-go');
+        btn.disabled = true;
+        btn.innerText = '恢复中...';
+
+        try {
+            const res  = await fetch(`${API_BASE}/restore`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ userId, password })
+            });
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                localStorage.clear();
+                for (const [k, v] of Object.entries(data.snapshot)) {
+                    localStorage.setItem(k, v);
+                }
+                localStorage.setItem('isActivated', 'true');
+                localStorage.setItem('ps_user_id',  userId);
+                localStorage.setItem('ps_password', password);
+                alert('✅ 数据恢复成功！');
+                enterApp();
+            } else {
+                alert('❌ ' + (data.error || '恢复失败，请检查 UserID 和密码'));
+                btn.disabled = false;
+                btn.innerText = '恢复数据';
+            }
+        } catch {
+            alert('网络错误，请检查连接');
+            btn.disabled = false;
+            btn.innerText = '恢复数据';
+        }
+    }
+
+    // ── 初始化 ────────────────────────────────────────────
     if (localStorage.getItem('isActivated') === 'true') showGuide();
     updateUI();
 </script>
