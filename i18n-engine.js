@@ -61,6 +61,7 @@ const i18nConfig = {
         '暂无历史数据': 'No data yet',
 
         // === 同行对比（新增）===
+        '同行对比':'Comparison with the same industry',
         '收益率跑赢同行': 'Outperforming',
         '的同行': '% of peers',
         '暂无足够数据': 'Not enough data yet',
