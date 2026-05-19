@@ -47,13 +47,13 @@ const i18nConfig = {
         '今日目标：': 'Today\'s goal:',
         '= 打平成本': '= breakeven',
         '超出的每一分，都是您的净利润 💰': 'Every extra dollar is pure profit 💰',
-        '昨日小亏 ¥': 'Yesterday -$',
+        '昨日小亏': 'Yesterday -',
         '今天只需多一笔就是反转': 'One more sale = comeback',
         '不必完美，只需开始 🔥': 'Don\'t aim for perfect, just start 🔥',
-        '昨日盈利 ¥': 'Yesterday +$',
+        '昨日盈利': 'Yesterday +',
         ' 🎉': ' 🎉',
         '今天保持节奏': 'Keep the momentum',
-        '基础线：¥': 'Baseline: $',
+        '基础线:': 'Baseline: ',
 
         // === 报表弹窗 ===
         '数据复盘': 'Data Review',
