@@ -536,8 +536,16 @@
             document.getElementById('profit-tip').innerText=tip;
             setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
             input.value=''; render();
-            // 记账后静默同步
-            if(typeof CloudSync!=='undefined') setTimeout(()=>CloudSync.silentSync(), 1500);
+
+            // 云同步：等浏览器空闲时执行，绝不阻塞 UI
+            if(typeof CloudSync !== 'undefined' && localStorage.getItem('ps_user_id')) {
+                const doSync = () => CloudSync.silentSync();
+                if(typeof requestIdleCallback !== 'undefined') {
+                    requestIdleCallback(doSync, { timeout: 5000 });
+                } else {
+                    setTimeout(doSync, 3000); // Safari fallback
+                }
+            }
         }
     }
 
@@ -705,11 +713,17 @@
 
     window.onload = () => {
         render();
-        // 页面加载后2秒静默同步（有账号时）
         if(typeof CloudSync !== 'undefined') {
             CloudSync.trackDuration('main');
+            // 页面完全稳定后再同步，用 requestIdleCallback 确保不阻塞首屏
             if(localStorage.getItem('ps_user_id')) {
-                setTimeout(()=> CloudSync.silentSync(), 2000);
+                const doSync = () => CloudSync.silentSync();
+                if(typeof requestIdleCallback !== 'undefined') {
+                    // 等浏览器空闲，最多等8秒
+                    requestIdleCallback(doSync, { timeout: 8000 });
+                } else {
+                    setTimeout(doSync, 5000); // Safari fallback
+                }
             }
         }
     };
