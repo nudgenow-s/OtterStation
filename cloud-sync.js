@@ -8,7 +8,7 @@
  */
 
 const CloudSync = (() => {
-    const API = 'https://prestige-api.jingyi950917.workers.dev'; // 替换为你的 Worker 域名
+    const API = 'https://api.nudgenow.xyz'; // 替换为你的 Worker 域名
 
     // ── 工具 ─────────────────────────────────────────────
 
@@ -99,9 +99,10 @@ const CloudSync = (() => {
 
         try {
             await fetch(`${API}/sync`, {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({
+                method:    'POST',
+                headers:   { 'Content-Type': 'application/json' },
+                keepalive: true,   // 页面卸载时请求不被中断
+                body:      JSON.stringify({
                     userId,
                     password,
                     snapshot:  getSnapshot(),
@@ -109,7 +110,6 @@ const CloudSync = (() => {
                     profit:    getProfitData()
                 })
             });
-            // 静默成功，记录时间
             localStorage.setItem('_last_sync', Date.now().toString());
         } catch {
             // 离线时静默失败，不打扰用户
