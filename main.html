@@ -91,7 +91,13 @@
 
         /* ── Score ── */
         .score-section { text-align: center; padding: 8px 20px 0; }
-        #emoji-status { font-size: 72px; display: block; margin: 6px 0 10px; transition: 0.5s; cursor: pointer; }
+        #emoji-status {
+            font-size: 72px; display: block; margin: 6px 0 10px;
+            transition: transform 0.2s; cursor: pointer;
+            user-select: none;
+        }
+        #emoji-status:hover  { transform: scale(1.08); }
+        #emoji-status:active { transform: scale(0.94); }
         #health-score {
             font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
             font-size: 58px; font-weight: 700;
@@ -263,6 +269,251 @@
         #supplement-input:focus { border-bottom-color: var(--crimson); }
         #supplement-input::placeholder { color: var(--text-3); font-size: 18px; }
         .divider-rule { height: 1px; background: var(--border); margin: 10px 0 16px; }
+
+        /* ════════════════════════════════════════════════
+           ★ 账号卡片 Modal
+        ════════════════════════════════════════════════ */
+        #account-modal .modal-card {
+            width: 316px;
+            padding: 24px 20px 20px;
+        }
+        .acct-close {
+            position: absolute; top: 14px; right: 14px;
+            border: none; background: none; font-size: 20px;
+            cursor: pointer; color: var(--text-3); line-height: 1;
+            transition: color 0.2s;
+        }
+        .acct-close:hover { color: var(--crimson); }
+
+        /* 头部：头像 + 行业 + ID */
+        .acct-head {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 18px;
+        }
+        .acct-avatar {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--crimson) 0%, #6B1220 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(155,35,53,0.25);
+        }
+        .acct-head-info-name { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+        .acct-head-info-id   {
+            font-size: 11px; color: var(--text-3);
+            font-family: 'Courier New', monospace; letter-spacing: 1.5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .copy-id-btn {
+            font-size: 10px; color: var(--crimson); cursor: pointer;
+            border: 1px solid rgba(155,35,53,0.25); border-radius: 6px;
+            padding: 1px 6px; transition: all 0.2s;
+        }
+        .copy-id-btn:hover { background: var(--crimson); color: #fff; }
+
+        /* 会员状态条 */
+        .membership-bar {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;
+        }
+        .membership-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .membership-badge {
+            font-size: 10px; font-weight: 700; letter-spacing: 1px;
+            padding: 3px 10px; border-radius: 20px; text-transform: uppercase;
+        }
+        .badge-active  { background: rgba(45,125,82,0.1);  color: var(--success); border: 1px solid rgba(45,125,82,0.22); }
+        .badge-warn    { background: rgba(200,132,10,0.1);  color: #C8840A;        border: 1px solid rgba(200,132,10,0.25); }
+        .badge-expired { background: rgba(155,35,53,0.08); color: var(--crimson); border: 1px solid rgba(155,35,53,0.2); }
+
+        .membership-days { font-size: 11px; color: var(--text-3); }
+        .membership-prog { height: 4px; background: rgba(107,66,38,0.1); border-radius: 2px; overflow: hidden; }
+        .membership-prog-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--crimson), var(--gold)); transition: width 0.8s ease; }
+
+        /* 详情行 */
+        .acct-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 0; border-bottom: 1px solid rgba(107,66,38,0.06);
+            font-size: 12px;
+        }
+        .acct-row:last-of-type { border-bottom: none; }
+        .acct-row-label { color: var(--text-3); font-size: 11px; }
+        .acct-row-val   { font-weight: 600; color: var(--text-1); }
+        .acct-row-val.good { color: var(--success); }
+
+        /* 快捷操作 */
+        .acct-actions {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; margin-top: 16px;
+        }
+        .acct-btn {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 8px; text-align: center;
+            cursor: pointer; transition: all 0.2s;
+            font-size: 11px; color: var(--text-2); font-weight: 500;
+        }
+        .acct-btn:hover { border-color: var(--crimson); color: var(--crimson); background: rgba(155,35,53,0.04); }
+        .acct-btn .ab-icon { font-size: 20px; display: block; margin-bottom: 5px; }
+        .acct-btn.renew {
+            grid-column: span 2;
+            background: var(--crimson); border-color: var(--crimson); color: #fff;
+            box-shadow: var(--shadow-btn); padding: 14px;
+        }
+        .acct-btn.renew:hover { background: var(--crimson-dk); }
+
+        /* ════════════════════════════════════════════════
+           ★ 成本计算器 Modal（全屏横屏）
+        ════════════════════════════════════════════════ */
+        #calc-modal {
+            display: none; position: fixed; inset: 0;
+            background: #1C0D10; z-index: 9000; overflow: hidden;
+            flex-direction: column;
+        }
+        #calc-modal.open { display: flex; }
+
+        /* 顶部栏 */
+        .calc-topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 18px; flex-shrink: 0;
+            background: rgba(0,0,0,0.25);
+            border-bottom: 1px solid rgba(201,168,76,0.12);
+        }
+        .calc-topbar-left { display: flex; align-items: center; gap: 12px; }
+        .calc-brand {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 15px; letter-spacing: 3px; color: #D4AC5A; text-transform: uppercase;
+        }
+        .calc-x-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.55);
+            font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .calc-x-btn:hover { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+
+        .calc-topbar-right { display: flex; gap: 7px; align-items: center; flex-wrap: nowrap; }
+        .ctb {
+            padding: 5px 11px; border-radius: 14px; font-size: 11px; font-weight: 600;
+            cursor: pointer; border: 1px solid; transition: all 0.2s; white-space: nowrap;
+        }
+        .ctb-curr  { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.28); color: #D4AC5A; }
+        .ctb-curr.on { background: #D4AC5A; border-color: #D4AC5A; color: #1C0D10; }
+        .ctb-hist  { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.45); }
+        .ctb-hist:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+        .ctb-add   { background: rgba(155,35,53,0.14); border-color: rgba(155,35,53,0.38); color: #D4AC5A; }
+        .ctb-add:hover { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+        .ctb-save  { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+        .ctb-save:hover { background: #7A1828; }
+
+        /* 主体 */
+        .calc-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* 左：表格区 */
+        .calc-left {
+            flex: 1; overflow-y: auto; padding: 14px 18px;
+        }
+        .calc-left::-webkit-scrollbar { width: 3px; }
+        .calc-left::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius: 3px; }
+
+        /* 汇率行 */
+        .calc-rate-row {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.1);
+            border-radius: 10px; padding: 9px 14px; margin-bottom: 12px;
+        }
+        .calc-rate-label { font-size: 10px; color: rgba(201,168,76,0.55); letter-spacing: 1px; white-space: nowrap; }
+        .calc-rate-input {
+            background: transparent; border: none;
+            border-bottom: 1px solid rgba(201,168,76,0.28); color: #D4AC5A;
+            font-size: 14px; font-weight: 700; width: 110px; outline: none;
+            padding: 2px 4px; font-family: 'Courier New', monospace;
+        }
+        .calc-rate-hint { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.18); }
+
+        /* 成本表格 */
+        .calc-tbl { width: 100%; border-collapse: collapse; }
+        .calc-tbl th {
+            font-size: 9px; color: rgba(255,255,255,0.28); letter-spacing: 1.5px;
+            text-transform: uppercase; padding: 7px 6px; text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .calc-tbl td { padding: 5px 3px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+
+        .ci { /* calc input */
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 7px; padding: 6px 9px; color: rgba(255,255,255,0.82);
+            font-size: 12px; width: 100%; outline: none;
+            transition: border-color 0.2s; font-family: 'PingFang SC', sans-serif;
+        }
+        .ci:focus { border-color: rgba(201,168,76,0.38); background: rgba(201,168,76,0.04); }
+        .ci.num   { font-family: 'Courier New', monospace; text-align: right; }
+
+        .c-sel {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 7px; padding: 6px 5px; color: rgba(255,255,255,0.65);
+            font-size: 11px; outline: none; width: 100%;
+        }
+        .c-del {
+            background: none; border: none; color: rgba(255,255,255,0.18);
+            font-size: 15px; cursor: pointer; padding: 3px 7px; border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .c-del:hover { background: rgba(244,63,94,0.14); color: #f43f5e; }
+
+        .c-sub { /* subtotal cell */
+            text-align: right; font-family: 'Courier New', monospace;
+            font-size: 12px; font-weight: 700; color: #D4AC5A; white-space: nowrap;
+        }
+
+        /* 右：汇总 */
+        .calc-right {
+            width: 190px; flex-shrink: 0;
+            border-left: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.18);
+            padding: 14px; display: flex; flex-direction: column; gap: 9px;
+        }
+        .sc { /* summary card */
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 11px; padding: 11px 13px;
+        }
+        .sc-label { font-size: 9px; color: rgba(255,255,255,0.28); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .sc-val { font-family: 'Courier New', monospace; font-size: 17px; font-weight: 700; color: rgba(255,255,255,0.82); }
+        .sc-val.warn  { color: #f59e0b; }
+        .sc.grand {
+            background: linear-gradient(135deg, #9B2335 0%, #6B1220 100%);
+            border-color: rgba(201,168,76,0.28); margin-top: auto;
+        }
+        .sc.grand .sc-label { color: rgba(255,255,255,0.55); }
+        .sc.grand .sc-val   { color: #D4AC5A; font-size: 20px; }
+
+        /* 历史记录面板（覆盖计算器） */
+        #calc-hist-panel {
+            display: none; position: absolute; inset: 0;
+            background: #140A0D; z-index: 10; flex-direction: column;
+        }
+        #calc-hist-panel.open { display: flex; }
+        .hist-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .hist-bar-title { font-size: 13px; color: #D4AC5A; font-weight: 600; letter-spacing: 2px; }
+        .hist-scroll { flex: 1; overflow-y: auto; padding: 12px 18px; }
+        .hist-scroll::-webkit-scrollbar { width: 3px; }
+        .hist-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.14); }
+        .hist-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 11px; padding: 11px 13px; margin-bottom: 9px;
+            cursor: pointer; transition: all 0.18s;
+        }
+        .hist-card:hover { border-color: rgba(201,168,76,0.28); background: rgba(201,168,76,0.04); }
+        .hist-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .hist-date  { font-size: 10px; color: rgba(255,255,255,0.28); letter-spacing: 0.5px; }
+        .hist-total { font-family: 'Courier New', monospace; font-size: 15px; font-weight: 700; color: #D4AC5A; }
+        .hist-meta  { font-size: 11px; color: rgba(255,255,255,0.35); }
+        .hist-del   { background: none; border: none; color: rgba(255,255,255,0.18); font-size: 13px; cursor: pointer; padding: 2px 5px; }
+        .hist-del:hover { color: #f43f5e; }
+        .hist-empty { text-align: center; color: rgba(255,255,255,0.2); font-size: 13px; padding: 48px 0; }
     </style>
 </head>
 <body>
@@ -274,6 +525,63 @@
         <div id="motivation-text" class="modal-text"></div>
         <button class="btn-main" style="font-size:13px;" onclick="jumpToRecord()">✍️ 直接记一笔</button>
         <button class="btn-secondary" onclick="closeMotivation()">知道了</button>
+    </div>
+</div>
+
+<!-- ★ 账号卡片 Modal ★ -->
+<div id="account-modal" class="modal-overlay" style="z-index:3100;">
+    <div class="modal-card" style="width:316px;padding:24px 20px 20px;">
+        <button class="acct-close" onclick="closeAccountModal()">×</button>
+
+        <!-- 头部 -->
+        <div class="acct-head">
+            <div class="acct-avatar" id="acct-avatar">🦦</div>
+            <div>
+                <div class="acct-head-info-name" id="acct-industry">主理人工作台</div>
+                <div class="acct-head-info-id">
+                    <span id="acct-uid-text">ID: --------</span>
+                    <span class="copy-id-btn" onclick="copyUserId()">复制</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 会员状态条 -->
+        <div class="membership-bar">
+            <div class="membership-top">
+                <span class="membership-badge badge-active" id="acct-badge">免费会员</span>
+                <span class="membership-days" id="acct-days">剩余 -- 天</span>
+            </div>
+            <div class="membership-prog">
+                <div class="membership-prog-fill" id="acct-prog-fill" style="width:100%"></div>
+            </div>
+        </div>
+
+        <!-- 详情 -->
+        <div class="acct-row">
+            <span class="acct-row-label">开通时间</span>
+            <span class="acct-row-val" id="acct-start">--</span>
+        </div>
+        <div class="acct-row">
+            <span class="acct-row-label">激活码</span>
+            <span class="acct-row-val" id="acct-license" style="font-family:'Courier New';font-size:10px;letter-spacing:1px;">--</span>
+        </div>
+        <div class="acct-row">
+            <span class="acct-row-label">今日达成率</span>
+            <span class="acct-row-val good" id="acct-ach">--%</span>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="acct-actions">
+            <div class="acct-btn" onclick="closeAccountModal();openCalc()">
+                <span class="ab-icon">🧮</span>成本计算
+            </div>
+            <div class="acct-btn" onclick="closeAccountModal();validateBoss('report')">
+                <span class="ab-icon">📊</span>数据报表
+            </div>
+            <div class="acct-btn renew" onclick="handleRenew()">
+                🔑 续费 / 升级会员
+            </div>
+        </div>
     </div>
 </div>
 
@@ -294,7 +602,8 @@
     </div>
 
     <div class="score-section">
-        <span id="emoji-status">😴</span>
+        <!-- ★ 点击 emoji 弹出账号卡片 ★ -->
+        <span id="emoji-status" onclick="openAccountModal()">😴</span>
         <div id="health-score">0%</div>
         <div class="health-label">今日目标达成率</div>
     </div>
@@ -334,7 +643,6 @@
         <button class="close-btn" onclick="toggleReport()">×</button>
     </div>
 
-    <!-- 同行对比 -->
     <div class="benchmark-bar">
         <span class="benchmark-icon">📊</span>
         <div>
@@ -400,6 +708,79 @@
             <div id="supplement-date-label"></div>
             <input type="number" id="supplement-input" inputmode="decimal" placeholder="¥ 当日总营收">
             <button class="btn-main" style="font-size:14px;" onclick="saveSupplementRecord()">确认补记</button>
+        </div>
+    </div>
+</div>
+
+<!-- ★ 成本计算器 Modal（全屏横屏）★ -->
+<div id="calc-modal">
+    <div style="position:relative;display:flex;flex-direction:column;width:100%;height:100%;">
+
+        <!-- 历史记录面板 -->
+        <div id="calc-hist-panel">
+            <div class="hist-bar">
+                <div class="hist-bar-title">📋 计算历史</div>
+                <div style="display:flex;gap:8px;">
+                    <button class="ctb ctb-hist" onclick="calcClearHistory()" style="color:#f43f5e;border-color:rgba(244,63,94,0.28);">清空</button>
+                    <button class="calc-x-btn" onclick="calcCloseHistory()">×</button>
+                </div>
+            </div>
+            <div class="hist-scroll" id="calc-hist-list"></div>
+        </div>
+
+        <!-- 顶部栏 -->
+        <div class="calc-topbar">
+            <div class="calc-topbar-left">
+                <button class="calc-x-btn" onclick="closeCalc()">×</button>
+                <div class="calc-brand">成本计算器</div>
+            </div>
+            <div class="calc-topbar-right">
+                <button class="ctb ctb-curr on"  id="calc-btn-cny" onclick="calcSetCurr('CNY')">¥ CNY</button>
+                <button class="ctb ctb-curr"     id="calc-btn-usd" onclick="calcSetCurr('USD')">$ USD</button>
+                <button class="ctb ctb-hist"     onclick="calcOpenHistory()">📋 历史</button>
+                <button class="ctb ctb-add"      onclick="calcAddRow()">＋ 添加</button>
+                <button class="ctb ctb-save"     onclick="calcSave()">💾 保存</button>
+            </div>
+        </div>
+
+        <!-- 主体 -->
+        <div class="calc-body">
+            <!-- 左：表格 -->
+            <div class="calc-left">
+                <div class="calc-rate-row">
+                    <span class="calc-rate-label">USD → CNY</span>
+                    <input class="calc-rate-input" type="number" id="calc-rate" value="7.25" step="0.0001" oninput="calcRecalc()">
+                    <span class="calc-rate-hint">风险金 +20%</span>
+                </div>
+                <table class="calc-tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:32%">项目</th>
+                            <th style="width:17%">频率</th>
+                            <th style="width:16%">USD</th>
+                            <th style="width:16%">CNY</th>
+                            <th style="width:13%;text-align:right">月小计</th>
+                            <th style="width:6%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="calc-body"></tbody>
+                </table>
+            </div>
+            <!-- 右：汇总 -->
+            <div class="calc-right">
+                <div class="sc">
+                    <div class="sc-label">原始月度</div>
+                    <div class="sc-val"><span class="csym">¥</span> <span id="c-base">0.00</span></div>
+                </div>
+                <div class="sc">
+                    <div class="sc-label">风险金 20%</div>
+                    <div class="sc-val warn"><span class="csym">¥</span> <span id="c-risk">0.00</span></div>
+                </div>
+                <div class="sc grand">
+                    <div class="sc-label">月度总预算</div>
+                    <div class="sc-val"><span class="csym">¥</span> <span id="c-grand">0.00</span></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -537,13 +918,12 @@
             setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
             input.value=''; render();
 
-            // 云同步：等浏览器空闲时执行，绝不阻塞 UI
             if(typeof CloudSync !== 'undefined' && localStorage.getItem('ps_user_id')) {
                 const doSync = () => CloudSync.silentSync();
                 if(typeof requestIdleCallback !== 'undefined') {
                     requestIdleCallback(doSync, { timeout: 5000 });
                 } else {
-                    setTimeout(doSync, 3000); // Safari fallback
+                    setTimeout(doSync, 3000);
                 }
             }
         }
@@ -562,23 +942,14 @@
         const pctEl = document.getElementById('benchmark-pct');
         pctEl.innerText = '计算中...';
         let pct = null;
-
-        // 优先联网获取
-        if(typeof CloudSync !== 'undefined') {
-            pct = await CloudSync.fetchBenchmark();
-        }
-
-        // 离线时用本地估算
-        if(pct === null && typeof CloudSync !== 'undefined') {
-            pct = CloudSync.estimateBenchmarkOffline();
-        } else if(pct === null) {
-            // CloudSync 未加载时的极简估算
+        if(typeof CloudSync !== 'undefined') pct = await CloudSync.fetchBenchmark();
+        if(pct === null && typeof CloudSync !== 'undefined') pct = CloudSync.estimateBenchmarkOffline();
+        else if(pct === null) {
             const rev   = parseFloat(localStorage.getItem('todayRev'))  || 0;
             const daily = parseFloat(localStorage.getItem('dailyCost')) || 1;
             const ratio = Math.min(rev / daily, 2.5);
             pct = Math.min(99.99, 45 + ratio * 25 + Math.random() * 8).toFixed(2);
         }
-
         pctEl.innerText = `${pct}%`;
     }
 
@@ -711,22 +1082,252 @@
     if (_metaTheme) _metaTheme.setAttribute('content', cfg.theme);
     document.getElementById('industry-logo').innerText=`🦦 ${cfg.icon} ${cfg.name.toUpperCase()} · STATION`;
 
+    // 首次激活时记录时间戳
+    if (!localStorage.getItem('activatedAt') && localStorage.getItem('isActivated') === 'true') {
+        localStorage.setItem('activatedAt', Date.now().toString());
+    }
+
     window.onload = () => {
         render();
         if(typeof CloudSync !== 'undefined') {
             CloudSync.trackDuration('main');
-            // 页面完全稳定后再同步，用 requestIdleCallback 确保不阻塞首屏
             if(localStorage.getItem('ps_user_id')) {
                 const doSync = () => CloudSync.silentSync();
                 if(typeof requestIdleCallback !== 'undefined') {
-                    // 等浏览器空闲，最多等8秒
                     requestIdleCallback(doSync, { timeout: 8000 });
                 } else {
-                    setTimeout(doSync, 5000); // Safari fallback
+                    setTimeout(doSync, 5000);
                 }
             }
         }
     };
+
+    /* ════════════════════════════════════════
+       ★ 账号卡片逻辑
+    ════════════════════════════════════════ */
+    function openAccountModal(){
+        const cfg     = IndustryAdapter.getCurrent();
+        const userId  = localStorage.getItem('ps_user_id') || '未绑定';
+        const license = localStorage.getItem('license_key') || '--';
+        const actTs   = localStorage.getItem('activatedAt');
+
+        document.getElementById('acct-avatar').innerText   = cfg.icon;
+        document.getElementById('acct-industry').innerText = cfg.name + ' 主理人';
+        document.getElementById('acct-uid-text').innerText = 'ID: ' + userId;
+        document.getElementById('acct-license').innerText  =
+            license.length > 12 ? license.substring(0,12) + '****' : license;
+
+        // 今日达成率
+        const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
+        const dc  = parseFloat(localStorage.getItem('dailyCost')) || 1;
+        document.getElementById('acct-ach').innerText = Math.floor(rev / dc * 100) + '%';
+
+        // 开通时间 & 会员剩余
+        const TOTAL_DAYS = 365;
+        const badge = document.getElementById('acct-badge');
+        const days  = document.getElementById('acct-days');
+        const fill  = document.getElementById('acct-prog-fill');
+
+        if (actTs) {
+            const start       = new Date(parseInt(actTs));
+            const elapsed     = Math.floor((Date.now() - start) / 86400000);
+            const remain      = Math.max(TOTAL_DAYS - elapsed, 0);
+            const usedPct     = Math.min(elapsed / TOTAL_DAYS * 100, 100);
+
+            document.getElementById('acct-start').innerText = start.toLocaleDateString();
+            days.innerText  = `剩余 ${remain} 天`;
+            fill.style.width = (100 - usedPct) + '%';
+
+            if (remain > 30) {
+                badge.className = 'membership-badge badge-active'; badge.innerText = '免费会员';
+                days.style.color = 'var(--success)';
+            } else if (remain > 0) {
+                badge.className = 'membership-badge badge-warn'; badge.innerText = '即将到期';
+                days.style.color = '#C8840A';
+            } else {
+                badge.className = 'membership-badge badge-expired'; badge.innerText = '已过期';
+                days.style.color = 'var(--crimson)';
+            }
+        } else {
+            document.getElementById('acct-start').innerText = new Date().toLocaleDateString();
+            days.innerText = '剩余 365 天';
+            badge.className = 'membership-badge badge-active'; badge.innerText = '免费会员';
+            fill.style.width = '100%';
+        }
+
+        document.getElementById('account-modal').style.display = 'flex';
+    }
+
+    function closeAccountModal(){
+        document.getElementById('account-modal').style.display = 'none';
+    }
+
+    function copyUserId(){
+        const uid = localStorage.getItem('ps_user_id') || '';
+        if (!uid) return;
+        navigator.clipboard.writeText(uid).then(() => {
+            const btn = document.querySelector('.copy-id-btn');
+            btn.innerText = '已复制 ✓';
+            setTimeout(() => { btn.innerText = '复制'; }, 2000);
+        });
+    }
+
+    function handleRenew(){
+        closeAccountModal();
+        alert('请联系客服续费或升级会员 🦦');
+    }
+
+    /* ════════════════════════════════════════
+       ★ 成本计算器逻辑
+    ════════════════════════════════════════ */
+    let _calcCurr = 'CNY';
+    let _calcInited = false;
+
+    function openCalc(){
+        const modal = document.getElementById('calc-modal');
+        modal.classList.add('open');
+        // 尝试锁定横屏
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+        }
+        // 首次打开：预填当前成本数据
+        if (!_calcInited) {
+            _calcInited = true;
+            const rent   = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
+            const salary = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+            const misc   = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
+            if (rent)   calcAddRow('房租',    '', rent);
+            if (salary) calcAddRow('人工工资', '', salary);
+            if (misc)   calcAddRow('水电杂费', '', misc);
+            if (!rent && !salary && !misc) {
+                calcAddRow('房租', '', 5000);
+                calcAddRow('人工工资', '', 8000);
+            }
+        }
+        calcRecalc();
+    }
+
+    function closeCalc(){
+        document.getElementById('calc-modal').classList.remove('open');
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+        else if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(() => {});
+        }
+    }
+
+    function calcSetCurr(c){
+        _calcCurr = c;
+        document.getElementById('calc-btn-cny').classList.toggle('on', c === 'CNY');
+        document.getElementById('calc-btn-usd').classList.toggle('on', c === 'USD');
+        document.querySelectorAll('.csym').forEach(el => el.innerText = c === 'CNY' ? '¥' : '$');
+        calcRecalc();
+    }
+
+    function calcAddRow(name='', usd='', cny=''){
+        const tbody = document.getElementById('calc-body');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input class="ci" type="text" value="${name}" placeholder="项目名称" oninput="calcRecalc()"></td>
+            <td><select class="c-sel" onchange="calcRecalc()">
+                <option value="30">日费用</option>
+                <option value="1" selected>月费用</option>
+                <option value="0.0833">年费用</option>
+            </select></td>
+            <td><input class="ci num" type="number" value="${usd}" placeholder="0" oninput="calcRecalc()"></td>
+            <td><input class="ci num" type="number" value="${cny}" placeholder="0" oninput="calcRecalc()"></td>
+            <td class="c-sub"><span class="csym">${_calcCurr==='CNY'?'¥':'$'}</span> <span class="row-sub">0.00</span></td>
+            <td><button class="c-del" onclick="this.closest('tr').remove();calcRecalc()">×</button></td>
+        `;
+        tbody.appendChild(tr);
+        calcRecalc();
+    }
+
+    function calcRecalc(){
+        const rate = parseFloat(document.getElementById('calc-rate').value) || 7.25;
+        let totalCNY = 0;
+        document.querySelectorAll('#calc-body tr').forEach(row => {
+            const freq = parseFloat(row.querySelector('.c-sel').value) || 1;
+            const nums = row.querySelectorAll('input[type="number"]');
+            const usd  = parseFloat(nums[0].value) || 0;
+            const cny  = parseFloat(nums[1].value) || 0;
+            const mCNY = ((usd * rate) + cny) * freq;
+            const disp = _calcCurr === 'CNY' ? mCNY : mCNY / rate;
+            row.querySelector('.row-sub').innerText =
+                disp.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            totalCNY += mCNY;
+        });
+        const risk  = totalCNY * 0.2;
+        const grand = totalCNY + risk;
+        const f     = _calcCurr === 'CNY' ? 1 : 1 / rate;
+        const fmt   = n => n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById('c-base').innerText  = fmt(totalCNY * f);
+        document.getElementById('c-risk').innerText  = fmt(risk * f);
+        document.getElementById('c-grand').innerText = fmt(grand * f);
+    }
+
+    function calcSave(){
+        const rate  = parseFloat(document.getElementById('calc-rate').value) || 7.25;
+        const grand = document.getElementById('c-grand').innerText;
+        const rows  = [];
+        document.querySelectorAll('#calc-body tr').forEach(tr => {
+            const inputs = tr.querySelectorAll('input');
+            rows.push({ name: inputs[0].value, freq: tr.querySelector('select').value, usd: inputs[1].value, cny: inputs[2].value });
+        });
+        const history = JSON.parse(localStorage.getItem('calc_history') || '[]');
+        history.unshift({ date: new Date().toLocaleString(), rate, currency: _calcCurr, grand, rows });
+        if (history.length > 30) history.splice(30);
+        localStorage.setItem('calc_history', JSON.stringify(history));
+        alert('✅ 已保存本次计算');
+    }
+
+    function calcOpenHistory(){
+        calcRenderHistory();
+        document.getElementById('calc-hist-panel').classList.add('open');
+    }
+    function calcCloseHistory(){
+        document.getElementById('calc-hist-panel').classList.remove('open');
+    }
+    function calcClearHistory(){
+        if (confirm('确认清空全部计算历史？')) {
+            localStorage.removeItem('calc_history');
+            calcRenderHistory();
+        }
+    }
+    function calcRenderHistory(){
+        const list    = document.getElementById('calc-hist-list');
+        const history = JSON.parse(localStorage.getItem('calc_history') || '[]');
+        if (!history.length) {
+            list.innerHTML = '<div class="hist-empty">暂无历史记录</div>'; return;
+        }
+        list.innerHTML = history.map((item, idx) => `
+            <div class="hist-card" onclick="calcLoadHistory(${idx})">
+                <div class="hist-card-top">
+                    <span class="hist-date">${item.date}</span>
+                    <button class="hist-del" onclick="event.stopPropagation();calcDeleteHistory(${idx})">×</button>
+                </div>
+                <div class="hist-total">${item.currency==='CNY'?'¥':'$'} ${item.grand}</div>
+                <div class="hist-meta">${item.rows.length} 项 · 汇率 ${item.rate} · ${item.currency}</div>
+            </div>
+        `).join('');
+    }
+    function calcLoadHistory(idx){
+        const history = JSON.parse(localStorage.getItem('calc_history') || '[]');
+        const item = history[idx]; if (!item) return;
+        document.getElementById('calc-body').innerHTML = '';
+        document.getElementById('calc-rate').value = item.rate;
+        calcSetCurr(item.currency);
+        item.rows.forEach(r => calcAddRow(r.name, r.usd, r.cny));
+        const sels = document.querySelectorAll('.c-sel');
+        item.rows.forEach((r, i) => { if (sels[i]) sels[i].value = r.freq; });
+        calcRecalc();
+        calcCloseHistory();
+    }
+    function calcDeleteHistory(idx){
+        const history = JSON.parse(localStorage.getItem('calc_history') || '[]');
+        history.splice(idx, 1);
+        localStorage.setItem('calc_history', JSON.stringify(history));
+        calcRenderHistory();
+    }
 
     /* ── Calendar ── */
     const _cLang=localStorage.getItem('lang')==='en'?'en-US':'zh-CN';
