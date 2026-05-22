@@ -409,11 +409,20 @@
         document.getElementById('lang-btn').innerText = t.btn;
         document.getElementById('t-auth-title').innerText = t.authTitle;
         document.getElementById('t-auth-btn').innerText = t.authBtn;
-       document.getElementById('t-recover').innerText = t.tRecover;
+        document.getElementById('t-recover').innerText = t.tRecover;
         document.getElementById('t-recover-file').innerText = t.tRecoverFile;
         document.getElementById('t-guide-title').innerText = t.guideTitle;
         document.getElementById('t-guide-btn').innerText = t.guideBtn;
-        document.getElementById('t-instruction').innerHTML = t.instruction;
+        document.getElementById('t-section-title').innerText = t.sectionTitle;
+        document.getElementById('t-new-password').innerText = t.newPassword;
+        document.getElementById('t-confirm-password').innerText = t.confirmPassword;
+        document.getElementById('t-save-continue').innerText = t.saveContinue;
+        document.getElementById('t-skip').innerText = t.skip;
+        document.getElementById('t-id-restore').innerText = t.idRestore;
+        document.getElementById('t-restore-user-id').innerText = t.restoreUserId;
+        document.getElementById('t-restore-password').innerText = t.restorePassword;
+        document.getElementById('t-restore-data').innerText = t.restoreData;
+        document.getElementById('t-back').innerText = t.back;
     }
 
     function toggleLang() {
@@ -529,8 +538,8 @@
     }
 
     async function saveAccount() {
-        const pwd1 = document.getElementById('new-password').value;
-        const pwd2 = document.getElementById('confirm-password').value;
+        const pwd1 = document.getElementById('t-new-password').value;
+        const pwd2 = document.getElementById('t-confirm-password').value;
         if (!pwd1 || pwd1.length < 4) { alert('密码至少4位'); return; }
         if (pwd1 !== pwd2)             { alert('两次密码不一致'); return; }
 
@@ -570,8 +579,8 @@
 
     // ── 云端恢复流程 ──────────────────────────────────────
     async function doCloudRestore() {
-        const userId   = document.getElementById('restore-user-id').value.trim();
-        const password = document.getElementById('restore-password').value;
+        const userId   = document.getElementById('t-restore-user-id').value.trim();
+        const password = document.getElementById('t-restore-password').value;
         if (!userId || !password) { alert('请填写 UserID 和密码'); return; }
 
         const btn = document.querySelector('#cloud-restore-ui .btn-go');
