@@ -352,24 +352,14 @@
 
     const translations = {
         zh: {
-            btn:'EN',
-            authTitle:'激活您的专属能量站', 
-            authBtn:'立即验证',
-            tRecover:'已有账号？输入 UserID 恢复数据',
-            tRecoverFile:'通过备份文件复原数据', 
-            guideTitle:'使用说明', 
-            guideBtn:'进入系统',
+            btn:'EN', authTitle:'激活您的专属能量站', authBtn:'立即验证',
+            recover:'通过备份文件复原数据', guideTitle:'使用说明', guideBtn:'进入系统',
             instruction:'为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">"添加到主屏幕"</span><br>3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>完成后从桌面图标进入。',
             error:'激活码错误 🦦', importSuccess:'✅ 资产还原成功，欢迎回来！', importError:'❌ 无效的备份文件。'
         },
         en: {
-            btn:'中文', 
-            authTitle:'Activate Your Station', 
-            authBtn:'Verify Now',
-            tRecover:'Have an account? Enter UserID to restore',
-            tRecoverFile:'Restore from Backup File',
-            guideTitle:'Instructions', 
-            guideBtn:'Enter System',
+            btn:'中文', authTitle:'Activate Your Station', authBtn:'Verify Now',
+            recover:'Restore from Backup File', guideTitle:'Instructions', guideBtn:'Enter System',
             instruction:'To get the <span class="highlight">App</span> experience:<br><br>1️⃣ Tap the <span class="highlight">Share Icon</span> at bottom<br>2️⃣ Find <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on top right.<br><br>Then open from your home screen.',
             error:'Invalid Code. 🦦', importSuccess:'✅ Assets Restored! Welcome back.', importError:'❌ Invalid Backup File.'
         }
@@ -380,8 +370,7 @@
         document.getElementById('lang-btn').innerText = t.btn;
         document.getElementById('t-auth-title').innerText = t.authTitle;
         document.getElementById('t-auth-btn').innerText = t.authBtn;
-        document.getElementById('t-recover').innerText = t.tRecover;
-        document.getElementById('t-recover-file').innerText = t.tRecoverFile;
+        document.getElementById('t-recover').innerText = t.recover;
         document.getElementById('t-guide-title').innerText = t.guideTitle;
         document.getElementById('t-guide-btn').innerText = t.guideBtn;
         document.getElementById('t-instruction').innerHTML = t.instruction;
@@ -476,7 +465,7 @@
     function enterApp()         { window.location.replace('index.html'); }
 
     // ── 账号设置流程 ──────────────────────────────────────
-    const API_BASE = 'https://prestige-api.jingyi950917.workers.dev'; // 替换为你的 Worker 域名
+    const API_BASE = 'https://osapi.nudgenow.xyz';
 
     async function showAccountSetup(licenseKey) {
         hideAll();
