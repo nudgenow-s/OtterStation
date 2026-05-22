@@ -294,7 +294,7 @@
             <div class="brand-sub">Set Your Password</div>
         </div>
         <div class="rule"></div>
-        <div class="t-section-title">您的专属 UserID</div>
+        <div class="section-title" id="t-section-title">您的专属 UserID</div>
         <div class="user-id-box">
             <div class="user-id-label">USER ID</div>
             <div class="user-id-value" id="display-user-id">--------</div>
@@ -403,24 +403,34 @@
             back:'← Back to Activation'
         }
     };
-
     function updateUI() {
         const t = translations[currentLang];
+    
+        // 通用与激活区
         document.getElementById('lang-btn').innerText = t.btn;
         document.getElementById('t-auth-title').innerText = t.authTitle;
         document.getElementById('t-auth-btn').innerText = t.authBtn;
         document.getElementById('t-recover').innerText = t.tRecover;
         document.getElementById('t-recover-file').innerText = t.tRecoverFile;
+    
+        // 引导区
         document.getElementById('t-guide-title').innerText = t.guideTitle;
         document.getElementById('t-guide-btn').innerText = t.guideBtn;
+        document.getElementById('t-instruction').innerHTML = t.instruction;
+
+        // 账号设置区
         document.getElementById('t-section-title').innerText = t.sectionTitle;
-        document.getElementById('t-new-password').innerText = t.newPassword;
-        document.getElementById('t-confirm-password').innerText = t.confirmPassword;
+        document.getElementById('t-copy').innerText = t.copy;
+        // 注意：input 必须使用 .placeholder 而不是 .innerText
+        document.getElementById('t-new-password').placeholder = t.newPassword;
+        document.getElementById('t-confirm-password').placeholder = t.confirmPassword;
         document.getElementById('t-save-continue').innerText = t.saveContinue;
         document.getElementById('t-skip').innerText = t.skip;
+    
+        // 云端恢复区
         document.getElementById('t-id-restore').innerText = t.idRestore;
-        document.getElementById('t-restore-user-id').innerText = t.restoreUserId;
-        document.getElementById('t-restore-password').innerText = t.restorePassword;
+        document.getElementById('t-restore-user-id').placeholder = t.restoreUserId;
+        document.getElementById('t-restore-password').placeholder = t.restorePassword;
         document.getElementById('t-restore-data').innerText = t.restoreData;
         document.getElementById('t-back').innerText = t.back;
     }
