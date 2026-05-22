@@ -294,16 +294,16 @@
             <div class="brand-sub">Set Your Password</div>
         </div>
         <div class="rule"></div>
-        <div class="section-title">您的专属 UserID</div>
+        <div class="t-section-title">您的专属 UserID</div>
         <div class="user-id-box">
             <div class="user-id-label">USER ID</div>
             <div class="user-id-value" id="display-user-id">--------</div>
-            <button class="copy-btn" onclick="copyUserId()">复制</button>
+            <button class="copy-btn" id="t-copy" onclick="copyUserId()">复制</button>
         </div>
-        <input type="password" id="new-password" placeholder="设置登录密码（至少4位）">
-        <input type="password" id="confirm-password" placeholder="再次确认密码">
-        <button class="btn-go" onclick="saveAccount()" style="margin-top:14px;">保存并继续</button>
-        <span class="switch-link" onclick="skipAccount()">跳过，稍后再说</span>
+        <input type="password" id="t-new-password" placeholder="设置登录密码（至少4位）">
+        <input type="password" id="t-confirm-password" placeholder="再次确认密码">
+        <button class="btn-go" id="t-save-continue" onclick="saveAccount()" style="margin-top:14px;">保存并继续</button>
+        <span class="switch-link" id="t-skip" onclick="skipAccount()">跳过，稍后再说</span>
     </div>
 
     <!-- 云端恢复区 -->
@@ -314,11 +314,11 @@
             <div class="brand-sub">Cloud Recovery</div>
         </div>
         <div class="rule"></div>
-        <div class="section-title">输入账号恢复数据</div>
-        <input type="text" id="restore-user-id" placeholder="UserID（8位数字）" style="letter-spacing:4px;font-size:20px;text-align:center;">
-        <input type="password" id="restore-password" placeholder="登录密码">
-        <button class="btn-go" onclick="doCloudRestore()" style="margin-top:14px;">恢复数据</button>
-        <span class="switch-link" onclick="showAuthUi()">← 返回激活</span>
+        <div class="section-title" id="t-id-restore">输入账号恢复数据</div>
+        <input type="text" id="t-restore-user-id" placeholder="UserID（8位数字）" style="letter-spacing:4px;font-size:20px;text-align:center;">
+        <input type="password" id="t-restore-password" placeholder="登录密码">
+        <button class="btn-go" id="t-restore-data" onclick="doCloudRestore()" style="margin-top:14px;">恢复数据</button>
+        <span class="switch-link" id="t-back" onclick="showAuthUi()">← 返回激活</span>
     </div>
 
     <!-- 引导区 -->
@@ -362,7 +362,21 @@
             instruction:'为了获得 <span class="highlight">APP</span> 体验：<br><br>1️⃣ 点击浏览器底部的 <span class="highlight">分享按钮</span><br>2️⃣ 向上滑动找到 <span class="highlight">"添加到主屏幕"</span><br>3️⃣ 点击右上角 <span class="highlight">"添加"</span><br><br>完成后从桌面图标进入。',
             error:'激活码错误 🦦', 
             importSuccess:'✅ 资产还原成功，欢迎回来！',
-            importError:'❌ 无效的备份文件。'
+            importError:'❌ 无效的备份文件。',
+            sectionTitle:'您的专属 UserID',
+            copy:'复制',
+            newPassword:'设置登录密码（至少4位）',
+            confirmPassword:'再次确认密码',
+            saveContinue:'保存并继续',
+            skip:'跳过，稍后再说',
+            idRestore:'输入账号恢复数据',
+            restoreUserId:'UserID（8位数字）',
+            restorePassword:'登录密码',
+            restoreData:'恢复数据',
+            back:'← 返回激活'
+            
+            
+            
         },
         en: {
             btn:'中文',
@@ -375,7 +389,18 @@
             instruction:'To get the <span class="highlight">App</span> experience:<br><br>1️⃣ Tap the <span class="highlight">Share Icon</span> at bottom<br>2️⃣ Find <span class="highlight">"Add to Home Screen"</span><br>3️⃣ Tap <span class="highlight">"Add"</span> on top right.<br><br>Then open from your home screen.',
             error:'Invalid Code. 🦦', 
             importSuccess:'✅ Assets Restored! Welcome back.',
-            importError:'❌ Invalid Backup File.'
+            importError:'❌ Invalid Backup File.',
+            sectionTitle:'Your UserID',
+            copy:'copy',
+            newPassword:'Set Password（at least 4-digit）',
+            confirmPassword:'Confirm Password',
+            saveContinue:'Save&Continue',
+            skip:'Skip for now',
+            idRestore:'Restore via UserID',
+            restoreUserId:'UserID（8-digit）',
+            restorePassword:'Password',
+            restoreData:'Restore',
+            back:'← Back to Activation'
         }
     };
 
