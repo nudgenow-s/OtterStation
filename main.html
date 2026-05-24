@@ -1146,7 +1146,7 @@
     document.documentElement.style.setProperty('--primary-pink', cfg.theme);
     const _metaTheme = document.querySelector('meta[name="theme-color"]');
     if (_metaTheme) _metaTheme.setAttribute('content', cfg.theme);
-    document.getElementById('industry-logo').innerText=`🦦 ${cfg.icon} ${cfg.name.toUpperCase()} · STATION`;
+    document.getElementById('industry-logo').innerText=` ${cfg.name.toUpperCase()} · STATION`;
 
     // 首次激活时记录时间戳
     if (!localStorage.getItem('activatedAt') && localStorage.getItem('isActivated') === 'true') {
