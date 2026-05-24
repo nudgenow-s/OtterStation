@@ -761,6 +761,7 @@
                 <div class="calc-rate-row">
                     <span class="calc-rate-label">USD → CNY</span>
                     <input class="calc-rate-input" type="number" id="calc-rate" value="7.25" step="0.0001" oninput="calcRecalc()">
+                    <span id="calc-rate-date" style="font-size:10px;color:rgba(201,168,76,0.35);font-style:italic;margin-left:4px;"></span>
                     <span class="calc-rate-hint">风险金 +20%</span>
                 </div>
                 <table class="calc-tbl">
@@ -796,6 +797,7 @@
     </div>
 </div>
 
+<script src="rate-fetcher.js"></script>
 <script src="accounting.js"></script>
 <script src="achievement.js"></script>
 <script src="cloud-sync.js"></script>
@@ -1344,12 +1346,24 @@
     let _calcInited = false;
 
     function openCalc(){
-        const modal = document.getElementById('calc-modal');
-        modal.classList.add('open');
-        // 尝试锁定横屏
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(() => {});
+         const modal = document.getElementById('calc-modal');
+         modal.classList.add('open');
+         if (screen.orientation && screen.orientation.lock) {
+             screen.orientation.lock('landscape').catch(() => {});
+    }
+
+    // 自动拉取实时汇率
+        if (typeof RateFetcher !== 'undefined') {
+           RateFetcher.fetch_rate().then(data => {
+               if (data && data.rate) {
+                   document.getElementById('calc-rate').value = data.rate;
+                   const dateEl = document.getElementById('calc-rate-date');
+                   if (dateEl) dateEl.innerText = data.date;
+                   calcRecalc();
+               }
+           });
         }
+
         // 首次打开：预填当前成本数据
         if (!_calcInited) {
             _calcInited = true;
