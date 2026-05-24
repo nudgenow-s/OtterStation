@@ -542,6 +542,17 @@
                     <span id="acct-uid-text">ID: --------</span>
                     <span class="copy-id-btn" onclick="copyUserId()">复制</span>
                 </div>
+                <div class="acct-head-info-id" style="margin-top:5px;">
+                    <span style="color:var(--text-3);font-size:11px;margin-right:4px;">密码：</span>
+                    <span id="acct-pwd-text" style="letter-spacing:2px;">••••</span>
+                    <span id="acct-pwd-eye" onclick="togglePassword()"
+                        style="cursor:pointer;font-size:13px;margin-left:6px;user-select;none;">👁</span>
+                    <span id="acct-set-pwd" onclick="showSetPassword()"
+                        style="display:none;font-size:10px;color:var(--crimson);cursor:pointer;
+                        border:1px solid rgba(155,35,53,0.25);border-radius:6px;padding:1px 6px;margin-left:4px;">
+                        设置密码
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -583,7 +594,7 @@
             </div>
         </div>
     </div>
-</div>
+  </div>
 
 <!-- ═══ Main App ═══ -->
 <div class="app-container">
@@ -792,6 +803,57 @@
     (function() { if (localStorage.getItem('isActivated') !== 'true') window.location.replace('gate.html'); })();
     if (localStorage.getItem('hasSetup') !== 'true') window.location.href = 'index.html';
 
+    /* ════════════════════════════════════════
+   ★ 会员状态工具函数
+   ════════════════════════════════════════ */
+   function isMember() {
+       const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
+       return expiry > Date.now();
+   }
+
+   function getMemberRemainDays() {
+       const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
+       return Math.max(0, Math.ceil((expiry - Date.now()) / 86400000));
+   }
+
+   function showMemberGate() {
+    // 非会员拦截弹窗
+       const overlay = document.createElement('div');
+       overlay.style.cssText = `
+           position:fixed;inset:0;background:rgba(26,18,8,0.5);
+           backdrop-filter:blur(6px);z-index:9999;
+           display:flex;justify-content:center;align-items:center;
+        `;
+       overlay.innerHTML = `
+           <div style="background:#fff;border-radius:24px;padding:28px 24px;width:280px;
+               box-shadow:0 24px 64px rgba(107,66,38,0.18);border:1px solid rgba(107,66,38,0.10);
+               text-align:center;position:relative;animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+               <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);
+                   width:40px;height:3px;background:#9B2335;border-radius:0 0 3px 3px;"></div>
+               <div style="font-size:36px;margin-bottom:12px;">👑</div>
+               <div style="font-size:16px;font-weight:700;color:#1A1208;margin-bottom:8px;">此功能仅会员可用</div>
+               <div style="font-size:13px;color:#6B5C4C;line-height:1.7;margin-bottom:20px;">
+                您还不是会员<br>开通后解锁全部专业功能
+               </div>
+               <button onclick="window.location.href='membership.html'"
+                   style="width:100%;background:#9B2335;color:#fff;border:none;padding:14px;
+                   border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;
+                   margin-bottom:10px;font-family:'PingFang SC',sans-serif;
+                   box-shadow:0 4px 16px rgba(155,35,53,0.28);">
+                   🔑 开通会员
+               </button>
+               <button onclick="this.closest('div').parentElement.remove()"
+                   style="width:100%;background:none;border:1px solid rgba(107,66,38,0.15);
+                   color:#A89880;padding:12px;border-radius:50px;font-size:13px;cursor:pointer;
+                   font-family:'PingFang SC',sans-serif;">
+                   知道了
+               </button>
+           </div>
+       `;
+       document.body.appendChild(overlay);
+       overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+    }
+
     /* ── 跨天重置 ── */
     (function resetNewDay(){
         const today = new Date().toLocaleDateString();
@@ -831,6 +893,9 @@
         return `昨日盈利 ¥${y.toFixed(2)} 🎉\n👉 今天保持节奏\n基础线：¥${d.toFixed(2)}`;
     }
     (function dailyMotivation(){
+        if (!isMember()) return; // ★ 非会员不显示
+        const today = new Date().toLocaleDateString();
+        if(localStorage.getItem('motivationShown')===today) return;
         const today = new Date().toLocaleDateString();
         if(localStorage.getItem('motivationShown')===today) return;
         document.getElementById('motivation-text').innerText = buildMotivation();
@@ -912,8 +977,10 @@
             try{ if(typeof AchievementEngine!=='undefined') AchievementEngine.check(val); }catch(e){}
             const dc=parseFloat(localStorage.getItem('dailyCost'))||0;
             let tip='';
-            if(rev>0&&rev<dc) tip=`⏳ 距离打平还差 ¥${(dc-rev).toFixed(2)}`;
-            else if(rev>=dc&&dc>0) tip=`✨ 纯赚 ¥${(rev-dc).toFixed(2)}`;
+            if (isMember()){
+                if(rev>0&&rev<dc) tip=`⏳ 距离打平还差 ¥${(dc-rev).toFixed(2)}`;
+                else if(rev>=dc&&dc>0) tip=`✨ 纯赚 ¥${(rev-dc).toFixed(2)}`;
+            }
             document.getElementById('profit-tip').innerText=tip;
             setTimeout(()=>{ document.getElementById('profit-tip').innerText=''; },3500);
             input.value=''; render();
@@ -1002,6 +1069,7 @@
         document.getElementById('roi-desc').innerHTML=`累计纯利 ¥${cum.toFixed(2)}，进度 ${pct}%<br>${ct}`;
     }
     function exportCSV(){
+        if (isMember()){ showMemberGate();return:}
         const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
         let csv='日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n';
         const sorted=Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
@@ -1089,6 +1157,65 @@
 
     window.onload = () => {
         render();
+        if (!localStorage.getItem('ps_user_id') && localStorage.getItem('isActivated') === 'true') {
+            const autoId = String(Math.floor(10000000 + Math.random() * 90000000));
+            localStorage.setItem('ps_user_id',autoId);
+        }
+        
+        if (!isMember()) return; // ★ 非会员不显示
+        const today = new Date().toLocaleDateString();
+        if(localStorage.getItem('motivationShown')===today) return;
+
+
+// ★ 会员7天到期提醒
+(function checkMemberExpiry(){
+    const remain = getMemberRemainDays();
+    const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
+    if (expiry > 0 && remain <= 7 && remain > 0) {
+        const today = new Date().toLocaleDateString();
+        if (localStorage.getItem('expiryNoticedDate') !== today) {
+            localStorage.setItem('expiryNoticedDate', today);
+            setTimeout(() => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position:fixed;inset:0;background:rgba(26,18,8,0.45);
+                    backdrop-filter:blur(6px);z-index:9999;
+                    display:flex;justify-content:center;align-items:center;
+                `;
+                overlay.innerHTML = `
+                    <div style="background:#fff;border-radius:24px;padding:28px 24px;width:280px;
+                        box-shadow:0 24px 64px rgba(107,66,38,0.18);text-align:center;position:relative;
+                        animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+                        <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);
+                            width:40px;height:3px;background:#C8840A;border-radius:0 0 3px 3px;"></div>
+                        <div style="font-size:36px;margin-bottom:10px;">⏰</div>
+                        <div style="font-size:16px;font-weight:700;color:#1A1208;margin-bottom:8px;">会员即将到期</div>
+                        <div style="font-size:13px;color:#6B5C4C;line-height:1.7;margin-bottom:18px;">
+                            您的会员还剩 <strong style="color:#C8840A;">${remain} 天</strong><br>
+                            到期后部分功能将不可用<br>续费后无缝衔接
+                        </div>
+                        <button onclick="window.location.href='membership.html'"
+                            style="width:100%;background:#9B2335;color:#fff;border:none;padding:14px;
+                            border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;
+                            margin-bottom:10px;font-family:'PingFang SC',sans-serif;
+                            box-shadow:0 4px 16px rgba(155,35,53,0.28);">
+                            🔑 立即续费
+                        </button>
+                        <button onclick="this.closest('div').parentElement.remove()"
+                            style="width:100%;background:none;border:1px solid rgba(107,66,38,0.15);
+                            color:#A89880;padding:12px;border-radius:50px;font-size:13px;cursor:pointer;
+                            font-family:'PingFang SC',sans-serif;">
+                            稍后再说
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+            }, 1200);
+        }
+    }
+})();
+
         if(typeof CloudSync !== 'undefined') {
             CloudSync.trackDuration('main');
             if(localStorage.getItem('ps_user_id')) {
@@ -1154,10 +1281,45 @@
             badge.className = 'membership-badge badge-active'; badge.innerText = '免费会员';
             fill.style.width = '100%';
         }
-
+        const pwd = localStorage.getItem('ps_password') || '';
+        const pwdText = document.getElementById('acct-pwd-text');
+        const pwdEye = document.getElementById('acct-pwd-eye');
+        const setPwdBtn = document.getElementById('acct-set-pwd');
+        if(pwd) {
+            pwdText.innerText = '••••';
+            pwdEye.style.display = 'inline';
+            setPwdBtn.style.display = 'none';
+            pwdText._realPwd = pwd;
+            pwdText._shown = false;
+        } else {
+            pwdText.innerText ='';
+            pwdEye.style.display = 'none';
+            setPwdBtn.style.display = 'inline';
+        }
+        
         document.getElementById('account-modal').style.display = 'flex';
     }
 
+    function togglePassword() {
+        const pwdText = document.getElementById('acct-pwd-text');
+        const eye     = document.getElementById('acct-pwd-eye');
+        if (!pwdText._realPwd) return;
+        pwdText._shown = !pwdText._shown;
+        pwdText.innerText = pwdText._shown ? pwdText._realPwd : '••••';
+        eye.innerText = pwdText._shown ? '🙈' : '👁';
+    }
+
+    function showSetPassword() {
+        const pwd = promt('设置登陆密码（至少四位）');
+        if (pwd && pwd.length >= 4) {
+            localStorage.setItem('ps_password',pwd);
+            alert('密码已设置 ✔');
+            closeAccountModal();
+        } else if (pwd!== null) {
+            alert('密码至少4位');
+        }
+    }
+    
     function closeAccountModal(){
         document.getElementById('account-modal').style.display = 'none';
     }
@@ -1174,7 +1336,7 @@
 
     function handleRenew(){
         closeAccountModal();
-        alert('请联系客服续费或升级会员 🦦');
+        window.location.href = 'membership.html';
     }
 
     /* ════════════════════════════════════════
@@ -1385,6 +1547,7 @@
         setTimeout(()=>{ area.scrollIntoView({behavior:'smooth',block:'nearest'}); document.getElementById('supplement-input').focus(); },100);
     }
     function saveSupplementRecord(){
+        if(!isMember()){ showMemberGate(); return; }
         const val=parseFloat(document.getElementById('supplement-input').value);
         if(!_sel||isNaN(val)||val<0){ alert(_cL.err); return; }
         AccountingEngine.saveDailySnapshot(val,_sel);
