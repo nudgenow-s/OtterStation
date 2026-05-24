@@ -896,8 +896,6 @@
         if (!isMember()) return; // ★ 非会员不显示
         const today = new Date().toLocaleDateString();
         if(localStorage.getItem('motivationShown')===today) return;
-        const today = new Date().toLocaleDateString();
-        if(localStorage.getItem('motivationShown')===today) return;
         document.getElementById('motivation-text').innerText = buildMotivation();
         setTimeout(()=>{ document.getElementById('motivation-modal').style.display='flex'; }, 600);
         localStorage.setItem('motivationShown', today);
