@@ -479,6 +479,11 @@
                     localStorage.setItem('isActivated', 'true');
                     localStorage.setItem('license_key', code);
                     localStorage.setItem('bound_device_id', generateDeviceFingerprint());
+                    if (!localStorage.getItem('membershipExpiry')) {
+                        const expiry = Date.now() + 21 * 86400000;
+                        localStorage.setItem('membershipExpiry',expiry.toString());
+                        localStorage.setItem('isMember','true');
+                    }
                     // 激活成功后进入账号设置流程
                     showAccountSetup(code);
                 } else {
