@@ -6,7 +6,7 @@ const IndustryAdapter = {
         "nail": {
             name: "美业",
             theme: "#9B2335",
-            icon: "💅",
+            icon: "💒",
             unit: "位顾客",
             slogan: "让美力变现 ✨"
         },
@@ -20,7 +20,7 @@ const IndustryAdapter = {
         "retail": {
             name: "零售",
             theme: "#6B4226",
-            icon: "👗",
+            icon: "📦",
             unit: "件衣服",
             slogan: "穿出风格，赚到自由 🛍️"
         }
