@@ -1,4 +1,4 @@
-const CACHE_NAME = 'precision-manager-v16'; // ← 每次发布新版本，改这个数字
+const CACHE_NAME = 'precision-manager-v17'; // ← 每次发布新版本，改这个数字
 
 const ASSETS = [
   './',
