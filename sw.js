@@ -1,4 +1,4 @@
-const CACHE_NAME = 'precision-manager-v17'; // ← 每次发布新版本，改这个数字
+const CACHE_NAME = 'precision-manager-v18'; // ← 每次发布新版本，改这个数字
 
 const ASSETS = [
   './',
@@ -6,6 +6,7 @@ const ASSETS = [
   './index.html',
   './main.html',
   './setup.html',
+  './rate-fetcher.js',
   './accounting.js',
   './achievement.js',
   './cloud-sync.js',
