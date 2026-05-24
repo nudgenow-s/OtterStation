@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#9B2335">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>升级会员 · Prestige Station</title>
+    <script src="config.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-page:    #F7F3EE;
+            --bg-card:    #FFFFFF;
+            --bg-surface: #FAF8F5;
+            --bg-input:   #F4F0EB;
+            --crimson:    #9B2335;
+            --crimson-dk: #7A1828;
+            --gold:       #B8963E;
+            --gold-lt:    #D4AC5A;
+            --text-1:     #1A1208;
+            --text-2:     #6B5C4C;
+            --text-3:     #A89880;
+            --border:     rgba(107,66,38,0.10);
+            --border-md:  rgba(107,66,38,0.18);
+            --success:    #2D7D52;
+            --shadow-btn:   0 4px 16px rgba(155,35,53,0.28);
+            --shadow-modal: 0 24px 64px rgba(107,66,38,0.18), 0 4px 16px rgba(107,66,38,0.08);
+            --shadow-card:  0 4px 24px rgba(107,66,38,0.08), 0 1px 4px rgba(107,66,38,0.04);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html { background:var(--bg-page); min-height:100%; }
+        body {
+            font-family:'PingFang SC','Helvetica Neue',sans-serif;
+            background:var(--bg-page);
+            min-height:100vh;
+            display:flex; flex-direction:column; align-items:center;
+            padding:0 0 80px;
+        }
+
+        /* ── 顶部导航 ── */
+        .top-bar {
+            width:100%; max-width:420px;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:20px 20px 0;
+        }
+        .back-btn {
+            font-size:13px; color:var(--text-3);
+            cursor:pointer; transition:color 0.2s;
+            border:none; background:none; padding:4px 0;
+        }
+        .back-btn:hover { color:var(--crimson); }
+        .top-brand {
+            font-family:'Cormorant Garamond',Georgia,serif;
+            font-size:13px; letter-spacing:4px;
+            color:var(--gold); text-transform:uppercase;
+        }
+        /* 语言切换 */
+        .lang-toggle {
+            font-size:11px; font-weight:600; color:var(--text-3);
+            cursor:pointer; letter-spacing:1px;
+            transition:color 0.2s; border:none; background:none;
+            padding:4px 0;
+        }
+        .lang-toggle:hover { color:var(--crimson); }
+
+        /* ── 到期提醒 ── */
+        .expire-banner {
+            display:none;
+            width:calc(100% - 40px); max-width:380px; margin:16px 0 0;
+            background:linear-gradient(135deg,rgba(200,132,10,0.08),rgba(184,150,62,0.06));
+            border:1px solid rgba(200,132,10,0.25); border-radius:14px;
+            padding:13px 16px; font-size:12px; color:#C8840A;
+            line-height:1.7; text-align:center;
+        }
+        .expire-banner.show { display:block; }
+
+        /* ── Hero ── */
+        .hero {
+            text-align:center; padding:28px 20px 0;
+            width:100%; max-width:420px;
+        }
+        .hero-icon { font-size:44px; display:block; margin-bottom:12px; }
+        .hero-title {
+            font-family:'Cormorant Garamond',Georgia,serif;
+            font-size:26px; font-weight:500;
+            color:var(--text-1); letter-spacing:1px; margin-bottom:6px;
+        }
+        .hero-sub { font-size:12px; color:var(--text-3); letter-spacing:0.5px; line-height:1.7; }
+
+        /* ── 权益条 ── */
+        .perks-strip {
+            display:flex; gap:8px;
+            width:100%; max-width:420px;
+            padding:20px 20px 0;
+            overflow-x:auto; scrollbar-width:none;
+        }
+        .perks-strip::-webkit-scrollbar { display:none; }
+        .perk {
+            flex-shrink:0; background:var(--bg-card);
+            border:1px solid var(--border); border-radius:14px;
+            padding:12px 14px; text-align:center; min-width:88px;
+        }
+        .perk-icon { font-size:20px; display:block; margin-bottom:4px; }
+        .perk-label { font-size:10px; color:var(--text-2); line-height:1.4; }
+
+        .rule { height:1px; background:var(--border); margin:22px 20px; width:calc(100% - 40px); max-width:380px; }
+
+        /* ── 套餐 ── */
+        .section-label {
+            font-size:10px; letter-spacing:2.5px; color:var(--text-3);
+            text-transform:uppercase; text-align:center; margin-bottom:14px;
+            width:100%; max-width:420px; padding:0 20px;
+        }
+        .plans-wrap {
+            width:100%; max-width:420px;
+            padding:0 20px; display:flex; flex-direction:column; gap:10px;
+        }
+        .plan-card {
+            background:var(--bg-card); border:1.5px solid var(--border);
+            border-radius:18px; padding:16px 18px;
+            display:flex; align-items:center; gap:14px;
+            cursor:pointer; transition:border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            position:relative; user-select:none;
+        }
+        .plan-card:hover { border-color:var(--crimson); box-shadow:0 4px 16px rgba(155,35,53,0.10); }
+        .plan-card.selected {
+            border-color:var(--crimson);
+            background:rgba(155,35,53,0.03);
+            box-shadow:0 4px 20px rgba(155,35,53,0.14);
+        }
+        .plan-card.recommended { border-color:var(--gold); }
+        .plan-card.recommended.selected { border-color:var(--crimson); background:rgba(155,35,53,0.03); }
+        .rec-tag {
+            position:absolute; top:-1px; right:16px;
+            background:linear-gradient(90deg,var(--gold),var(--gold-lt));
+            color:#fff; font-size:9px; font-weight:700; letter-spacing:1.5px;
+            padding:3px 10px; border-radius:0 0 8px 8px; text-transform:uppercase;
+        }
+        .plan-radio {
+            width:20px; height:20px; border-radius:50%;
+            border:2px solid var(--border-md); flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            transition:border-color 0.2s, background 0.2s;
+        }
+        .plan-card.selected .plan-radio { border-color:var(--crimson); background:var(--crimson); }
+        .plan-radio::after {
+            content:''; width:8px; height:8px; border-radius:50%;
+            background:#fff; opacity:0; transition:opacity 0.15s;
+        }
+        .plan-card.selected .plan-radio::after { opacity:1; }
+        .plan-info { flex:1; }
+        .plan-name { font-size:14px; font-weight:600; color:var(--text-1); margin-bottom:3px; }
+        .plan-desc { font-size:11px; color:var(--text-3); }
+        .plan-price { text-align:right; flex-shrink:0; }
+        /* 数字用 DM Mono 标准字体 */
+        .plan-price-main {
+            font-family:'DM Mono','Courier New',monospace;
+            font-size:20px; font-weight:500; color:var(--crimson); line-height:1;
+            letter-spacing:-0.5px;
+        }
+        .plan-price-main .currency-sym {
+            font-size:13px; font-weight:400; vertical-align:super;
+            font-family:'DM Mono','Courier New',monospace;
+        }
+        .plan-price-per { font-size:10px; color:var(--text-3); margin-top:3px; font-family:'DM Mono',monospace; }
+        .plan-price-save {
+            font-size:10px; color:var(--success); font-weight:600;
+            background:rgba(45,125,82,0.08); border-radius:6px;
+            padding:1px 6px; margin-top:3px; display:inline-block;
+        }
+
+        /* ── 支付方式 ── */
+        .pay-section { width:100%; max-width:420px; padding:22px 20px 0; }
+        .pay-label { font-size:10px; letter-spacing:2.5px; color:var(--text-3); text-transform:uppercase; margin-bottom:12px; }
+        .pay-methods { display:flex; gap:10px; }
+        .pay-btn {
+            flex:1; background:var(--bg-card); border:1.5px solid var(--border);
+            border-radius:14px; padding:14px 8px; text-align:center;
+            cursor:pointer; transition:border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            user-select:none;
+        }
+        .pay-btn:hover { border-color:var(--border-md); }
+        .pay-btn.selected {
+            border-color:var(--crimson); background:rgba(155,35,53,0.03);
+            box-shadow:0 2px 12px rgba(155,35,53,0.10);
+        }
+        /* logo 图片 */
+        .pay-logo { width:28px; height:28px; display:block; margin:0 auto 6px; object-fit:contain; }
+        /* svg inline fallback */
+        .pay-logo-svg { width:28px; height:28px; display:block; margin:0 auto 6px; }
+        .pay-name { font-size:11px; color:var(--text-2); font-weight:500; }
+        .pay-badge { font-size:9px; color:var(--text-3); margin-top:2px; background:var(--bg-input); border-radius:5px; padding:1px 5px; display:inline-block; }
+
+        /* ── 应付金额 ── */
+        .amount-display {
+            width:100%; max-width:420px; padding:20px 20px 0; text-align:center;
+        }
+        .amount-main {
+            font-family:'DM Mono','Courier New',monospace;
+            font-size:44px; font-weight:500; color:var(--crimson); line-height:1; letter-spacing:-1px;
+        }
+        .amount-sub { font-size:11px; color:var(--text-3); margin-top:8px; letter-spacing:0.3px; }
+
+        /* ── 确认按钮 ── */
+        .confirm-wrap { width:100%; max-width:420px; padding:22px 20px 0; }
+        .btn-confirm {
+            width:100%; background:var(--crimson); color:#fff; border:none;
+            padding:17px; border-radius:50px; font-size:15px; font-weight:600;
+            cursor:pointer; letter-spacing:0.3px;
+            font-family:'PingFang SC','Helvetica Neue',sans-serif;
+            box-shadow:var(--shadow-btn);
+            transition:background 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-confirm:hover { background:var(--crimson-dk); box-shadow:0 6px 20px rgba(155,35,53,0.35); }
+        .btn-confirm:active { transform:scale(0.98); box-shadow:none; }
+        .btn-confirm:disabled { background:var(--text-3); box-shadow:none; cursor:not-allowed; opacity:0.7; }
+        .confirm-hint { text-align:center; font-size:11px; color:var(--text-3); margin-top:12px; line-height:1.7; }
+
+        /* ── 加载遮罩 ── */
+        .loading-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(26,18,8,0.55); backdrop-filter:blur(8px);
+            z-index:9000; justify-content:center; align-items:center;
+            flex-direction:column; gap:16px;
+        }
+        .loading-overlay.open { display:flex; }
+        .loading-spinner {
+            width:44px; height:44px;
+            border:3px solid rgba(255,255,255,0.15);
+            border-top-color:var(--gold-lt); border-radius:50%;
+            animation:spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .loading-text { font-size:14px; color:rgba(255,255,255,0.7); letter-spacing:1px; }
+
+        /* ── 成功弹窗 ── */
+        .success-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(26,18,8,0.55); backdrop-filter:blur(10px);
+            z-index:9100; justify-content:center; align-items:center;
+        }
+        .success-overlay.open { display:flex; }
+        .success-modal {
+            background:var(--bg-card); border-radius:24px;
+            padding:36px 28px 28px; width:280px; text-align:center;
+            box-shadow:var(--shadow-modal); border:1px solid var(--border);
+            animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); position:relative;
+        }
+        .success-modal::before {
+            content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+            width:40px; height:3px; background:var(--success); border-radius:0 0 3px 3px;
+        }
+        @keyframes popIn { from{opacity:0;transform:scale(0.92) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        .success-icon { font-size:52px; display:block; margin-bottom:14px; }
+        .success-title { font-size:18px; font-weight:700; color:var(--text-1); margin-bottom:8px; }
+        .success-desc { font-size:13px; color:var(--text-2); line-height:1.7; margin-bottom:20px; }
+        .btn-success-ok {
+            width:100%; background:var(--crimson); color:#fff; border:none;
+            padding:15px; border-radius:50px; font-size:14px; font-weight:600;
+            cursor:pointer; font-family:'PingFang SC',sans-serif;
+            box-shadow:var(--shadow-btn); transition:background 0.2s;
+        }
+        .btn-success-ok:hover { background:var(--crimson-dk); }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-bar">
+    <button class="back-btn" onclick="goBack()" id="t-back">← 返回</button>
+    <div class="top-brand">Prestige</div>
+    <button class="lang-toggle" onclick="toggleLang()" id="t-lang-btn">EN</button>
+</div>
+
+<!-- 到期提醒 -->
+<div class="expire-banner" id="expire-banner">
+    <span id="t-expire-text">⏰ 您的会员还剩 <strong id="expire-days-text"></strong> 天到期，续费后无缝衔接</span>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+    <span class="hero-icon">👑</span>
+    <div class="hero-title" id="t-hero-title">升级 Prestige 会员</div>
+    <div class="hero-sub" id="t-hero-sub">解锁全部专业功能，让每笔数据为您创造更多价值</div>
+</div>
+
+<!-- 权益 -->
+<div class="perks-strip">
+    <div class="perk"><span class="perk-icon">📊</span><div class="perk-label" id="t-perk-1">全维度<br>CSV报表</div></div>
+    <div class="perk"><span class="perk-icon">📅</span><div class="perk-label" id="t-perk-2">无限<br>补记</div></div>
+    <div class="perk"><span class="perk-icon">💡</span><div class="perk-label" id="t-perk-3">每日<br>激励</div></div>
+    <div class="perk"><span class="perk-icon">💰</span><div class="perk-label" id="t-perk-4">盈亏<br>实时提示</div></div>
+    <div class="perk"><span class="perk-icon">☁️</span><div class="perk-label" id="t-perk-5">云端<br>同步</div></div>
+</div>
+
+<div class="rule"></div>
+
+<!-- 套餐标题 -->
+<div class="section-label" id="t-plans-label">选择套餐</div>
+<div class="plans-wrap" id="plans-wrap"></div>
+
+<!-- 支付方式 -->
+<div class="pay-section">
+    <div class="pay-label" id="t-pay-label">支付方式</div>
+    <div class="pay-methods">
+
+        <!-- 微信 -->
+        <div class="pay-btn selected" data-method="wechat_pay" onclick="selectPayMethod(this)">
+            <!-- 微信 SVG Logo -->
+            <svg class="pay-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#07C160"/>
+                <path d="M16.5 11C11.806 11 8 14.164 8 18.08c0 2.2 1.22 4.16 3.13 5.46l-.78 2.34 2.72-1.36c.98.27 2.02.42 3.1.42.27 0 .54-.01.8-.03-.17-.52-.26-1.07-.26-1.63 0-3.56 3.36-6.44 7.5-6.44.26 0 .52.01.77.04C24.25 13.84 20.69 11 16.5 11z" fill="white"/>
+                <circle cx="13.5" cy="18" r="1.2" fill="#07C160"/>
+                <circle cx="19.5" cy="18" r="1.2" fill="#07C160"/>
+                <path d="M24.25 17.5C20.52 17.5 17.5 20.02 17.5 23.13c0 1.68.9 3.18 2.33 4.19l-.58 1.75 2.03-1.01c.73.2 1.51.32 2.32.32C27.23 28.38 31 25.86 31 23.13c0-2.73-3.07-5.63-6.75-5.63z" fill="white"/>
+                <circle cx="22" cy="23" r="1" fill="#07C160"/>
+                <circle cx="26.5" cy="23" r="1" fill="#07C160"/>
+            </svg>
+            <div class="pay-name" id="t-pay-wechat">微信支付</div>
+            <div class="pay-badge" id="t-pay-wechat-badge">推荐</div>
+        </div>
+
+        <!-- 支付宝 -->
+        <div class="pay-btn" data-method="alipay" onclick="selectPayMethod(this)">
+            <!-- 支付宝 SVG Logo -->
+            <svg class="pay-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#1677FF"/>
+                <path d="M20 8C13.373 8 8 13.373 8 20s5.373 12 12 12 12-5.373 12-12S26.627 8 20 8z" fill="#1677FF"/>
+                <path d="M31.8 23.4c-1.7-.6-4.1-1.5-6.2-2.3.9-1.5 1.5-3.3 1.7-5.1H22v-1.5h5v-1.5h-5V11h-2.5v1.9h-5v1.5h5v1.5h-4.2v1.5h8.9c-.2 1.2-.6 2.4-1.2 3.4-2.3-.8-4.4-1.4-5.8-1.4-3 0-5 1.6-5 3.8 0 2.3 2 3.8 4.8 3.8 2.5 0 4.9-1.3 6.5-3.5 2 .9 4.3 1.9 5.8 2.6l1.5-2.7z" fill="white"/>
+                <path d="M17.2 24.8c-1.5 0-2.4-.7-2.4-1.8 0-1 .9-1.8 2.5-1.8 1.2 0 2.6.4 4.2 1.1-1.1 1.6-2.6 2.5-4.3 2.5z" fill="#1677FF"/>
+            </svg>
+            <div class="pay-name" id="t-pay-alipay">支付宝</div>
+            <div class="pay-badge" id="t-pay-alipay-badge">自动跳转</div>
+        </div>
+
+        <!-- 信用卡 -->
+        <div class="pay-btn" data-method="card" onclick="selectPayMethod(this)">
+            <svg class="pay-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#1A1208"/>
+                <rect x="7" y="12" width="26" height="17" rx="3" fill="none" stroke="#D4AC5A" stroke-width="1.5"/>
+                <rect x="7" y="17" width="26" height="4" fill="#D4AC5A" opacity="0.5"/>
+                <rect x="10" y="24" width="8" height="2" rx="1" fill="#D4AC5A" opacity="0.7"/>
+            </svg>
+            <div class="pay-name" id="t-pay-card">信用卡</div>
+            <div class="pay-badge" id="t-pay-card-badge">海外</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 应付金额 -->
+<div class="amount-display">
+    <div class="amount-main" id="amount-main">$ --</div>
+    <div class="amount-sub" id="amount-sub"></div>
+</div>
+
+<!-- 确认按钮 -->
+<div class="confirm-wrap">
+    <button class="btn-confirm" id="btn-confirm" onclick="handlePay()">跳转支付</button>
+    <div class="confirm-hint" id="t-confirm-hint">支付成功后会员自动生效 · 如有问题请联系客服</div>
+</div>
+
+<!-- 加载遮罩 -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="t-loading-text">正在跳转支付页面...</div>
+</div>
+
+<!-- 成功弹窗 -->
+<div class="success-overlay" id="success-overlay">
+    <div class="success-modal">
+        <span class="success-icon">🎉</span>
+        <div class="success-title" id="t-success-title">开通成功！</div>
+        <div class="success-desc" id="success-desc"></div>
+        <button class="btn-success-ok" id="t-success-btn" onclick="successBack()">返回工作台</button>
+    </div>
+</div>
+
+<script>
+// ── 配置 ──────────────────────────────────────────────────────
+const API_BASE = 'https://osapi.nudgenow.xyz';
+
+let USD_TO_CNY  = 7.25;
+let currentLang = localStorage.getItem('lang') || 'zh';
+
+// ── 翻译表 ────────────────────────────────────────────────────
+const T = {
+    zh: {
+        langBtn:        'EN',
+        back:           '← 返回',
+        heroTitle:      '升级 Prestige 会员',
+        heroSub:        '解锁全部专业功能，让每笔数据为您创造更多价值',
+        expireText:     (d) => `⏰ 您的会员还剩 ${d} 天到期，续费后无缝衔接`,
+        perk1:          '全维度\nCSV报表',
+        perk2:          '无限\n补记',
+        perk3:          '每日\n激励',
+        perk4:          '盈亏\n实时提示',
+        perk5:          '云端\n同步',
+        plansLabel:     '选择套餐',
+        payLabel:       '支付方式',
+        payWechat:      '微信支付',
+        payWechatBadge: '推荐',
+        payAlipay:      '支付宝',
+        payAlipayBadge: '自动跳转',
+        payCard:        '信用卡',
+        payCardBadge:   '海外',
+        recTag:         '最受欢迎',
+        confirmHint:    '支付成功后会员自动生效 · 如有问题请联系客服',
+        loadingText:    '正在跳转支付页面...',
+        confirmingText: '正在确认支付结果...',
+        successTitle:   '开通成功！',
+        successBtn:     '返回工作台',
+        successDesc:    (days, date) => `<strong>+${days} 天</strong>会员已生效<br>有效期至 ${date}<br><br>解锁全部专业功能 💪`,
+        btnText:        (method, price) => {
+            const m = { wechat_pay:'微信支付', alipay:'支付宝', card:'信用卡' }[method];
+            return `${m} · ${price}`;
+        },
+        amountSub:      (days, method) => {
+            const m = { wechat_pay:'微信', alipay:'支付宝', card:'信用卡' }[method];
+            return `${days} 天会员 · ${m}支付`;
+        },
+        amountSubCard:  (cny, rate) => `≈ ¥${cny}（参考汇率 ${rate}）`,
+        noUser:         '请先登录账号再开通会员',
+        payFail:        (msg) => `跳转失败：${msg}\n请检查网络或联系客服`,
+        timeout:        '✅ 支付已提交，会员状态将在数分钟内生效。\n如5分钟后未更新请联系客服并提供 UserID。',
+        planNames:      { '1m':'1 个月', '3m':'3 个月', '6m':'6 个月', '1y':'1 年' },
+        planDescs:      { '1m':'体验全功能，随时可续', '3m':'省 $2，适合稳定运营', '6m':'省 $2.9，最受欢迎', '1y':'省 $48.9，全年无忧' },
+        planPer:        { '1m':'$9.9 / mo', '3m':'$6.63 / mo', '6m':'$6.15 / mo', '1y':'$5.83 / mo' },
+        planSave:       { '1m':null, '3m':'Save $2', '6m':'Save $2.9', '1y':'Save $48.9' },
+    },
+    en: {
+        langBtn:        '中文',
+        back:           '← Back',
+        heroTitle:      'Upgrade to Prestige',
+        heroSub:        'Unlock all pro features and make every data point work for you',
+        expireText:     (d) => `⏰ Your membership expires in ${d} days — renew to keep access`,
+        perk1:          'Full CSV\nReport',
+        perk2:          'Unlimited\nBack-log',
+        perk3:          'Daily\nMotivation',
+        perk4:          'P&L\nInsights',
+        perk5:          'Cloud\nSync',
+        plansLabel:     'Choose a Plan',
+        payLabel:       'Payment Method',
+        payWechat:      'WeChat Pay',
+        payWechatBadge: 'Recommended',
+        payAlipay:      'Alipay',
+        payAlipayBadge: 'Auto-redirect',
+        payCard:        'Credit Card',
+        payCardBadge:   'Global',
+        recTag:         'Most Popular',
+        confirmHint:    'Membership activates immediately after payment · Contact support for issues',
+        loadingText:    'Redirecting to payment...',
+        confirmingText: 'Confirming payment...',
+        successTitle:   'Success!',
+        successBtn:     'Back to Dashboard',
+        successDesc:    (days, date) => `<strong>+${days} days</strong> membership activated<br>Valid until ${date}<br><br>All pro features unlocked 💪`,
+        btnText:        (method, price) => {
+            const m = { wechat_pay:'WeChat Pay', alipay:'Alipay', card:'Credit Card' }[method];
+            return `${m} · ${price}`;
+        },
+        amountSub:      (days, method) => {
+            const m = { wechat_pay:'WeChat Pay', alipay:'Alipay', card:'Credit Card' }[method];
+            return `${days}-day membership · ${m}`;
+        },
+        amountSubCard:  (cny, rate) => `≈ ¥${cny} (rate ${rate})`,
+        noUser:         'Please log in before upgrading',
+        payFail:        (msg) => `Payment redirect failed: ${msg}\nCheck your network or contact support`,
+        timeout:        '✅ Payment submitted. Membership will activate within a few minutes.\nContact support with your UserID if not updated after 5 minutes.',
+        planNames:      { '1m':'1 Month', '3m':'3 Months', '6m':'6 Months', '1y':'1 Year' },
+        planDescs:      { '1m':'Try all features, renew anytime', '3m':'Save $2, great for steady ops', '6m':'Save $2.9, most popular', '1y':'Save $48.9, worry-free year' },
+        planPer:        { '1m':'$9.9 / mo', '3m':'$6.63 / mo', '6m':'$6.15 / mo', '1y':'$5.83 / mo' },
+        planSave:       { '1m':null, '3m':'Save $2', '6m':'Save $2.9', '1y':'Save $48.9' },
+    }
+};
+
+// ── 套餐数据（价格统一 USD）─────────────────────────────────
+const PLANS = [
+    { id:'1m', priceUSD:9.9,  days:30,  recommended:false },
+    { id:'3m', priceUSD:19.9, days:90,  recommended:false },
+    { id:'6m', priceUSD:36.9, days:180, recommended:true  },
+    { id:'1y', priceUSD:69.9, days:365, recommended:false },
+];
+
+let selectedPlan   = '6m';
+let selectedMethod = 'wechat_pay';
+let pollTimer      = null;
+
+// ── 语言切换 ──────────────────────────────────────────────────
+function toggleLang() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('lang', currentLang);
+    applyLang();
+    renderPlans();
+    updateAmountDisplay();
+}
+
+function applyLang() {
+    const t = T[currentLang];
+    document.getElementById('t-lang-btn').innerText        = t.langBtn;
+    document.getElementById('t-back').innerText            = t.back;
+    document.getElementById('t-hero-title').innerText      = t.heroTitle;
+    document.getElementById('t-hero-sub').innerText        = t.heroSub;
+    document.getElementById('t-perk-1').innerHTML          = t.perk1.replace('\n','<br>');
+    document.getElementById('t-perk-2').innerHTML          = t.perk2.replace('\n','<br>');
+    document.getElementById('t-perk-3').innerHTML          = t.perk3.replace('\n','<br>');
+    document.getElementById('t-perk-4').innerHTML          = t.perk4.replace('\n','<br>');
+    document.getElementById('t-perk-5').innerHTML          = t.perk5.replace('\n','<br>');
+    document.getElementById('t-plans-label').innerText     = t.plansLabel;
+    document.getElementById('t-pay-label').innerText       = t.payLabel;
+    document.getElementById('t-pay-wechat').innerText      = t.payWechat;
+    document.getElementById('t-pay-wechat-badge').innerText= t.payWechatBadge;
+    document.getElementById('t-pay-alipay').innerText      = t.payAlipay;
+    document.getElementById('t-pay-alipay-badge').innerText= t.payAlipayBadge;
+    document.getElementById('t-pay-card').innerText        = t.payCard;
+    document.getElementById('t-pay-card-badge').innerText  = t.payCardBadge;
+    document.getElementById('t-confirm-hint').innerText    = t.confirmHint;
+    document.getElementById('t-loading-text').innerText    = t.loadingText;
+    document.getElementById('t-success-title').innerText   = t.successTitle;
+    document.getElementById('t-success-btn').innerText     = t.successBtn;
+
+    // 到期提醒（如果显示中的话）
+    const days = document.getElementById('expire-days-text')?.innerText;
+    if (days) document.getElementById('t-expire-text').innerHTML = t.expireText(days);
+}
+
+// ── 套餐渲染 ──────────────────────────────────────────────────
+function renderPlans() {
+    const t = T[currentLang];
+    document.getElementById('plans-wrap').innerHTML = PLANS.map(p => {
+        const save = t.planSave[p.id];
+        return `
+        <div class="plan-card ${p.recommended?'recommended':''} ${p.id===selectedPlan?'selected':''}"
+             onclick="selectPlan('${p.id}')">
+            ${p.recommended ? `<div class="rec-tag">${t.recTag}</div>` : ''}
+            <div class="plan-radio"></div>
+            <div class="plan-info">
+                <div class="plan-name">${t.planNames[p.id]}</div>
+                <div class="plan-desc">${t.planDescs[p.id]}</div>
+            </div>
+            <div class="plan-price">
+                <div class="plan-price-main">
+                    <span class="currency-sym">$</span>${p.priceUSD}
+                </div>
+                <div class="plan-price-per">${t.planPer[p.id]}</div>
+                ${save ? `<div class="plan-price-save">${save}</div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function selectPlan(id) {
+    selectedPlan = id;
+    renderPlans();
+    updateAmountDisplay();
+}
+
+function selectPayMethod(el) {
+    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedMethod = el.dataset.method;
+    updateAmountDisplay();
+}
+
+// ── 金额展示 ──────────────────────────────────────────────────
+// 所有支付方式都以 USD 计价（Stripe 国际收单统一 USD）
+// 微信/支付宝由 Stripe 在 Checkout 页面完成货币换算展示
+function updateAmountDisplay() {
+    const plan  = PLANS.find(p => p.id === selectedPlan);
+    const t     = T[currentLang];
+    if (!plan) return;
+
+    const priceStr = `$${plan.priceUSD}`;
+    document.getElementById('amount-main').innerText = priceStr;
+
+    if (selectedMethod === 'card') {
+        const cny = (plan.priceUSD * USD_TO_CNY).toFixed(2);
+        document.getElementById('amount-sub').innerText = t.amountSubCard(cny, USD_TO_CNY);
+    } else {
+        document.getElementById('amount-sub').innerText = t.amountSub(plan.days, selectedMethod);
+    }
+
+    document.getElementById('btn-confirm').innerText = t.btnText(selectedMethod, priceStr);
+}
+
+// ── 发起支付 ──────────────────────────────────────────────────
+async function handlePay() {
+    const t      = T[currentLang];
+    const userId = localStorage.getItem('ps_user_id');
+    if (!userId) { alert(t.noUser); return; }
+
+    const btn = document.getElementById('btn-confirm');
+    btn.disabled = true;
+    document.getElementById('t-loading-text').innerText = t.loadingText;
+    document.getElementById('loading-overlay').classList.add('open');
+
+    try {
+        const successUrl = `${location.origin}${location.pathname}?session_id={CHECKOUT_SESSION_ID}&lang=${currentLang}`;
+        const cancelUrl  = `${location.origin}${location.pathname}?lang=${currentLang}`;
+
+        const res = await fetch(`${API_BASE}/create-checkout`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                userId,
+                planId:        selectedPlan,
+                paymentMethod: selectedMethod,
+                successUrl,
+                cancelUrl,
+            }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.url) throw new Error(data.error || 'Failed');
+
+        localStorage.setItem('_pending_session', data.sessionId);
+        localStorage.setItem('_pending_plan',    selectedPlan);
+
+        // 跳转到 Stripe Checkout
+        // 微信/支付宝：Stripe 页面会有"打开微信/支付宝"按钮 → 唤起 App → 输入密码
+        // 信用卡：直接填写卡号页面
+        window.location.href = data.url;
+
+    } catch(e) {
+        document.getElementById('loading-overlay').classList.remove('open');
+        btn.disabled = false;
+        alert(t.payFail(e.message));
+    }
+}
+
+// ── 支付结果轮询 ──────────────────────────────────────────────
+async function pollPaymentResult(sessionId) {
+    const t = T[currentLang];
+    document.getElementById('t-loading-text').innerText = t.confirmingText;
+    document.getElementById('loading-overlay').classList.add('open');
+
+    let attempts = 0;
+    const check = async () => {
+        attempts++;
+        try {
+            const userId   = localStorage.getItem('ps_user_id');
+            const password = localStorage.getItem('ps_password');
+            if (userId && password) {
+                const res  = await fetch(`${API_BASE}/restore`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ userId, password }),
+                });
+                const data = await res.json();
+                if (data.status === 'success' && data.snapshot) {
+                    const newExpiry = parseInt(data.snapshot.membershipExpiry || '0');
+                    const oldExpiry = parseInt(localStorage.getItem('membershipExpiry') || '0');
+                    if (newExpiry > oldExpiry) {
+                        localStorage.setItem('membershipExpiry', String(newExpiry));
+                        localStorage.setItem('isMember', 'true');
+                        localStorage.removeItem('_pending_session');
+                        const planId = localStorage.removeItem('_pending_plan') || selectedPlan;
+                        showSuccess(newExpiry);
+                        return;
+                    }
+                }
+            }
+        } catch(e) {}
+
+        if (attempts < 10) {
+            pollTimer = setTimeout(check, 1500);
+        } else {
+            document.getElementById('loading-overlay').classList.remove('open');
+            renderPlans();
+            updateAmountDisplay();
+            alert(t.timeout);
+        }
+    };
+    await check();
+}
+
+function showSuccess(newExpiry) {
+    const t       = T[currentLang];
+    const date    = new Date(newExpiry).toLocaleDateString(currentLang === 'zh' ? 'zh-CN' : 'en-US');
+    const planId  = localStorage.getItem('_pending_plan') || selectedPlan;
+    const plan    = PLANS.find(p => p.id === planId);
+    document.getElementById('success-desc').innerHTML = t.successDesc(plan?.days || '', date);
+    document.getElementById('t-success-title').innerText = t.successTitle;
+    document.getElementById('t-success-btn').innerText   = t.successBtn;
+    document.getElementById('loading-overlay').classList.remove('open');
+    document.getElementById('success-overlay').classList.add('open');
+}
+
+function successBack() { window.location.href = 'main.html'; }
+function goBack() {
+    if (document.referrer) history.back();
+    else window.location.href = 'main.html';
+}
+
+// ── 初始化 ────────────────────────────────────────────────────
+async function init() {
+    // 从 URL 继承语言参数
+    const urlLang = new URLSearchParams(location.search).get('lang');
+    if (urlLang && (urlLang === 'zh' || urlLang === 'en')) {
+        currentLang = urlLang;
+        localStorage.setItem('lang', currentLang);
+    }
+
+    // 应用主题色
+    try {
+        const cfg = IndustryAdapter.getCurrent();
+        if (cfg?.theme) {
+            document.documentElement.style.setProperty('--crimson', cfg.theme);
+            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', cfg.theme);
+        }
+    } catch(e) {}
+
+    // 拉取实时汇率
+    try {
+        const res  = await fetch(`${API_BASE}/rate`);
+        const data = await res.json();
+        if (data.rate) USD_TO_CNY = data.rate;
+    } catch(e) {}
+
+    // 到期提醒
+    const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
+    const remain = Math.ceil((expiry - Date.now()) / 86400000);
+    if (expiry > 0 && remain <= 7 && remain > 0) {
+        document.getElementById('expire-days-text').innerText = remain;
+        document.getElementById('t-expire-text').innerHTML = T[currentLang].expireText(remain);
+        document.getElementById('expire-banner').classList.add('show');
+    }
+
+    // 检查支付回跳
+    const sessionId = new URLSearchParams(location.search).get('session_id');
+    if (sessionId) {
+        await pollPaymentResult(sessionId);
+        return;
+    }
+
+    applyLang();
+    renderPlans();
+    updateAmountDisplay();
+}
+
+init();
+</script>
+</body>
+</html>
