@@ -1067,7 +1067,7 @@
         document.getElementById('roi-desc').innerHTML=`累计纯利 ¥${cum.toFixed(2)}，进度 ${pct}%<br>${ct}`;
     }
     function exportCSV(){
-        if (isMember()){ showMemberGate();return:}
+        if (isMember()){ showMemberGate();return;}
         const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
         let csv='日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n';
         const sorted=Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
