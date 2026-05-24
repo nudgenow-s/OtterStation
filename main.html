@@ -1356,12 +1356,12 @@
             const rent   = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
             const salary = parseFloat(localStorage.getItem('monthlySalary')) || 0;
             const misc   = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
-            if (rent)   calcAddRow('房租',    '', rent);
-            if (salary) calcAddRow('人工工资', '', salary);
+            if (rent)   calcAddRow('物业费',    '', rent);
+            if (salary) calcAddRow('宽带话费', '', salary);
             if (misc)   calcAddRow('水电杂费', '', misc);
             if (!rent && !salary && !misc) {
-                calcAddRow('房租', '', 5000);
-                calcAddRow('人工工资', '', 8000);
+                calcAddRow('物业费', '', 5000);
+                calcAddRow('宽带话费', '', 2000);
             }
         }
         calcRecalc();
