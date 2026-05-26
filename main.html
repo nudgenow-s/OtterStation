@@ -1213,10 +1213,7 @@
                console.warn('Legacy register offline');
           }
       })();
-        
-        if (!isMember()) return; // ★ 非会员不显示
-        const today = new Date().toLocaleDateString();
-        if(localStorage.getItem('motivationShown')===today) return;
+    
 
 
 // ★ 会员7天到期提醒
@@ -1353,7 +1350,7 @@
         
         
       const pwd       = localStorage.getItem('ps_password') || '';
-      const userId    = localStorage.getItem('ps_user_id')  || '';
+      const userIdForPwd = localStorage.getItem('ps_user_id') || '';
       const pwdText   = document.getElementById('acct-pwd-text');
       const pwdEye    = document.getElementById('acct-pwd-eye');
       const setPwdBtn = document.getElementById('acct-set-pwd');
@@ -1364,7 +1361,7 @@
           setPwdBtn.style.display = 'none';
           pwdText._realPwd = pwd;
           pwdText._shown   = false;
-      } else if (userId) {
+      } else if (userIdForPwd) {
           // 有ID但没密码：显示设置密码按钮
           pwdText.innerText       = '';
           pwdEye.style.display    = 'none';
@@ -1449,7 +1446,7 @@
          modal.classList.add('open');
          if (screen.orientation && screen.orientation.lock) {
              screen.orientation.lock('landscape').catch(() => {});
-    }
+          }
 
     // 自动拉取实时汇率
         if (typeof RateFetcher !== 'undefined') {
