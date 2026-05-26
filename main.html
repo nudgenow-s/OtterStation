@@ -818,6 +818,12 @@
        return Date.now() < freeExpiry;
    }
 
+   function isInFreeTrial(){
+       const activatedAt = parseInt(localStorage.getItem('activatedAt')) || 0;
+       if (!activatedAt) return false;
+       return Date.now() < activatedAt + 21 * 86400000;
+   }
+
    function getMemberRemainDays() {
        const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
        if (expiry > Date.now()) return Math.ceil((expiry - Date.now()) / 86400000);
@@ -905,7 +911,7 @@
         return `昨日盈利 ¥${y.toFixed(2)} 🎉\n👉 今天保持节奏\n基础线：¥${d.toFixed(2)}`;
     }
     (function dailyMotivation(){
-        if (!isMember()) return; // ★ 非会员不显示
+        if (!isMember() && !isInFreeTrial()) return; // ★ 非会员不显示
         const today = new Date().toLocaleDateString();
         if(localStorage.getItem('motivationShown')===today) return;
         document.getElementById('motivation-text').innerText = buildMotivation();
@@ -987,7 +993,7 @@
             try{ if(typeof AchievementEngine!=='undefined') AchievementEngine.check(val); }catch(e){}
             const dc=parseFloat(localStorage.getItem('dailyCost'))||0;
             let tip='';
-            if (isMember()){
+            if (isMember() || isInFreeTrial()){
                 if(rev>0&&rev<dc) tip=`⏳ 距离打平还差 ¥${(dc-rev).toFixed(2)}`;
                 else if(rev>=dc&&dc>0) tip=`✨ 纯赚 ¥${(rev-dc).toFixed(2)}`;
             }
@@ -1079,7 +1085,7 @@
         document.getElementById('roi-desc').innerHTML=`累计纯利 ¥${cum.toFixed(2)}，进度 ${pct}%<br>${ct}`;
     }
     function exportCSV(){
-        if (isMember()){ showMemberGate();return;}
+        if (isMember() && !isInFreeTrial()){ showMemberGate(); return; }
         const history=JSON.parse(localStorage.getItem('revenue_history'))||{};
         let csv='日期,总营收,达成率,日均房租,日均人工,日均杂费,绝对净利\n';
         const sorted=Object.keys(history).sort((a,b)=>new Date(a)-new Date(b));
@@ -1167,10 +1173,39 @@
 
     window.onload = () => {
         render();
-        if (!localStorage.getItem('ps_user_id') && localStorage.getItem('isActivated') === 'true') {
-            const autoId = String(Math.floor(10000000 + Math.random() * 90000000));
-            localStorage.setItem('ps_user_id',autoId);
+        // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
+(async function autoRegisterLegacyUser() {
+    if (localStorage.getItem('ps_user_id')) return;
+    if (localStorage.getItem('isActivated') !== 'true') return;
+
+    const autoId     = String(Math.floor(10000000 + Math.random() * 90000000));
+    const licenseKey = localStorage.getItem('license_key') || '';
+    const deviceId   = localStorage.getItem('bound_device_id') || '';
+    // 老用户暂时用随机密码占位，用户可在账号卡片里手动设置
+    const tempPwd    = 'PWD' + autoId;
+
+    try {
+        const res  = await fetch('https://osapi.nudgenow.xyz/register', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ licenseKey, deviceId, password: tempPwd })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success' || data.status === 'exists') {
+            // 用服务端返回的 userId（防止本地生成的和服务端冲突）
+            const finalId = data.userId || autoId;
+            localStorage.setItem('ps_user_id',  finalId);
+            localStorage.setItem('ps_password', tempPwd);
+        } else {
+            // 注册失败时至少本地存一个ID，不影响使用
+            localStorage.setItem('ps_user_id', autoId);
         }
+    } catch(e) {
+        // 离线时本地存ID，联网后下次sync会补上
+        localStorage.setItem('ps_user_id', autoId);
+    }
+})();
         
         if (!isMember()) return; // ★ 非会员不显示
         const today = new Date().toLocaleDateString();
@@ -1338,16 +1373,36 @@
         eye.innerText = pwdText._shown ? '🙈' : '👁';
     }
 
-    function showSetPassword() {
-        const pwd = promt('设置登陆密码（至少四位）');
-        if (pwd && pwd.length >= 4) {
-            localStorage.setItem('ps_password',pwd);
-            alert('密码已设置 ✔');
-            closeAccountModal();
-        } else if (pwd!== null) {
-            alert('密码至少4位');
-        }
-    }
+    async function showSetPassword() {
+        const pwd = prompt('设置登录密码（至少4位）：');
+        if (pwd === null) return;
+        if (pwd.length < 4) { alert('密码至少4位'); return; }
+
+        const userId = localStorage.getItem('ps_user_id');
+        const licenseKey = localStorage.getItem('license_key') || '';
+        const deviceId   = localStorage.getItem('bound_device_id') || '';
+
+        try {
+            const res  = await fetch('https://osapi.nudgenow.xyz/register', {
+               method:  'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body:    JSON.stringify({ licenseKey, deviceId, password: pwd })
+            });
+            const data = await res.json();
+            if (data.status === 'success' || data.status === 'exists') {
+               localStorage.setItem('ps_password', pwd);
+               alert('密码已设置 ✅');
+               closeAccountModal();
+            } else {
+                alert('设置失败：' + (data.error || '请检查网络'));
+            }
+       } catch(e) {
+           // 离线时先存本地
+           localStorage.setItem('ps_password', pwd);
+           alert('密码已保存（将在联网后同步）✅');
+           closeAccountModal();
+       }
+}
     
     function closeAccountModal(){
         document.getElementById('account-modal').style.display = 'none';
@@ -1588,7 +1643,7 @@
         setTimeout(()=>{ area.scrollIntoView({behavior:'smooth',block:'nearest'}); document.getElementById('supplement-input').focus(); },100);
     }
     function saveSupplementRecord(){
-        if(!isMember()){ showMemberGate(); return; }
+        if(!isMember() && !isInFreeTrial()){ showMemberGate(); return; }
         const val=parseFloat(document.getElementById('supplement-input').value);
         if(!_sel||isNaN(val)||val<0){ alert(_cL.err); return; }
         AccountingEngine.saveDailySnapshot(val,_sel);
