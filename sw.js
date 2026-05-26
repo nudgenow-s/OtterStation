@@ -42,17 +42,22 @@ self.addEventListener('activate', (e) => {
 
 // 网络优先：优先从服务器拉最新代码，离线时才用缓存兜底
 self.addEventListener('fetch', (e) => {
+  // POST 及其他非 GET 请求直接放行，不走缓存
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
     fetch(e.request)
       .then((networkResponse) => {
-        // 拿到新资源后，顺手更新缓存
-        const cloned = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, cloned));
+        // 只缓存成功的 GET 响应
+        if (networkResponse && networkResponse.status === 200) {
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, cloned));
+        }
         return networkResponse;
       })
       .catch(() => {
-        // 无网络时，从缓存取
         return caches.match(e.request);
       })
   );
 });
+
