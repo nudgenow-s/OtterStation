@@ -1293,7 +1293,7 @@
         } else if (inFreePeriod) {
             //21days free
             const remain = Math.ceil((freeExpiry -Date.now()) / 86400000);
-            days.innerText = `免费期剩余 ${remain} 天;
+            days.innerText = `免费期剩余 ${remain} 天`;
             fill.style.width = Math.max((remain / 21) * 100, 2) + '%';
             if (remain > 7) {
                 badge.className = 'membership-badge badge-active'; badge.innerText = '免费试用';
@@ -1306,13 +1306,9 @@
            days.innerText = '已过期';
            fill.style.width = '2%';
            badge.className = 'membership-badge badge-expired'; badge.innerText = '已过期';
-           days.style.color = 'var(--crimson);
+           days.style.color = 'var(--crimson)';
         }
-
-
-           
         
-            
         
         const pwd = localStorage.getItem('ps_password') || '';
         const pwdText = document.getElementById('acct-pwd-text');
