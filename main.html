@@ -825,7 +825,7 @@
        const activatedAt = parseInt(localStorage.getItem('activatedAt')) || 0;
        if (!activatedAt) return 0;
        const freeExpiry = activatedAt + 21 * 86400000;
-       return Math.max(0,Math.ceil((freeExpiry - Date.now()) / 86400000;
+       return Math.max(0,Math.ceil((freeExpiry - Date.now()) / 86400000));
    }
 
    function showMemberGate() {
