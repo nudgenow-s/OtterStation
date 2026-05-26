@@ -1174,38 +1174,45 @@
     window.onload = () => {
         render();
         // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
-(async function autoRegisterLegacyUser() {
-    if (localStorage.getItem('ps_user_id')) return;
-    if (localStorage.getItem('isActivated') !== 'true') return;
+        (async function autoRegisterLegacyUser() {
+            // 已有ID说明之前注册过，跳过
+            if (localStorage.getItem('ps_user_id')) return;
+            if (localStorage.getItem('isActivated') !== 'true') return;
 
-    const autoId     = String(Math.floor(10000000 + Math.random() * 90000000));
-    const licenseKey = localStorage.getItem('license_key') || '';
-    const deviceId   = localStorage.getItem('bound_device_id') || '';
-    // 老用户暂时用随机密码占位，用户可在账号卡片里手动设置
-    const tempPwd    = 'PWD' + autoId;
+            const deviceId = localStorage.getItem('bound_device_id') || generateDeviceFingerprint();
+            localStorage.setItem('bound_device_id', deviceId);
 
-    try {
-        const res  = await fetch('https://osapi.nudgenow.xyz/register', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ licenseKey, deviceId, password: tempPwd })
-        });
-        const data = await res.json();
+            // 先本地生成ID，保证离线也能用
+            const localId = String(Math.floor(10000000 + Math.random() * 90000000));
+            localStorage.setItem('ps_user_id', localId);
 
-        if (data.status === 'success' || data.status === 'exists') {
-            // 用服务端返回的 userId（防止本地生成的和服务端冲突）
-            const finalId = data.userId || autoId;
-            localStorage.setItem('ps_user_id',  finalId);
-            localStorage.setItem('ps_password', tempPwd);
-        } else {
-            // 注册失败时至少本地存一个ID，不影响使用
-            localStorage.setItem('ps_user_id', autoId);
-        }
-    } catch(e) {
-        // 离线时本地存ID，联网后下次sync会补上
-        localStorage.setItem('ps_user_id', autoId);
-    }
-})();
+            // 临时密码
+            const tempPwd = 'PWD' + localId;
+
+            try {
+                const res  = await fetch('https://osapi.nudgenow.xyz/register', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ deviceId, password: tempPwd })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    // 用服务端生成的正式ID覆盖本地临时ID
+                    localStorage.setItem('ps_user_id',  data.userId);
+                    localStorage.setItem('ps_password', tempPwd);
+                    // 刷新账号卡片显示
+                    const uidEl = document.getElementById('acct-uid-text');
+                    if (uidEl) uidEl.innerText = 'ID: ' + data.userId;
+                } else {
+                    // 注册失败，本地ID继续用，密码暂不设
+                    console.warn('Legacy register failed:', data);
+                }
+          } catch(e) {
+               // 离线，本地ID先用着
+               console.warn('Legacy register offline');
+          }
+      })();
         
         if (!isMember()) return; // ★ 非会员不显示
         const today = new Date().toLocaleDateString();
@@ -1345,21 +1352,29 @@
         }
         
         
-        const pwd = localStorage.getItem('ps_password') || '';
-        const pwdText = document.getElementById('acct-pwd-text');
-        const pwdEye = document.getElementById('acct-pwd-eye');
-        const setPwdBtn = document.getElementById('acct-set-pwd');
-        if(pwd) {
-            pwdText.innerText = '••••';
-            pwdEye.style.display = 'inline';
-            setPwdBtn.style.display = 'none';
-            pwdText._realPwd = pwd;
-            pwdText._shown = false;
-        } else {
-            pwdText.innerText ='';
-            pwdEye.style.display = 'none';
-            setPwdBtn.style.display = 'inline';
-        }
+      const pwd       = localStorage.getItem('ps_password') || '';
+      const userId    = localStorage.getItem('ps_user_id')  || '';
+      const pwdText   = document.getElementById('acct-pwd-text');
+      const pwdEye    = document.getElementById('acct-pwd-eye');
+      const setPwdBtn = document.getElementById('acct-set-pwd');
+
+      if (pwd) {
+          pwdText.innerText       = '••••';
+          pwdEye.style.display    = 'inline';
+          setPwdBtn.style.display = 'none';
+          pwdText._realPwd = pwd;
+          pwdText._shown   = false;
+      } else if (userId) {
+          // 有ID但没密码：显示设置密码按钮
+          pwdText.innerText       = '';
+          pwdEye.style.display    = 'none';
+          setPwdBtn.style.display = 'inline';
+      } else {
+          // 还没有ID（注册中）：显示提示
+          pwdText.innerText       = '生成中...';
+          pwdEye.style.display    = 'none';
+          setPwdBtn.style.display = 'none';
+      }
         
         document.getElementById('account-modal').style.display = 'flex';
     }
