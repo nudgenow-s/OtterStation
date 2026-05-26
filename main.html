@@ -810,12 +810,22 @@
    ════════════════════════════════════════ */
    function isMember() {
        const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
-       return expiry > Date.now();
+       if (expiry > Date.now()) return true;
+       //21 free start from activatedAt 
+       const activatedAt = parseInt(localStorage.getItem('activatedAt')) || 0;
+       if (!activatedAt) return false;
+       const freeExpiry = activatedAt + 21 * 86400000;
+       return Date.now() < freeExpiry;
    }
 
    function getMemberRemainDays() {
        const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
-       return Math.max(0, Math.ceil((expiry - Date.now()) / 86400000));
+       if (expiry > Date.now()) return Math.ceil((expiry - Date.now()) / 86400000);
+       //else get left free expiry 
+       const activatedAt = parseInt(localStorage.getItem('activatedAt')) || 0;
+       if (!activatedAt) return 0;
+       const freeExpiry = activatedAt + 21 * 86400000;
+       return Math.max(0,Math.ceil((freeExpiry - Date.now()) / 86400000;
    }
 
    function showMemberGate() {
@@ -1250,37 +1260,59 @@
         document.getElementById('acct-ach').innerText = Math.floor(rev / dc * 100) + '%';
 
         // 开通时间 & 会员剩余
-        const TOTAL_DAYS = 365;
         const badge = document.getElementById('acct-badge');
-        const days  = document.getElementById('acct-days');
-        const fill  = document.getElementById('acct-prog-fill');
+        const days = document.getElementById('acct-days');
+        const fill = document.getElementById('acct-prog-fill');
 
-        if (actTs) {
-            const start       = new Date(parseInt(actTs));
-            const elapsed     = Math.floor((Date.now() - start) / 86400000);
-            const remain      = Math.max(TOTAL_DAYS - elapsed, 0);
-            const usedPct     = Math.min(elapsed / TOTAL_DAYS * 100, 100);
+        const activatedAt  = parseInt(localStorage.getItem('activatedAt')) || 0;
+        const paidExpiry   = parseInt(localStorage.getItem('membershipExpiry')) || 0;
+        const isPaid       = paidExpiry > Date.now();
+        const freeExpiry   = activatedAt + 21 * 86400000;
+        const inFreePeriod = !isPaid && activatedAt && Date.now() < freeExpiry;
 
-            document.getElementById('acct-start').innerText = start.toLocaleDateString();
-            days.innerText  = `剩余 ${remain} 天`;
-            fill.style.width = (100 - usedPct) + '%';
+        //activated time
+        document.getElementById('acct-start').innerText = activatedAt
+            ? new Date(activatedAt).toLocaleDateString()
+            : new Date().toLocaleDateString();
 
-            if (remain > 30) {
-                badge.className = 'membership-badge badge-active'; badge.innerText = '免费会员';
+        if (isPaid) {
+            //paid membership:show the left days
+            const remain = Math.ceil((paidExpiry - Date.now()) / 86400000);
+            const total  = 365;
+            const elapsed = total - remain;
+            days.innerText = `剩余 ${remain} 天` ;
+            fill.style.width = Math.max((remain / total) * 100, 2) + '%';
+            if (remain > 7) {
+                badge.className = 'membership-badge badge-active'; badge.innerText = '会员';
                 days.style.color = 'var(--success)';
-            } else if (remain > 0) {
+            } else {
                 badge.className = 'membership-badge badge-warn'; badge.innerText = '即将到期';
                 days.style.color = '#C8840A';
+            }
+        } else if (inFreePeriod) {
+            //21days free
+            const remain = Math.ceil((freeExpiry -Date.now()) / 86400000);
+            days.innerText = `免费期剩余 ${remain} 天;
+            fill.style.width = Math.max((remain / 21) * 100, 2) + '%';
+            if (remain > 7) {
+                badge.className = 'membership-badge badge-active'; badge.innerText = '免费试用';
+                days.style.color = 'var(--success)';
             } else {
-                badge.className = 'membership-badge badge-expired'; badge.innerText = '已过期';
-                days.style.color = 'var(--crimson)';
+                badge.className = 'membership-badge badge-warn'; badge.innerText = '试用即将结束';
+                days.style.color = '#C8840A';
             }
         } else {
-            document.getElementById('acct-start').innerText = new Date().toLocaleDateString();
-            days.innerText = '剩余 365 天';
-            badge.className = 'membership-badge badge-active'; badge.innerText = '免费会员';
-            fill.style.width = '100%';
+           days.innerText = '已过期';
+           fill.style.width = '2%';
+           badge.className = 'membership-badge badge-expired'; badge.innerText = '已过期';
+           days.style.color = 'var(--crimson);
         }
+
+
+           
+        
+            
+        
         const pwd = localStorage.getItem('ps_password') || '';
         const pwdText = document.getElementById('acct-pwd-text');
         const pwdEye = document.getElementById('acct-pwd-eye');
