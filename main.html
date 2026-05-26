@@ -1180,8 +1180,9 @@
 // ★ 会员7天到期提醒
 (function checkMemberExpiry(){
     const remain = getMemberRemainDays();
-    const expiry = parseInt(localStorage.getItem('membershipExpiry')) || 0;
-    if (expiry > 0 && remain <= 7 && remain > 0) {
+    const hasMembership = parseInt(localStorage.getItem('membershipExpiry')) > Date.now() || (parseInt(localStorage.getItem('activatedAt')) + 21 * 86400000) > Date.now();
+    
+    if (hasMembership && remain <= 7 && remain > 0) {
         const today = new Date().toLocaleDateString();
         if (localStorage.getItem('expiryNoticedDate') !== today) {
             localStorage.setItem('expiryNoticedDate', today);
