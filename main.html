@@ -1171,32 +1171,32 @@
         render();
         // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
         (async function autoRegisterLegacyUser() {
-            // 已有ID说明之前注册过，跳过
-            if (localStorage.getItem('ps_user_id')) return;
+            if (localStorage.getItem('ps_registered') === 'true') return;
             if (localStorage.getItem('isActivated') !== 'true') return;
+
+            // 立即生成本地ID显示用
+            if (!localStorage.getItem('ps_user_id')) {
+                localStorage.setItem('ps_user_id', String(Math.floor(10000000 + Math.random() * 90000000)));
+            }
 
             const deviceId = localStorage.getItem('bound_device_id') || generateDeviceFingerprint();
             localStorage.setItem('bound_device_id', deviceId);
-
-            // 先本地生成ID，保证离线也能用
-            const localId = String(Math.floor(10000000 + Math.random() * 90000000));
-            localStorage.setItem('ps_user_id', localId);
-
-            // 临时密码
-            const tempPwd = 'PWD' + localId;
+            const tempPwd  = 'PWD' + localStorage.getItem('ps_user_id');
 
             try {
                 const res  = await fetch('https://osapi.nudgenow.xyz/register', {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ deviceId, password: tempPwd })
+                   method:  'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body:    JSON.stringify({ deviceId, password: tempPwd })
                 });
                 const data = await res.json();
+
                 if (data.status === 'success') {
-                    localStorage.setItem('ps_user_id',  data.userId);
-                    // 不存临时密码，让用户自己设置
-                    localStorage.removeItem('ps_password');
-                    // 刷新账号卡片显示
+                    // 用服务端正式ID覆盖本地临时ID
+                    localStorage.setItem('ps_user_id',   data.userId);
+                    localStorage.setItem('ps_registered', 'true');
+                    localStorage.removeItem('ps_password'); // 不存临时密码，让用户自己设置
+                    // 更新账号卡片显示
                     const uidEl = document.getElementById('acct-uid-text');
                     if (uidEl) uidEl.innerText = 'ID: ' + data.userId;
                     const pwdText   = document.getElementById('acct-pwd-text');
@@ -1205,15 +1205,11 @@
                     if (pwdText)   pwdText.innerText       = '';
                     if (pwdEye)    pwdEye.style.display    = 'none';
                     if (setPwdBtn) setPwdBtn.style.display = 'inline';
-                 }else {
-                    // 注册失败，本地ID继续用，密码暂不设
-                    console.warn('Legacy register failed:', data);
                 }
-          } catch(e) {
-               // 离线，本地ID先用着
-               console.warn('Legacy register offline');
-          }
-      })();
+            } catch(e) {
+                 console.warn('Auto register offline');
+            }
+        })();
     
 
 
