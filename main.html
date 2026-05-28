@@ -1196,15 +1196,20 @@
                     body:    JSON.stringify({ deviceId, password: tempPwd })
                 });
                 const data = await res.json();
-
                 if (data.status === 'success') {
-                    // 用服务端生成的正式ID覆盖本地临时ID
                     localStorage.setItem('ps_user_id',  data.userId);
-                    localStorage.setItem('ps_password', tempPwd);
+                    // 不存临时密码，让用户自己设置
+                    localStorage.removeItem('ps_password');
                     // 刷新账号卡片显示
                     const uidEl = document.getElementById('acct-uid-text');
                     if (uidEl) uidEl.innerText = 'ID: ' + data.userId;
-                } else {
+                    const pwdText   = document.getElementById('acct-pwd-text');
+                    const pwdEye    = document.getElementById('acct-pwd-eye');
+                    const setPwdBtn = document.getElementById('acct-set-pwd');
+                    if (pwdText)   pwdText.innerText       = '';
+                    if (pwdEye)    pwdEye.style.display    = 'none';
+                    if (setPwdBtn) setPwdBtn.style.display = 'inline';
+                 }else {
                     // 注册失败，本地ID继续用，密码暂不设
                     console.warn('Legacy register failed:', data);
                 }
