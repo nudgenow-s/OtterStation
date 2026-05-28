@@ -573,10 +573,6 @@
             <span class="acct-row-val" id="acct-start">--</span>
         </div>
         <div class="acct-row">
-            <span class="acct-row-label">激活码</span>
-            <span class="acct-row-val" id="acct-license" style="font-family:'Courier New';font-size:10px;letter-spacing:1px;">--</span>
-        </div>
-        <div class="acct-row">
             <span class="acct-row-label">今日达成率</span>
             <span class="acct-row-val good" id="acct-ach">--%</span>
         </div>
@@ -1289,15 +1285,13 @@
     ════════════════════════════════════════ */
     function openAccountModal(){
         const cfg     = IndustryAdapter.getCurrent();
-        const userId  = localStorage.getItem('ps_user_id') || '未绑定';
-        const license = localStorage.getItem('license_key') || '--';
+        const userId  = localStorage.getItem('ps_user_id') || '';
         const actTs   = localStorage.getItem('activatedAt');
 
         document.getElementById('acct-avatar').innerText   = cfg.icon;
         document.getElementById('acct-industry').innerText = cfg.name + ' 主理人';
-        document.getElementById('acct-uid-text').innerText = 'ID: ' + userId;
-        document.getElementById('acct-license').innerText  =
-            license.length > 12 ? license.substring(0,12) + '****' : license;
+        document.getElementById('acct-uid-text').innerText = userId ? 'ID: ' + userId : 'ID: 生成中...';
+        
 
         // 今日达成率
         const rev = parseFloat(localStorage.getItem('todayRev')) || 0;
@@ -1373,9 +1367,9 @@
           setPwdBtn.style.display = 'inline';
       } else {
           // 还没有ID（注册中）：显示提示
-          pwdText.innerText       = '生成中...';
+          pwdText.innerText       = '';
           pwdEye.style.display    = 'none';
-          setPwdBtn.style.display = 'none';
+          setPwdBtn.style.display = 'inline';
       }
         
         document.getElementById('account-modal').style.display = 'flex';
