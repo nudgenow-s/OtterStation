@@ -557,12 +557,38 @@
         }
     }
 
-    function skipAccount() {
-        localStorage.removeItem('_tmp_pending_license');
-        localStorage.removeItem('_tmp_pending_uid');
-        showGuide();
-    }
+    async function skipAccount() {
+    // 用随机密码自动注册，用户进入后可在账号卡片修改
+       const deviceId = localStorage.getItem('bound_device_id') || generateDeviceFingerprint();
+       localStorage.setItem('bound_device_id', deviceId);
+       const tempPwd  = 'PWD' + String(Math.floor(10000000 + Math.random() * 90000000));
 
+       const btn = document.getElementById('t-skip');
+       btn.innerText = '注册中...';
+
+       try {
+         const res  = await fetch(`${API_BASE}/register`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ deviceId, password: tempPwd })
+          });
+         const data = await res.json();
+         if (data.status === 'success') {
+            localStorage.setItem('ps_user_id',   data.userId);
+            localStorage.setItem('ps_password',  tempPwd);
+            localStorage.setItem('ps_registered','true');
+            // 显示正式ID
+            document.getElementById('display-user-id').innerText = data.userId;
+          }
+     } catch(e) {
+        // 离线时跳过，进入后台会重试
+            console.warn('Skip register offline');
+        }
+
+    localStorage.removeItem('_tmp_pending_license');
+    localStorage.removeItem('_tmp_pending_uid');
+    showGuide();
+}
     // ── 云端恢复流程 ──────────────────────────────────────
     async function doCloudRestore() {
         const userId   = document.getElementById('t-restore-user-id').value.trim();
