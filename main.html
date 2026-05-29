@@ -1171,7 +1171,29 @@
         render();
         // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
         (async function autoRegisterLegacyUser() {
-            if (localStorage.getItem('ps_registered') === 'true') return;
+            const existingId  = localStorage.getItem('ps_user_id');
+            const existingPwd = localStorage.getItem('ps_password');
+
+            // 已注册且有密码，跳过
+            if (localStorage.getItem('ps_registered') === 'true' && existingPwd) return;
+
+            // 有ID和密码但可能没入库（早期激活码用户）
+            if (existingId && existingPwd) {
+                try {
+                    const res  = await fetch('https://osapi.nudgenow.xyz/register', {
+                        method:  'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body:    JSON.stringify({ userId: existingId, deviceId: localStorage.getItem('bound_device_id') || '', password: existingPwd })
+                     });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        localStorage.setItem('ps_registered', 'true');
+                     }
+                } catch(e) {
+                    console.warn('Legacy user sync register failed');
+                }
+                return;
+            }
             if (localStorage.getItem('isActivated') !== 'true') return;
 
             // 立即生成本地ID显示用
