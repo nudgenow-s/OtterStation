@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#9B2335">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>真实成本 · Prestige Station</title>
+    <script src="config.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'PingFang SC','Helvetica Neue',sans-serif;
+            background: #F7F3EE;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .loading {
+            text-align: center; color: #A89880;
+            font-size: 14px; letter-spacing: 1px;
+        }
+        .loading-icon { font-size: 40px; display: block; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <span class="loading-icon">🎯</span>
+        正在加载真实成本...
+    </div>
+    <script>
+        (function() {
+            if (localStorage.getItem('isActivated') !== 'true') {
+                window.location.replace('gate.html');
+                return;
+            }
+
+            try {
+                const cfg = IndustryAdapter.getCurrent();
+                const industryMap = {
+                    '美业': 'realcost-beauty.html',
+                    '餐饮': 'realcost-food.html',
+                    '零售': 'realcost-retail.html',
+                };
+                const target = industryMap[cfg.name];
+                if (target) {
+                    window.location.replace(target);
+                } else {
+                    // 未知行业默认跳零售
+                    window.location.replace('realcost-retail.html');
+                }
+            } catch(e) {
+                window.location.replace('realcost-retail.html');
+            }
+        })();
+    </script>
+</body>
+</html>

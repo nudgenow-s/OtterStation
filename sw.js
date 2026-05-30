@@ -13,6 +13,10 @@ const ASSETS = [
   './config.js',
   './i18n-engine.js',
   './membership.html',
+  './realcost.html',
+  './realcost-beauty.html',
+  './realcost-retail.html',
+  './realcost-food.html',
   './manifest.json'
 ];
 
