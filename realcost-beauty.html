@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>獭掌柜·美业版 v2</title>
+<style>
+/* ── RESET & BASE ── */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --pink:     #FF6B9D;
+  --pink-dk:  #C44D75;
+  --yellow:   #FFD000;
+  --yellow-dk:#BF9B00;
+  --green:    #4CAF50;
+  --green-dk: #388E3C;
+  --red:      #F44336;
+  --gold:     #F5A623;
+  --purple:   #9B6DFF;
+  --teal:     #00BCD4;
+  --brown:    #795548;
+  --indigo:   #3F51B5;
+  --gray-bg:  #FDF5F7;
+  --gray-card:#F9F0F3;
+  --border:   #F0E0E6;
+  --text:     #2A1A20;
+  --text-2:   #7A5060;
+  --text-3:   #B89AA4;
+}
+
+body {
+  font-family:'PingFang SC','Helvetica Neue',sans-serif;
+  background:var(--gray-bg);
+  min-height:100vh; max-width:480px; margin:0 auto;
+  display:flex; flex-direction:column; overflow-x:hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background:#fff; border-bottom:2px solid var(--border);
+  padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.topbar-logo { font-size:17px; font-weight:900; color:var(--pink); letter-spacing:-.3px; }
+.topbar-stats { display:flex; gap:14px; }
+.stat-chip { display:flex; align-items:center; gap:5px; font-size:14px; font-weight:800; color:#333; }
+
+/* ── MONTH HEADER ── */
+.month-header {
+  background:var(--pink); margin:14px 16px 0; border-radius:20px;
+  padding:16px 20px; display:flex; justify-content:space-between; align-items:center;
+  box-shadow:0 5px 0 var(--pink-dk);
+}
+.mh-left .mh-title { color:#fff; font-size:20px; font-weight:900; }
+.mh-left .mh-sub   { color:rgba(255,255,255,.72); font-size:12px; font-weight:700; margin-top:3px; }
+.mh-right .mh-rev  { color:#fff; font-size:26px; font-weight:900; text-align:right; }
+.mh-right .mh-rlbl { color:rgba(255,255,255,.65); font-size:11px; font-weight:700; text-align:right; }
+
+/* ── MAIN VIEW ── */
+.main-view { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.calendar-view { padding:24px 0 130px; }
+.page-view { padding:16px 16px 130px; display:none; }
+.page-view.visible { display:block; }
+
+/* ── SNAKE ── */
+.snake-track { position:relative; width:100%; }
+.snake-svg   { position:absolute; top:0; left:0; width:100%; pointer-events:none; z-index:0; }
+
+.day-node {
+  position:absolute; width:74px; height:74px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; z-index:2; transform:translate(-50%,-50%);
+  transition:transform .12s ease; opacity:0; animation:popIn .38s ease forwards;
+}
+.day-node:active { transform:translate(-50%,calc(-50% + 4px)) scale(.9); }
+
+@keyframes popIn {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.35); }
+  70%  { transform:translate(-50%,-50%) scale(1.1); }
+  100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+
+.n-future { background:#EEE; box-shadow:0 5px 0 #C8C8C8; border:3px solid #C8C8C8; }
+.n-future .nd-num { color:#AAA; } .n-future .nd-ico { color:#BBB; }
+.n-done   { background:var(--pink); box-shadow:0 5px 0 var(--pink-dk); border:3px solid var(--pink-dk); }
+.n-done   .nd-num { color:#fff; }   .n-done .nd-ico { color:#fff; }
+.n-missed { background:#fff; box-shadow:0 5px 0 #C8C8C8; border:3px solid #DDD; }
+.n-missed .nd-num { color:#C0C0C0; } .n-missed .nd-ico { color:#CCC; }
+.n-today  {
+  background:var(--yellow); box-shadow:0 5px 0 var(--yellow-dk); border:3px solid var(--yellow-dk);
+  animation:popIn .38s ease forwards, todayPulse 2.2s .5s ease-in-out infinite;
+}
+.n-today .nd-num { color:#333; } .n-today .nd-ico { color:#555; }
+@keyframes todayPulse {
+  0%,100% { box-shadow:0 5px 0 var(--yellow-dk),0 0 0 0 rgba(255,208,0,.5); }
+  50%     { box-shadow:0 5px 0 var(--yellow-dk),0 0 0 14px rgba(255,208,0,0); }
+}
+
+.nd-num { font-size:23px; font-weight:900; line-height:1; }
+.nd-ico { font-size:13px; margin-top:3px; font-weight:700; }
+
+.today-tag {
+  position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+  background:var(--yellow); color:#333; font-size:10px; font-weight:900;
+  padding:3px 9px; border-radius:8px; white-space:nowrap; box-shadow:0 2px 0 var(--yellow-dk); z-index:3;
+}
+.today-tag::after {
+  content:''; position:absolute; bottom:-5px; left:50%; transform:translateX(-50%);
+  border:4px solid transparent; border-top-color:var(--yellow);
+}
+
+.chest-node {
+  position:absolute; width:82px; height:82px; background:#fff;
+  border-radius:20px; border:3px solid #DDD; box-shadow:0 5px 0 #C4C4C4;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; z-index:2; transform:translate(-50%,-50%); transition:transform .12s;
+}
+.chest-node:active { transform:translate(-50%,calc(-50% + 4px)) scale(.9); }
+.ch-icon  { font-size:34px; }
+.ch-label { font-size:10px; font-weight:800; color:#999; margin-top:4px; }
+
+.mascot-node {
+  position:absolute; font-size:60px; transform:translate(-50%,-50%); z-index:1;
+  animation:mFloat 3s ease-in-out infinite;
+  filter:drop-shadow(0 6px 10px rgba(255,107,157,.25)); pointer-events:none;
+}
+@keyframes mFloat {
+  0%,100% { transform:translate(-50%,-50%) translateY(0); }
+  50%     { transform:translate(-50%,-50%) translateY(-10px); }
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; background:#fff; border-top:2px solid var(--border);
+  display:flex; z-index:200; padding-bottom:env(safe-area-inset-bottom,6px);
+  overflow-x:auto;
+}
+.nav-btn {
+  flex:1; min-width:52px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:9px 2px 7px; border:none; background:none; cursor:pointer; gap:3px;
+}
+.nav-ico { width:22px; height:22px; display:flex; align-items:center; justify-content:center; transition:transform .15s; }
+.nav-ico svg { width:22px; height:22px; stroke:var(--text-3); transition:stroke .15s; }
+.nav-btn.active .nav-ico svg { stroke:var(--pink); }
+.nav-btn:active .nav-ico { transform:scale(.88); }
+.nav-lbl { font-size:8px; font-weight:800; color:#AAA; white-space:nowrap; }
+.nav-btn.active .nav-lbl { color:var(--pink); }
+.nav-btn.active .nav-ico { transform:scale(1.18); }
+.nav-btn:active  .nav-ico { transform:scale(.88); }
+
+/* ── SHEET ── */
+.overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:500; align-items:flex-end;
+}
+.overlay.open { display:flex; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.sheet {
+  background:#fff; width:100%; border-radius:28px 28px 0 0;
+  padding:0 24px 44px; animation:sheetUp .3s ease; max-height:82vh; overflow-y:auto;
+}
+@keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sh-handle { width:44px; height:5px; background:#E0E0E0; border-radius:3px; margin:14px auto 20px; }
+.sh-date   { font-size:22px; font-weight:900; color:#222; }
+.sh-status { font-size:13px; font-weight:700; color:#999; margin:4px 0 18px; }
+.metrics-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.mc { background:#F5F5F5; border-radius:16px; padding:14px 12px; }
+.mc-lbl { font-size:11px; font-weight:700; color:#999; margin-bottom:5px; }
+.mc-val { font-size:20px; font-weight:900; color:#222; }
+.mc-val.g { color:var(--green); } .mc-val.p { color:var(--pink); } .mc-val.r { color:var(--red); }
+.btn-row { display:flex; gap:10px; margin-bottom:10px; }
+.btn-sh {
+  flex:1; padding:15px 8px; border:none; border-radius:18px;
+  font-size:15px; font-weight:900; font-family:inherit;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .1s;
+}
+.btn-primary { background:var(--pink); color:#fff; box-shadow:0 5px 0 var(--pink-dk); }
+.btn-primary:active { transform:translateY(4px); box-shadow:0 1px 0 var(--pink-dk); }
+.btn-ghost { background:#F0F0F0; color:#555; box-shadow:0 4px 0 #CECECE; width:100%; }
+.btn-ghost:active { transform:translateY(3px); box-shadow:0 1px 0 #CECECE; }
+
+/* ── 页面通用 ── */
+.page-title-bar { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.page-title-bar .ic-wrap svg { stroke:var(--pink); }
+.page-title-icon { font-size:24px; }
+.page-title-text { font-size:22px; font-weight:900; color:var(--text); flex:1; }
+.section-label { font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 10px; }
+.form-subtitle { font-size:13px; color:var(--text-3); margin:-8px 0 16px; }
+
+/* ── 表单 ── */
+.form-card { background:#fff; border-radius:20px; padding:20px 16px; margin-bottom:16px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+.form-group { margin-bottom:16px; }
+.form-group.half { flex:1; }
+.form-row { display:flex; gap:12px; }
+.form-lbl { display:block; font-size:12px; font-weight:800; color:var(--text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+.form-inp {
+  width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:12px;
+  font-size:15px; font-family:inherit; outline:none; color:var(--text); transition:border-color .2s;
+}
+.form-inp:focus { border-color:var(--pink); }
+
+.cat-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.cat-chip {
+  padding:7px 12px; border-radius:20px; border:2px solid var(--border);
+  background:#fff; font-size:12px; font-weight:800; color:var(--text-2);
+  cursor:pointer; transition:all .15s; font-family:inherit;
+}
+.cat-chip.active { background:var(--pink); border-color:var(--pink); color:#fff; }
+
+.margin-preview {
+  background:var(--gray-card); border-radius:12px; padding:10px 14px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.mp-label { font-size:11px; font-weight:800; color:var(--text-3); }
+.mp-unit  { font-size:14px; font-weight:900; color:var(--text); }
+
+.form-submit {
+  width:100%; padding:16px; background:var(--pink); color:#fff;
+  border:none; border-radius:18px; font-size:16px; font-weight:900;
+  cursor:pointer; box-shadow:0 5px 0 var(--pink-dk); font-family:inherit;
+  display:flex; align-items:center; justify-content:center; gap:8px; transition:all .1s;
+}
+.form-submit:active { transform:translateY(4px); box-shadow:0 1px 0 var(--pink-dk); }
+.form-success { text-align:center; padding:14px; background:#E8F5E9; color:var(--green); border-radius:14px; font-weight:800; margin-top:12px; font-size:15px; }
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%,60%  { transform:translateX(-6px); }
+  40%,80%  { transform:translateX(6px); }
+}
+.shake { animation:shake .4s ease; border-color:var(--red) !important; }
+
+/* ── 耗材卡片 ── */
+.mat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.mat-card { background:#fff; border-radius:16px; padding:14px 12px; box-shadow:0 2px 8px rgba(0,0,0,.06); position:relative; }
+.mat-name { font-size:14px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.mat-detail { font-size:11px; color:var(--text-3); margin-bottom:6px; }
+.mat-unit-cost { font-size:18px; font-weight:900; color:var(--pink); }
+.mat-unit-cost span { font-size:11px; color:var(--text-3); font-weight:600; }
+.mat-del { position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer; font-size:14px; color:var(--text-3); }
+.mat-stock-badge { display:inline-block; font-size:10px; font-weight:800; padding:2px 7px; border-radius:8px; margin-top:4px; }
+.stock-ok  { background:#E8F5E9; color:var(--green); }
+.stock-low { background:#FFF3E0; color:var(--gold); }
+.stock-out { background:#FFEBEE; color:var(--red); }
+
+/* ── 技师卡片 ── */
+.tech-list { display:flex; flex-direction:column; gap:10px; }
+.tech-card { background:#fff; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.tech-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--pink),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.tech-info { flex:1; }
+.tech-name  { font-size:16px; font-weight:900; color:var(--text); }
+.tech-rates { font-size:12px; color:var(--text-3); margin-top:3px; }
+.tech-del   { background:none; border:none; cursor:pointer; font-size:16px; color:var(--text-3); }
+
+/* ── 订单卡片 ── */
+.order-list { display:flex; flex-direction:column; gap:10px; }
+.order-card { background:#fff; border-radius:18px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); border-left:4px solid var(--pink); }
+.order-card.type-sale { border-left-color:var(--green); }
+.order-card.type-gift { border-left-color:var(--gold); }
+.oc-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.oc-name   { font-size:16px; font-weight:900; color:var(--text); }
+.oc-date   { font-size:11px; color:var(--text-3); margin-top:3px; }
+.oc-margin { font-size:22px; font-weight:900; }
+.oc-margin.good { color:var(--green); } .oc-margin.warn { color:var(--gold); } .oc-margin.bad { color:var(--red); }
+.oc-meta { display:flex; gap:8px; flex-wrap:wrap; }
+.oc-tag { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:800; }
+.tag-nail    { background:#FFF0F5; color:var(--pink);   border:1px solid #FFD0E0; }
+.tag-lash    { background:#F0F0FF; color:var(--purple); border:1px solid #D8D0FF; }
+.tag-beauty  { background:#E8F5E9; color:var(--green);  border:1px solid #C0E0C8; }
+.tag-tattoo  { background:#FFF3E0; color:var(--brown);  border:1px solid #DEB887; }
+.tag-medical { background:#E3F2FD; color:var(--indigo); border:1px solid #90CAF9; }
+.tag-offline { background:#F0FFF4; color:var(--green);  border:1px solid #C0E0C8; }
+.tag-meituan { background:#FFF5E6; color:var(--gold);   border:1px solid #FFD8A0; }
+.tag-douyin  { background:#F0F0F0; color:#444;           border:1px solid #DDD; }
+.tag-sale    { background:#E8F5E9; color:var(--green);  border:1px solid #A5D6A7; }
+.tag-gift    { background:#FFF8E1; color:var(--gold);   border:1px solid #FFE082; }
+.oc-costs { display:flex; gap:12px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.oc-cost-item { flex:1; text-align:center; }
+.oc-cost-lbl  { font-size:10px; color:var(--text-3); font-weight:700; margin-bottom:2px; }
+.oc-cost-val  { font-size:13px; font-weight:800; color:var(--text); }
+
+/* ── 排行 ── */
+.rank-subtitle { font-size:12px; color:var(--text-3); font-weight:700; margin:-8px 0 16px; }
+.rank-empty    { text-align:center; color:var(--text-3); padding:48px 20px; font-size:15px; }
+.rank-tab-row  { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.rank-tab { flex:1; min-width:70px; padding:10px; border-radius:14px; border:2px solid var(--border); background:#fff; font-size:12px; font-weight:800; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15px; }
+.rank-tab.active { background:var(--pink); border-color:var(--pink); color:#fff; }
+.rank-card { background:#fff; border-radius:18px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+.rank-top-1 { border:2px solid #FFD700; background:linear-gradient(135deg,#FFFDE7,#fff); }
+.rank-top-2 { border:2px solid #C0C0C0; background:linear-gradient(135deg,#FAFAFA,#fff); }
+.rank-top-3 { border:2px solid #CD7F32; background:linear-gradient(135deg,#FFF3E0,#fff); }
+.rc-medal   { font-size:28px; min-width:36px; text-align:center; }
+.rank-num   { display:inline-block; width:28px; height:28px; background:var(--gray-bg); border-radius:50%; font-size:13px; font-weight:900; color:var(--text-3); line-height:28px; text-align:center; }
+.rc-body    { flex:1; }
+.rc-name    { font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; }
+.rc-bar-wrap{ background:var(--gray-bg); border-radius:6px; height:8px; overflow:hidden; margin-bottom:6px; }
+.rc-bar     { height:100%; border-radius:6px; transition:width .6s cubic-bezier(.34,1.56,.64,1); }
+.rc-sub     { font-size:12px; color:var(--text-3); font-weight:700; }
+.rc-val     { font-size:16px; font-weight:900; color:var(--pink); min-width:60px; text-align:right; }
+
+/* ── 库存汇总卡 ── */
+.inv-summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.inv-sum-card { border-radius:18px; padding:16px 14px; }
+.inv-sum-card.purchase { background:linear-gradient(135deg,#FFF0F5,#FFE0EC); border:2px solid #FFD0E0; }
+.inv-sum-card.resale   { background:linear-gradient(135deg,#F0FFF4,#E0FFE8); border:2px solid #C0E0C8; }
+.inv-sum-lbl  { font-size:11px; font-weight:800; color:var(--text-3); margin-bottom:4px; }
+.inv-sum-val  { font-size:22px; font-weight:900; }
+.inv-sum-card.purchase .inv-sum-val { color:var(--pink); }
+.inv-sum-card.resale   .inv-sum-val { color:var(--green); }
+.inv-sum-sub  { font-size:11px; color:var(--text-3); margin-top:3px; }
+
+/* ── 获客成本 ── */
+.acq-list { display:flex; flex-direction:column; gap:10px; }
+.acq-card { background:#fff; border-radius:18px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+.acq-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.acq-platform { font-size:15px; font-weight:900; color:var(--text); }
+.acq-amount   { font-size:20px; font-weight:900; color:var(--pink); }
+.acq-meta { font-size:12px; color:var(--text-3); }
+.acq-del { background:none; border:none; cursor:pointer; font-size:14px; color:var(--text-3); }
+
+/* ── 耗材分类标题 ── */
+.mat-cat-header {
+  display:flex; align-items:center; gap:8px; margin:14px 0 8px;
+  padding:8px 12px; background:var(--gray-card); border-radius:10px;
+  font-size:12px; font-weight:900; color:var(--text-2); letter-spacing:.04em;
+}
+
+/* ── 产品/赠品行样式 ── */
+.prod-row {
+  display:flex; align-items:center; gap:6px; margin-bottom:8px;
+  background:var(--gray-card); border-radius:12px; padding:10px 10px;
+  animation:rowIn .2s ease;
+}
+@keyframes rowIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+.prod-row-info { flex:1; min-width:0; }
+.prod-row-name { font-size:13px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prod-row-sub  { font-size:10px; color:var(--text-3); font-weight:700; margin-top:1px; }
+.prod-row-qty  { width:46px; padding:7px 4px; border:2px solid var(--border); border-radius:10px; font-size:14px; text-align:center; font-family:inherit; color:var(--text); background:#fff; }
+.prod-row-price { width:70px; padding:7px 6px; border:2px solid var(--border); border-radius:10px; font-size:13px; text-align:center; font-family:inherit; color:var(--text); background:#fff; }
+.prod-row-price:focus, .prod-row-qty:focus { outline:none; border-color:var(--pink); }
+.prod-row-sub-total { font-size:12px; font-weight:900; min-width:44px; text-align:right; }
+.prod-row-del { background:none; border:none; cursor:pointer; font-size:16px; color:var(--text-3); padding:0 2px; flex-shrink:0; }
+
+.hidden { display:none !important; }
+
+/* ── 耗材Tip标签 ── */
+.tip-tab-btn {
+  padding:5px 10px; border-radius:16px; border:2px solid #FFE082;
+  background:#fff; font-size:11px; font-weight:800; color:#B8860B;
+  cursor:pointer; font-family:inherit; transition:all .15s;
+}
+.tip-tab-btn.active { background:#FFD000; border-color:#BF9B00; color:#5A4000; }
+.tip-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; border-bottom:1px solid rgba(255,224,130,.4); }
+.tip-row:last-child { border-bottom:none; }
+.tip-item-name { font-size:12px; font-weight:700; color:#5A4000; flex:1; }
+.tip-item-val  { font-size:12px; font-weight:900; color:#B8860B; text-align:right; white-space:nowrap; margin-left:8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;stroke:var(--pink)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>獭掌柜·美业版
+  </div>
+  <div class="topbar-stats">
+    <div class="stat-chip">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span id="streak-val">0</span>
+    </div>
+    <div class="stat-chip">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="days-val">0</span> 天
+    </div>
+  </div>
+</div>
+
+<div class="month-header">
+  <div class="mh-left">
+    <div class="mh-title" id="mh-title"></div>
+    <div class="mh-sub"   id="mh-sub"></div>
+  </div>
+  <div class="mh-right">
+    <div class="mh-rev"  id="mh-rev">¥0</div>
+    <div class="mh-rlbl">本月营收</div>
+  </div>
+</div>
+
+<div class="main-view" id="main-view">
+  <div class="calendar-view" id="view-calendar">
+    <div class="snake-track" id="snake-track">
+      <svg class="snake-svg" id="snake-svg"></svg>
+    </div>
+  </div>
+  <div class="page-view" id="view-orders"></div>
+  <div class="page-view" id="view-ranking"></div>
+  <div class="page-view" id="view-materials"></div>
+  <div class="page-view" id="view-technicians"></div>
+  <div class="page-view" id="view-neworder"></div>
+  <div class="page-view" id="view-acquire"></div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" data-view="calendar" onclick="switchTab(this,'calendar')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+    <span class="nav-lbl">日历</span>
+  </button>
+  <button class="nav-btn" data-view="orders" onclick="switchTab(this,'orders')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span>
+    <span class="nav-lbl">订单</span>
+  </button>
+  <button class="nav-btn" data-view="ranking" onclick="switchTab(this,'ranking')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+    <span class="nav-lbl">排行</span>
+  </button>
+  <button class="nav-btn" data-view="materials" onclick="switchTab(this,'materials')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+    <span class="nav-lbl">库存</span>
+  </button>
+  <button class="nav-btn" data-view="technicians" onclick="switchTab(this,'technicians')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+    <span class="nav-lbl">员工</span>
+  </button>
+  <button class="nav-btn" data-view="neworder" onclick="switchTab(this,'neworder')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+    <span class="nav-lbl">新建</span>
+  </button>
+  <button class="nav-btn" data-view="acquire" onclick="switchTab(this,'acquire')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+    <span class="nav-lbl">获客</span>
+  </button>
+</div>
+
+<!-- 日历弹窗 -->
+<div class="overlay" id="overlay" onclick="overlayTap(event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-date"   id="sh-date"></div>
+    <div class="sh-status" id="sh-status"></div>
+    <div class="metrics-grid" id="sh-metrics"></div>
+    <div class="btn-row"   id="sh-btn-row"></div>
+    <button class="btn-sh btn-ghost" onclick="closeSheet()">关闭</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  ICONS — Lucide SVG inline helper
+// ══════════════════════════════════════════════════════════════════
+var IC = {
+  calendar:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  clipboard:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+  barChart:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  package:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+  users:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  plusCircle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+  activity:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  star:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  check:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  x:          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  gift:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+  shoppingBag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  sparkles:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1m0 16v1M4.22 4.22l.7.7m12.16 12.16.7.7M3 12h1m16 0h1M4.22 19.78l.7-.7M18.36 5.64l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>',
+  megaphone:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>',
+  trendUp:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  scissors:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+  droplet:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+  medal:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6"/><path d="M9 2h6l1 6H8z"/></svg>',
+  wallet:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  info:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  lock:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  trophy:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/><rect x="6" y="18" width="12" height="4"/></svg>',
+  tag:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  dollar:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  trash:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  plus:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  save:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+};
+// icon() 生成指定尺寸的 SVG span
+function icon(name, size, color){
+  size=size||20; color=color||'currentColor';
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:'+size+'px;height:'+size+'px;flex-shrink:0" class="ic-wrap">'+
+    IC[name].replace('stroke="currentColor"','stroke="'+color+'"').replace(/viewBox/,'width="'+size+'" height="'+size+'" viewBox')+
+  '</span>';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  ENGINE
+// ══════════════════════════════════════════════════════════════════
+var Engine = (function(){
+  var KEYS = {
+    history:'beauty_h', materials:'beauty_m', technicians:'beauty_t',
+    orders:'beauty_o', acquire:'beauty_acq', products:'beauty_products',
+    productOrders:'beauty_po',
+    usageCounts:'beauty_uc',
+    matCategories:'beauty_matcats'
+  };
+
+  var DEFAULT_CATS = ['美睫耗材','美甲耗材','美容耗材','纹绣耗材','医美耗材','通用辅材','可零售产品'];
+
+  function getMatCategories(){
+    return load(KEYS.matCategories) || DEFAULT_CATS.slice();
+  }
+  function saveMatCategories(cats){ save(KEYS.matCategories, cats); }
+  function addMatCategory(name){
+    var cats = getMatCategories();
+    if(cats.indexOf(name) >= 0) return cats;
+    cats.push(name); saveMatCategories(cats); return cats;
+  }
+  function deleteMatCategory(name){
+    var cats = getMatCategories().filter(function(c){ return c !== name; });
+    saveMatCategories(cats); return cats;
+  }
+  function load(k){ try{ return JSON.parse(localStorage.getItem(k))||null; }catch(e){ return null; } }
+  function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+  function getHistory()    { return load(KEYS.history)||{}; }
+  function getDay(key)     { return getHistory()[key]||null; }
+  function setDay(key,data){ var h=getHistory(); h[key]=Object.assign(h[key]||{},data); save(KEYS.history,h); }
+
+  function getUsageCounts() { return load(KEYS.usageCounts)||{}; }
+  function saveUsageCounts(uc){ save(KEYS.usageCounts, uc); }
+
+  function consumeMatByUsage(matId, qtyTimes){
+    var list = getMaterials();
+    var idx = list.findIndex(function(m){ return m.id == matId; });
+    if(idx < 0) return 0;
+    var mat = list[idx];
+    var usageCount = parseFloat(mat.usageCount) || 1;
+    var uc = getUsageCounts();
+    if(!uc[matId]) uc[matId] = 0;
+    uc[matId] += qtyTimes;
+    var bottlesToDeduct = Math.floor(uc[matId] / usageCount);
+    uc[matId] = uc[matId] % usageCount;
+    saveUsageCounts(uc);
+    if(bottlesToDeduct > 0){
+      list[idx].stock = Math.max(0, (parseFloat(list[idx].stock)||0) - bottlesToDeduct);
+      save(KEYS.materials, list);
+    }
+    return bottlesToDeduct;
+  }
+
+  function getMaterials()      { return load(KEYS.materials)||[]; }
+  function addMaterial(m){
+    var list=getMaterials();
+    m.id=Date.now()+Math.random();
+    m.unitCost=parseFloat(m.totalPrice)/parseFloat(m.usageCount);
+    m.stock=parseFloat(m.stock)||0;
+    list.push(m); save(KEYS.materials,list); return list;
+  }
+  function deleteMaterial(id)  { save(KEYS.materials,getMaterials().filter(function(m){ return m.id!=id; })); }
+
+  function updateMaterialStock(id, delta){
+    var list=getMaterials();
+    var idx=list.findIndex(function(m){ return m.id==id; });
+    if(idx>=0){ list[idx].stock=Math.max(0,(parseFloat(list[idx].stock)||0)+delta); save(KEYS.materials,list); }
+  }
+
+  function getInventorySummary(){
+    var mats=getMaterials();
+    var uc = getUsageCounts();
+    var purchaseTotal=0, resaleTotal=0, productCount=0;
+    mats.forEach(function(m){
+      var stock=parseFloat(m.stock)||0;
+      var totalPrice=parseFloat(m.totalPrice)||0;
+      var usageCount = parseFloat(m.usageCount) || 1;
+      var unitCost = totalPrice / usageCount;
+      var usedRemainder = uc[m.id] || 0;
+      var stockValue;
+      if (usedRemainder > 0) {
+        stockValue = (stock - 1) * totalPrice + (totalPrice - unitCost * usedRemainder);
+      } else {
+        stockValue = stock * totalPrice;
+      }
+      purchaseTotal += stockValue;
+      if(m.isProduct){ resaleTotal+=stock*(parseFloat(m.salePrice)||0); productCount++; }
+    });
+    return { purchaseTotal:purchaseTotal, resaleTotal:resaleTotal, productCount:productCount, total:mats.length };
+  }
+
+  function getTechnicians()    { return load(KEYS.technicians)||[]; }
+  function addTechnician(t){
+    var list=getTechnicians(); t.id=Date.now()+Math.random(); list.push(t); save(KEYS.technicians,list); return list;
+  }
+  function deleteTechnician(id){ save(KEYS.technicians,getTechnicians().filter(function(t){ return t.id!=id; })); }
+
+  function getOrders()   { return load(KEYS.orders)||[]; }
+
+  function recordOrder(o){
+    var list=getOrders();
+    o.id=Date.now(); o.createdAt=new Date().toISOString();
+    o.date=new Date().toLocaleDateString();
+    o.materialTotal=o.materialItems.reduce(function(a,i){ return a+i.subtotal; },0);
+    var commBase=o.commBase==='actual'?o.actualRevenue:o.facePrice;
+    o.techCost=commBase*(o.techRate/100);
+    o.platformFee=o.facePrice*(o.commissionRate/100);
+    o.totalVariableCost=o.materialTotal+o.techCost+o.platformFee;
+    o.grossProfit=o.facePrice-o.totalVariableCost;
+    o.grossMargin=o.facePrice>0?(o.grossProfit/o.facePrice*100):0;
+    list.unshift(o); save(KEYS.orders,list);
+    o.materialItems.forEach(function(item){
+      if(item.matId){ consumeMatByUsage(item.matId, item.qty); }
+    });
+    _syncDay(o.date); return o;
+  }
+
+  function _syncDay(dateKey){
+    var oList=getOrders().filter(function(o){ return o.date===dateKey; });
+    var pList=getProductOrders().filter(function(o){ return o.date===dateKey; });
+    var revenue=oList.reduce(function(a,o){ return a+o.facePrice; },0)
+               +pList.filter(function(p){ return p.type==='sale'; }).reduce(function(a,p){ return a+p.totalAmount; },0);
+    var profit=oList.reduce(function(a,o){ return a+o.grossProfit; },0)
+              +pList.filter(function(p){ return p.type==='sale'; }).reduce(function(a,p){ return a+p.grossProfit; },0)
+              +pList.filter(function(p){ return p.type==='gift'; }).reduce(function(a,p){ return a+p.grossProfit; },0);
+    var varCost=oList.reduce(function(a,o){ return a+o.totalVariableCost; },0)
+               +pList.reduce(function(a,p){ return a+p.costTotal; },0);
+    var gm=revenue>0?(profit/revenue*100):0;
+    setDay(dateKey,{ revenue:revenue, profit:profit, varCost:varCost, grossMargin:gm,
+      orderCount:oList.length, productOrderCount:pList.length });
+  }
+
+  // ── 产品销售 / 赠品 ──
+  // 说明：
+  // type='sale': totalAmount=实收售价合计，costTotal=进货成本合计，grossProfit=totalAmount-costTotal
+  // type='gift': totalAmount=0（不收钱），costTotal=赠品成本，grossProfit=-costTotal（成本损耗）
+  // 两种情况costTotal均计入变动成本（_syncDay中已合并）
+  function getProductOrders()  { return load(KEYS.productOrders)||[]; }
+  function recordProductOrder(o){
+    var list=getProductOrders();
+    o.id=Date.now()+Math.random(); o.createdAt=new Date().toISOString();
+    o.date=new Date().toLocaleDateString();
+    // 成本合计（销售和赠品都计算）
+    o.costTotal=o.items.reduce(function(a,i){ return a+(parseFloat(i.unitCost)||0)*i.qty; },0);
+    if(o.type==='sale'){
+      o.grossProfit=o.totalAmount-o.costTotal;
+      o.grossMargin=o.totalAmount>0?(o.grossProfit/o.totalAmount*100):0;
+    } else {
+      // 赠品：收入0，成本计入，毛利为负（成本损耗）
+      o.totalAmount=0;
+      o.grossProfit=-o.costTotal;
+      o.grossMargin=0;
+    }
+    // 按整瓶扣库存
+    o.items.forEach(function(item){
+      if(item.matId) updateMaterialStock(item.matId, -item.qty);
+    });
+    list.unshift(o); save(KEYS.productOrders,list);
+    _syncDay(o.date); return o;
+  }
+
+  function getAcquire()   { return load(KEYS.acquire)||[]; }
+  function addAcquire(a){
+    var list=getAcquire(); a.id=Date.now(); a.createdAt=new Date().toISOString(); list.unshift(a);
+    save(KEYS.acquire,list); return list;
+  }
+  function deleteAcquire(id){ save(KEYS.acquire,getAcquire().filter(function(a){ return a.id!=id; })); }
+  function getAcquireSummary(){
+    var list=getAcquire(), total=0, byPlatform={};
+    list.forEach(function(a){
+      total+=parseFloat(a.amount)||0;
+      if(!byPlatform[a.platform]) byPlatform[a.platform]=0;
+      byPlatform[a.platform]+=parseFloat(a.amount)||0;
+    });
+    return { total:total, byPlatform:byPlatform };
+  }
+
+  function getProjectRanking(){
+    var map={};
+    var typeLabel={ lash:'美睫', nail:'美甲', beauty:'美容', tattoo:'纹绣', medical:'医美' };
+    getOrders().forEach(function(o){
+      if(!map[o.projectName]) map[o.projectName]={ name:o.projectName, type:o.projectType, typeLabel:typeLabel[o.projectType]||o.projectType, count:0, revenue:0, profit:0 };
+      map[o.projectName].count++; map[o.projectName].revenue+=o.facePrice; map[o.projectName].profit+=o.grossProfit;
+    });
+    return Object.values(map).sort(function(a,b){ return b.count-a.count; });
+  }
+  function getProfitRanking(){
+    var map={};
+    var typeLabel={ lash:'美睫', nail:'美甲', beauty:'美容', tattoo:'纹绣', medical:'医美' };
+    getOrders().forEach(function(o){
+      if(!map[o.projectName]) map[o.projectName]={ name:o.projectName, type:o.projectType, typeLabel:typeLabel[o.projectType]||o.projectType, count:0, revenue:0, profit:0 };
+      map[o.projectName].count++; map[o.projectName].revenue+=o.facePrice; map[o.projectName].profit+=o.grossProfit;
+    });
+    return Object.values(map).sort(function(a,b){ return b.profit-a.profit; });
+  }
+  function getTechCommissionRanking(){
+    var map={};
+    getOrders().forEach(function(o){
+      if(!o.techName) return;
+      if(!map[o.techName]) map[o.techName]={ name:o.techName, count:0, revenue:0, commission:0, profit:0 };
+      map[o.techName].count++;
+      map[o.techName].revenue+=o.facePrice;
+      map[o.techName].commission+=o.techCost||0;
+      map[o.techName].profit+=o.grossProfit;
+    });
+    return Object.values(map).sort(function(a,b){ return b.commission-a.commission; });
+  }
+  function getChannelRanking(){
+    var map={};
+    var chLabel={ offline:'到店自然客', meituan:'美团团购', douyin:'抖音团购' };
+    var chEmoji={ offline:'🚶', meituan:'🥡', douyin:'🎵' };
+    getOrders().forEach(function(o){
+      var ch=o.channel||'offline';
+      if(!map[ch]) map[ch]={ name:chLabel[ch]||ch, emoji:chEmoji[ch]||'📍', channel:ch, count:0, revenue:0, profit:0 };
+      map[ch].count++; map[ch].revenue+=o.facePrice; map[ch].profit+=o.grossProfit;
+    });
+    return Object.values(map).sort(function(a,b){ return b.revenue-a.revenue; });
+  }
+
+  function getMonthStats(year,month){
+    var h=getHistory(), revenue=0, profit=0, days=0;
+    Object.keys(h).forEach(function(k){
+      var d=new Date(k);
+      if(d.getFullYear()===year&&d.getMonth()===month){
+        revenue+=parseFloat(h[k].revenue)||0; profit+=parseFloat(h[k].profit)||0;
+        if((parseFloat(h[k].revenue)||0)>0) days++;
+      }
+    });
+    return { revenue:revenue, profit:profit, days:days, gm:revenue>0?(profit/revenue*100):0 };
+  }
+  function getStreak(){
+    var h=getHistory(), now=new Date(), s=0;
+    for(var i=0;i<365;i++){
+      var d=new Date(now); d.setDate(d.getDate()-i);
+      var k=d.toLocaleDateString();
+      if(h[k]&&parseFloat(h[k].revenue)>0) s++; else if(i>0) break;
+    }
+    return s;
+  }
+  function fmtMoney(v){
+    v=parseFloat(v)||0;
+    if(v>=10000) return '¥'+(v/10000).toFixed(1)+'w';
+    var s=v.toFixed(2); return '¥'+(s.endsWith('.00')?Math.round(v):s);
+  }
+  function fmtMargin(v){
+    v=parseFloat(v)||0;
+    var s=v.toFixed(1);
+    return (s.endsWith('.0')?Math.round(v):s)+'%';
+  }
+  function getMatRemainingValue(matId){
+    var list = getMaterials();
+    var mat = list.find(function(m){ return m.id == matId; });
+    if(!mat) return 0;
+    var uc = getUsageCounts();
+    var usageCount = parseFloat(mat.usageCount)||1;
+    var totalPrice = parseFloat(mat.totalPrice)||0;
+    var stock = parseFloat(mat.stock)||0;
+    var usedRemainder = uc[matId] || 0;
+    var unitCost = totalPrice / usageCount;
+    if (usedRemainder > 0) {
+      return (stock - 1) * totalPrice + (totalPrice - unitCost * usedRemainder);
+    } else {
+      return stock * totalPrice;
+    }
+  }
+
+  return {
+    getDay, setDay,
+    getMaterials, addMaterial, deleteMaterial, updateMaterialStock, getInventorySummary,
+    consumeMatByUsage, getUsageCounts, getMatRemainingValue,
+    getMatCategories, addMatCategory, deleteMatCategory,
+    getTechnicians, addTechnician, deleteTechnician,
+    getOrders, recordOrder,
+    getProductOrders, recordProductOrder,
+    getAcquire, addAcquire, deleteAcquire, getAcquireSummary,
+    getProjectRanking, getProfitRanking, getTechCommissionRanking, getChannelRanking,
+    getMonthStats, getStreak, fmtMoney, fmtMargin
+  };
+})();
+
+// ══════════════════════════════════════════════════════════════════
+//  APP
+// ══════════════════════════════════════════════════════════════════
+var now=new Date(), YEAR=now.getFullYear(), MONTH=now.getMonth(), TODAY=now.getDate();
+var DAYS=new Date(YEAR,MONTH+1,0).getDate();
+var MN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+function dateKey(d){ return new Date(YEAR,MONTH,d).toLocaleDateString(); }
+
+function switchTab(btn,viewId){
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  document.querySelectorAll('.page-view').forEach(function(v){ v.classList.remove('visible'); });
+  var cal=document.getElementById('view-calendar');
+  cal.style.display='none';
+  if(viewId==='calendar'){ cal.style.display=''; return; }
+  var el=document.getElementById('view-'+viewId);
+  if(!el) return;
+  el.classList.add('visible');
+  if     (viewId==='orders')      renderOrders(el);
+  else if(viewId==='ranking')     renderRanking(el);
+  else if(viewId==='materials')   renderMaterials(el);
+  else if(viewId==='technicians') renderTechnicians(el);
+  else if(viewId==='neworder')    renderNewOrder(el);
+  else if(viewId==='acquire')     renderAcquire(el);
+}
+
+function updateHeader(){
+  var s=Engine.getMonthStats(YEAR,MONTH);
+  document.getElementById('mh-title').textContent=YEAR+'年'+MN[MONTH];
+  document.getElementById('mh-sub').textContent='本月已完成 '+s.days+' 个工作日';
+  document.getElementById('mh-rev').textContent=Engine.fmtMoney(s.revenue);
+  document.getElementById('streak-val').textContent=Engine.getStreak();
+  document.getElementById('days-val').textContent=s.days;
+}
+
+// ── 蛇形日历 ──────────────────────────────────────────────────────
+var XP=[50,68,80,68,50,32,20,32];
+function nodeXY(idx,W){ return { x:W*XP[idx%XP.length]/100, y:70+idx*100 }; }
+
+function buildSnake(){
+  var track=document.getElementById('snake-track');
+  var svg  =document.getElementById('snake-svg');
+  var rawH=(function(){ try{ return JSON.parse(localStorage.getItem('beauty_h'))||{}; }catch(e){ return {}; } })();
+  var W=track.offsetWidth||375;
+  var trackH=70+(DAYS+1)*100+60;
+  track.style.height=trackH+'px';
+  svg.setAttribute('height',trackH); svg.setAttribute('viewBox','0 0 '+W+' '+trackH);
+  var coords=[]; for(var i=0;i<=DAYS;i++) coords.push(nodeXY(i,W));
+
+  var pd=''; for(var i=0;i<coords.length-1;i++){
+    var a=coords[i],b=coords[i+1]; if(i===0) pd='M '+a.x+' '+a.y;
+    pd+=' Q '+a.x+' '+((a.y+b.y)/2)+' '+b.x+' '+b.y;
+  }
+  var pe=document.createElementNS('http://www.w3.org/2000/svg','path');
+  pe.setAttribute('d',pd); pe.setAttribute('fill','none');
+  pe.setAttribute('stroke','#F0D0DA'); pe.setAttribute('stroke-width','8');
+  pe.setAttribute('stroke-linecap','round'); svg.appendChild(pe);
+
+  for(var day=1;day<=DAYS;day++){
+    var idx=day-1, pos=coords[idx], key=dateKey(day), data=rawH[key]||null;
+    var hasSales=data&&parseFloat(data.revenue)>0;
+    var isToday=day===TODAY, isPast=day<TODAY, isFuture=day>TODAY;
+
+    var node=document.createElement('div'); node.className='day-node';
+    node.style.left=pos.x+'px'; node.style.top=pos.y+'px';
+    node.style.animationDelay=(idx*35)+'ms';
+    if(isToday) node.classList.add('n-today');
+    else if(isFuture) node.classList.add('n-future');
+    else if(hasSales) node.classList.add('n-done');
+    else node.classList.add('n-missed');
+
+    if(isToday){ var tg=document.createElement('div'); tg.className='today-tag'; tg.textContent='今天'; node.appendChild(tg); }
+    var ne=document.createElement('div'); ne.className='nd-num'; ne.textContent=day; node.appendChild(ne);
+    var ie=document.createElement('div'); ie.className='nd-ico'; ie.textContent=isToday?'⭐':hasSales?'✓':isPast?'✗':''; node.appendChild(ie);
+
+    (function(d,k,dat,iT,iF,iP,hS){ node.onclick=function(){ openSheet(d,k,dat,iT,iF,iP,hS); }; })(day,key,data,isToday,isFuture,isPast,hasSales);
+    track.appendChild(node);
+  }
+
+  var mi=Math.floor(DAYS/2), mp=coords[mi];
+  var mas=document.createElement('div'); mas.className='mascot-node';
+  mas.style.left=(mp.x+(mp.x>W*.5?-80:80))+'px'; mas.style.top=mp.y+'px'; mas.textContent='🦦';
+  track.appendChild(mas);
+
+  var cp=coords[DAYS], ch=document.createElement('div'); ch.className='chest-node';
+  ch.style.left=cp.x+'px'; ch.style.top=cp.y+'px';
+  ch.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">月度总结</div>';
+  ch.onclick=openChest; track.appendChild(ch);
+}
+
+function openSheet(day,key,data,isToday,isFuture,isPast,hasSales){
+  document.getElementById('sh-date').textContent=(MONTH+1)+'月'+day+'日';
+  var m=document.getElementById('sh-metrics'), br=document.getElementById('sh-btn-row');
+  if(isFuture){ document.getElementById('sh-status').textContent='还没到这天哦 🔒'; m.innerHTML=''; br.innerHTML=''; }
+  else if(!hasSales&&!isToday){
+    document.getElementById('sh-status').textContent='这天没有接单';
+    m.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val">—</div></div>';
+    br.innerHTML='';
+  } else {
+    var rawD=(function(){ try{ return JSON.parse(localStorage.getItem('beauty_h'))||{}; }catch(e){ return {}; } })();
+    var cur=rawD[key]||data||{};
+    var rev=parseFloat(cur.revenue)||0, prof=parseFloat(cur.profit)||0;
+    var varC=parseFloat(cur.varCost)||(rev-prof);
+    var gm=cur.grossMargin||(rev>0?(prof/rev*100):null);
+    var cnt=cur.orderCount||0;
+    document.getElementById('sh-status').textContent=isToday?'今天 · 进行中 ('+cnt+'单)':'已完成 '+cnt+' 单 ✓';
+    m.innerHTML=
+      '<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val p">'+Engine.fmtMoney(rev)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">毛利率</div><div class="mc-val '+(gm&&gm>=50?'g':'p')+'">'+(gm?Engine.fmtMargin(gm):'—')+'</div></div>';
+    br.innerHTML=isToday?'<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'neworder\')">'+icon('plusCircle',16,'#fff')+' 新建订单</button>':'';
+  }
+  document.getElementById('overlay').classList.add('open');
+}
+function overlayTap(e){ if(e.target===document.getElementById('overlay')) closeSheet(); }
+function closeSheet()  { document.getElementById('overlay').classList.remove('open'); }
+function openChest(){
+  var s=Engine.getMonthStats(YEAR,MONTH);
+  var acq=Engine.getAcquireSummary();
+  var inv=Engine.getInventorySummary();
+  var monthAcq=Engine.getAcquire().reduce(function(a,item){
+    var d=new Date(item.createdAt);
+    if(d.getFullYear()===YEAR&&d.getMonth()===MONTH) a+=parseFloat(item.amount)||0;
+    return a;
+  },0);
+  var netProfit=s.profit-monthAcq;
+  alert('💅 '+(MONTH+1)+'月月度总结\n\n接单天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+
+    '\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+Engine.fmtMargin(s.gm)+
+    '\n\n📣 本月获客投入：'+Engine.fmtMoney(monthAcq)+
+    '\n💰 月净利润（扣获客后）：'+Engine.fmtMoney(netProfit)+
+    '\n\n🧴 库存进货价值：'+Engine.fmtMoney(inv.purchaseTotal)+
+    '\n📦 库存可销售价值：'+Engine.fmtMoney(inv.resaleTotal));
+}
+
+function shake(el,msg){
+  el.placeholder=msg; el.classList.remove('shake');
+  requestAnimationFrame(function(){ el.classList.add('shake'); });
+  setTimeout(function(){ el.classList.remove('shake'); },600);
+}
+
+function syncToMain(addRevenue) {
+    if (!addRevenue || addRevenue <= 0) return;
+    const today = new Date().toLocaleDateString();
+    const current = parseFloat(localStorage.getItem('todayRev')) || 0;
+    const newRev = current + addRevenue;
+    localStorage.setItem('todayRev', String(newRev));
+    localStorage.setItem('realcost_updated', Date.now().toString());
+    // 同步到 revenue_history
+    try {
+        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        if (!history[today]) history[today] = {};
+        history[today].revenue = newRev.toFixed(2);
+        localStorage.setItem('revenue_history', JSON.stringify(history));
+    } catch(e) {}
+}
+// ══════════════════════════════════════════════════════════════════
+//  新建订单（服务 + 产品销售BOM + 赠品BOM）
+// ══════════════════════════════════════════════════════════════════
+function renderNewOrder(container){
+  var mats=Engine.getMaterials(), techs=Engine.getTechnicians();
+  var matCategories = {};
+  mats.forEach(function(m){
+    var cat = m.category || '未分类';
+    if(!matCategories[cat]) matCategories[cat] = [];
+    matCategories[cat].push(m);
+  });
+
+  var allProducts=mats.filter(function(m){ return m.isProduct; });
+  var orderMats=[];
+
+  // ── 产品销售列表 & 赠品列表（BOM式，各自独立数组）──
+  var saleItems=[];   // { matId, name, unitCost, salePrice, qty }
+  var giftItems=[];   // { matId, name, unitCost, qty }
+
+  var PROJECT_TYPES=[
+    { val:'lash',    label:'美睫', rateKey:'lashRate'    },
+    { val:'nail',    label:'美甲', rateKey:'nailRate'    },
+    { val:'beauty',  label:'美容', rateKey:'beautyRate'  },
+    { val:'tattoo',  label:'纹绣', rateKey:'tattooRate'  },
+    { val:'medical', label:'医美', rateKey:'medicalRate' },
+  ];
+
+  // 耗材选择器（含产品，用于BOM）
+  var matOptGroupsHtml = '<option value="">选择耗材/产品…</option>';
+  if(Object.keys(matCategories).length === 0){
+    matOptGroupsHtml = '<option value="">暂无耗材，请先在库存中添加</option>';
+  } else {
+    Object.keys(matCategories).forEach(function(cat){
+      matOptGroupsHtml += '<optgroup label="' + cat + '">';
+      matCategories[cat].forEach(function(m){
+        var uc = Engine.getUsageCounts();
+        var usedRemainder = uc[m.id] || 0;
+        var usageCount = parseFloat(m.usageCount)||1;
+        var remaining = usedRemainder > 0 ? (usageCount - usedRemainder) + '次剩余' : '';
+        matOptGroupsHtml += '<option value="'+m.id+'">'+m.name+(m.stock?' (库存:'+m.stock+(m.stockUnit||'')+(remaining?' · '+remaining:'')+')':'')+'（¥'+m.unitCost.toFixed(2)+'/次）</option>';
+      });
+      matOptGroupsHtml += '</optgroup>';
+    });
+  }
+
+  // 产品下拉（仅 isProduct 的）
+  var prodOptHtml = '<option value="">选择产品…</option>';
+  if(allProducts.length){
+    allProducts.forEach(function(p){
+      prodOptHtml += '<option value="'+p.id+'" data-cost="'+p.unitCost.toFixed(4)+'" data-sale="'+(p.salePrice||0)+'" data-name="'+p.name+'" data-unit="'+(p.stockUnit||'个')+'" data-stock="'+(p.stock||0)+'">'+
+        p.name+' (库存:'+p.stock+(p.stockUnit||'')+'  进价¥'+p.unitCost.toFixed(2)+'  售¥'+(p.salePrice||0)+')</option>';
+    });
+  } else {
+    prodOptHtml = '<option value="">暂无可售产品，请先在库存添加</option>';
+  }
+
+  container.innerHTML='<div>'+
+    '<div class="page-title-bar">'+icon('sparkles',24,'var(--pink)')+'<span class="page-title-text">新建订单</span></div>'+
+    '<div class="form-subtitle">服务 · 产品销售 · 赠品均在此页面完成</div>'+
+
+    // ── 项目信息 ──
+    '<div class="form-card">'+
+      '<div class="section-label">项目信息</div>'+
+      '<div class="form-group"><label class="form-lbl">项目名称 *</label>'+
+        '<input id="o-name" class="form-inp" type="text" placeholder="如：日式美睫 D型 0.07mm"></div>'+
+      '<div class="form-row">'+
+        '<div class="form-group half"><label class="form-lbl">项目类别</label>'+
+          '<div class="cat-chips" style="margin-top:4px" id="type-chips">'+
+            PROJECT_TYPES.map(function(t,i){ return '<button class="cat-chip'+(i===0?' active':'')+'" data-val="'+t.val+'" data-rate-key="'+t.rateKey+'">'+t.label+'</button>'; }).join('')+
+          '</div></div>'+
+        '<div class="form-group half"><label class="form-lbl">员工</label>'+
+          '<select id="o-tech" class="form-inp">'+
+            '<option value="">选择员工…</option>'+
+            techs.map(function(t){ return '<option value="'+t.id+'">'+t.name+'</option>'; }).join('')+
+          '</select></div>'+
+      '</div>'+
+    '</div>'+
+
+    // ── 渠道 & 收费 ──
+    '<div class="form-card">'+
+      '<div class="section-label">渠道 & 收费</div>'+
+      '<div class="form-row">'+
+        '<div class="form-group half"><label class="form-lbl">销售渠道</label>'+
+          '<select id="o-channel" class="form-inp" onchange="noChChange()">'+
+            '<option value="offline">到店自然客</option>'+
+            '<option value="meituan">美团团购</option>'+
+            '<option value="douyin">抖音团购</option>'+
+          '</select></div>'+
+        '<div class="form-group half"><label class="form-lbl">券面价 / 售价 (¥)</label>'+
+          '<input id="o-face" class="form-inp" type="number" step="0.01" min="0" placeholder="299" oninput="noFaceChange()"></div>'+
+      '</div>'+
+      '<div id="platform-block" style="display:none">'+
+        '<div class="form-row">'+
+          '<div class="form-group half"><label class="form-lbl">平台佣金率 (%)</label>'+
+            '<input id="o-comm" class="form-inp" type="number" step="0.1" min="0" max="100" placeholder="12" oninput="noCommChange()"></div>'+
+          '<div class="form-group half"><label class="form-lbl">平台实收 (¥)</label>'+
+            '<input id="o-actual" class="form-inp" type="number" step="0.01" min="0" placeholder="263" oninput="noActualChange()"></div>'+
+        '</div>'+
+        '<div class="form-group"><label class="form-lbl">员工提成基数</label>'+
+          '<div class="cat-chips" id="base-chips">'+
+            '<button class="cat-chip active" data-val="face">按券面价</button>'+
+            '<button class="cat-chip" data-val="actual">按平台实收</button>'+
+          '</div></div>'+
+      '</div>'+
+    '</div>'+
+
+    // ── 耗材成本（BOM）──
+    '<div class="form-card">'+
+      '<div class="section-label">耗材成本（BOM）</div>'+
+      '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:10px">'+
+        '💡 用量填<b>使用次数</b>，满<span style="color:var(--pink)">可用次数</span>才自动扣减一瓶库存'+
+      '</div>'+
+      '<div class="form-row" style="margin-bottom:10px">'+
+        '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">从库存选择（按分类）</label>'+
+          '<select id="o-mat-pick" class="form-inp">'+matOptGroupsHtml+'</select></div>'+
+        '<div style="display:flex;align-items:flex-end;gap:6px;flex:1">'+
+          '<div class="form-group half" style="margin-bottom:0;flex:1"><label class="form-lbl">用量（次）</label>'+
+            '<input id="o-mat-qty" class="form-inp" type="number" step="1" min="1" placeholder="1"></div>'+
+          '<button class="cat-chip active" style="margin-bottom:2px;white-space:nowrap;flex-shrink:0" onclick="noAddMat()">＋ 添加</button>'+
+        '</div>'+
+      '</div>'+
+      '<div id="mat-rows"></div>'+
+      '<button style="width:100%;margin-top:6px;padding:10px;border:2px dashed var(--border);border-radius:12px;background:none;color:var(--text-3);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit" onclick="noAddManual()">＋ 手动填写耗材</button>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">'+
+        '<span style="font-size:13px;color:var(--text-3);font-weight:700">耗材合计</span>'+
+        '<span id="o-mat-total" style="font-size:18px;font-weight:900;color:var(--pink)">¥0.00</span>'+
+      '</div>'+
+    '</div>'+
+
+    // ── 备注 ──
+    '<div class="form-card">'+
+      '<div class="section-label">备注</div>'+
+      '<input id="o-note" class="form-inp" type="text" placeholder="手型特殊 / 额外钻饰 / 过敏体质…">'+
+    '</div>'+
+
+    // ── 变动成本预览 ──
+    '<div class="form-card">'+
+      '<div class="section-label">变动成本预览</div>'+
+      '<div id="cost-preview"><div style="color:var(--text-3);font-size:13px">填写售价后显示预览</div></div>'+
+    '</div>'+
+
+    '<button class="form-submit" onclick="noSubmit()">'+icon('save',18,'#fff')+' 保存服务订单</button>'+
+    '<div class="form-success hidden" id="o-succ">✅ 服务订单已记录！</div>'+
+
+    // ══════════════════════════════════════════════════════════
+    // 产品销售区块（BOM逐条选择）
+    // ══════════════════════════════════════════════════════════
+    '<div style="margin-top:20px">'+
+      '<div class="form-card" style="border:2px solid #C0E0C8">'+
+        '<div class="section-label" style="color:var(--green);display:flex;align-items:center;gap:6px">'+icon('shoppingBag',14,'var(--green)')+'本次产品销售（选填）</div>'+
+        '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
+          '随单销售产品 · 成本自动计入变动成本 · 售价可修改'+
+        '</div>'+
+
+        // 产品选择行
+        '<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">'+
+          '<div style="flex:1"><label class="form-lbl">选择产品</label>'+
+            '<select id="ps-pick" class="form-inp" onchange="psPicked()">'+prodOptHtml+'</select></div>'+
+          '<div style="width:52px"><label class="form-lbl">数量</label>'+
+            '<input id="ps-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:11px 6px;text-align:center"></div>'+
+        '</div>'+
+        // 成本/售价预览（自动带入，售价可改）
+        '<div id="ps-pick-preview" style="display:none;margin-bottom:10px">'+
+          '<div style="background:var(--gray-card);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
+            '<div style="flex:1;min-width:120px">'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">进货成本（只读）</div>'+
+              '<div id="ps-cost-display" style="font-size:15px;font-weight:900;color:var(--pink)">¥—</div>'+
+            '</div>'+
+            '<div style="flex:1;min-width:120px">'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">实际售价（可改）</div>'+
+              '<input id="ps-sale-price" class="form-inp" type="number" step="0.01" min="0" placeholder="0" style="padding:9px 10px;font-size:14px" oninput="psPreviewCalc()">'+
+            '</div>'+
+            '<div id="ps-margin-badge" style="font-size:12px;font-weight:900;color:var(--green);text-align:right;min-width:60px"></div>'+
+          '</div>'+
+        '</div>'+
+        '<button onclick="psAdd()" style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--green-dk);margin-bottom:12px">＋ 加入销售清单</button>'+
+
+        // 已添加的产品销售行
+        '<div id="ps-rows"></div>'+
+
+        // 销售汇总
+        '<div id="ps-summary" style="display:none;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">销售额合计</span>'+
+            '<span id="ps-total" style="font-size:18px;font-weight:900;color:var(--green)">¥0.00</span>'+
+          '</div>'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
+            '<span style="font-size:12px;color:var(--text-3);font-weight:700">产品成本合计</span>'+
+            '<span id="ps-cost-total" style="font-size:14px;font-weight:800;color:var(--pink)">¥0.00</span>'+
+          '</div>'+
+          '<div style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">产品毛利</span>'+
+            '<span id="ps-profit" style="font-size:15px;font-weight:900;color:var(--green)">¥0.00</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    // ══════════════════════════════════════════════════════════
+    // 赠品发放区块（BOM逐条选择）
+    // ══════════════════════════════════════════════════════════
+    '<div style="margin-top:4px">'+
+      '<div class="form-card" style="border:2px solid #FFE082">'+
+        '<div class="section-label" style="color:var(--gold);display:flex;align-items:center;gap:6px">'+icon('gift',14,'var(--gold)')+'本次赠品发放（选填）</div>'+
+        '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
+          '赠予客户产品 · 售价为零 · <b>成本仍计入变动成本</b> · 自动扣减库存'+
+        '</div>'+
+        '<div class="form-group" style="margin-bottom:10px"><label class="form-lbl">赠品原因（选填）</label>'+
+          '<input id="o-gift-reason" class="form-inp" type="text" placeholder="如：新客礼包 / 消费满赠 / 节日活动"></div>'+
+
+        // 赠品选择行
+        '<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">'+
+          '<div style="flex:1"><label class="form-lbl">选择产品</label>'+
+            '<select id="gift-pick" class="form-inp" onchange="giftPicked()">'+prodOptHtml+'</select></div>'+
+          '<div style="width:52px"><label class="form-lbl">数量</label>'+
+            '<input id="gift-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:11px 6px;text-align:center"></div>'+
+        '</div>'+
+        // 赠品成本预览
+        '<div id="gift-pick-preview" style="display:none;margin-bottom:10px">'+
+          '<div style="background:#FFF8E1;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center">'+
+            '<div style="flex:1">'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">进货成本（计入变动成本）</div>'+
+              '<div id="gift-cost-display" style="font-size:15px;font-weight:900;color:var(--gold)">¥—</div>'+
+            '</div>'+
+            '<div style="font-size:12px;color:var(--text-3);font-weight:700">售价：¥0（赠品）</div>'+
+          '</div>'+
+        '</div>'+
+        '<button onclick="giftAdd()" style="width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--yellow-dk);margin-bottom:12px">＋ 加入赠品清单</button>'+
+
+        // 已添加的赠品行
+        '<div id="gift-rows"></div>'+
+
+        // 赠品成本汇总
+        '<div id="gift-summary" style="display:none;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">赠品成本合计</span>'+
+            '<span id="gift-cost-total" style="font-size:18px;font-weight:900;color:var(--gold)">¥0.00</span>'+
+          '</div>'+
+          '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-top:4px">⚠️ 赠品成本已自动计入今日变动成本</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    // 一键保存全部
+    '<button class="form-submit" style="margin-top:8px;background:linear-gradient(90deg,var(--pink),var(--purple));box-shadow:0 5px 0 var(--pink-dk)" onclick="noSubmitAll()">'+icon('save',18,'#fff')+' 一键保存服务 + 销售 + 赠品</button>'+
+    '<div class="form-success hidden" id="o-succ-all">✅ 全部已记录！库存已同步扣减</div>'+
+
+    '<div style="height:20px"></div>'+
+  '</div>';
+
+  // ══ 产品销售 BOM 逻辑 ══════════════════════════════════════════
+  // 当前选中的产品信息（供预览用）
+  var _curPsOpt = null;
+
+  window.psPicked = function(){
+    var sel = container.querySelector('#ps-pick');
+    var opt = sel.options[sel.selectedIndex];
+    var preview = container.querySelector('#ps-pick-preview');
+    if(!opt || !opt.value){ preview.style.display='none'; _curPsOpt=null; return; }
+    _curPsOpt = {
+      matId: opt.value,
+      name: opt.dataset.name,
+      unitCost: parseFloat(opt.dataset.cost)||0,
+      salePrice: parseFloat(opt.dataset.sale)||0,
+      stockUnit: opt.dataset.unit||'个',
+      stock: parseFloat(opt.dataset.stock)||0
+    };
+    // 带入成本和默认售价
+    container.querySelector('#ps-cost-display').textContent = '¥'+_curPsOpt.unitCost.toFixed(2)+'  /'+_curPsOpt.stockUnit;
+    container.querySelector('#ps-sale-price').value = _curPsOpt.salePrice > 0 ? _curPsOpt.salePrice : '';
+    psPreviewCalc();
+    preview.style.display = '';
+  };
+
+  window.psPreviewCalc = function(){
+    if(!_curPsOpt) return;
+    var sp = parseFloat(container.querySelector('#ps-sale-price').value)||0;
+    var qty = parseFloat(container.querySelector('#ps-qty').value)||1;
+    var cost = _curPsOpt.unitCost * qty;
+    var sale = sp * qty;
+    var margin = sale > 0 ? ((sale - cost) / sale * 100) : null;
+    var badge = container.querySelector('#ps-margin-badge');
+    if(margin !== null){
+      var col = margin >= 50 ? 'var(--green)' : margin >= 30 ? 'var(--gold)' : 'var(--red)';
+      badge.style.color = col;
+      badge.textContent = Engine.fmtMargin(margin) + ' 毛利率';
+    } else {
+      badge.textContent = sp === 0 ? '按成本价出售' : '';
+    }
+  };
+
+  // 渲染产品销售行
+  function renderPsRows(){
+    var el = container.querySelector('#ps-rows');
+    var summary = container.querySelector('#ps-summary');
+    if(!saleItems.length){ el.innerHTML=''; if(summary) summary.style.display='none'; return; }
+    var totalSale=0, totalCost=0;
+    el.innerHTML = saleItems.map(function(item, i){
+      var cost = item.unitCost * item.qty;
+      var sale = item.salePrice * item.qty;
+      totalSale += sale; totalCost += cost;
+      var margin = sale > 0 ? Engine.fmtMargin((sale-cost)/sale*100) : '按成本';
+      var col = (sale-cost) >= 0 ? 'var(--green)' : 'var(--red)';
+      return '<div class="prod-row">'+
+        '<div class="prod-row-info">'+
+          '<div class="prod-row-name">🛍 '+item.name+'</div>'+
+          '<div class="prod-row-sub">进价¥'+item.unitCost.toFixed(2)+' × '+item.qty+' = 成本¥'+cost.toFixed(2)+'</div>'+
+        '</div>'+
+        // 数量（可改）
+        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="数量" '+
+          'oninput="saleItems['+i+'].qty=Math.max(1,parseInt(this.value)||1);renderPsRows()">'+
+        // 售价（可改）
+        '<input class="prod-row-price" type="number" min="0" step="0.01" value="'+item.salePrice.toFixed(2)+'" title="实际售价（可改）" '+
+          'oninput="saleItems['+i+'].salePrice=parseFloat(this.value)||0;renderPsRows()">'+
+        '<div class="prod-row-sub-total" style="color:'+col+'">¥'+(sale).toFixed(2)+'<br><span style="font-size:10px">'+margin+'</span></div>'+
+        '<button class="prod-row-del" onclick="saleItems.splice('+i+',1);renderPsRows()">✕</button>'+
+      '</div>';
+    }).join('');
+    // 汇总
+    if(summary){ summary.style.display=''; }
+    var profit = totalSale - totalCost;
+    var pEl = container.querySelector('#ps-total'); if(pEl) pEl.textContent='¥'+totalSale.toFixed(2);
+    var cEl = container.querySelector('#ps-cost-total'); if(cEl) cEl.textContent='¥'+totalCost.toFixed(2);
+    var prEl = container.querySelector('#ps-profit');
+    if(prEl){ prEl.textContent='¥'+profit.toFixed(2); prEl.style.color=profit>=0?'var(--green)':'var(--red)'; }
+  }
+  // 暴露给行内oninput使用
+  window.saleItems = saleItems;
+  window.renderPsRows = renderPsRows;
+
+  window.psAdd = function(){
+    var sel = container.querySelector('#ps-pick');
+    var qty = Math.max(1, parseInt(container.querySelector('#ps-qty').value)||1);
+    if(!_curPsOpt){ shake(sel, '请先选择产品'); return; }
+    var sp = parseFloat(container.querySelector('#ps-sale-price').value)||0;
+    // 检查库存
+    if(qty > _curPsOpt.stock){
+      if(!confirm('库存仅剩 '+_curPsOpt.stock+' '+_curPsOpt.stockUnit+'，确定继续？')) return;
+    }
+    saleItems.push({ matId:_curPsOpt.matId, name:_curPsOpt.name, unitCost:_curPsOpt.unitCost, salePrice:sp, qty:qty });
+    sel.value=''; container.querySelector('#ps-pick-preview').style.display='none';
+    container.querySelector('#ps-qty').value='1';
+    _curPsOpt=null;
+    renderPsRows();
+  };
+
+  // ══ 赠品 BOM 逻辑 ══════════════════════════════════════════════
+  var _curGiftOpt = null;
+
+  window.giftPicked = function(){
+    var sel = container.querySelector('#gift-pick');
+    var opt = sel.options[sel.selectedIndex];
+    var preview = container.querySelector('#gift-pick-preview');
+    if(!opt || !opt.value){ preview.style.display='none'; _curGiftOpt=null; return; }
+    _curGiftOpt = {
+      matId: opt.value,
+      name: opt.dataset.name,
+      unitCost: parseFloat(opt.dataset.cost)||0,
+      stockUnit: opt.dataset.unit||'个',
+      stock: parseFloat(opt.dataset.stock)||0
+    };
+    var qty = parseFloat(container.querySelector('#gift-qty').value)||1;
+    container.querySelector('#gift-cost-display').textContent = '¥'+((_curGiftOpt.unitCost*qty).toFixed(2))+'（¥'+_curGiftOpt.unitCost.toFixed(2)+' × '+qty+'）';
+    preview.style.display = '';
+  };
+
+  // 渲染赠品行
+  function renderGiftRows(){
+    var el = container.querySelector('#gift-rows');
+    var summary = container.querySelector('#gift-summary');
+    if(!giftItems.length){ el.innerHTML=''; if(summary) summary.style.display='none'; return; }
+    var totalCost=0;
+    el.innerHTML = giftItems.map(function(item, i){
+      var cost = item.unitCost * item.qty;
+      totalCost += cost;
+      return '<div class="prod-row" style="background:#FFF8E1">'+
+        '<div class="prod-row-info">'+
+          '<div class="prod-row-name">🎁 '+item.name+'</div>'+
+          '<div class="prod-row-sub">成本¥'+item.unitCost.toFixed(2)+' × '+item.qty+' = ¥'+cost.toFixed(2)+'（计入变动成本）</div>'+
+        '</div>'+
+        // 数量（可改）
+        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="数量" '+
+          'oninput="giftItems['+i+'].qty=Math.max(1,parseInt(this.value)||1);renderGiftRows()" style="border-color:#FFE082">'+
+        '<div class="prod-row-sub-total" style="color:var(--gold)">¥'+cost.toFixed(2)+'<br><span style="font-size:10px">赠品</span></div>'+
+        '<button class="prod-row-del" onclick="giftItems.splice('+i+',1);renderGiftRows()">✕</button>'+
+      '</div>';
+    }).join('');
+    if(summary){ summary.style.display=''; }
+    var cEl = container.querySelector('#gift-cost-total'); if(cEl) cEl.textContent='¥'+totalCost.toFixed(2);
+  }
+  window.giftItems = giftItems;
+  window.renderGiftRows = renderGiftRows;
+
+  window.giftAdd = function(){
+    var sel = container.querySelector('#gift-pick');
+    var qty = Math.max(1, parseInt(container.querySelector('#gift-qty').value)||1);
+    if(!_curGiftOpt){ shake(sel, '请先选择产品'); return; }
+    if(qty > _curGiftOpt.stock){
+      if(!confirm('库存仅剩 '+_curGiftOpt.stock+' '+_curGiftOpt.stockUnit+'，确定继续？')) return;
+    }
+    giftItems.push({ matId:_curGiftOpt.matId, name:_curGiftOpt.name, unitCost:_curGiftOpt.unitCost, qty:qty });
+    sel.value=''; container.querySelector('#gift-pick-preview').style.display='none';
+    container.querySelector('#gift-qty').value='1';
+    _curGiftOpt=null;
+    renderGiftRows();
+  };
+
+  // ══ 耗材BOM逻辑（服务订单）══════════════════════════════════════
+  function renderMatRows(){
+    var el=container.querySelector('#mat-rows');
+    if(!orderMats.length){ el.innerHTML=''; noCalc(); return; }
+    el.innerHTML=orderMats.map(function(m,i){
+      var usageTip = m.matId ? (function(){
+        var mat = Engine.getMaterials().find(function(x){ return x.id==m.matId; });
+        if(!mat) return '';
+        var uc = Engine.getUsageCounts();
+        var used = uc[m.matId]||0;
+        var total = parseFloat(mat.usageCount)||1;
+        return ' (瓶内已用'+used+'/'+total+'次)';
+      })() : '';
+      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--gray-card);border-radius:10px;padding:8px 10px">'+
+        '<input class="form-inp" style="flex:2;padding:7px 10px;font-size:13px" placeholder="耗材名称" value="'+m.name+'" oninput="window._om['+i+'].name=this.value">'+
+        '<input class="form-inp" style="flex:1;padding:7px 8px;font-size:12px" type="number" placeholder="单次¥" value="'+(m.unitCost||'')+'" oninput="window._om['+i+'].unitCost=parseFloat(this.value)||0;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()">'+
+        '<input class="form-inp" style="width:44px;padding:7px 4px;font-size:13px;text-align:center" type="number" step="1" min="1" placeholder="次" value="'+m.qty+'" oninput="window._om['+i+'].qty=parseFloat(this.value)||1;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()" title="使用次数'+usageTip+'">'+
+        '<span style="font-size:12px;font-weight:800;color:var(--pink);min-width:40px;text-align:right">¥'+(m.unitCost*m.qty).toFixed(2)+'</span>'+
+        '<button onclick="window._om.splice('+i+',1);window._reRender()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-3)">✕</button>'+
+      '</div>';
+    }).join('');
+    noCalc();
+  }
+  window._om=orderMats; window._reRender=renderMatRows;
+
+  window.noAddMat=function(){
+    var pick=container.querySelector('#o-mat-pick');
+    var qty =parseFloat(container.querySelector('#o-mat-qty').value)||1;
+    if(!pick.value) return;
+    var mat=Engine.getMaterials().find(function(m){ return m.id==pick.value; });
+    if(!mat) return;
+    orderMats.push({ matId:mat.id, name:mat.name, unitCost:mat.unitCost, qty:qty, subtotal:mat.unitCost*qty });
+    pick.value=''; container.querySelector('#o-mat-qty').value=''; renderMatRows();
+  };
+  window.noAddManual=function(){
+    orderMats.push({ matId:null, name:'', unitCost:0, qty:1, subtotal:0 }); renderMatRows();
+  };
+
+  window.noChChange=function(){
+    var ch=container.querySelector('#o-channel').value, isOnline=ch!=='offline';
+    container.querySelector('#platform-block').style.display=isOnline?'':'none';
+    if(ch==='meituan') container.querySelector('#o-comm').value='12';
+    if(ch==='douyin')  container.querySelector('#o-comm').value='5';
+    if(isOnline) noCommChange(); else noCalc();
+  };
+  window.noFaceChange=function(){ noCommChange(); };
+  window.noCommChange=function(){
+    var face=parseFloat(container.querySelector('#o-face').value)||0;
+    var rate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
+    if(face>0&&container.querySelector('#o-actual')) container.querySelector('#o-actual').value=(face*(1-rate/100)).toFixed(2);
+    noCalc();
+  };
+  window.noActualChange=function(){
+    var face=parseFloat(container.querySelector('#o-face').value)||0;
+    var actual=parseFloat(container.querySelector('#o-actual').value)||0;
+    if(face>0&&actual>0&&container.querySelector('#o-comm')) container.querySelector('#o-comm').value=((1-actual/face)*100).toFixed(1);
+    noCalc();
+  };
+
+  function getCurTechRate(){
+    var typeChip=container.querySelector('#type-chips .cat-chip.active');
+    var pType=typeChip?typeChip.dataset.val:'lash';
+    var rateKey=typeChip?typeChip.dataset.rateKey:'lashRate';
+    var techSel=container.querySelector('#o-tech').value;
+    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel; });
+    var techRate=tech?(parseFloat(tech[rateKey])||0):0;
+    return { pType:pType, techRate:techRate, rateKey:rateKey };
+  }
+
+  function noCalc(){
+    var face=parseFloat(container.querySelector('#o-face')&&container.querySelector('#o-face').value)||0;
+    var ch=container.querySelector('#o-channel')&&container.querySelector('#o-channel').value||'offline';
+    var isOnline=ch!=='offline';
+    var commRate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
+    var actual=isOnline?face*(1-commRate/100):face;
+    var baseChip=container.querySelector('#base-chips .cat-chip.active');
+    var baseMode=baseChip?baseChip.dataset.val:'face';
+    var commBase=baseMode==='actual'?actual:face;
+    var tr=getCurTechRate();
+
+    var matTotal=orderMats.reduce(function(a,m){ return a+m.subtotal; },0);
+    var techCost=commBase*(tr.techRate/100);
+    var platformFee=isOnline?face*(commRate/100):0;
+    var totalVC=matTotal+techCost+platformFee;
+    var grossProfit=face-totalVC;
+    var margin=face>0?(grossProfit/face*100):0;
+
+    var mtEl=container.querySelector('#o-mat-total');
+    if(mtEl) mtEl.textContent='¥'+matTotal.toFixed(2);
+
+    var pv=container.querySelector('#cost-preview');
+    if(!pv||face<=0){ if(pv) pv.innerHTML='<div style="color:var(--text-3);font-size:13px">填写售价后显示预览</div>'; return; }
+
+    function row(label,val,big,col){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;'+(big?'border-top:1px solid var(--border);padding-top:10px;margin-top:4px':'')+'">'+
+        '<span style="font-size:13px;color:var(--text-3);font-weight:700">'+label+'</span>'+
+        '<span style="font-size:'+(big?'16':'14')+'px;font-weight:'+(big?900:800)+';color:'+(col||'var(--text)')+'">'+val+'</span>'+
+      '</div>';
+    }
+    var html=row('券面价 / 售价','¥'+face.toFixed(2));
+    if(isOnline){
+      html+=row('  ↳ 平台佣金（'+commRate+'%）','-¥'+platformFee.toFixed(2));
+      html+=row('  ↳ 实收到账','¥'+actual.toFixed(2));
+    }
+    html+=row('耗材成本','¥'+matTotal.toFixed(2));
+    html+=row('员工提成（'+tr.techRate+'%）','¥'+techCost.toFixed(2));
+    html+=row('变动成本合计','¥'+totalVC.toFixed(2),true);
+    html+=row('毛利润',(grossProfit>=0?'':'−')+'¥'+Math.abs(grossProfit).toFixed(2),true,grossProfit>=0?'var(--green)':'var(--red)');
+    var mc=margin>=50?'var(--green)':margin>=30?'var(--gold)':'var(--red)';
+    html+=row('毛利率',Engine.fmtMargin(margin),true,mc);
+    pv.innerHTML=html;
+  }
+  window.noCalc=noCalc;
+
+  function chipGroup(selector){
+    container.querySelectorAll(selector).forEach(function(btn){
+      btn.onclick=function(){
+        container.querySelectorAll(selector).forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active'); noCalc();
+      };
+    });
+  }
+  chipGroup('#type-chips .cat-chip');
+  chipGroup('#base-chips .cat-chip');
+  var techSel=container.querySelector('#o-tech'); if(techSel) techSel.onchange=noCalc;
+
+  // ── 单独保存服务订单 ──
+  window.noSubmit=function(){
+    var name=container.querySelector('#o-name').value.trim();
+    var face=parseFloat(container.querySelector('#o-face').value)||0;
+    if(!name) return shake(container.querySelector('#o-name'),'请填写项目名称');
+    if(!face) return shake(container.querySelector('#o-face'),'请填写售价');
+    var ch=container.querySelector('#o-channel').value, isOnline=ch!=='offline';
+    var commRate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
+    var actual=isOnline?face*(1-commRate/100):face;
+    var baseChip=container.querySelector('#base-chips .cat-chip.active');
+    var baseMode=baseChip?baseChip.dataset.val:'face';
+    var tr=getCurTechRate();
+    var techSel2=container.querySelector('#o-tech').value;
+    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel2; });
+    Engine.recordOrder({
+      projectName:name, projectType:tr.pType,
+      techId:techSel2, techName:tech?tech.name:'', techRate:tr.techRate,
+      channel:ch, facePrice:face, commissionRate:commRate, actualRevenue:actual, commBase:baseMode,
+      materialItems:orderMats.map(function(m){ return Object.assign({},m); }),
+      note:container.querySelector('#o-note').value,
+    });
+    
+    // ★ 同步今日营收到 main.html
+    function syncToMain(addRevenue) {
+       const today = new Date().toLocaleDateString();
+       const current = parseFloat(localStorage.getItem('todayRev')) || 0;
+       const newRev = current + addRevenue;
+       localStorage.setItem('todayRev', newRev);
+       localStorage.setItem('realcost_updated', Date.now().toString());
+       // 同步保存到 main 的 revenue_history
+       const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+       if (!history[today]) history[today] = {};
+       history[today].revenue = newRev.toFixed(2);
+       localStorage.setItem('revenue_history', JSON.stringify(history));
+    }
+    _clearServiceForm();
+    var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
+    setTimeout(function(){ su.classList.add('hidden'); },2800);
+    syncToMain(face);
+    updateHeader();
+  };
+
+  // ── 一键保存服务+产品销售+赠品 ──
+  window.noSubmitAll=function(){
+    var name=container.querySelector('#o-name').value.trim();
+    var face=parseFloat(container.querySelector('#o-face').value)||0;
+    if(!name) return shake(container.querySelector('#o-name'),'请填写项目名称');
+    if(!face) return shake(container.querySelector('#o-face'),'请填写售价');
+    var ch=container.querySelector('#o-channel').value, isOnline=ch!=='offline';
+    var commRate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
+    var actual=isOnline?face*(1-commRate/100):face;
+    var baseChip=container.querySelector('#base-chips .cat-chip.active');
+    var baseMode=baseChip?baseChip.dataset.val:'face';
+    var tr=getCurTechRate();
+    var techSel3=container.querySelector('#o-tech').value;
+    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel3; });
+    // 保存服务订单
+    Engine.recordOrder({
+      projectName:name, projectType:tr.pType,
+      techId:techSel3, techName:tech?tech.name:'', techRate:tr.techRate,
+      channel:ch, facePrice:face, commissionRate:commRate, actualRevenue:actual, commBase:baseMode,
+      materialItems:orderMats.map(function(m){ return Object.assign({},m); }),
+      note:container.querySelector('#o-note').value,
+    });
+    
+    // ★ 同步今日营收到 main.html
+    function syncToMain(addRevenue) {
+       const today = new Date().toLocaleDateString();
+       const current = parseFloat(localStorage.getItem('todayRev')) || 0;
+       const newRev = current + addRevenue;
+       localStorage.setItem('todayRev', newRev);
+       localStorage.setItem('realcost_updated', Date.now().toString());
+       // 同步保存到 main 的 revenue_history
+      const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+      if (!history[today]) history[today] = {};
+      history[today].revenue = newRev.toFixed(2);
+      localStorage.setItem('revenue_history', JSON.stringify(history));
+    }
+    // 保存产品销售
+    if(saleItems.length){
+      var totalAmount=saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0);
+      Engine.recordProductOrder({ type:'sale', items:saleItems.map(function(i){ return Object.assign({},i); }), totalAmount:totalAmount, related:name });
+
+    }
+    // 保存赠品（成本照常计入，售价为0）
+    if(giftItems.length){
+      var reason=container.querySelector('#o-gift-reason')&&container.querySelector('#o-gift-reason').value||'';
+      Engine.recordProductOrder({ type:'gift', items:giftItems.map(function(i){ return Object.assign({},i); }), totalAmount:0, reason:reason||name });
+    }
+    _clearServiceForm();
+    _clearProductForms();
+    var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
+    setTimeout(function(){ su.classList.add('hidden'); },2800);
+    // ★ 同步今日营收到 main.html
+    syncToMain(face + (saleItems.length ? saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0) : 0));
+    updateHeader();
+    };
+
+  function _clearServiceForm(){
+    container.querySelector('#o-name').value='';
+    container.querySelector('#o-face').value='';
+    if(container.querySelector('#o-actual')) container.querySelector('#o-actual').value='';
+    if(container.querySelector('#o-comm'))   container.querySelector('#o-comm').value='';
+    container.querySelector('#o-note').value='';
+    orderMats.length=0; renderMatRows(); noCalc();
+  }
+  function _clearProductForms(){
+    saleItems.length=0; giftItems.length=0;
+    renderPsRows(); renderGiftRows();
+    container.querySelector('#ps-pick').value='';
+    container.querySelector('#ps-pick-preview').style.display='none';
+    container.querySelector('#gift-pick').value='';
+    container.querySelector('#gift-pick-preview').style.display='none';
+    if(container.querySelector('#o-gift-reason')) container.querySelector('#o-gift-reason').value='';
+  }
+
+  noCalc();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  订单历史
+// ══════════════════════════════════════════════════════════════════
+function renderOrders(container){
+  var orders=Engine.getOrders();
+  var pOrders=Engine.getProductOrders();
+  var chMap={ offline:'到店', meituan:'美团', douyin:'抖音' };
+  var typeLabel={ lash:'💜 美睫', nail:'💅 美甲', beauty:'🌿 美容', tattoo:'🖌 纹绣', medical:'💉 医美' };
+  var typeCls  ={ lash:'tag-lash', nail:'tag-nail', beauty:'tag-beauty', tattoo:'tag-tattoo', medical:'tag-medical' };
+
+  container.innerHTML='<div>'+
+    '<div class="page-title-bar">'+icon('clipboard',24,'var(--pink)')+'<span class="page-title-text">订单记录</span></div>'+
+    '<div class="rank-tab-row" style="margin-bottom:12px">'+
+      '<button class="rank-tab active" onclick="ordTabSwitch(\'service\',this)">服务订单</button>'+
+      '<button class="rank-tab" onclick="ordTabSwitch(\'product\',this)">产品/赠品</button>'+
+    '</div>'+
+
+    '<div id="ord-service-block">'+
+    '<div class="form-row" style="margin-bottom:12px;gap:8px">'+
+      '<select id="f-ch" class="form-inp" onchange="filterOrders()" style="flex:1;padding:10px 12px">'+
+        '<option value="">全部渠道</option><option value="offline">到店</option><option value="meituan">美团</option><option value="douyin">抖音</option>'+
+      '</select>'+
+      '<select id="f-type" class="form-inp" onchange="filterOrders()" style="flex:1;padding:10px 12px">'+
+        '<option value="">全部类别</option>'+
+        '<option value="lash">美睫</option><option value="nail">美甲</option>'+
+        '<option value="beauty">美容</option><option value="tattoo">纹绣</option><option value="medical">医美</option>'+
+      '</select>'+
+    '</div>'+
+    '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
+      '共 <span id="o-count">'+orders.length+'</span> 单 · 平均毛利率 '+
+      '<span id="o-avg" style="color:var(--pink);font-weight:900">'+(orders.length?Engine.fmtMargin(orders.reduce(function(a,o){ return a+o.grossMargin; },0)/orders.length):'—')+'</span>'+
+    '</div>'+
+    '<div class="order-list" id="o-list"></div>'+
+    '</div>'+
+
+    '<div id="ord-product-block" style="display:none">'+
+    '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
+      '销售 <span style="color:var(--green);font-weight:900">'+pOrders.filter(function(p){ return p.type==='sale'; }).length+'</span> 笔 · '+
+      '赠品 <span style="color:var(--gold);font-weight:900">'+pOrders.filter(function(p){ return p.type==='gift'; }).length+'</span> 笔'+
+    '</div>'+
+    '<div class="order-list">'+
+      (pOrders.length?pOrders.map(function(o){
+        var isSale=o.type==='sale';
+        return '<div class="order-card '+(isSale?'type-sale':'type-gift')+'">'+
+          '<div class="oc-header">'+
+            '<div><div class="oc-name">'+(isSale?'🛍 产品销售':'🎁 赠品发放')+(o.related?' · '+o.related:o.reason?' · '+o.reason:'')+'</div>'+
+            '<div class="oc-date">'+o.date+' · '+o.items.map(function(i){ return i.name+'×'+i.qty; }).join(' / ')+'</div></div>'+
+            '<div class="oc-margin '+(isSale?(o.grossMargin>=50?'good':o.grossMargin>=30?'warn':'bad'):'warn')+'">'+(isSale?Engine.fmtMargin(o.grossMargin):'赠品')+'</div>'+
+          '</div>'+
+          '<div class="oc-meta">'+
+            '<span class="oc-tag '+(isSale?'tag-sale':'tag-gift')+'">'+(isSale?'零售':'赠品')+'</span>'+
+          '</div>'+
+          '<div class="oc-costs">'+
+            (isSale?
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">销售额</div><div class="oc-cost-val">¥'+(parseFloat(o.totalAmount)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">产品成本</div><div class="oc-cost-val">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">毛利</div><div class="oc-cost-val" style="color:var(--green)">¥'+(parseFloat(o.grossProfit)||0).toFixed(2)+'</div></div>'
+              :
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">赠品成本</div><div class="oc-cost-val" style="color:var(--gold)">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">成本损耗</div><div class="oc-cost-val" style="color:var(--red)">-¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'
+            )+
+          '</div>'+
+        '</div>';
+      }).join(''):'<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">暂无记录</div>')+
+    '</div>'+
+    '</div>'+
+  '</div>';
+
+  window.ordTabSwitch=function(tab,btn){
+    container.querySelectorAll('.rank-tab').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active');
+    container.querySelector('#ord-service-block').style.display=tab==='service'?'':'none';
+    container.querySelector('#ord-product-block').style.display=tab==='product'?'':'none';
+  };
+
+  window.filterOrders=function(){
+    var ch=container.querySelector('#f-ch').value, ty=container.querySelector('#f-type').value;
+    var filtered=orders.filter(function(o){ return (!ch||o.channel===ch)&&(!ty||o.projectType===ty); });
+    container.querySelector('#o-count').textContent=filtered.length;
+    container.querySelector('#o-avg').textContent=filtered.length?Engine.fmtMargin(filtered.reduce(function(a,o){ return a+o.grossMargin; },0)/filtered.length):'—';
+    var el=container.querySelector('#o-list');
+    if(!filtered.length){ el.innerHTML='<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">暂无订单记录</div>'; return; }
+    el.innerHTML=filtered.map(function(o){
+      var mc=o.grossMargin>=50?'good':o.grossMargin>=30?'warn':'bad';
+      return '<div class="order-card">'+
+        '<div class="oc-header">'+
+          '<div><div class="oc-name">'+o.projectName+'</div>'+
+          '<div class="oc-date">'+o.date+(o.techName?' · '+o.techName:'')+'</div></div>'+
+          '<div class="oc-margin '+mc+'">'+Engine.fmtMargin(o.grossMargin)+'</div>'+
+        '</div>'+
+        '<div class="oc-meta">'+
+          '<span class="oc-tag '+(typeCls[o.projectType]||'tag-nail')+'">'+(typeLabel[o.projectType]||o.projectType)+'</span>'+
+          '<span class="oc-tag tag-'+o.channel+'">'+chMap[o.channel]+'</span>'+
+          (o.note?'<span class="oc-tag" style="background:var(--gray-card);color:var(--text-3);border:1px solid var(--border)">'+o.note+'</span>':'')+
+        '</div>'+
+        '<div class="oc-costs">'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">售价</div><div class="oc-cost-val">¥'+o.facePrice.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">耗材</div><div class="oc-cost-val">¥'+o.materialTotal.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">提成</div><div class="oc-cost-val">¥'+o.techCost.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">毛利</div><div class="oc-cost-val" style="color:'+(o.grossProfit>=0?'var(--green)':'var(--red)')+'">¥'+o.grossProfit.toFixed(2)+'</div></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  };
+  window.filterOrders();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  排行榜
+// ══════════════════════════════════════════════════════════════════
+function renderRanking(container){
+  var medals=['🥇','🥈','🥉'];
+  var BAR=['#FF6B9D','#9B6DFF','#4CAF50','#F5A623','#2196F3'];
+
+  function card(item,i,val,max,valLabel,subLabel,valColor){
+    var pct=max>0?Math.max(4,Math.round(val/max*100)):4;
+    var medal=i<3?medals[i]:'<span class="rank-num">'+(i+1)+'</span>';
+    var typeBadge=item.type?'<span style="font-size:10px;color:var(--text-3);background:var(--gray-bg);border-radius:8px;padding:2px 6px;margin-left:4px">'+(item.typeLabel||item.type)+'</span>':'';
+    return '<div class="rank-card '+(i<3?'rank-top-'+(i+1):'')+'">'+
+      '<div class="rc-medal">'+medal+'</div>'+
+      '<div class="rc-body">'+
+        '<div class="rc-name">'+item.name+typeBadge+'</div>'+
+        '<div class="rc-bar-wrap"><div class="rc-bar" style="width:'+pct+'%;background:'+BAR[Math.min(i,4)]+'"></div></div>'+
+        '<div class="rc-sub">'+subLabel+'</div>'+
+      '</div>'+
+      '<div class="rc-val" style="color:'+(valColor||'var(--pink)')+'">'+valLabel+'</div>'+
+    '</div>';
+  }
+
+  var cData=Engine.getProjectRanking(),        cMax=cData.length?cData[0].count:1;
+  var pData=Engine.getProfitRanking(),          pMax=pData.length?Math.max(pData[0].profit,1):1;
+  var tData=Engine.getTechCommissionRanking(),  tMax=tData.length?tData[0].commission:1;
+  var chData=Engine.getChannelRanking(),        chMax=chData.length?chData[0].revenue:1;
+
+  container.innerHTML='<div>'+
+    '<div class="page-title-bar">'+icon('barChart',24,'var(--pink)')+'<span class="page-title-text">项目排行</span></div>'+
+    '<div class="rank-tab-row">'+
+      '<button class="rank-tab active" onclick="rankTab(\'count\',this)">接单量</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'profit\',this)">毛利价值</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'tech\',this)">员工提成</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'channel\',this)">销售渠道</button>'+
+    '</div>'+
+
+    '<div id="rank-count">'+
+      (cData.length?'<div class="rank-subtitle">累计接单数量榜</div>'+cData.map(function(item,i){
+        return card(item,i,item.count,cMax,item.count+'单',Engine.fmtMoney(item.revenue)+' 营收');
+      }).join(''):'<div class="rank-empty">还没有订单，快去接单吧！</div>')+
+    '</div>'+
+
+    '<div id="rank-profit" style="display:none">'+
+      (pData.length?'<div class="rank-subtitle">各项目累计毛利金额</div>'+pData.map(function(item,i){
+        var col=item.profit>=0?'var(--green)':'var(--red)';
+        return card(item,i,Math.max(item.profit,0),pMax,Engine.fmtMoney(item.profit),item.count+'单 · 营收'+Engine.fmtMoney(item.revenue),col);
+      }).join(''):'<div class="rank-empty">暂无数据</div>')+
+    '</div>'+
+
+    '<div id="rank-tech" style="display:none">'+
+      (tData.length?'<div class="rank-subtitle">员工累计提成金额</div>'+tData.map(function(item,i){
+        return card({name:item.name},i,item.commission,tMax,Engine.fmtMoney(item.commission),item.count+'单 · 创收'+Engine.fmtMoney(item.revenue),'var(--purple)');
+      }).join(''):'<div class="rank-empty">暂无员工提成数据</div>')+
+    '</div>'+
+
+    '<div id="rank-channel" style="display:none">'+
+      (chData.length?'<div class="rank-subtitle">各渠道累计营收与单量</div>'+chData.map(function(item,i){
+        return '<div class="rank-card '+(i<3?'rank-top-'+(i+1):'')+'">'+
+          '<div class="rc-medal" style="font-size:32px">'+item.emoji+'</div>'+
+          '<div class="rc-body">'+
+            '<div class="rc-name">'+item.name+'</div>'+
+            '<div class="rc-bar-wrap"><div class="rc-bar" style="width:'+Math.max(4,Math.round(item.revenue/chMax*100))+'%;background:'+BAR[Math.min(i,4)]+'"></div></div>'+
+            '<div class="rc-sub">'+item.count+'单 · 毛利'+Engine.fmtMoney(item.profit)+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;min-width:72px">'+
+            '<div style="font-size:16px;font-weight:900;color:var(--teal)">'+Engine.fmtMoney(item.revenue)+'</div>'+
+            '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-top:2px">'+
+              (item.revenue>0?Engine.fmtMargin(item.profit/item.revenue*100)+' 毛利率':'—')+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }).join(''):'<div class="rank-empty">暂无渠道数据</div>')+
+    '</div>'+
+  '</div>';
+
+  window.rankTab=function(tab,btn){
+    container.querySelectorAll('.rank-tab').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active');
+    ['count','profit','tech','channel'].forEach(function(t){
+      container.querySelector('#rank-'+t).style.display=t===tab?'':'none';
+    });
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  耗材/产品库
+// ══════════════════════════════════════════════════════════════════
+function renderMaterials(container){
+  function draw(){
+    var mats=Engine.getMaterials();
+    var inv=Engine.getInventorySummary();
+    var uc=Engine.getUsageCounts();
+    var cats=Engine.getMatCategories();
+    var onlyMats=mats.filter(function(m){ return !m.isProduct; });
+    var onlyProds=mats.filter(function(m){ return m.isProduct; });
+    var catOptionsHtml=cats.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+
+    container.innerHTML='<div>'+
+      '<div class="page-title-bar">'+icon('package',24,'var(--pink)')+'<span class="page-title-text">库存管理</span></div>'+
+
+      '<div class="inv-summary-grid">'+
+        '<div class="inv-sum-card purchase">'+
+          '<div class="inv-sum-lbl">📦 库存进货价值</div>'+
+          '<div class="inv-sum-val">'+Engine.fmtMoney(inv.purchaseTotal)+'</div>'+
+          '<div class="inv-sum-sub">单瓶/盒进价×库存量·共'+mats.length+'种</div>'+
+        '</div>'+
+        '<div class="inv-sum-card resale">'+
+          '<div class="inv-sum-lbl">💰 可销售零售价值</div>'+
+          '<div class="inv-sum-val">'+Engine.fmtMoney(inv.resaleTotal)+'</div>'+
+          '<div class="inv-sum-sub">按零售价·'+inv.productCount+'种产品</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="form-card">'+
+        '<div class="section-label">耗材分类管理</div>'+
+        '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:10px">点击标签上的 × 可删除，未被使用的类别才能删除</div>'+
+        '<div id="cat-chips-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
+          cats.map(function(c){
+            var inUse=mats.some(function(m){ return m.category===c; });
+            return '<span style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;border:2px solid var(--border);background:#fff;font-size:12px;font-weight:800;color:var(--text-2)">'+
+              c+
+              '<button onclick="catDel(\''+c+'\')" style="background:none;border:none;cursor:'+(inUse?'not-allowed':'pointer')+';font-size:13px;color:'+(inUse?'#CCC':'var(--red)')+';padding:0;line-height:1" title="'+(inUse?'该类别有耗材，无法删除':'删除')+'">×</button>'+
+            '</span>';
+          }).join('')+
+        '</div>'+
+        '<div style="display:flex;gap:8px">'+
+          '<input id="new-cat-inp" class="form-inp" type="text" placeholder="输入新类别名称…" style="flex:1">'+
+          '<button onclick="catAdd()" style="padding:10px 16px;background:var(--pink);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;font-family:inherit">＋ 添加</button>'+
+        '</div>'+
+        '<div class="form-success hidden" id="cat-succ">✅ 类别已更新！</div>'+
+      '</div>'+
+
+      '<div class="form-card">'+
+        '<div class="section-label">添加耗材 / 产品</div>'+
+
+        // ── 💡 行业耗材使用次数参考 Tip ──
+        '<div id="tip-box" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:2px solid #FFE082;border-radius:14px;padding:12px 14px;margin-bottom:14px">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+            '<span style="font-size:13px;font-weight:900;color:#B8860B">💡 耗材可用次数参考</span>'+
+            '<button onclick="tipToggle()" id="tip-toggle-btn" style="background:none;border:none;font-size:12px;font-weight:800;color:#B8860B;cursor:pointer;font-family:inherit">收起 ▲</button>'+
+          '</div>'+
+          '<div id="tip-content">'+
+            // 行业切换 tab
+            '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="tip-tabs">'+
+              '<button class="tip-tab-btn active" onclick="tipTab(\'nail\',this)">💅 美甲</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'lash\',this)">💜 美睫</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'beauty\',this)">🌿 美容</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'tattoo\',this)">🖌 纹绣</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'medical\',this)">💉 医美</button>'+
+            '</div>'+
+            '<div id="tip-body"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div class="form-row">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">名称 *</label>'+
+            '<input id="m-name" class="form-inp" type="text" placeholder="如：玻尿酸原液"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">类别</label>'+
+            '<select id="m-cat" class="form-inp">'+catOptionsHtml+'</select></div>'+
+        '</div>'+
+        '<div style="height:10px"></div>'+
+        '<div class="form-row">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单瓶/盒进价 (¥) *</label>'+
+            '<input id="m-price" class="form-inp" type="number" step="0.01" min="0" placeholder="80" oninput="mPreview()"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">可用次数 *</label>'+
+            '<input id="m-usage" class="form-inp" type="number" step="1" min="1" placeholder="40" oninput="mPreview()"></div>'+
+        '</div>'+
+        '<div class="form-row" style="margin-top:10px">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">当前库存数量（瓶/盒）</label>'+
+            '<input id="m-stock" class="form-inp" type="number" step="1" min="0" placeholder="10"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单位</label>'+
+            '<input id="m-unit" class="form-inp" type="text" placeholder="瓶/盒/支/ml…"></div>'+
+        '</div>'+
+        '<div style="margin-top:12px;display:flex;align-items:center;gap:10px">'+
+          '<input type="checkbox" id="m-is-product" style="width:18px;height:18px;accent-color:var(--green)" onchange="mProdToggle()">'+
+          '<label for="m-is-product" style="font-size:14px;font-weight:800;color:var(--text)">✅ 这是可零售产品</label>'+
+        '</div>'+
+        '<div id="m-prod-extra" style="display:none;margin-top:10px">'+
+          '<label class="form-lbl">零售售价 (¥) *</label>'+
+          '<input id="m-sale-price" class="form-inp" type="number" step="0.01" min="0" placeholder="128" oninput="mPreview()">'+
+          '<div class="margin-preview hidden" id="m-profit-prev" style="margin-top:8px">'+
+            '<span class="mp-label">产品毛利率</span><span class="mp-unit" id="m-prod-margin">—</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="margin-preview hidden" id="m-prev" style="margin-top:10px">'+
+          '<span class="mp-label">单次成本</span><span class="mp-unit" id="m-uc">¥—</span>'+
+          '<span style="font-size:12px;color:var(--text-3);font-weight:700" id="m-note"></span>'+
+          '<span style="font-size:11px;color:var(--text-3);font-weight:700" id="m-stock-value"></span>'+
+        '</div>'+
+        '<div style="height:12px"></div>'+
+        '<button class="form-submit" onclick="mSubmit()">'+icon('plus',18,'#fff')+' 添加</button>'+
+        '<div class="form-success hidden" id="m-succ">✅ 已添加！</div>'+
+      '</div>'+
+
+      '<div class="rank-tab-row" id="mat-tab-row" style="margin-top:4px">'+
+        '<button class="rank-tab active" onclick="matTabSwitch(\'mat\',this)">🧴 耗材 ('+onlyMats.length+')</button>'+
+        '<button class="rank-tab" onclick="matTabSwitch(\'prod\',this)">🛍 产品 ('+onlyProds.length+')</button>'+
+      '</div>'+
+
+      '<div id="mat-list-mat">'+
+        (onlyMats.length?
+          '<div class="mat-grid">'+onlyMats.map(function(m){
+            var s=parseFloat(m.stock)||0, sc=s>10?'stock-ok':s>0?'stock-low':'stock-out';
+            var usedInBottle=uc[m.id]||0;
+            var usageCount=parseFloat(m.usageCount)||1;
+            var totalPrice=parseFloat(m.totalPrice)||0;
+            var unitCost=totalPrice/usageCount;
+            var stockValue = usedInBottle > 0
+               ? (s - 1) * totalPrice + (totalPrice - unitCost * usedInBottle)
+               : s * totalPrice;
+            var bottleInfo=usedInBottle>0?(' 本瓶已用'+usedInBottle+'/'+usageCount+'次'):'';
+            return '<div class="mat-card">'+
+              '<button class="mat-del" onclick="mDel(\''+m.id+'\')">✕</button>'+
+              '<div class="mat-name">'+m.name+'</div>'+
+              '<div class="mat-detail">'+m.category+' · ¥'+totalPrice+'/'+usageCount+'次</div>'+
+              '<div class="mat-unit-cost">¥'+m.unitCost.toFixed(2)+'<span> /次</span></div>'+
+              '<span class="mat-stock-badge '+sc+'">库存: '+s+(m.stockUnit||'')+(bottleInfo?('<br><span style="font-size:9px">'+bottleInfo+'</span>'):'')+
+              '</span>'+
+              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">库存价值: ¥'+stockValue.toFixed(2)+'</div>'+
+            '</div>';
+          }).join('')+'</div>'
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无耗材</div>'
+        )+
+      '</div>'+
+
+      '<div id="mat-list-prod" style="display:none">'+
+        (onlyProds.length?
+          '<div class="mat-grid">'+onlyProds.map(function(m){
+            var s=parseFloat(m.stock)||0, sc=s>5?'stock-ok':s>0?'stock-low':'stock-out';
+            var totalPrice=parseFloat(m.totalPrice)||0;
+            var stockValue=s*totalPrice;
+            var margin=m.salePrice&&totalPrice?((m.salePrice-totalPrice)/m.salePrice*100):null;
+            return '<div class="mat-card">'+
+              '<button class="mat-del" onclick="mDel(\''+m.id+'\')">✕</button>'+
+              '<div class="mat-name">'+m.name+'</div>'+
+              '<div class="mat-detail">进价¥'+totalPrice+'  售价¥'+(m.salePrice||'—')+'</div>'+
+              '<div class="mat-unit-cost">'+
+                (margin!==null?'<span style="font-size:12px;font-weight:900;color:'+(margin>=50?'var(--green)':margin>=30?'var(--gold)':'var(--red)')+'">毛利率 '+Engine.fmtMargin(margin)+'</span>':'')+
+              '</div>'+
+              '<span class="mat-stock-badge '+sc+'">库存: '+s+(m.stockUnit||'')+'</span>'+
+              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">进货价值: ¥'+stockValue.toFixed(2)+'</div>'+
+            '</div>';
+          }).join('')+'</div>'
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无可零售产品</div>'
+        )+
+      '</div>'+
+    '</div>';
+
+    // ── 💡 Tip 数据 & 交互（必须在 innerHTML 之后、事件绑定之前挂载）──
+    var TIP_DATA = {
+      nail: [
+        { name:'底胶 15ml',         val:'300–350次' },
+        { name:'颜色胶 15ml',        val:'100–130次' },
+        { name:'封层 15ml',          val:'300–350次' },
+        { name:'卸甲水/锡纸套装',    val:'80–120次' },
+        { name:'酒精/清洁液 500ml',  val:'400–600次' },
+        { name:'砂条/锉条（盒装）',  val:'50–80次/支' },
+        { name:'甲油胶延长液 30ml',  val:'80–100次' },
+        { name:'光疗树脂 10g',       val:'60–80次' },
+        { name:'钻饰/贴纸（包）',    val:'30–50次' },
+      ],
+      lash: [
+        { name:'单根嫁接睫毛 12排装', val:'10–15次' },
+        { name:'单根嫁接睫毛 16排装', val:'15–20次' },
+        { name:'三叶草/YY 12排装',    val:'8–12次' },
+        { name:'漫画睫毛套装',         val:'3–6次' },
+        { name:'嫁接胶水 5ml',         val:'60–80次' },
+        { name:'除胶剂 15ml',          val:'80–100次' },
+        { name:'睫毛梳/镊子（套）',   val:'长期使用' },
+        { name:'眼膜/防护贴片（盒）', val:'50–80次' },
+        { name:'底膜/隔离液 10ml',     val:'60–80次' },
+      ],
+      beauty: [
+        { name:'玻尿酸原液 30ml',      val:'60–80次' },
+        { name:'精华液 50ml',           val:'80–100次' },
+        { name:'面膜（箱/30片）',       val:'30次' },
+        { name:'按摩霜/膏 500ml',       val:'100–150次' },
+        { name:'导入营养液 100ml',      val:'80–120次' },
+        { name:'清洁凝胶/洁面 200ml',  val:'60–80次' },
+        { name:'纳米微针（盒/10片）',  val:'10次' },
+        { name:'超声波耦合剂 500ml',   val:'150–200次' },
+        { name:'酒精棉片（包/100片）', val:'100次' },
+      ],
+      tattoo: [
+        { name:'纹绣色料（瓶/5ml）',  val:'40–60次' },
+        { name:'麻药膏 10g',           val:'15–20次' },
+        { name:'定妆液 30ml',          val:'80–100次' },
+        { name:'纹绣针头（盒/20支）', val:'20次（一次性）' },
+        { name:'纹绣纸巾/棉签（包）', val:'50–80次' },
+        { name:'保鲜膜（卷）',         val:'200–300次' },
+        { name:'修复霜 15g',           val:'30–50次' },
+        { name:'隐形眉卡（套）',       val:'长期使用' },
+      ],
+      medical: [
+        { name:'水光针液 2ml/支',        val:'1次（一次性）' },
+        { name:'肉毒素（瓶/100u）',      val:'4–6次（按部位）' },
+        { name:'填充剂/玻尿酸 1ml',      val:'1次（一次性）' },
+        { name:'注射针头（盒/100支）',   val:'100次（一次性）' },
+        { name:'利多卡因麻药 10ml',      val:'5–8次' },
+        { name:'碘伏棉球（包）',         val:'50次' },
+        { name:'无菌手套（盒/100只）',  val:'50次' },
+        { name:'光子仪耦合剂 500ml',     val:'100–150次' },
+        { name:'医用冷敷贴（盒/10片）', val:'10次' },
+      ],
+    };
+    var _tipOpen = true;
+    var _curTipTab = 'nail';
+
+    function renderTipBody(){
+      var el = container.querySelector('#tip-body');
+      if(!el) return;
+      var items = TIP_DATA[_curTipTab] || [];
+      el.innerHTML = items.map(function(item){
+        return '<div class="tip-row">'+
+          '<span class="tip-item-name">'+item.name+'</span>'+
+          '<span class="tip-item-val">'+item.val+'</span>'+
+        '</div>';
+      }).join('');
+    }
+
+    window.tipToggle = function(){
+      _tipOpen = !_tipOpen;
+      var btn = container.querySelector('#tip-toggle-btn');
+      var content = container.querySelector('#tip-content');
+      if(btn) btn.textContent = _tipOpen ? '收起 ▲' : '展开 ▼';
+      if(content) content.style.display = _tipOpen ? '' : 'none';
+    };
+    window.tipTab = function(tab, btn){
+      _curTipTab = tab;
+      container.querySelectorAll('.tip-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      if(btn) btn.classList.add('active');
+      renderTipBody();
+    };
+
+    renderTipBody(); // 初始渲染美甲数据
+
+    window.catAdd=function(){
+      var inp=container.querySelector('#new-cat-inp');
+      var name=inp.value.trim();
+      if(!name) return shake(inp,'请输入类别名称');
+      Engine.addMatCategory(name);
+      inp.value='';
+      var s=container.querySelector('#cat-succ'); s.classList.remove('hidden'); setTimeout(function(){ s.classList.add('hidden'); },1500);
+      draw();
+    };
+    window.catDel=function(name){
+      var inUse=Engine.getMaterials().some(function(m){ return m.category===name; });
+      if(inUse){ alert('该类别下还有耗材，请先删除或更改耗材类别后再删除此类别'); return; }
+      if(!confirm('确定删除「'+name+'」分类？')) return;
+      Engine.deleteMatCategory(name); draw();
+    };
+    window.matTabSwitch=function(tab,btn){
+      container.querySelectorAll('#mat-tab-row .rank-tab').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active');
+      container.querySelector('#mat-list-mat').style.display=tab==='mat'?'':'none';
+      container.querySelector('#mat-list-prod').style.display=tab==='prod'?'':'none';
+    };
+    window.mProdToggle=function(){
+      var checked=container.querySelector('#m-is-product').checked;
+      container.querySelector('#m-prod-extra').style.display=checked?'':'none';
+      mPreview();
+    };
+    window.mPreview=function(){
+      var p=parseFloat(container.querySelector('#m-price').value)||0;
+      var u=parseFloat(container.querySelector('#m-usage').value)||0;
+      var st=parseFloat(container.querySelector('#m-stock').value)||0;
+      var pv=container.querySelector('#m-prev');
+      if(p>0&&u>0){
+        pv.classList.remove('hidden');
+        container.querySelector('#m-uc').textContent='¥'+(p/u).toFixed(2)+' / 次';
+        container.querySelector('#m-note').textContent='¥'+p+' ÷ '+u+'次';
+        var sv=container.querySelector('#m-stock-value');
+        if(sv&&st>0) sv.textContent='  库存价值: ¥'+(p*st).toFixed(2);
+        else if(sv) sv.textContent='';
+      } else pv.classList.add('hidden');
+      var isProd=container.querySelector('#m-is-product').checked;
+      var spEl=container.querySelector('#m-sale-price');
+      var ppEl=container.querySelector('#m-profit-prev');
+      if(isProd&&p>0&&u>0&&spEl){
+        var sp=parseFloat(spEl.value)||0;
+        if(sp>p&&sp>0){
+          ppEl.classList.remove('hidden');
+          container.querySelector('#m-prod-margin').textContent=Engine.fmtMargin((sp-p)/sp*100);
+        } else ppEl.classList.add('hidden');
+      } else if(ppEl) ppEl.classList.add('hidden');
+    };
+    window.mSubmit=function(){
+      var name=container.querySelector('#m-name').value.trim();
+      var cat =container.querySelector('#m-cat').value;
+      var price=parseFloat(container.querySelector('#m-price').value);
+      var usage=parseFloat(container.querySelector('#m-usage').value);
+      var stock=parseFloat(container.querySelector('#m-stock').value)||0;
+      var unit =container.querySelector('#m-unit').value.trim();
+      var isProd=container.querySelector('#m-is-product').checked;
+      var salePrice=isProd?parseFloat(container.querySelector('#m-sale-price').value)||0:0;
+      if(!name)  return shake(container.querySelector('#m-name'),'请填写名称');
+      if(!price) return shake(container.querySelector('#m-price'),'请填写总价');
+      if(!usage) return shake(container.querySelector('#m-usage'),'请填写次数');
+      Engine.addMaterial({ name:name, category:cat, totalPrice:price, usageCount:usage, stock:stock, stockUnit:unit, isProduct:isProd, salePrice:salePrice });
+      draw();
+    };
+    window.mDel=function(id){
+      if(!confirm('确定删除？')) return; Engine.deleteMaterial(id); draw();
+    };
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  技师档案
+// ══════════════════════════════════════════════════════════════════
+function renderTechnicians(container){
+  var AVATARS=['🌸','🌺','🌻','🌹','🍀','🦋','🌙','⭐'];
+  function draw(){
+    var list=Engine.getTechnicians();
+    container.innerHTML='<div>'+
+      '<div class="page-title-bar">'+icon('users',24,'var(--pink)')+'<span class="page-title-text">员工档案</span></div>'+
+      '<div class="form-subtitle">为每位员工设置各项目提成比例</div>'+
+      '<div class="form-card">'+
+        '<div class="form-group"><label class="form-lbl">员工姓名 *</label>'+
+          '<input id="t-name" class="form-inp" type="text" placeholder="小王"></div>'+
+        '<div class="form-row">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美睫提成%</label>'+
+            '<input id="t-lash" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="30"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美甲提成%</label>'+
+            '<input id="t-nail" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="25"></div>'+
+        '</div>'+
+        '<div class="form-row" style="margin-top:10px">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美容提成%</label>'+
+            '<input id="t-beauty" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="35"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">纹绣提成%</label>'+
+            '<input id="t-tattoo" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="30"></div>'+
+        '</div>'+
+        '<div class="form-row" style="margin-top:10px">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">医美提成%</label>'+
+            '<input id="t-medical" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="20"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"></div>'+
+        '</div>'+
+        '<div style="height:12px"></div>'+
+        '<button class="form-submit" onclick="tSubmit()">'+icon('plus',18,'#fff')+' 添加员工</button>'+
+        '<div class="form-success hidden" id="t-succ">✅ 员工已添加！</div>'+
+      '</div>'+
+      '<div class="section-label">员工团队（'+list.length+'人）</div>'+
+      '<div class="tech-list">'+
+        (list.length
+          ?list.map(function(t,i){ return '<div class="tech-card">'+
+              '<div class="tech-avatar">'+AVATARS[i%AVATARS.length]+'</div>'+
+              '<div class="tech-info"><div class="tech-name">'+t.name+'</div>'+
+                '<div class="tech-rates">美睫 '+t.lashRate+'% · 美甲 '+t.nailRate+'% · 美容 '+(t.beautyRate||0)+'% · 纹绣 '+(t.tattooRate||0)+'% · 医美 '+(t.medicalRate||0)+'%</div></div>'+
+              '<button class="tech-del" onclick="tDel(\''+t.id+'\')">🗑</button>'+
+            '</div>'; }).join('')
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无员工档案</div>'
+        )+
+      '</div>'+
+    '</div>';
+
+    window.tSubmit=function(){
+      var name=container.querySelector('#t-name').value.trim();
+      if(!name) return shake(container.querySelector('#t-name'),'请填写员工姓名');
+      Engine.addTechnician({
+        name:name,
+        lashRate   :parseFloat(container.querySelector('#t-lash').value)||0,
+        nailRate   :parseFloat(container.querySelector('#t-nail').value)||0,
+        beautyRate :parseFloat(container.querySelector('#t-beauty').value)||0,
+        tattooRate :parseFloat(container.querySelector('#t-tattoo').value)||0,
+        medicalRate:parseFloat(container.querySelector('#t-medical').value)||0,
+      }); draw();
+    };
+    window.tDel=function(id){
+      if(!confirm('确定删除？')) return; Engine.deleteTechnician(id); draw();
+    };
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  获客成本
+// ══════════════════════════════════════════════════════════════════
+function renderAcquire(container){
+  var PLATFORMS=[
+    { val:'douyin_feed',  label:'🎵 抖音短视频投流' },
+    { val:'douyin_live',  label:'🔴 抖音直播投流' },
+    { val:'wechat_feed',  label:'💬 微信短视频投流' },
+    { val:'wechat_live',  label:'📡 微信直播投流' },
+    { val:'meituan_rank', label:'🥡 美团排名费用' },
+    { val:'other',        label:'📌 其他渠道' },
+  ];
+
+  function draw(){
+    var list=Engine.getAcquire();
+    var summary=Engine.getAcquireSummary();
+    var totalOrders=Engine.getOrders().length;
+    var cpOrder=totalOrders>0?summary.total/totalOrders:0;
+
+    container.innerHTML='<div>'+
+      '<div class="page-title-bar">'+icon('megaphone',24,'var(--pink)')+'<span class="page-title-text">获客成本</span></div>'+
+
+      '<div class="form-card" style="background:linear-gradient(135deg,#FFF0F5,#F0F0FF);border:2px solid var(--border)">'+
+        '<div class="form-row" style="margin-bottom:0">'+
+          '<div style="flex:1;text-align:center">'+
+            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">累计投流总额</div>'+
+            '<div style="font-size:26px;font-weight:900;color:var(--pink)">'+Engine.fmtMoney(summary.total)+'</div>'+
+          '</div>'+
+          '<div style="width:1px;background:var(--border)"></div>'+
+          '<div style="flex:1;text-align:center">'+
+            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">单均获客成本</div>'+
+            '<div style="font-size:26px;font-weight:900;color:var(--purple)">'+Engine.fmtMoney(cpOrder)+'</div>'+
+          '</div>'+
+        '</div>'+
+        (Object.keys(summary.byPlatform).length?
+          '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">'+
+            Object.keys(summary.byPlatform).map(function(k){
+              var pf=PLATFORMS.find(function(p){ return p.val===k; });
+              return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+                '<span style="font-size:13px;font-weight:700;color:var(--text-2)">'+(pf?pf.label:k)+'</span>'+
+                '<span style="font-size:14px;font-weight:900;color:var(--pink)">'+Engine.fmtMoney(summary.byPlatform[k])+'</span>'+
+              '</div>';
+            }).join('')+
+          '</div>'
+          :'')+
+      '</div>'+
+
+      '<div class="form-card">'+
+        '<div class="section-label">记录投流费用</div>'+
+        '<div class="form-row">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">平台</label>'+
+            '<select id="acq-platform" class="form-inp">'+
+              PLATFORMS.map(function(p){ return '<option value="'+p.val+'">'+p.label+'</option>'; }).join('')+
+            '</select></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">金额 (¥) *</label>'+
+            '<input id="acq-amount" class="form-inp" type="number" step="0.01" min="0" placeholder="500"></div>'+
+        '</div>'+
+        '<div style="height:10px"></div>'+
+        '<div class="form-row">'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">投放日期</label>'+
+            '<input id="acq-date" class="form-inp" type="date"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">备注</label>'+
+            '<input id="acq-note" class="form-inp" type="text" placeholder="第一周爆款视频…"></div>'+
+        '</div>'+
+        '<div style="height:12px"></div>'+
+        '<button class="form-submit" onclick="acqSubmit()">'+icon('plus',18,'#fff')+' 记录费用</button>'+
+        '<div class="form-success hidden" id="acq-succ">✅ 投流费用已记录！</div>'+
+      '</div>'+
+
+      '<div class="section-label">投流记录（'+list.length+'条）</div>'+
+      '<div class="acq-list">'+
+        (list.length?list.map(function(a){
+          var pf=PLATFORMS.find(function(p){ return p.val===a.platform; });
+          return '<div class="acq-card">'+
+            '<div class="acq-header">'+
+              '<div>'+
+                '<div class="acq-platform">'+(pf?pf.label:a.platform)+'</div>'+
+                '<div class="acq-meta">'+(a.date||'')+(a.note?' · '+a.note:'')+'</div>'+
+              '</div>'+
+              '<div style="display:flex;align-items:center;gap:10px">'+
+                '<div class="acq-amount">'+Engine.fmtMoney(a.amount)+'</div>'+
+                '<button class="acq-del" onclick="acqDel(\''+a.id+'\')">🗑</button>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join('')
+        :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无记录，添加第一条投流费用吧</div>')+
+      '</div>'+
+    '</div>';
+
+    var dateEl=container.querySelector('#acq-date');
+    if(dateEl){ var d=new Date(); dateEl.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+    window.acqSubmit=function(){
+      var amount=parseFloat(container.querySelector('#acq-amount').value)||0;
+      if(!amount) return shake(container.querySelector('#acq-amount'),'请填写金额');
+      Engine.addAcquire({
+        platform:container.querySelector('#acq-platform').value,
+        amount:amount,
+        date:container.querySelector('#acq-date').value,
+        note:container.querySelector('#acq-note').value,
+      });
+      draw();
+      var s=container.querySelector('#acq-succ');
+      s.classList.remove('hidden'); setTimeout(function(){ s.classList.add('hidden'); },2000);
+    };
+    window.acqDel=function(id){
+      if(!confirm('确定删除？')) return; Engine.deleteAcquire(id); draw();
+    };
+  }
+  draw();
+}
+
+// ── 初始化 ────────────────────────────────────────────────────────
+document.getElementById('view-calendar').style.display='';
+updateHeader();
+buildSnake();
+setTimeout(function(){
+  var node=document.querySelector('.n-today');
+  if(node) node.scrollIntoView({ behavior:'smooth', block:'center' });
+},600);
+</script>
+</body>
+</html>

@@ -1373,15 +1373,17 @@
           >
             <span class="ab-icon">🧮</span>成本计算
           </div>
-          <div
-            class="acct-btn"
-            onclick="
-              closeAccountModal();
-              validateBoss('report');
-            "
-          >
-            <span class="ab-icon">📊</span>数据报表
-          </div>
+          <div class="acct-btn" onclick="closeAccountModal();window.location.href='realcost.html'">
+               <span class="ab-icon">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                       <circle cx="11" cy="11" r="8"/>
+                       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                       <line x1="11" y1="8" x2="11" y2="14"/>
+                       <line x1="8" y1="11" x2="14" y2="11"/>
+                       </svg>
+              </span>真实成本
+          </div>>
           <div class="acct-btn renew" onclick="handleRenew()">
             🔑 续费 / 升级会员
           </div>
@@ -2297,6 +2299,12 @@
 
       window.onload = () => {
         render();
+        // ★ 监听 realcost 页面的营收更新
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'todayRev' || e.key === 'realcost_updated') {
+                render();
+            }
+        });
         // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
         (async function autoRegisterLegacyUser() {
           const existingId = localStorage.getItem("ps_user_id");
