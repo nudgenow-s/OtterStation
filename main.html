@@ -1814,6 +1814,15 @@
             localStorage.setItem("user_stats", JSON.stringify(s));
           } catch (e) {}
         }
+        // 每月1日重新计算日均成本
+        const todayObj = new Date();
+        if (todayObj.getDate() === 1) {
+          const r = parseFloat(localStorage.getItem("monthlyRent")) || 0;
+          const s = parseFloat(localStorage.getItem("monthlySalary")) || 0;
+          const o = parseFloat(localStorage.getItem("monthlyOther")) || 0;
+          const daysInMonth = new Date(todayObj.getFullYear(),todayObj.getMonth() + 1,0).getDate();
+          localStorage.setItem("dailyCost",((r + s + o) / daysInMonth).toFixed(2));
+        }
         localStorage.setItem("lastVisitDate", today);
       })();
 
@@ -1936,7 +1945,11 @@
         const st =
           parseFloat(document.getElementById("edit-startup").value) || 0;
         const now = new Date();
-        const daysInMonth = new Date(now.getFullYear(),now.getMonth() + 1, 0).getDate();
+        const daysInMonth = new Date(
+          now.getFullYear(),
+          now.getMonth() + 1,
+          0,
+        ).getDate();
         const dc = (r + s + o) / daysInMonth;
         const today = new Date().toLocaleDateString();
         if (history[today]) {
