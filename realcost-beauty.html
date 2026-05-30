@@ -1479,23 +1479,15 @@ function renderNewOrder(container){
       note:container.querySelector('#o-note').value,
     });
     
-    // ★ 同步今日营收到 main.html
-    function syncToMain(addRevenue) {
-       const today = new Date().toLocaleDateString();
-       const current = parseFloat(localStorage.getItem('todayRev')) || 0;
-       const newRev = current + addRevenue;
-       localStorage.setItem('todayRev', newRev);
-       localStorage.setItem('realcost_updated', Date.now().toString());
-       // 同步保存到 main 的 revenue_history
-       const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-       if (!history[today]) history[today] = {};
-       history[today].revenue = newRev.toFixed(2);
-       localStorage.setItem('revenue_history', JSON.stringify(history));
-    }
     _clearServiceForm();
     var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2800);
-    syncToMain(face);
+    var commBase = baseMode==='actual' ? actual : face;
+    var matTotal = orderMats.reduce(function(a,m){ return a+m.subtotal; },0);
+    var techCost = commBase * (tr.techRate/100);
+    var platformFee = isOnline ? face*(commRate/100) : 0;
+    var grossProfit = face - matTotal - techCost - platformFee;
+    syncToMain(grossProfit);
     updateHeader();
   };
 
@@ -1522,19 +1514,6 @@ function renderNewOrder(container){
       note:container.querySelector('#o-note').value,
     });
     
-    // ★ 同步今日营收到 main.html
-    function syncToMain(addRevenue) {
-       const today = new Date().toLocaleDateString();
-       const current = parseFloat(localStorage.getItem('todayRev')) || 0;
-       const newRev = current + addRevenue;
-       localStorage.setItem('todayRev', newRev);
-       localStorage.setItem('realcost_updated', Date.now().toString());
-       // 同步保存到 main 的 revenue_history
-      const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-      if (!history[today]) history[today] = {};
-      history[today].revenue = newRev.toFixed(2);
-      localStorage.setItem('revenue_history', JSON.stringify(history));
-    }
     // 保存产品销售
     if(saleItems.length){
       var totalAmount=saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0);
@@ -1551,7 +1530,20 @@ function renderNewOrder(container){
     var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2800);
     // ★ 同步今日营收到 main.html
-    syncToMain(face + (saleItems.length ? saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0) : 0));
+    // 服务订单毛利
+    var commBase = baseMode==='actual' ? actual : face;
+    var matTotal = orderMats.reduce(function(a,m){ return a+m.subtotal; },0);
+    var techCost = commBase * (tr.techRate/100);
+    var platformFee = isOnline ? face*(commRate/100) : 0;
+    var serviceProfit = face - matTotal - techCost - platformFee;
+
+    // 产品销售毛利（售价-进价）
+    var saleProfit = saleItems.reduce(function(a,i){ return a+(i.salePrice-i.unitCost)*i.qty; },0);
+
+    // 赠品成本损耗（负数）
+    var giftCost = giftItems.reduce(function(a,i){ return a+i.unitCost*i.qty; },0);
+
+    syncToMain(serviceProfit + saleProfit - giftCost);
     updateHeader();
     };
 
