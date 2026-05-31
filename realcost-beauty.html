@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>獭掌柜·美业版 v2</title>
+<script src="config.js"></script>
+
 <style>
 /* ── RESET & BASE ── */
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -46,7 +48,13 @@ body {
 .topbar-logo { font-size:17px; font-weight:900; color:var(--pink); letter-spacing:-.3px; }
 .topbar-stats { display:flex; gap:14px; }
 .stat-chip { display:flex; align-items:center; gap:5px; font-size:14px; font-weight:800; color:#333; }
-
+.topbar-back {
+  display:flex; align-items:center; gap:4px;
+  font-size:14px; font-weight:700; color:var(--pink);
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; padding:4px 0; flex-shrink:0;
+}
+.topbar-back:active { opacity:0.7; }
 /* ── MONTH HEADER ── */
 .month-header {
   background:var(--pink); margin:14px 16px 0; border-radius:20px;
@@ -60,8 +68,8 @@ body {
 
 /* ── MAIN VIEW ── */
 .main-view { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-.calendar-view { padding:24px 0 130px; }
-.page-view { padding:16px 16px 130px; display:none; }
+.calendar-view { padding: 24px 0 160px; }
+.page-view { padding:16px 16px 160px; display:none; }
 .page-view.visible { display:block; }
 
 /* ── SNAKE ── */
@@ -133,9 +141,9 @@ body {
 
 /* ── BOTTOM NAV ── */
 .bottom-nav {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  position:fixed; bottom:env(safe-area-inset-bottom,0px); left:50%; transform:translateX(-50%);
   width:100%; max-width:480px; background:#fff; border-top:2px solid var(--border);
-  display:flex; z-index:200; padding-bottom:env(safe-area-inset-bottom,6px);
+  display:flex; z-index:200; padding-bottom:8px;
   overflow-x:auto;
 }
 .nav-btn {
@@ -361,18 +369,17 @@ body {
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;stroke:var(--pink)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>獭掌柜·美业版
-  </div>
+  <button class="topbar-back" onclick="window.location.href='main.html'">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    返回
+  </button>
+  <div class="topbar-logo" id="topbar-title">真实成本</div>
   <div class="topbar-stats">
-    <div class="stat-chip">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      <span id="streak-val">0</span>
-    </div>
-    <div class="stat-chip">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span id="days-val">0</span> 天
-    </div>
+    <div class="stat-chip">🔥 <span id="streak-val">0</span></div>
+    <div class="stat-chip">📅 <span id="days-val">0</span> 天</div>
   </div>
 </div>
 
@@ -445,6 +452,20 @@ body {
 </div>
 
 <script>
+  // ★ 从 config.js 读取主题色，覆盖美业版默认粉色
+(function applyTheme() {
+    try {
+        var cfg = IndustryAdapter.getCurrent();
+        if (cfg && cfg.theme) {
+            var root = document.documentElement;
+            root.style.setProperty('--pink',    cfg.theme);
+            root.style.setProperty('--pink-dk', cfg.theme.replace(')', ', 0.8)').replace('rgb', 'rgba') || '#7A1828');
+            // 同步 meta theme-color
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', cfg.theme);
+        }
+    } catch(e) {}
+})();
 // ══════════════════════════════════════════════════════════════════
 //  ICONS — Lucide SVG inline helper
 // ══════════════════════════════════════════════════════════════════
@@ -900,7 +921,7 @@ function openChest(){
     '\n\n📣 本月获客投入：'+Engine.fmtMoney(monthAcq)+
     '\n💰 月净利润（扣获客后）：'+Engine.fmtMoney(netProfit)+
     '\n\n🧴 库存进货价值：'+Engine.fmtMoney(inv.purchaseTotal)+
-    '\n📦 库存可销售价值：'+Engine.fmtMoney(inv.resaleTotal));
+    '\n📦 可零售产品可卖：'+Engine.fmtMoney(inv.resaleTotal));
 }
 
 function shake(el,msg){
@@ -1479,19 +1500,19 @@ function renderNewOrder(container){
       note:container.querySelector('#o-note').value,
     });
     
-    _clearServiceForm();
-    var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
-    setTimeout(function(){ su.classList.add('hidden'); },2800);
+    // ★ 先算毛利，再清空表单（顺序不能反）
     var commBase = baseMode==='actual' ? actual : face;
     var matTotal = orderMats.reduce(function(a,m){ return a+m.subtotal; },0);
     var techCost = commBase * (tr.techRate/100);
     var platformFee = isOnline ? face*(commRate/100) : 0;
     var grossProfit = face - matTotal - techCost - platformFee;
     syncToMain(grossProfit);
-    updateHeader();
-  };
 
-  // ── 一键保存服务+产品销售+赠品 ──
+    _clearServiceForm();
+    var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
+    setTimeout(function(){ su.classList.add('hidden'); },2800);
+  };
+ // ── 一键保存服务+产品销售+赠品 ──
   window.noSubmitAll=function(){
     var name=container.querySelector('#o-name').value.trim();
     var face=parseFloat(container.querySelector('#o-face').value)||0;
@@ -1525,10 +1546,7 @@ function renderNewOrder(container){
       var reason=container.querySelector('#o-gift-reason')&&container.querySelector('#o-gift-reason').value||'';
       Engine.recordProductOrder({ type:'gift', items:giftItems.map(function(i){ return Object.assign({},i); }), totalAmount:0, reason:reason||name });
     }
-    _clearServiceForm();
-    _clearProductForms();
-    var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
-    setTimeout(function(){ su.classList.add('hidden'); },2800);
+
     // ★ 同步今日营收到 main.html
     // 服务订单毛利
     var commBase = baseMode==='actual' ? actual : face;
@@ -1537,16 +1555,30 @@ function renderNewOrder(container){
     var platformFee = isOnline ? face*(commRate/100) : 0;
     var serviceProfit = face - matTotal - techCost - platformFee;
 
-    // 产品销售毛利（售价-进价）
+    // 产品销售毛利（售价-进价）× 数量
     var saleProfit = saleItems.reduce(function(a,i){ return a+(i.salePrice-i.unitCost)*i.qty; },0);
 
-    // 赠品成本损耗（负数）
+    // 赠品成本损耗
     var giftCost = giftItems.reduce(function(a,i){ return a+i.unitCost*i.qty; },0);
 
-    syncToMain(serviceProfit + saleProfit - giftCost);
+    // 耗材成本已在 serviceProfit 里扣了（matTotal）
+    // 产品销售成本已在 saleProfit 里扣了（unitCost）
+    // 赠品成本单独扣
+    var totalProfit = serviceProfit + saleProfit - giftCost;
+
+    _clearServiceForm();
+    _clearProductForms();
+    var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
+    setTimeout(function(){ su.classList.add('hidden'); },2800);
+    
+    syncToMain(totalProfit);
     updateHeader();
     };
+  
+    
+  
 
+ 
   function _clearServiceForm(){
     container.querySelector('#o-name').value='';
     container.querySelector('#o-face').value='';
@@ -2249,6 +2281,7 @@ function renderAcquire(container){
         date:container.querySelector('#acq-date').value,
         note:container.querySelector('#acq-note').value,
       });
+      syncToMain(-amount);
       draw();
       var s=container.querySelector('#acq-succ');
       s.classList.remove('hidden'); setTimeout(function(){ s.classList.add('hidden'); },2000);
