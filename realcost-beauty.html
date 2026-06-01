@@ -930,21 +930,43 @@ function shake(el,msg){
   setTimeout(function(){ el.classList.remove('shake'); },600);
 }
 
-function syncToMain(addRevenue) {
-    if (!addRevenue || addRevenue <= 0) return;
-    const today = new Date().toLocaleDateString();
-    const current = parseFloat(localStorage.getItem('todayRev')) || 0;
-    const newRev = current + addRevenue;
+function syncToMain(addProfit) {
+    if (!addProfit) return;
+    var today = new Date().toLocaleDateString();
+
+    // 累加到 todayRev
+    var current = parseFloat(localStorage.getItem('todayRev')) || 0;
+    var newRev   = current + addProfit;
     localStorage.setItem('todayRev', String(newRev));
-    localStorage.setItem('realcost_updated', Date.now().toString());
-    // 同步到 revenue_history
+
+    // 触发 AccountingEngine 快照（供 CSV 和历史用）
     try {
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        var dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        var history = JSON.parse(localStorage.getItem('revenue_history')) || {};
         if (!history[today]) history[today] = {};
-        history[today].revenue = newRev.toFixed(2);
+        history[today].revenue     = newRev.toFixed(2);
+        history[today].profit      = (newRev - dc).toFixed(2);
+        history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
+        var r = parseFloat(localStorage.getItem('monthlyRent'))    || 0;
+        var s = parseFloat(localStorage.getItem('monthlySalary'))  || 0;
+        var o = parseFloat(localStorage.getItem('monthlyOther'))   || 0;
+        var daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+        history[today].costSnapshot = {
+            rent:   (r / daysInMonth).toFixed(2),
+            salary: (s / daysInMonth).toFixed(2),
+            other:  (o / daysInMonth).toFixed(2),
+        };
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
+
+    // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+        amount:    addProfit,
+        todayRev:  newRev,
+        timestamp: Date.now(),
+    }));
 }
+
 // ══════════════════════════════════════════════════════════════════
 //  新建订单（服务 + 产品销售BOM + 赠品BOM）
 // ══════════════════════════════════════════════════════════════════

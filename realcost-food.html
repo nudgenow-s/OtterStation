@@ -666,19 +666,43 @@ function updateHeader(){
 }
 
 // ★ 同步今日毛利到 main.html
-function syncToMain(addProfit){
-  var today=new Date().toLocaleDateString();
-  var current=parseFloat(localStorage.getItem('todayRev'))||0;
-  var newVal=current+addProfit;
-  localStorage.setItem('todayRev', String(newVal));
-  localStorage.setItem('realcost_updated', Date.now().toString());
-  try{
-    var history=JSON.parse(localStorage.getItem('revenue_history'))||{};
-    if(!history[today]) history[today]={};
-    history[today].revenue=newVal.toFixed(2);
-    localStorage.setItem('revenue_history',JSON.stringify(history));
-  }catch(e){}
+function syncToMain(addProfit) {
+    if (!addProfit) return;
+    var today = new Date().toLocaleDateString();
+
+    // 累加到 todayRev
+    var current = parseFloat(localStorage.getItem('todayRev')) || 0;
+    var newRev   = current + addProfit;
+    localStorage.setItem('todayRev', String(newRev));
+
+    // 触发 AccountingEngine 快照（供 CSV 和历史用）
+    try {
+        var dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        var history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        if (!history[today]) history[today] = {};
+        history[today].revenue     = newRev.toFixed(2);
+        history[today].profit      = (newRev - dc).toFixed(2);
+        history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
+        var r = parseFloat(localStorage.getItem('monthlyRent'))    || 0;
+        var s = parseFloat(localStorage.getItem('monthlySalary'))  || 0;
+        var o = parseFloat(localStorage.getItem('monthlyOther'))   || 0;
+        var daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+        history[today].costSnapshot = {
+            rent:   (r / daysInMonth).toFixed(2),
+            salary: (s / daysInMonth).toFixed(2),
+            other:  (o / daysInMonth).toFixed(2),
+        };
+        localStorage.setItem('revenue_history', JSON.stringify(history));
+    } catch(e) {}
+
+    // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+        amount:    addProfit,
+        todayRev:  newRev,
+        timestamp: Date.now(),
+    }));
 }
+
 
 // ── 蛇形日历 ──
 var XP=[50,68,80,68,50,32,20,32];

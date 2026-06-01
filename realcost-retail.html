@@ -48,16 +48,11 @@ overflow-x: hidden;
 }
 
 /* ── TOPBAR ── */
-.topbar {
-background: #fff;
-border-bottom: 2px solid var(--border);
-padding: 14px 20px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-position: sticky;
-top: 0;
-z-index: 100;
+.topbar-back {
+  display:flex; align-items:center; gap:4px;
+  font-size:14px; font-weight:700; color:var(--orange);
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; padding:4px 0; flex-shrink:0;
 }
 .topbar-logo { font-size: 20px; font-weight: 900; color: var(--orange); }
 .topbar-stats { display: flex; gap: 16px; }
@@ -545,7 +540,7 @@ transition:transform .1s;
   </div>
   <div class="mh-right">
     <div class="mh-rev"  id="mh-rev">¥0</div>
-    <div class="mh-rlbl">本月营收</div>
+    <div class="mh-rlbl">本月毛利</div>
   </div>
 </div>
 
@@ -754,10 +749,40 @@ const Engine = (function () {
 
     // 更新日历历史
     updateDayFromSales(dateKey);
-    // ★ 同步今日营收到 main.html
-    const todayRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    localStorage.setItem('todayRev', (todayRev + total).toString());
-    localStorage.setItem('realcost_updated', Date.now().toString());
+    
+    // ★ 同步毛利到 main.html（完整触发）
+    const today = new Date().toLocaleDateString();
+    const currentRev = parseFloat(localStorage.getItem('todayRev')) || 0;
+    const newRev = currentRev + profit; // 同步毛利而非营收
+    localStorage.setItem('todayRev', String(newRev));
+
+    // 同步到 revenue_history（供 CSV 和快照用）
+    try {
+        const dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
+        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+        if (!history[today]) history[today] = {};
+        history[today].revenue     = newRev.toFixed(2);
+        history[today].profit      = (newRev - dc).toFixed(2);
+        history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
+        const r = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
+        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+        const o = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
+        const dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+        history[today].costSnapshot = {
+            rent:   (r/dim).toFixed(2),
+            salary: (s/dim).toFixed(2),
+            other:  (o/dim).toFixed(2),
+        };
+        localStorage.setItem('revenue_history', JSON.stringify(history));
+    } catch(e) {}
+
+    // 触发 main 的 storage 监听（成就+render）
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+        amount:    profit,
+        todayRev:  newRev,
+        timestamp: Date.now(),
+    }));
+
     return record;
   }
 
@@ -2216,7 +2241,7 @@ function updateHeader() {
   var s = Engine.getMonthStats(YEAR, MONTH);
   document.getElementById('mh-title').textContent = YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent   = '本月已记录 '+s.days+' 天';
-  document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.revenue);
+  document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.profit);
   document.getElementById('streak-val').textContent = Engine.getStreak();
   document.getElementById('days-val').textContent   = s.days;
 }

@@ -2277,6 +2277,19 @@
           const el = document.getElementById("badge-" + id);
           if (el) el.classList.add("active-badge");
         });
+        // ★ 盈亏提示常驻显示
+       const profitEl = document.getElementById('profit-tip');
+       if (profitEl && (isMember() || isInFreeTrial())) {
+        if (rev > 0 && rev < d) {
+            profitEl.innerText = '⏳ 距离打平还差 ¥' + (d - rev).toFixed(2);
+            profitEl.style.color = 'var(--text-3)';
+        } else if (rev >= d && d > 0) {
+            profitEl.innerText = '✨ 纯赚 ¥' + (rev - d).toFixed(2);
+            profitEl.style.color = 'var(--success)';
+        } else {
+            profitEl.innerText = '';
+        }
+    }
       }
 
       /* ── Init ── */
@@ -2300,11 +2313,22 @@
       window.onload = () => {
         render();
         // ★ 监听 realcost 页面的营收更新
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'todayRev' || e.key === 'realcost_updated') {
+       window.addEventListener('storage', function(e) {
+         if (e.key === 'realcost_trigger') {
+            try {
+                var data = JSON.parse(e.newValue);
+                if (!data) return;
+                var val = parseFloat(data.amount) || 0;
+                try {
+                    if (typeof AchievementEngine !== 'undefined') AchievementEngine.check(val);
+                } catch(err) {}
                 render();
-            }
-        });
+                if (typeof CloudSync !== 'undefined' && localStorage.getItem('ps_user_id')) {
+                    setTimeout(function() { CloudSync.silentSync(); }, 3000);
+                }
+            } catch(err) {}
+         }
+       });
         // ★ 已有记录未绑定ID的用户，自动生成ID并注册到数据库
         (async function autoRegisterLegacyUser() {
           const existingId = localStorage.getItem("ps_user_id");
