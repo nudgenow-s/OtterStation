@@ -48,18 +48,10 @@ overflow-x: hidden;
 }
 
 /* ── TOPBAR ── */
+
 .topbar-back {
   display:flex; align-items:center; gap:4px;
   font-size:14px; font-weight:700; color:var(--orange);
-  background:none; border:none; cursor:pointer;
-  font-family:inherit; padding:4px 0; flex-shrink:0;
-}
-.topbar-logo { font-size: 20px; font-weight: 900; color: var(--orange); }
-.topbar-stats { display: flex; gap: 16px; }
-.stat-chip { display: flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 800; color: #333; }
-.topbar-back {
-  display:flex; align-items:center; gap:4px;
-  font-size:14px; font-weight:700; color:var(--pink);
   background:none; border:none; cursor:pointer;
   font-family:inherit; padding:4px 0; flex-shrink:0;
 }
@@ -524,11 +516,7 @@ transition:transform .1s;
     </svg>
     返回
   </button>
-  <div class="topbar-logo" id="topbar-title">真实成本</div>
-  <div class="topbar-stats">
-    <div class="stat-chip">🔥 <span id="streak-val">0</span></div>
-    <div class="stat-chip">📅 <span id="days-val">0</span> 天</div>
-  </div>
+  
 </div>
 
 <!-- MONTH HEADER -->
@@ -2242,8 +2230,7 @@ function updateHeader() {
   document.getElementById('mh-title').textContent = YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent   = '本月已记录 '+s.days+' 天';
   document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.profit);
-  document.getElementById('streak-val').textContent = Engine.getStreak();
-  document.getElementById('days-val').textContent   = s.days;
+  
 }
 
 // ── 蛇形路径 ─────────────────────────────────────────────────────────────
