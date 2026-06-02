@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#9B2335">
+<title>账本总览</title>
+<script src="config.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --primary:    #9B2335;
+  --primary-dk: #7A1828;
+  --gold:       #B8963E;
+  --gold-lt:    #D4AC5A;
+  --green:      #2D7D52;
+  --green-lt:   #4CAF50;
+  --red:        #F44336;
+  --warn:       #C8840A;
+  --bg:         #F7F3EE;
+  --bg-card:    #FFFFFF;
+  --bg-surface: #FAF8F5;
+  --bg-input:   #F4F0EB;
+  --border:     rgba(107,66,38,0.10);
+  --border-md:  rgba(107,66,38,0.18);
+  --text:       #1A1208;
+  --text-2:     #6B5C4C;
+  --text-3:     #A89880;
+  --shadow:     0 2px 12px rgba(107,66,38,0.08);
+  --shadow-btn: 0 4px 16px rgba(155,35,53,0.28);
+}
+
+body {
+  font-family:'PingFang SC','Helvetica Neue',sans-serif;
+  background:var(--bg); min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+  padding-bottom:60px;
+}
+
+/* ── 顶部 ── */
+.topbar {
+  width:100%; max-width:480px; background:var(--bg-card);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px; display:flex; align-items:center;
+  justify-content:space-between; position:sticky; top:0; z-index:100;
+  box-shadow:var(--shadow);
+}
+.back-btn {
+  display:flex; align-items:center; gap:4px;
+  font-size:14px; font-weight:700; color:var(--primary);
+  background:none; border:none; cursor:pointer; font-family:inherit;
+}
+.topbar-title { font-size:16px; font-weight:700; color:var(--text); }
+.topbar-space { width:48px; }
+
+/* ── Tab 切换 ── */
+.tab-bar {
+  width:100%; max-width:480px;
+  display:flex; background:var(--bg-card);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:53px; z-index:99;
+}
+.tab-btn {
+  flex:1; padding:12px 8px; border:none; background:none;
+  font-size:13px; font-weight:800; color:var(--text-3);
+  cursor:pointer; font-family:inherit;
+  border-bottom:2px solid transparent; transition:all .2s;
+}
+.tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+/* ── 通用容器 ── */
+.page { width:100%; max-width:480px; padding:16px 16px 0; }
+
+/* ── 卡片 ── */
+.card {
+  background:var(--bg-card); border-radius:20px;
+  padding:18px 16px; margin-bottom:14px; box-shadow:var(--shadow);
+  border:1px solid var(--border);
+}
+.card-title {
+  font-size:11px; font-weight:800; color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:14px;
+}
+
+/* ── 资产总览卡 ── */
+.asset-hero {
+  background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%);
+  border-radius:20px; padding:20px 18px; margin-bottom:14px;
+  box-shadow:var(--shadow-btn);
+}
+.ah-label { font-size:11px; color:rgba(255,255,255,.65); font-weight:700; margin-bottom:6px; }
+.ah-total { font-size:36px; font-weight:900; color:#fff; line-height:1; margin-bottom:4px; }
+.ah-sub   { font-size:12px; color:rgba(255,255,255,.55); }
+.ah-grid  {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:10px; margin-top:16px; padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.15);
+}
+.ah-item { text-align:center; }
+.ah-item-val { font-size:16px; font-weight:900; color:#fff; }
+.ah-item-lbl { font-size:9px; color:rgba(255,255,255,.55); margin-top:3px; font-weight:700; }
+
+/* ── 现金流卡 ── */
+.cf-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;
+}
+.cf-row:last-child { border-bottom:none; }
+.cf-label { color:var(--text-2); display:flex; align-items:center; gap:6px; }
+.cf-val   { font-weight:700; color:var(--text); }
+.cf-val.positive { color:var(--green); }
+.cf-val.negative { color:var(--red); }
+.cf-val.warn     { color:var(--warn); }
+
+/* ── 待支付列表 ── */
+.pending-item {
+  background:var(--bg-surface); border-radius:14px; padding:13px 14px;
+  margin-bottom:8px; display:flex; align-items:center; gap:12px;
+  border:1px solid var(--border);
+}
+.pi-icon { font-size:20px; flex-shrink:0; }
+.pi-info { flex:1; }
+.pi-name { font-size:14px; font-weight:800; color:var(--text); }
+.pi-desc { font-size:11px; color:var(--text-3); margin-top:2px; }
+.pi-amount { font-size:16px; font-weight:900; color:var(--warn); flex-shrink:0; }
+.pi-paid {
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--border-md);
+  background:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0; transition:all .2s;
+}
+.pi-paid.checked { background:var(--green); border-color:var(--green); color:#fff; }
+
+/* ── 贷款卡 ── */
+.loan-card {
+  background:var(--bg-surface); border-radius:14px; padding:14px;
+  margin-bottom:10px; border:1px solid var(--border);
+}
+.loan-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.loan-name   { font-size:14px; font-weight:800; color:var(--text); }
+.loan-inst   { font-size:11px; color:var(--text-3); margin-top:2px; }
+.loan-remain { font-size:18px; font-weight:900; color:var(--red); }
+.loan-remain-lbl { font-size:10px; color:var(--text-3); text-align:right; }
+.loan-prog-wrap { height:5px; background:var(--bg-input); border-radius:3px; overflow:hidden; margin-bottom:8px; }
+.loan-prog { height:100%; background:linear-gradient(90deg, var(--green), var(--gold)); border-radius:3px; transition:width .8s ease; }
+.loan-meta { display:flex; gap:12px; font-size:11px; color:var(--text-3); font-weight:700; }
+.loan-del  { background:none; border:none; cursor:pointer; font-size:13px; color:var(--text-3); padding:2px 4px; }
+
+/* ── 表单输入 ── */
+.form-row { display:flex; gap:10px; margin-bottom:10px; }
+.form-group { flex:1; }
+.form-lbl { display:block; font-size:11px; font-weight:800; color:var(--text-3); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em; }
+.form-inp {
+  width:100%; padding:11px 12px; border:1.5px solid var(--border-md); border-radius:11px;
+  font-size:14px; font-family:inherit; outline:none; color:var(--text);
+  background:var(--bg-input); transition:border-color .2s;
+}
+.form-inp:focus { border-color:var(--primary); background:#fff; }
+.form-inp::placeholder { color:var(--text-3); }
+.btn-primary {
+  width:100%; padding:14px; background:var(--primary); color:#fff;
+  border:none; border-radius:14px; font-size:14px; font-weight:800;
+  cursor:pointer; font-family:inherit; box-shadow:var(--shadow-btn);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-primary:active { transform:translateY(2px); box-shadow:none; }
+.btn-secondary {
+  width:100%; padding:12px; background:var(--bg-surface); color:var(--text-2);
+  border:1.5px solid var(--border-md); border-radius:14px; font-size:13px;
+  font-weight:700; cursor:pointer; font-family:inherit; margin-top:8px;
+}
+
+/* ── 历史月份 ── */
+.month-selector {
+  display:flex; gap:8px; overflow-x:auto; margin-bottom:16px;
+  scrollbar-width:none; padding-bottom:4px;
+}
+.month-selector::-webkit-scrollbar { display:none; }
+.month-chip {
+  flex-shrink:0; padding:7px 14px; border-radius:20px;
+  border:1.5px solid var(--border-md); background:var(--bg-card);
+  font-size:12px; font-weight:800; color:var(--text-2);
+  cursor:pointer; transition:all .15s; font-family:inherit;
+}
+.month-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+
+/* ── 历史数据卡 ── */
+.hist-month-card {
+  background:var(--bg-card); border-radius:18px; padding:16px 18px;
+  margin-bottom:12px; box-shadow:var(--shadow); border:1px solid var(--border);
+}
+.hmc-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.hmc-month  { font-size:16px; font-weight:900; color:var(--text); }
+.hmc-profit {
+  font-size:20px; font-weight:900;
+}
+.hmc-profit.pos { color:var(--green); }
+.hmc-profit.neg { color:var(--red); }
+.hmc-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.hmc-item { background:var(--bg-surface); border-radius:12px; padding:10px 8px; text-align:center; }
+.hmc-val  { font-size:14px; font-weight:900; color:var(--text); }
+.hmc-lbl  { font-size:9px; color:var(--text-3); margin-top:3px; font-weight:700; }
+
+/* ── 空状态 ── */
+.empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:14px; line-height:2; }
+
+/* ── 成功提示 ── */
+.toast {
+  position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-8px);
+  background:rgba(26,18,8,.82); color:#fff; padding:9px 18px; border-radius:20px;
+  font-size:13px; font-weight:700; z-index:9999; opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%,60%  { transform:translateX(-5px); }
+  40%,80%  { transform:translateX(5px); }
+}
+.shake { animation:shake .35s ease; border-color:var(--red) !important; }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="topbar">
+  <button class="back-btn" onclick="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    返回
+  </button>
+  <div class="topbar-title">账本总览</div>
+  <div class="topbar-space"></div>
+</div>
+
+<!-- Tab -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('assets',this)">资产现金流</button>
+  <button class="tab-btn" onclick="switchTab('history',this)">历史记录</button>
+  <button class="tab-btn" onclick="switchTab('loans',this)">贷款管理</button>
+</div>
+
+<!-- 资产现金流 Tab -->
+<div class="page" id="tab-assets">
+
+  <!-- 资产总览 -->
+  <div class="asset-hero" id="asset-hero"></div>
+
+  <!-- 现金余额 -->
+  <div class="card">
+    <div class="card-title">💵 现金余额</div>
+    <div class="cf-row">
+      <span class="cf-label">当前现金</span>
+      <span class="cf-val positive" id="cf-cash">¥0</span>
+    </div>
+    <div class="cf-row">
+      <span class="cf-label">货品资产（进货价）<span style="font-size:10px;color:var(--text-3)"> · 库存进价</span></span>
+      <span class="cf-val" id="cf-goods">¥0</span>
+    </div>
+    <div class="cf-row">
+      <span class="cf-label">待支付合计</span>
+      <span class="cf-val warn" id="cf-pending">¥0</span>
+    </div>
+    <div class="cf-row" style="border-bottom:none;padding-bottom:0">
+      <span class="cf-label" style="font-weight:800;color:var(--text)">真实可用现金</span>
+      <span class="cf-val" id="cf-real" style="font-size:18px"></span>
+    </div>
+    <!-- 手动更新现金 -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="form-lbl">手动更新现金余额</div>
+      <div class="form-row" style="margin-bottom:8px">
+        <input id="cash-input" class="form-inp" type="number" step="0.01" placeholder="输入当前现金金额">
+        <button onclick="updateCash()" style="padding:11px 16px;background:var(--primary);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit">更新</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-3)">收银/收款后现金自动累加，也可手动修改为实际金额</div>
+    </div>
+  </div>
+
+  <!-- 待支付 -->
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 本月待支付</span>
+      <span style="font-size:11px;color:var(--text-3);font-weight:600">点击✓标记已付</span>
+    </div>
+    <div id="pending-list"></div>
+    <!-- 添加自定义待支付 -->
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <div class="form-lbl">添加其他待支付项</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <input id="p-name" class="form-inp" type="text" placeholder="项目名称">
+        </div>
+        <div class="form-group">
+          <input id="p-amount" class="form-inp" type="number" step="0.01" placeholder="金额">
+        </div>
+      </div>
+      <button onclick="addPendingItem()" class="btn-primary">＋ 添加</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 历史记录 Tab -->
+<div class="page" id="tab-history" style="display:none">
+  <div class="month-selector" id="month-selector"></div>
+  <div id="history-content"></div>
+</div>
+
+<!-- 贷款管理 Tab -->
+<div class="page" id="tab-loans" style="display:none">
+
+  <div class="card">
+    <div class="card-title">➕ 添加贷款</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2">
+        <label class="form-lbl">贷款机构 *</label>
+        <input id="l-inst" class="form-inp" type="text" placeholder="银行/网贷/亲友…">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">贷款总额 *</label>
+        <input id="l-total" class="form-inp" type="number" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-lbl">月供 *</label>
+        <input id="l-monthly" class="form-inp" type="number" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">总期数</label>
+        <input id="l-periods" class="form-inp" type="number" step="1" placeholder="12">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">已还期数</label>
+        <input id="l-paid" class="form-inp" type="number" step="1" placeholder="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-lbl">下次还款日</label>
+        <input id="l-next" class="form-inp" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">利率 (%/年)</label>
+        <input id="l-rate" class="form-inp" type="number" step="0.01" placeholder="0">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="addLoan()">💾 保存贷款</button>
+  </div>
+
+  <div id="loan-list"></div>
+
+  <!-- 贷款汇总 -->
+  <div class="card" id="loan-summary" style="display:none">
+    <div class="card-title">📊 贷款汇总</div>
+    <div class="cf-row">
+      <span class="cf-label">贷款总额</span>
+      <span class="cf-val" id="ls-total">¥0</span>
+    </div>
+    <div class="cf-row">
+      <span class="cf-label">累计已还</span>
+      <span class="cf-val positive" id="ls-paid">¥0</span>
+    </div>
+    <div class="cf-row">
+      <span class="cf-label">剩余待还</span>
+      <span class="cf-val negative" id="ls-remain">¥0</span>
+    </div>
+    <div class="cf-row" style="border-bottom:none">
+      <span class="cf-label">本月月供合计</span>
+      <span class="cf-val warn" id="ls-monthly">¥0</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  主题色
+// ══════════════════════════════════════════════════════
+(function applyTheme(){
+  try {
+    var cfg = IndustryAdapter.getCurrent();
+    if (cfg && cfg.theme) {
+      document.documentElement.style.setProperty('--primary', cfg.theme);
+      document.documentElement.style.setProperty('--primary-dk', cfg.theme);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', cfg.theme);
+    }
+  } catch(e) {}
+})();
+
+// ══════════════════════════════════════════════════════
+//  URL 参数 & 行业 Key 映射
+// ══════════════════════════════════════════════════════
+var params   = new URLSearchParams(location.search);
+var industry = params.get('industry') || 'retail';
+var backUrl  = params.get('back')     || 'realcost-' + industry + '.html';
+
+var HISTORY_KEYS = {
+  beauty: 'beauty_h',
+  retail: 'otter_history',
+  food:   'food_history',
+};
+var INVENTORY_KEYS = {
+  beauty: 'beauty_m',   // 美业耗材（含产品）
+  retail: 'otter_inventory',
+  food:   null,         // 餐饮无库存货品
+};
+var HISTORY_KEY  = HISTORY_KEYS[industry]  || 'otter_history';
+var INVENTORY_KEY= INVENTORY_KEYS[industry];
+
+// ══════════════════════════════════════════════════════
+//  全局 localStorage Keys（资产现金流，跨行业共用）
+// ══════════════════════════════════════════════════════
+var KEYS = {
+  cash:        'finance_cash',        // 当前现金余额
+  pending:     'finance_pending',     // 待支付列表
+  pendingPaid: 'finance_pending_paid',// 本月已付状态 { id: bool }
+  loans:       'finance_loans',       // 贷款列表
+};
+
+function load(k){ try{ return JSON.parse(localStorage.getItem(k))||null; }catch(e){ return null; } }
+function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+function fmt(v){ v=parseFloat(v)||0; return (v<0?'-¥':'¥')+Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// ══════════════════════════════════════════════════════
+//  Tab 切换
+// ══════════════════════════════════════════════════════
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tab-assets').style.display  = tab==='assets'  ? '' : 'none';
+  document.getElementById('tab-history').style.display = tab==='history' ? '' : 'none';
+  document.getElementById('tab-loans').style.display   = tab==='loans'   ? '' : 'none';
+  if(tab==='history') renderHistory();
+  if(tab==='loans')   renderLoans();
+}
+
+function goBack(){ window.location.href = backUrl; }
+
+// ══════════════════════════════════════════════════════
+//  货品资产计算
+// ══════════════════════════════════════════════════════
+function getGoodsAsset(){
+  if(!INVENTORY_KEY) return 0;
+  var inv = load(INVENTORY_KEY) || [];
+  if(industry === 'beauty'){
+    // 美业：耗材按进价×库存（isProduct 的也算）
+    return inv.reduce(function(a,m){
+      return a + (parseFloat(m.totalPrice)||0) * (parseFloat(m.stock)||0);
+    },0);
+  } else {
+    // 零售：进价×库存数量
+    return inv.reduce(function(a,p){
+      return a + (parseFloat(p.costPrice)||0) * (parseFloat(p.qty)||0);
+    },0);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  待支付列表生成
+// ══════════════════════════════════════════════════════
+function buildPendingItems(){
+  // 从 main 读固定成本
+  var rent    = parseFloat(localStorage.getItem('monthlyRent'))    || 0;
+  var salary  = parseFloat(localStorage.getItem('monthlySalary'))  || 0;
+  var other   = parseFloat(localStorage.getItem('monthlyOther'))   || 0;
+
+  // 贷款月供
+  var loans   = load(KEYS.loans) || [];
+  var loanMonthly = loans.reduce(function(a,l){ return a+(parseFloat(l.monthly)||0); },0);
+
+  // 自定义待支付
+  var custom  = load(KEYS.pending) || [];
+
+  var items = [];
+  if(rent>0)   items.push({ id:'rent',   icon:'🏠', name:'月房租',   desc:'固定支出', amount:rent   });
+  if(salary>0) items.push({ id:'salary', icon:'👥', name:'员工工资', desc:'固定支出', amount:salary });
+  if(other>0)  items.push({ id:'other',  icon:'🔧', name:'月杂费',   desc:'水电等杂费', amount:other });
+  if(loanMonthly>0) items.push({ id:'loans', icon:'🏦', name:'贷款月供合计', desc:loans.length+'笔贷款', amount:loanMonthly });
+
+  custom.forEach(function(c){
+    items.push({ id:'custom_'+c.id, icon:'📌', name:c.name, desc:'自定义', amount:parseFloat(c.amount)||0, deletable:true, rawId:c.id });
+  });
+
+  return items;
+}
+
+// ══════════════════════════════════════════════════════
+//  资产总览渲染
+// ══════════════════════════════════════════════════════
+function renderAssets(){
+  var cash       = parseFloat(load(KEYS.cash)) || 0;
+  var goods      = getGoodsAsset();
+  var totalAsset = cash + goods;
+  var items      = buildPendingItems();
+  var paidState  = load(KEYS.pendingPaid) || {};
+  var pendingTotal = items.reduce(function(a,item){
+    return paidState[item.id] ? a : a + item.amount;
+  },0);
+  var realCash   = cash - pendingTotal;
+
+  // 英雄卡
+  document.getElementById('asset-hero').innerHTML =
+    '<div class="ah-label">总资产</div>'+
+    '<div class="ah-total">'+fmt(totalAsset)+'</div>'+
+    '<div class="ah-sub">现金 + 货品资产</div>'+
+    '<div class="ah-grid">'+
+      '<div class="ah-item"><div class="ah-item-val">'+fmt(cash)+'</div><div class="ah-item-lbl">现金</div></div>'+
+      '<div class="ah-item"><div class="ah-item-val">'+fmt(goods)+'</div><div class="ah-item-lbl">货品资产</div></div>'+
+      '<div class="ah-item"><div class="ah-item-val" style="color:'+(realCash>=0?'#9ff':'#f87171')+'">'+fmt(realCash)+'</div><div class="ah-item-lbl">真实可用</div></div>'+
+    '</div>';
+
+  // 现金流卡数据
+  document.getElementById('cf-cash').textContent    = fmt(cash);
+  document.getElementById('cf-goods').textContent   = fmt(goods);
+  document.getElementById('cf-pending').textContent = fmt(pendingTotal);
+  var realEl = document.getElementById('cf-real');
+  realEl.textContent = fmt(realCash);
+  realEl.className   = 'cf-val ' + (realCash >= 0 ? 'positive' : 'negative');
+
+  // 待支付列表
+  var el = document.getElementById('pending-list');
+  if(!items.length){
+    el.innerHTML = '<div class="empty" style="padding:20px 0">暂无待支付项目<br>请先在 main 中设置固定成本</div>';
+    return;
+  }
+  el.innerHTML = items.map(function(item){
+    var paid = paidState[item.id];
+    return '<div class="pending-item" id="pi-'+item.id+'" style="'+(paid?'opacity:0.5':'')+'">'+
+      '<span class="pi-icon">'+item.icon+'</span>'+
+      '<div class="pi-info">'+
+        '<div class="pi-name">'+item.name+(paid?' <span style="font-size:10px;color:var(--green);font-weight:700">已付✓</span>':'')+'</div>'+
+        '<div class="pi-desc">'+item.desc+'</div>'+
+      '</div>'+
+      '<div class="pi-amount" style="'+(paid?'text-decoration:line-through;color:var(--text-3)':'')+'">'+fmt(item.amount)+'</div>'+
+      (item.deletable?'<button onclick="deleteCustomPending(\''+item.rawId+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-3);padding:0 4px">🗑</button>':'')+
+      '<button class="pi-paid '+(paid?'checked':'')+'" onclick="togglePaid(\''+item.id+'\')">'+(paid?'✓':'')+'</button>'+
+    '</div>';
+  }).join('');
+}
+
+function togglePaid(id){
+  var state = load(KEYS.pendingPaid) || {};
+  state[id] = !state[id];
+  // 如果标记为已付，从现金中扣除
+  var items = buildPendingItems();
+  var item  = items.find(function(i){ return i.id===id; });
+  if(item){
+    var cash = parseFloat(load(KEYS.cash)) || 0;
+    if(state[id]){
+      cash -= item.amount; // 标记已付：扣现金
+    } else {
+      cash += item.amount; // 取消已付：还回现金
+    }
+    save(KEYS.cash, cash);
+  }
+  save(KEYS.pendingPaid, state);
+  renderAssets();
+  showToast(state[id] ? '✅ 已标记为已付，现金已扣减' : '↩️ 已取消，现金已还原');
+}
+
+function updateCash(){
+  var inp = document.getElementById('cash-input');
+  var val = parseFloat(inp.value);
+  if(isNaN(val)){ inp.classList.add('shake'); setTimeout(function(){ inp.classList.remove('shake'); },400); return; }
+  save(KEYS.cash, val);
+  inp.value = '';
+  renderAssets();
+  showToast('✅ 现金余额已更新');
+}
+
+function addPendingItem(){
+  var nameEl   = document.getElementById('p-name');
+  var amountEl = document.getElementById('p-amount');
+  var name   = nameEl.value.trim();
+  var amount = parseFloat(amountEl.value);
+  if(!name){ nameEl.classList.add('shake'); setTimeout(function(){ nameEl.classList.remove('shake'); },400); return; }
+  if(!amount){ amountEl.classList.add('shake'); setTimeout(function(){ amountEl.classList.remove('shake'); },400); return; }
+  var list = load(KEYS.pending) || [];
+  list.push({ id: Date.now(), name:name, amount:amount });
+  save(KEYS.pending, list);
+  nameEl.value=''; amountEl.value='';
+  renderAssets();
+  showToast('✅ 已添加');
+}
+
+function deleteCustomPending(rawId){
+  if(!confirm('确定删除？')) return;
+  var list = (load(KEYS.pending)||[]).filter(function(c){ return c.id != rawId; });
+  save(KEYS.pending, list);
+  renderAssets();
+}
+
+// ══════════════════════════════════════════════════════
+//  历史记录渲染
+// ══════════════════════════════════════════════════════
+var _selYear  = new Date().getFullYear();
+var _selMonth = new Date().getMonth();
+
+function renderHistory(){
+  var history = load(HISTORY_KEY) || {};
+  // 收集所有有数据的年月
+  var months = {};
+  Object.keys(history).forEach(function(k){
+    var d = new Date(k);
+    if(isNaN(d)) return;
+    var ym = d.getFullYear()+'-'+(d.getMonth());
+    if(!months[ym]) months[ym] = { year:d.getFullYear(), month:d.getMonth(), days:[] };
+    if((parseFloat(history[k].revenue)||0) > 0) months[ym].days.push(k);
+  });
+
+  var sortedMonths = Object.values(months).sort(function(a,b){
+    return b.year!==a.year ? b.year-a.year : b.month-a.month;
+  });
+
+  var MN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+  // 月份选择器
+  var selEl = document.getElementById('month-selector');
+  if(!sortedMonths.length){
+    document.getElementById('history-content').innerHTML = '<div class="empty">暂无历史数据</div>';
+    selEl.innerHTML = '';
+    return;
+  }
+
+  selEl.innerHTML = sortedMonths.map(function(m){
+    var active = (m.year===_selYear && m.month===_selMonth);
+    return '<button class="month-chip'+(active?' active':'')+'" onclick="selectHistoryMonth('+m.year+','+m.month+',this)">'+
+      m.year+'年'+MN[m.month]+'</button>';
+  }).join('');
+
+  // 如果当前选择不在列表里，选第一个
+  var found = sortedMonths.find(function(m){ return m.year===_selYear&&m.month===_selMonth; });
+  if(!found){ _selYear=sortedMonths[0].year; _selMonth=sortedMonths[0].month; }
+
+  renderHistoryMonth(history, _selYear, _selMonth);
+}
+
+function selectHistoryMonth(year, month, btn){
+  _selYear  = year;
+  _selMonth = month;
+  document.querySelectorAll('.month-chip').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderHistoryMonth(load(HISTORY_KEY)||{}, year, month);
+}
+
+function renderHistoryMonth(history, year, month){
+  var MN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  var revenue=0, profit=0, days=0, orders=0;
+  var dailyRows = [];
+
+  Object.keys(history).sort(function(a,b){ return new Date(b)-new Date(a); }).forEach(function(k){
+    var d = new Date(k);
+    if(d.getFullYear()!==year||d.getMonth()!==month) return;
+    var h = history[k];
+    var rev  = parseFloat(h.revenue)||0;
+    var prof = parseFloat(h.profit)||0;
+    var cnt  = h.orderCount||0;
+    if(rev>0){ revenue+=rev; profit+=prof; days++; orders+=cnt; }
+    dailyRows.push({ date:k, rev:rev, profit:prof, gm:h.grossMargin||0, cnt:cnt });
+  });
+
+  var gm = revenue > 0 ? (profit/revenue*100) : 0;
+  var el = document.getElementById('history-content');
+
+  var html = '<div class="hist-month-card">'+
+    '<div class="hmc-header">'+
+      '<div class="hmc-month">'+year+'年'+MN[month]+'</div>'+
+      '<div class="hmc-profit '+(profit>=0?'pos':'neg')+'">'+fmt(profit)+'</div>'+
+    '</div>'+
+    '<div class="hmc-grid">'+
+      '<div class="hmc-item"><div class="hmc-val">'+fmt(revenue)+'</div><div class="hmc-lbl">总营收</div></div>'+
+      '<div class="hmc-item"><div class="hmc-val">'+days+'天</div><div class="hmc-lbl">营业天数</div></div>'+
+      '<div class="hmc-item"><div class="hmc-val">'+gm.toFixed(1)+'%</div><div class="hmc-lbl">平均毛利率</div></div>'+
+    '</div>'+
+  '</div>';
+
+  if(dailyRows.length){
+    html += '<div style="font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">每日明细</div>';
+    html += dailyRows.map(function(row){
+      return '<div style="background:var(--bg-card);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);border:1px solid var(--border)">'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:800;color:var(--text)">'+row.date+'</div>'+
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+row.cnt+'单 · 毛利率 '+parseFloat(row.gm).toFixed(1)+'%</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:15px;font-weight:900;color:var(--text)">'+fmt(row.rev)+'</div>'+
+          '<div style="font-size:12px;font-weight:700;color:'+(row.profit>=0?'var(--green)':'var(--red)')+'">毛利 '+fmt(row.profit)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  贷款管理
+// ══════════════════════════════════════════════════════
+function renderLoans(){
+  var loans = load(KEYS.loans) || [];
+  var el    = document.getElementById('loan-list');
+  var sumEl = document.getElementById('loan-summary');
+
+  if(!loans.length){
+    el.innerHTML = '<div class="empty">暂无贷款记录</div>';
+    sumEl.style.display = 'none';
+    return;
+  }
+
+  var totalAmt=0, totalPaid=0, totalRemain=0, totalMonthly=0;
+
+  el.innerHTML = loans.map(function(l,i){
+    var total   = parseFloat(l.total)   || 0;
+    var monthly = parseFloat(l.monthly) || 0;
+    var periods = parseInt(l.periods)   || 0;
+    var paid    = parseInt(l.paid)      || 0;
+    var remain  = periods > 0 ? Math.max(0, periods - paid) : '?';
+    var paidAmt = monthly * paid;
+    var remainAmt = typeof remain === 'number' ? monthly * remain : total - paidAmt;
+    var pct     = periods > 0 ? Math.min(paid/periods*100, 100) : 0;
+    var daysToNext = '';
+    if(l.nextDate){
+      var diff = Math.ceil((new Date(l.nextDate) - new Date()) / 86400000);
+      daysToNext = diff <= 0 ? '🔴 已到期' : diff <= 7 ? '🟡 '+diff+'天后' : '🟢 '+diff+'天后';
+    }
+
+    totalAmt     += total;
+    totalPaid    += paidAmt;
+    totalRemain  += remainAmt;
+    totalMonthly += monthly;
+
+    return '<div class="loan-card">'+
+      '<div class="loan-header">'+
+        '<div>'+
+          '<div class="loan-name">'+l.institution+'</div>'+
+          '<div class="loan-inst">月供 '+fmt(monthly)+' · 共'+periods+'期 · 已还'+paid+'期'+
+            (l.rate>0?' · 年利率'+l.rate+'%':'')+
+          '</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div class="loan-remain">'+fmt(remainAmt)+'</div>'+
+          '<div class="loan-remain-lbl">剩余待还</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="loan-prog-wrap"><div class="loan-prog" style="width:'+pct+'%"></div></div>'+
+      '<div class="loan-meta">'+
+        '<span>已还 '+pct.toFixed(0)+'%</span>'+
+        (daysToNext?'<span>下次还款 '+daysToNext+'</span>':'')+
+        '<span>已还 '+fmt(paidAmt)+'</span>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:flex-end;margin-top:8px;gap:8px">'+
+        '<button onclick="loanPaidOne('+i+')" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">还款+1期</button>'+
+        '<button class="loan-del" onclick="deleteLoan('+i+')">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  sumEl.style.display = '';
+  document.getElementById('ls-total').textContent   = fmt(totalAmt);
+  document.getElementById('ls-paid').textContent    = fmt(totalPaid);
+  document.getElementById('ls-remain').textContent  = fmt(totalRemain);
+  document.getElementById('ls-monthly').textContent = fmt(totalMonthly);
+}
+
+function addLoan(){
+  var inst    = document.getElementById('l-inst').value.trim();
+  var total   = parseFloat(document.getElementById('l-total').value)||0;
+  var monthly = parseFloat(document.getElementById('l-monthly').value)||0;
+  var periods = parseInt(document.getElementById('l-periods').value)||0;
+  var paid    = parseInt(document.getElementById('l-paid').value)||0;
+  var next    = document.getElementById('l-next').value;
+  var rate    = parseFloat(document.getElementById('l-rate').value)||0;
+
+  if(!inst){ shake('l-inst'); return; }
+  if(!total){ shake('l-total'); return; }
+  if(!monthly){ shake('l-monthly'); return; }
+
+  var loans = load(KEYS.loans) || [];
+  loans.push({ id:Date.now(), institution:inst, total:total, monthly:monthly,
+    periods:periods, paid:paid, nextDate:next, rate:rate });
+  save(KEYS.loans, loans);
+
+  // 清空表单
+  ['l-inst','l-total','l-monthly','l-periods','l-paid','l-next','l-rate'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+
+  renderLoans();
+  renderAssets(); // 更新待支付中的贷款月供
+  showToast('✅ 贷款已添加');
+}
+
+function loanPaidOne(idx){
+  var loans = load(KEYS.loans) || [];
+  if(!loans[idx]) return;
+  loans[idx].paid = (parseInt(loans[idx].paid)||0) + 1;
+  // 更新下次还款日（加一个月）
+  if(loans[idx].nextDate){
+    var d = new Date(loans[idx].nextDate);
+    d.setMonth(d.getMonth()+1);
+    loans[idx].nextDate = d.toISOString().slice(0,10);
+  }
+  // 从现金扣除月供
+  var cash = parseFloat(load(KEYS.cash)) || 0;
+  cash -= parseFloat(loans[idx].monthly)||0;
+  save(KEYS.cash, cash);
+  save(KEYS.loans, loans);
+  renderLoans();
+  renderAssets();
+  showToast('✅ 已还款，现金已扣减');
+}
+
+function deleteLoan(idx){
+  if(!confirm('确定删除此贷款记录？')) return;
+  var loans = (load(KEYS.loans)||[]);
+  loans.splice(idx,1);
+  save(KEYS.loans, loans);
+  renderLoans();
+  renderAssets();
+}
+
+function shake(id){
+  var el = document.getElementById(id);
+  el.classList.add('shake');
+  setTimeout(function(){ el.classList.remove('shake'); },400);
+}
+
+// ══════════════════════════════════════════════════════
+//  Toast
+// ══════════════════════════════════════════════════════
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ══════════════════════════════════════════════════════
+//  监听 realcost 收银触发现金更新
+// ══════════════════════════════════════════════════════
+window.addEventListener('storage', function(e){
+  if(e.key === 'realcost_trigger'){
+    try{
+      var data = JSON.parse(e.newValue);
+      if(!data || !data.amount) return;
+      // 收银/订单利润自动加入现金
+      var cash = parseFloat(load(KEYS.cash)) || 0;
+      cash += parseFloat(data.amount) || 0;
+      save(KEYS.cash, cash);
+      renderAssets();
+    }catch(e){}
+  }
+});
+
+// ══════════════════════════════════════════════════════
+//  初始化
+// ══════════════════════════════════════════════════════
+renderAssets();
+
+// 设置下次还款日默认值
+var d = new Date(); d.setMonth(d.getMonth()+1);
+var nextDefault = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+document.getElementById('l-next').value = nextDefault;
+</script>
+</body>
+</html>
