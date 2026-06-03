@@ -381,6 +381,7 @@ body {
   <div class="page-view" id="view-ranking"></div>
   <div class="page-view" id="view-neworder"></div>
   <div class="page-view" id="view-acquire"></div>
+  <div class="page-view" id="view-stock"></div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -408,6 +409,10 @@ body {
   <button class="nav-btn" data-view="acquire" onclick="switchTab(this,'acquire')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
     <span class="nav-lbl">获客</span>
+  </button>
+  <button class="nav-btn" data-view="stock" onclick="switchTab(this,'stock')">
+    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
+    <span class="nav-lbl">库存</span>
   </button>
 </div>
 
@@ -454,6 +459,7 @@ var FoodEngine = (function(){
     ingredients:'food_ingredients',
     orders:     'food_orders',
     acquire:    'food_acquire',
+    stock:      'food_stock',
     staff:      'food_staff',
   };
 
@@ -549,6 +555,32 @@ var FoodEngine = (function(){
       orderCount:orders.length, variableCost:revenue-profit });
   }
 
+  // ── 食材库存 ──
+function getStock(){ return load(KEYS.stock)||[]; }
+function addStock(item){
+    var list=getStock();
+    // 同名食材累加库存
+    var existing=list.find(function(s){ return s.name===item.name; });
+    if(existing){
+        existing.qty=(parseFloat(existing.qty)||0)+(parseFloat(item.qty)||0);
+        existing.unit=item.unit||existing.unit;
+        existing.costPerUnit=item.costPerUnit||existing.costPerUnit;
+    } else {
+        item.id=Date.now()+Math.random();
+        list.push(item);
+    }
+    save(KEYS.stock,list);
+    // ★ 扣减现金
+    var cost=(parseFloat(item.costPerUnit)||0)*(parseFloat(item.qty)||0);
+    if(cost>0){
+        localStorage.setItem('realcost_trigger', JSON.stringify({
+            type:'inventory_in', cashDelta:-cost, timestamp:Date.now()
+        }));
+    }
+    return list;
+}
+function deleteStock(id){ save(KEYS.stock,getStock().filter(function(s){ return s.id!=id; })); }
+ 
   // ── 获客/投流 ──
   function getAcquire(){ return load(KEYS.acquire)||[]; }
   function addAcquire(a){
@@ -620,6 +652,7 @@ var FoodEngine = (function(){
     getStaff, addStaff, deleteStaff,
     getOrders, recordOrder,
     getAcquire, addAcquire, deleteAcquire,
+    getStock, addStock, deleteStock,
     getMenuRanking, getProfitRanking,
     getMonthStats, getStreak,
     fmtMoney, fmtMargin,
@@ -649,6 +682,7 @@ function switchTab(btn,viewId){
   else if(viewId==='ranking')  renderRanking(el);
   else if(viewId==='neworder') renderNewOrder(el);
   else if(viewId==='acquire')  renderAcquire(el);
+  else if(viewId==='stock') renderStock(el);
 }
 
 function updateHeader(){
@@ -1297,6 +1331,85 @@ function renderRanking(container){
   };
 }
 
+function renderStock(container){
+    function draw(){
+        var list=FoodEngine.getStock();
+        container.innerHTML='<div>'+
+            '<div class="page-title-bar"><span style="font-size:24px">🥩</span><span class="page-title-text">食材库存</span></div>'+
+            '<div class="form-subtitle">录入进货食材，自动扣减现金余额</div>'+
+            '<div class="form-card">'+
+                '<div class="section-label">新增进货</div>'+
+                '<div class="form-row">'+
+                    '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">食材名称 *</label>'+
+                        '<input id="s-name" class="form-inp" type="text" placeholder="猪五花"></div>'+
+                    '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单位</label>'+
+                        '<input id="s-unit" class="form-inp" type="text" placeholder="斤/kg/个"></div>'+
+                '</div>'+
+                '<div class="form-row" style="margin-top:10px">'+
+                    '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">进货数量 *</label>'+
+                        '<input id="s-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="0"></div>'+
+                    '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单价 (¥) *</label>'+
+                        '<input id="s-price" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>'+
+                '</div>'+
+                '<div id="s-preview" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg-surface);border-radius:12px;font-size:13px;color:var(--text-2)"></div>'+
+                '<div style="height:10px"></div>'+
+                '<button class="form-submit" onclick="sSubmit()">📦 确认进货</button>'+
+                '<div class="form-success hidden" id="s-succ">✅ 已录入，现金已自动扣减</div>'+
+            '</div>'+
+            '<div class="section-label">当前库存（'+list.length+'种）</div>'+
+            (list.length?
+                list.map(function(s){
+                    return '<div style="background:var(--bg-card);border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);border:1px solid var(--border)">'+
+                        '<div>'+
+                            '<div style="font-size:14px;font-weight:800;color:var(--text)">'+s.name+'</div>'+
+                            '<div style="font-size:11px;color:var(--text-3);margin-top:2px">单价 ¥'+s.costPerUnit+'/'+s.unit+'</div>'+
+                        '</div>'+
+                        '<div style="display:flex;align-items:center;gap:12px">'+
+                            '<div style="text-align:right">'+
+                                '<div style="font-size:16px;font-weight:900;color:var(--primary)">'+s.qty+s.unit+'</div>'+
+                                '<div style="font-size:11px;color:var(--text-3)">价值 ¥'+(s.qty*s.costPerUnit).toFixed(2)+'</div>'+
+                            '</div>'+
+                            '<button onclick="FoodEngine.deleteStock(\''+s.id+'\');renderStock(container)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-3)">🗑</button>'+
+                        '</div>'+
+                    '</div>';
+                }).join('')
+                :'<div style="color:var(--text-3);font-size:13px;padding:20px 0;text-align:center">暂无库存记录</div>'
+            )+
+        '</div>';
+        // 实时预览
+        ['s-qty','s-price'].forEach(function(id){
+            var el=container.querySelector('#'+id);
+            if(el) el.addEventListener('input',function(){
+                var qty=parseFloat(container.querySelector('#s-qty').value)||0;
+                var price=parseFloat(container.querySelector('#s-price').value)||0;
+                var prev=container.querySelector('#s-preview');
+                if(qty>0&&price>0){
+                    prev.style.display='block';
+                    prev.textContent='本次进货成本：¥'+(qty*price).toFixed(2)+'，将从现金余额中扣除';
+                } else prev.style.display='none';
+            });
+        });
+
+        window.sSubmit=function(){
+            var name=container.querySelector('#s-name').value.trim();
+            var unit=container.querySelector('#s-unit').value.trim()||'份';
+            var qty=parseFloat(container.querySelector('#s-qty').value)||0;
+            var price=parseFloat(container.querySelector('#s-price').value)||0;
+            if(!name){ container.querySelector('#s-name').classList.add('shake'); setTimeout(function(){ container.querySelector('#s-name').classList.remove('shake'); },400); return; }
+            if(!qty||!price){ container.querySelector('#s-qty').classList.add('shake'); setTimeout(function(){ container.querySelector('#s-qty').classList.remove('shake'); },400); return; }
+            FoodEngine.addStock({ name:name, unit:unit, qty:qty, costPerUnit:price });
+            container.querySelector('#s-name').value='';
+            container.querySelector('#s-unit').value='';
+            container.querySelector('#s-qty').value='';
+            container.querySelector('#s-price').value='';
+            container.querySelector('#s-preview').style.display='none';
+            var su=container.querySelector('#s-succ'); su.classList.remove('hidden');
+            setTimeout(function(){ su.classList.add('hidden'); },2500);
+            draw();
+        };
+    }
+    draw();
+}
 // ══════════════════════════════════════════════════════
 //  获客/投流
 // ══════════════════════════════════════════════════════

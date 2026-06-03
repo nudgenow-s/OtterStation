@@ -845,17 +845,31 @@ function showToast(msg){
 //  监听 realcost 收银触发现金更新
 // ══════════════════════════════════════════════════════
 window.addEventListener('storage', function(e){
-  if(e.key === 'realcost_trigger'){
-    try{
-      var data = JSON.parse(e.newValue);
-      if(!data || !data.amount) return;
-      // 收银/订单利润自动加入现金
-      var cash = parseFloat(load(KEYS.cash)) || 0;
-      cash += parseFloat(data.amount) || 0;
-      save(KEYS.cash, cash);
-      renderAssets();
-    }catch(e){}
-  }
+    if(e.key === 'realcost_trigger'){
+        try{
+            var data = JSON.parse(e.newValue);
+            if(!data) return;
+            var cash = parseFloat(load(KEYS.cash)) || 0;
+
+            if(data.type === 'sale'){
+                // 售出：增加现金（毛利）
+                cash += parseFloat(data.amount) || 0;
+                save(KEYS.cash, cash);
+
+            } else if(data.type === 'inventory_in'){
+                // 新录入库存：扣减现金
+                cash += parseFloat(data.cashDelta) || 0;
+                save(KEYS.cash, cash);
+
+            } else if(!data.type){
+                // 兼容旧格式
+                cash += parseFloat(data.amount) || 0;
+                save(KEYS.cash, cash);
+            }
+
+            renderAssets();
+        }catch(err){}
+    }
 });
 
 // ══════════════════════════════════════════════════════

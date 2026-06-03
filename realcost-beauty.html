@@ -913,7 +913,7 @@ function openChest(){
   alert('💅 '+(MONTH+1)+'月月度总结\n\n接单天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+
     '\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+Engine.fmtMargin(s.gm)+
     '\n\n📣 本月获客投入：'+Engine.fmtMoney(monthAcq)+
-    '\n💰 月净利润（扣获客后）：'+Engine.fmtMoney(netProfit)+
+    '\n💰 月毛利润（扣获客后）：'+Engine.fmtMoney(netProfit)+
     '\n\n🧴 库存进货价值：'+Engine.fmtMoney(inv.purchaseTotal)+
     '\n📦 可零售产品可卖：'+Engine.fmtMoney(inv.resaleTotal));
 }
@@ -958,6 +958,15 @@ function syncToMain(addProfit) {
         amount:    addProfit,
         todayRev:  newRev,
         timestamp: Date.now(),
+    }));
+}
+
+function syncFinance(type, amount, goodsDelta) {
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+        type:       type,
+        amount:     amount || 0,
+        goodsDelta: goodsDelta || 0,
+        timestamp:  Date.now(),
     }));
 }
 
@@ -1523,6 +1532,7 @@ function renderNewOrder(container){
     var platformFee = isOnline ? face*(commRate/100) : 0;
     var grossProfit = face - matTotal - techCost - platformFee;
     syncToMain(grossProfit);
+    syncFinance('sale', grossProfit, 0);
 
     _clearServiceForm();
     var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
@@ -1588,6 +1598,7 @@ function renderNewOrder(container){
     setTimeout(function(){ su.classList.add('hidden'); },2800);
     
     syncToMain(totalProfit);
+    syncFinance('sale', grossProfit, 0);
     updateHeader();
     };
   
@@ -2119,6 +2130,10 @@ function renderMaterials(container){
       if(!price) return shake(container.querySelector('#m-price'),'请填写总价');
       if(!usage) return shake(container.querySelector('#m-usage'),'请填写次数');
       Engine.addMaterial({ name:name, category:cat, totalPrice:price, usageCount:usage, stock:stock, stockUnit:unit, isProduct:isProd, salePrice:salePrice });
+      // 新进耗材扣减现金
+      var cost = (parseFloat(container.querySelector('#m-price').value)||0) *
+                 (parseFloat(container.querySelector('#m-stock').value)||0);
+      if(cost > 0) syncFinance('inventory_in', -cost, 0);
       draw();
     };
     window.mDel=function(id){

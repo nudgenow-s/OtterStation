@@ -685,6 +685,15 @@ const Engine = (function () {
     } else {
       inv.push(Object.assign({ id: Date.now() + Math.random() }, product));
     }
+    // ★ 新录入库存，扣减现金
+    var cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
+    if(cost > 0){
+        localStorage.setItem('realcost_trigger', JSON.stringify({
+            type:      'inventory_in',
+            cashDelta: -cost,
+            timestamp: Date.now(),
+        }));
+    }
     saveInventory(inv);
     return inv;
   }
@@ -767,10 +776,12 @@ const Engine = (function () {
 
     // 触发 main 的 storage 监听（成就+render）
     localStorage.setItem('realcost_trigger', JSON.stringify({
-        amount:    profit,
-        todayRev:  newRev,
-        timestamp: Date.now(),
-    }));
+    type:      'sale',
+    amount:    profit,
+    revenue:   total,
+    todayRev:  newRev,
+    timestamp: Date.now(),
+}));
 
     return record;
   }
