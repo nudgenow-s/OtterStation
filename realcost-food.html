@@ -55,8 +55,7 @@ body {
 .topbar-title {
   font-size:16px; font-weight:700; color:var(--text);
 }
-.topbar-stats { display:flex; gap:12px; }
-.stat-chip { font-size:13px; font-weight:800; color:var(--text-2); display:flex; align-items:center; gap:4px; }
+
 
 /* ── MONTH HEADER ── */
 .month-header {
@@ -355,11 +354,7 @@ body {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     返回
   </button>
-  <div class="topbar-title">真实成本</div>
-  <div class="topbar-stats">
-    <div class="stat-chip">🔥<span id="streak-val">0</span></div>
-    <div class="stat-chip">📅<span id="days-val">0</span>天</div>
-  </div>
+ 
 </div>
 
 <!-- MONTH HEADER -->
@@ -661,8 +656,7 @@ function updateHeader(){
   document.getElementById('mh-title').textContent=YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent='本月已营业 '+s.days+' 天';
   document.getElementById('mh-rev').textContent=FoodEngine.fmtMoney(s.profit);
-  document.getElementById('streak-val').textContent=FoodEngine.getStreak();
-  document.getElementById('days-val').textContent=s.days;
+
 }
 
 // ★ 同步今日毛利到 main.html

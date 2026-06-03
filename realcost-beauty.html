@@ -46,9 +46,7 @@ body {
   padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
   position:sticky; top:0; z-index:100;
 }
-.topbar-logo { font-size:17px; font-weight:900; color:var(--pink); letter-spacing:-.3px; }
-.topbar-stats { display:flex; gap:14px; }
-.stat-chip { display:flex; align-items:center; gap:5px; font-size:14px; font-weight:800; color:#333; }
+
 .topbar-back {
   display:flex; align-items:center; gap:4px;
   font-size:14px; font-weight:700; color:var(--pink);
@@ -377,11 +375,7 @@ body {
     </svg>
     返回
   </button>
-  <div class="topbar-logo" id="topbar-title">真实成本</div>
-  <div class="topbar-stats">
-    <div class="stat-chip">🔥 <span id="streak-val">0</span></div>
-    <div class="stat-chip">📅 <span id="days-val">0</span> 天</div>
-  </div>
+  
 </div>
 
 <div class="month-header" onclick="window.location.href='realcost-history.html?industry=beauty&back=realcost-beauty.html'" style="cursor:pointer;">
@@ -821,8 +815,7 @@ function updateHeader(){
   document.getElementById('mh-title').textContent=YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent='本月已完成 '+s.days+' 个工作日';
   document.getElementById('mh-rev').textContent=Engine.fmtMoney(s.revenue);
-  document.getElementById('streak-val').textContent=Engine.getStreak();
-  document.getElementById('days-val').textContent=s.days;
+  
 }
 
 // ── 蛇形日历 ──────────────────────────────────────────────────────
