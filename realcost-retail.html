@@ -688,11 +688,8 @@ const Engine = (function () {
     // ★ 新录入库存，扣减现金
     var cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
     if(cost > 0){
-        localStorage.setItem('realcost_trigger', JSON.stringify({
-            type:      'inventory_in',
-            cashDelta: -cost,
-            timestamp: Date.now(),
-        }));
+        var c = parseFloat(localStorage.getItem('finance_cash')) || 0;
+        localStorage.setItem('finance_cash', String(c - cost));
     }
     saveInventory(inv);
     return inv;
@@ -774,6 +771,9 @@ const Engine = (function () {
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
+    // ★ 直接更新现金余额
+    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
+    localStorage.setItem('finance_cash', String(currentCash + profit));
     // 触发 main 的 storage 监听（成就+render）
     localStorage.setItem('realcost_trigger', JSON.stringify({
     type:      'sale',

@@ -573,9 +573,8 @@ function addStock(item){
     // ★ 扣减现金
     var cost=(parseFloat(item.costPerUnit)||0)*(parseFloat(item.qty)||0);
     if(cost>0){
-        localStorage.setItem('realcost_trigger', JSON.stringify({
-            type:'inventory_in', cashDelta:-cost, timestamp:Date.now()
-        }));
+        var c = parseFloat(localStorage.getItem('finance_cash')) || 0;
+        localStorage.setItem('finance_cash', String(c - cost));
     }
     return list;
 }
@@ -723,12 +722,16 @@ function syncToMain(addProfit) {
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
+    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
+    localStorage.setItem('finance_cash', String(currentCash + addProfit));
+
     // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
     localStorage.setItem('realcost_trigger', JSON.stringify({
         amount:    addProfit,
         todayRev:  newRev,
         timestamp: Date.now(),
     }));
+
 }
 
 

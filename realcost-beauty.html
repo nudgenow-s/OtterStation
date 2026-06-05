@@ -953,12 +953,17 @@ function syncToMain(addProfit) {
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
+    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
+    localStorage.setItem('finance_cash', String(currentCash + addProfit));
+
     // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
     localStorage.setItem('realcost_trigger', JSON.stringify({
         amount:    addProfit,
         todayRev:  newRev,
         timestamp: Date.now(),
     }));
+    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
+    localStorage.setItem('finance_cash', String(currentCash + addProfit));
 }
 
 function syncFinance(type, amount, goodsDelta) {
@@ -2132,8 +2137,11 @@ function renderMaterials(container){
       Engine.addMaterial({ name:name, category:cat, totalPrice:price, usageCount:usage, stock:stock, stockUnit:unit, isProduct:isProd, salePrice:salePrice });
       // 新进耗材扣减现金
       var cost = (parseFloat(container.querySelector('#m-price').value)||0) *
-                 (parseFloat(container.querySelector('#m-stock').value)||0);
-      if(cost > 0) syncFinance('inventory_in', -cost, 0);
+           (parseFloat(container.querySelector('#m-stock').value)||0);
+      if(cost > 0){
+         var c = parseFloat(localStorage.getItem('finance_cash')) || 0;
+         localStorage.setItem('finance_cash', String(c - cost));
+      }
       draw();
     };
     window.mDel=function(id){
