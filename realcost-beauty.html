@@ -924,7 +924,7 @@ function shake(el,msg){
   setTimeout(function(){ el.classList.remove('shake'); },600);
 }
 
-function syncToMain(addProfit) {
+function syncToMain(addProfit,actualRevenue) {
     if (!addProfit) return;
     var today = new Date().toLocaleDateString();
 
@@ -953,8 +953,7 @@ function syncToMain(addProfit) {
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
-    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
-    localStorage.setItem('finance_cash', String(currentCash + addProfit));
+    
 
     // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
     localStorage.setItem('realcost_trigger', JSON.stringify({
@@ -962,8 +961,9 @@ function syncToMain(addProfit) {
         todayRev:  newRev,
         timestamp: Date.now(),
     }));
+    var cashAdd = (actualRevenue !== undefined) ? actualRevenue : addProfit;
     var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
-    localStorage.setItem('finance_cash', String(currentCash + addProfit));
+    localStorage.setItem('finance_cash', String(currentCash + cashAdd));
 }
 
 function syncFinance(type, amount, goodsDelta) {
@@ -1536,7 +1536,7 @@ function renderNewOrder(container){
     var techCost = commBase * (tr.techRate/100);
     var platformFee = isOnline ? face*(commRate/100) : 0;
     var grossProfit = face - matTotal - techCost - platformFee;
-    syncToMain(grossProfit);
+    syncToMain(grossProfit,face);
     syncFinance('sale', grossProfit, 0);
 
     _clearServiceForm();
@@ -1601,8 +1601,9 @@ function renderNewOrder(container){
     _clearProductForms();
     var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2800);
+    var totalRevenue = face + (saleItems.length ? saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0) : 0);
     
-    syncToMain(totalProfit);
+    syncToMain(serviceProfit + saleProfit - giftCost,totalRevenue);
     syncFinance('sale', grossProfit, 0);
     updateHeader();
     };

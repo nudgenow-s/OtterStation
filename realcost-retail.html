@@ -773,7 +773,7 @@ const Engine = (function () {
 
     // ★ 直接更新现金余额
     var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
-    localStorage.setItem('finance_cash', String(currentCash + profit));
+    localStorage.setItem('finance_cash', String(currentCash + total));
     // 触发 main 的 storage 监听（成就+render）
     localStorage.setItem('realcost_trigger', JSON.stringify({
     type:      'sale',

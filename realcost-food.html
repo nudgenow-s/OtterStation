@@ -693,7 +693,7 @@ function updateHeader(){
 }
 
 // ★ 同步今日毛利到 main.html
-function syncToMain(addProfit) {
+function syncToMain(addProfit,actualRevenue) {
     if (!addProfit) return;
     var today = new Date().toLocaleDateString();
 
@@ -722,8 +722,9 @@ function syncToMain(addProfit) {
         localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
+    var cashAdd = (actualRevenue !== undefined) ? actualRevenue : addProfit; 
     var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
-    localStorage.setItem('finance_cash', String(currentCash + addProfit));
+    localStorage.setItem('finance_cash', String(currentCash + cashAdd));
 
     // 写入触发信号，main 的 storage 监听器收到后触发 AchievementEngine 和 render
     localStorage.setItem('realcost_trigger', JSON.stringify({
@@ -1229,7 +1230,7 @@ function renderNewOrder(container){
     });
 
     // ★ 同步毛利到 main
-    syncToMain(profit);
+    syncToMain(profit, o.totalRevenue);
 
     orderItems.length=0; renderItems(); oCalc();
     container.querySelector('#o-preview-card').style.display='none';
