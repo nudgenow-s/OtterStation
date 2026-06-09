@@ -694,7 +694,7 @@ function updateHeader(){
 
 // ★ 同步今日毛利到 main.html
 function syncToMain(addProfit,actualRevenue) {
-    if (!addProfit) return;
+    if (addProfit === undefined || addProfit === null) return;
     var today = new Date().toLocaleDateString();
 
     // 累加到 todayRev
@@ -1231,13 +1231,13 @@ function renderNewOrder(container){
     var platformFee=totalRev*(commRate/100);
     var totalCost=ingCost+techCost+platformFee+packFee+deliveryFee;
     var profit=totalRev-totalCost;
-    syncToMain(profit, o.totalRevenue);
-    updateHeader();
-
+    var actualRevenue = totalRev - platformFee;
+    syncToMain(profit, actualRevenue);
     orderItems.length=0; renderItems(); oCalc();
     container.querySelector('#o-preview-card').style.display='none';
     var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2500);
+    updateHeader();
     
   };
 
