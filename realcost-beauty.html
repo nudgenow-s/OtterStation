@@ -1536,7 +1536,7 @@ function renderNewOrder(container){
     var techCost = commBase * (tr.techRate/100);
     var platformFee = isOnline ? face*(commRate/100) : 0;
     var grossProfit = face - matTotal - techCost - platformFee;
-    syncToMain(grossProfit,face);
+    syncToMain(grossProfit,actual);
     syncFinance('sale', grossProfit, 0);
 
     _clearServiceForm();
@@ -1596,16 +1596,17 @@ function renderNewOrder(container){
     // 产品销售成本已在 saleProfit 里扣了（unitCost）
     // 赠品成本单独扣
     var totalProfit = serviceProfit + saleProfit - giftCost;
+    var actualRevenue = actual + (saleItems.length ? saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0) : 0);
+    
+    syncToMain(serviceProfit + saleProfit - giftCost,actualRevenue);
+    syncFinance('sale', grossProfit, 0);
+    updateHeader();
 
     _clearServiceForm();
     _clearProductForms();
     var su=container.querySelector('#o-succ-all'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2800);
-    var totalRevenue = face + (saleItems.length ? saleItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0) : 0);
     
-    syncToMain(serviceProfit + saleProfit - giftCost,totalRevenue);
-    syncFinance('sale', grossProfit, 0);
-    updateHeader();
     };
   
     
