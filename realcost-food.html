@@ -1214,13 +1214,7 @@ function renderNewOrder(container){
     var techRate=staffOpt?parseFloat(staffOpt.dataset.rate||0):0;
     var platform=isTakeout?(container.querySelector('#o-platform').value):'';
 
-    // ★ 先算毛利再清空
-    var totalRev=orderItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0);
-    var ingCost=orderItems.reduce(function(a,i){ return a+i.ingredientCost*i.qty; },0);
-    var techCost=totalRev*(techRate/100);
-    var platformFee=totalRev*(commRate/100);
-    var totalCost=ingCost+techCost+platformFee+packFee+deliveryFee;
-    var profit=totalRev-totalCost;
+    
 
     FoodEngine.recordOrder({
       channel:channel, platform:platform,
@@ -1230,13 +1224,21 @@ function renderNewOrder(container){
     });
 
     // ★ 同步毛利到 main
+    // ★ 先算毛利再清空
+    var totalRev=orderItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0);
+    var ingCost=orderItems.reduce(function(a,i){ return a+i.ingredientCost*i.qty; },0);
+    var techCost=totalRev*(techRate/100);
+    var platformFee=totalRev*(commRate/100);
+    var totalCost=ingCost+techCost+platformFee+packFee+deliveryFee;
+    var profit=totalRev-totalCost;
     syncToMain(profit, o.totalRevenue);
+    updateHeader();
 
     orderItems.length=0; renderItems(); oCalc();
     container.querySelector('#o-preview-card').style.display='none';
     var su=container.querySelector('#o-succ'); su.classList.remove('hidden');
     setTimeout(function(){ su.classList.add('hidden'); },2500);
-    updateHeader();
+    
   };
 
   window.staffAdd=function(){
