@@ -961,7 +961,13 @@ function renderMenu(container){
       listEl.innerHTML=filtered.map(function(i){
         var prices=(i.allPrices&&i.allPrices.length>1)?i.allPrices:[i.pricePerUnit];
         return prices.map(function(p){
-          return '<div class="sl-item" onclick="bomPickIngredient(\''+i.name+'\','+p+',\'+(i.unit||\'份\')+'\')">'+
+          return '<div class="sl-item" onclick="bomPickIngredient(\''+
+                 i.name +
+                 '\',' +
+                 p +
+                 ',\'' +
+                 (i.unit|| '份') +
+                 '\')">'+
             '<span>'+i.name+'</span>'+
             '<span class="sl-item-sub">¥'+p+'/'+(i.unit||'份')+'</span>'+
           '</div>';
@@ -1088,10 +1094,144 @@ function renderNewOrder(container){
         '<div class="form-row">'+
           '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">外卖平台</label>'+
             '<select id="o-platform" class="form-inp" onchange="oPlatformChange()">'+
-              '<option value="meituan" data-comm="18">美团外卖（18%）</option>'+
-              '<option value="eleme" data-comm="20">饿了么（20%）</option>'+
-              '<option value="douyin" data-comm="8">抖音团购（8%）</option>'+
-              '<option value="custom" data-comm="0">自定义</option>'+
+               // 中国
+              '<optgroup label="🌎 中国">'+
+                '<option value="meituan" data-comm="18">美团外卖（18%）</option>'+
+                '<option value="eleme" data-comm="18">饿了么（18%）</option>'+
+                '<option value="douyin" data-comm="8">抖音团购（8%）</option>'+
+              '</optgroup>'+
+              '<optgroup label="🌍 港澳台">'+
+                '<option value="foodpanda_hk" data-comm="32">Foodpanda 港澳台（32%）</option>'+
+                '<option value="deliveroo_hk" data-comm="32">Deliveroo 香港（32%）</option>'+
+                '<option value="ubereats_tw" data-comm="30">Uber Eats 台湾（30%）</option>'+
+                '<option value="hungrypanda_hk" data-comm="27">HungryPanda 港澳台（27%）</option>'+
+              '</optgroup>'+
+              // 北美
+              '<optgroup label="🌎 北美">'+
+                '<option value="doordash" data-comm="25">DoorDash（25%）</option>'+
+                '<option value="ubereats_us" data-comm="25">Uber Eats 北美（25%）</option>'+
+                '<option value="grubhub" data-comm="20">Grubhub（20%）</option>'+
+                '</optgroup>'+
+              '<optgroup label="🌍 加拿大">'+
+                '<option value="skipthedishes" data-comm="22">SkipTheDishes（22%）</option>'+
+                '<option value="doordash_ca" data-comm="25">DoorDash 加拿大（25%）</option>'+
+                '<option value="ubereats_ca" data-comm="25">Uber Eats 加拿大（25%）</option>'+
+              '</optgroup>'+
+              // 南美
+              '<optgroup label="🌎 南美">'+
+                '<option value="ifood" data-comm="28">iFood (28%) </option>'+
+                '<option value="rappi" data-comm="27">Rappi (27%) </option>'+
+                '<option value="pedidosya" data-comm="26">PedidosYa (26%) </option>'+
+                '<option value="ubereats_sa" data-comm="27">Uber Eats 南美 (27%) </option>'+
+              '</optgroup>'+
+              // 欧洲
+             '<optgroup label="🌍 欧洲">'+
+                '<option value="deliveroo" data-comm="30">Deliveroo（30%）</option>'+
+                '<option value="justeat" data-comm="12">Just Eat（12%）</option>'+
+                '<option value="glovo_eu" data-comm="27">Glovo 欧洲（27%）</option>'+
+                '<option value="ubereats_eu" data-comm="27">Uber Eats 欧洲（27%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 英国">'+
+                '<option value="justeat_uk" data-comm="12">Just Eat 英国（12%）</option>'+
+                '<option value="deliveroo_uk" data-comm="32">Deliveroo 英国（32%）</option>'+
+                '<option value="ubereats_uk" data-comm="30">Uber Eats 英国（30%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 希腊 / 东欧">'+
+                '<option value="efood" data-comm="27">efood 希腊（27%）</option>'+
+                '<option value="wolt" data-comm="27">Wolt 希腊/东欧（27%）</option>'+
+                '<option value="bolt_food" data-comm="25">Bolt Food 东欧（25%）</option>'+
+             '</optgroup>'+
+             // 日韩
+             '<optgroup label="🌍 日韩">'+
+                 '<option value="demaecan" data-comm="12">出前館 Demae-can（12%）</option>'+
+                 '<option value="ubereats_jp" data-comm="35">Uber Eats 日本（35%）</option>'+
+                 '<option value="menu_jp" data-comm="20">menu 日本（20%）</option>'+
+                 '<option value="baemin" data-comm="10">배달의민족 Baemin（10%）</option>'+
+                 '<option value="coupangeats" data-comm="12">쿠팡이츠 Coupang Eats（12%）</option>'+
+                 '<option value="yogiyo" data-comm="13">요기요 Yogiyo（13%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 中东">'+
+                 '<option value="talabat" data-comm="27">Talabat（27%）</option>'+
+                 '<option value="careem" data-comm="27">Careem Food（27%）</option>'+
+                 '<option value="hungerstation" data-comm="27">HungerStation（27%）</option>'+
+                 '<option value="noonfood" data-comm="22">Noon Food（22%）</option>'+
+             '<option value="zomato_me" data-comm="22">Zomato 中东（22%）</option>'+
+             '</optgroup>'+
+             // 东南亚
+             '<optgroup label="🌏 东南亚">'+
+                '<option value="grabfood" data-comm="27">GrabFood（27%）</option>'+
+                '<option value="gofood" data-comm="22">GoFood（22%）</option>'+
+                '<option value="foodpanda" data-comm="30">Foodpanda（30%）</option>'+
+                '<option value="shopeefood" data-comm="17">ShopeeFood（17%）</option>'+
+                '<option value="lineman" data-comm="27">LINE MAN（27%）</option>'+
+             '</optgroup>'+
+             // 非洲
+             '<optgroup label="🌍 非洲">'+
+                '<option value="jumiafood" data-comm="25">Jumia Food（25%）</option>'+
+                '<option value="glovo_af" data-comm="27">Glovo 非洲（27%）</option>'+
+                '<option value="ubereats_af" data-comm="27">Uber Eats 非洲（27%）</option>'+
+                '<option value="mrd" data-comm="22">Mr D（22%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 北非（阿拉伯语区）">'+
+                '<option value="otlob" data-comm="25">Otlob 埃及（25%）</option>'+
+                '<option value="glovo_na" data-comm="28">Glovo 北非（28%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 非洲补充">'+
+                '<option value="bolt_food_af" data-comm="25">Bolt Food 肯尼亚/加纳（25%）</option>'+
+                '<option value="glovo_wa" data-comm="28">Glovo 西非（28%）</option>'+
+             '</optgroup>'+
+             
+             '<optgroup label="🌍 澳大利亚">'+
+                '<option value="ubereats_au" data-comm="32">Uber Eats 澳洲（32%）</option>'+
+                '<option value="doordash_au" data-comm="27">DoorDash 澳洲（27%）</option>'+
+                '<option value="menulog" data-comm="12">Menulog（12%）</option>'+
+                '<option value="hungrypanda_au" data-comm="27">HungryPanda 澳洲（27%）</option>'+
+                '</optgroup>'+
+             '<optgroup label="🌍 新西兰">'+
+                '<option value="ubereats_nz" data-comm="32">Uber Eats 新西兰（32%）</option>'+
+                '<option value="menulog_nz" data-comm="12">Menulog 新西兰（12%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 俄罗斯">'+
+                '<option value="yandex_eats" data-comm="27">Яндекс Еда Yandex Eats（27%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 巴基斯坦">'+
+                '<option value="foodpanda_pk" data-comm="27">Foodpanda 巴基斯坦（27%）</option>'+
+                '<option value="careem_pk" data-comm="25">Careem Food 巴基斯坦（25%）</option>'+
+                '<option value="bykea" data-comm="22">Bykea（22%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 土耳其">'+
+                '<option value="yemeksepeti" data-comm="27">Yemeksepeti（27%）</option>'+
+                '<option value="getir" data-comm="25">Getir Food（25%）</option>'+
+                '<option value="trendyolgo" data-comm="22">Trendyol Go（22%）</option>'+
+             '</optgroup>'+
+             
+             
+             '<optgroup label="🌍 印度">'+
+                '<option value="zomato_in" data-comm="22">Zomato 印度（22%）</option>'+
+                '<option value="swiggy" data-comm="22">Swiggy（22%）</option>'+
+                '<option value="dunzo" data-comm="17">Dunzo（17%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 南亚其他">'+
+                '<option value="foodpanda_bd" data-comm="27">Foodpanda 孟加拉（27%）</option>'+
+                '<option value="shohoz" data-comm="22">Shohoz Food 孟加拉（22%）</option>'+
+                '<option value="pickme" data-comm="22">PickMe Food 斯里兰卡（22%）</option>'+
+                '<option value="foodmandu" data-comm="22">Foodmandu 尼泊尔（22%）</option>'+
+             '</optgroup>'+
+             '<optgroup label="🌍 以色列">'+
+                '<option value="wolt_il" data-comm="27">Wolt 以色列（27%）</option>'+
+                '<option value="tenbis" data-comm="17">10bis 以色列（17%）</option>'+
+             '</optgroup>'+
+             
+             '<optgroup label="🌍 墨西哥 / 中美洲">'+
+                '<option value="ubereats_mx" data-comm="27">Uber Eats 墨西哥（27%）</option>'+
+                '<option value="didi_food" data-comm="22">DiDi Food（22%）</option>'+
+                '<option value="rappi_mx" data-comm="27">Rappi 墨西哥（27%）</option>'+
+             '</optgroup>'+
+             
+             
+             '<optgroup label="⚙️ 其他">'+
+                '<option value="custom" data-comm="0">自定义佣金率</option>'+
+             '</optgroup>'+
             '</select></div>'+
           '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">平台佣金率 (%)</label>'+
             '<input id="o-comm" class="form-inp" type="number" step="0.1" min="0" max="100" value="18" oninput="oCalc()"></div>'+
