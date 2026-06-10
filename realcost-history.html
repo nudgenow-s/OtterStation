@@ -445,21 +445,23 @@ function goBack(){ window.location.href = backUrl; }
 //  货品资产计算
 // ══════════════════════════════════════════════════════
 function getGoodsAsset(){
-  if(!INVENTORY_KEY) return 0;
-  var inv = load(INVENTORY_KEY) || [];
-  if(industry === 'beauty'){
+  var total = 0;
+  if(INVENTORY_KEY) {
+    var inv = load(INVENTORY_KEY) || [];
+    if(industry === 'beauty'){
     // 美业：耗材按进价×库存（isProduct 的也算）
-    return inv.reduce(function(a,m){
-      return a + (parseFloat(m.totalPrice)||0) * (parseFloat(m.stock)||0);
-    },0);
-  } else {
+      inv.forEach(function(m){ total += (parseFloat(m.totalPrice)||0) * (parseFloat(m.stock)||0);});
+    } else {
     // 零售：进价×库存数量
-    return inv.reduce(function(a,p){
-      return a + (parseFloat(p.costPrice)||0) * (parseFloat(p.qty)||0);
-    },0);
+      inv.forEach(function(p){ total += (parseFloat(p.costPrice)||0) * (parseFloat(p.qty)||0);});
+    }
   }
-}
-
+  if(industry === 'food'){
+    var stock = load('food_stock') || [];
+    stock.forEach(function(s){ total += (parseFloat(s.costPerUnit)|| 0)*(parseFloat(s.qty)||0);});
+    } 
+  return total;
+  }
 // ══════════════════════════════════════════════════════
 //  待支付列表生成
 // ══════════════════════════════════════════════════════

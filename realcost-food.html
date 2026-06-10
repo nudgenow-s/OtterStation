@@ -171,9 +171,20 @@ body { font-family:'PingFang SC','Helvetica Neue',sans-serif; background:var(--b
 .tip-item-name{font-size:12px;font-weight:700;color:#5A4000;flex:1}
 .tip-item-val{font-size:12px;font-weight:900;color:#B8860B;text-align:right;white-space:nowrap;margin-left:8px}
 /* 搜索框 */
-.quick-search{width:100%;padding:10px 14px;border:1.5px solid var(--border-md);border-radius:12px;font-size:14px;font-family:inherit;outline:none;color:var(--text);background:var(--bg-input);margin-bottom:10px;transition:border-color .2s}
-.quick-search:focus{border-color:var(--primary);background:#fff}
-.quick-search::placeholder{color:var(--text-3)}
+.search-list {
+  background: var(--bg-card); border: 1.5px solid var(--border-md);
+  border-radius: 12px; max-height: 200px; overflow-y: auto;
+  box-shadow: var(--shadow); margin-top: 4px; display: none;
+}
+.search-list.open{display: block;}
+.sl-item {
+  padding:11px 14px; font-size:14px; font-weight: 700; color:var(--text);
+  cursor :pointer ; border-bottom: 1px solid var(--border);
+  display: flex; justify-content:space-between;align-items: center;
+}
+.sl-item:last-child { border-bottom: none;}
+.sl-item:active { background: var(--bg-surface);}
+.sl-item-sub { font-size: 11px;color:var(--text-3);font-weight: 600;}
 </style>
 </head>
 <body>
@@ -842,18 +853,16 @@ function renderMenu(container){
         // BOM
         '<div class="section-label" style="margin-top:14px">食材 BOM</div>'+
         (ingredients.length?
-          '<div>'+
-            '<!-- 搜索食材 -->'+
-            '<input id="bom-search" class="quick-search" placeholder="🔍 输入一个字搜索食材…" oninput="bomSearchFilter()">'+
-            '<div class="form-row" style="margin-bottom:8px">'+
-              '<div style="flex:2"><select id="m-ing-pick" class="form-inp" onchange="mIngPicked()" size="1">'+
-                '<option value="">选择食材（可先搜索）…</option>'+ingOptHtml+
-              '</select></div>'+
-              '<div style="width:70px"><input id="m-ing-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" oninput="mIngPreview()"></div>'+
-              '<div style="display:flex;align-items:center;padding-bottom:2px">'+
-                '<button onclick="mBomAdd()" style="padding:11px 14px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">＋</button>'+
-              '</div>'+
-            '</div>'+
+           '<div>'+
+             '<div style="position:relative">'+
+               '<input id="bom-search" class="quick-search" placeholder="🔍 输入食材名搜索…" autocomplete="off" oninput="bomSearchInput(this.value)">'+
+               '<div id="bom-search-list" class="search-list"></div>'+
+             '</div>'+
+             '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;margin-top:8px">'+
+               '<div id="bom-selected" style="flex:1;padding:10px 12px;background:var(--bg-surface);border-radius:12px;font-size:13px;color:var(--text-3)">未选择食材</div>'+
+               '<input id="m-ing-qty" class="form-inp" style="width:70px" type="number" step="0.01" min="0" placeholder="用量">'+
+               '<button onclick="mBomAdd()" style="padding:11px 14px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;flex-shrink:0">＋</button>'+
+             '</div>'+
           '</div>'
           :'<div style="color:var(--text-3);font-size:12px;padding:8px 0">请先在库存页录入食材</div>'
         )+
@@ -866,6 +875,7 @@ function renderMenu(container){
             '<div class="cp-row"><span class="cp-label">售价</span><span class="cp-val" id="mp-sale">¥—</span></div>'+
             '<div class="cp-row"><span class="cp-label">食材成本（含损耗）</span><span class="cp-val" id="mp-ing">¥—</span></div>'+
             '<div class="cp-row total"><span class="cp-label">单品毛利</span><span class="cp-val profit" id="mp-profit">¥—</span></div>'+
+            '<div class="cp-row"><span class="cp-label">单品毛利率</span><span id="mp-margin" style="font-size:15px;font-weight:900">-%</span></div>'+
           '</div>'+
         '</div>'+
         '<div style="height:12px"></div>'+
@@ -937,35 +947,56 @@ function renderMenu(container){
     renderTipBody();
 
     // BOM 逻辑
-    var _bomItems=[], _curIng=null, _allIngOpts=ingredients;
+    var _bomItems=[], _curIng=null;
 
-    window.bomSearchFilter=function(){
-      var q=container.querySelector('#bom-search').value.trim().toLowerCase();
-      var sel=container.querySelector('#m-ing-pick'); if(!sel) return;
-      var filtered=q?_allIngOpts.filter(function(i){ return i.name.indexOf(q)>=0; }):_allIngOpts;
-      sel.innerHTML='<option value="">选择食材…</option>'+filtered.map(function(i){
-        if(i.allPrices&&i.allPrices.length>1){
-          return i.allPrices.map(function(p){ return '<option value="'+i.id+'_'+p+'" data-price="'+p+'" data-unit="'+(i.unit||'份')+'" data-name="'+i.name+'">'+i.name+' ¥'+p+'/'+(i.unit||'份')+'</option>'; }).join('');
-        }
-        return '<option value="'+i.id+'_'+i.pricePerUnit+'" data-price="'+i.pricePerUnit+'" data-unit="'+(i.unit||'份')+'" data-name="'+i.name+'">'+i.name+' ¥'+i.pricePerUnit+'/'+(i.unit||'份')+'</option>';
+    window.bomSearchInput=function(q){
+      var listEl=container.querySelector('#bom-search-list');
+      var selEl=container.querySelector('#bom-selected');
+      if(!q.trim()){ listEl.classList.remove('open'); return; }
+      var filtered=ingredients.filter(function(i){ return i.name.indexOf(q)>=0; });
+      if(!filtered.length){
+        listEl.innerHTML='<div class="sl-item" style="color:var(--text-3)">没有匹配食材</div>';
+        listEl.classList.add('open'); return;
+      }
+      listEl.innerHTML=filtered.map(function(i){
+        var prices=(i.allPrices&&i.allPrices.length>1)?i.allPrices:[i.pricePerUnit];
+        return prices.map(function(p){
+          return '<div class="sl-item" onclick="bomPickIngredient(\''+i.name+'\','+p+',\'+(i.unit||\'份\')+'\')">'+
+            '<span>'+i.name+'</span>'+
+            '<span class="sl-item-sub">¥'+p+'/'+(i.unit||'份')+'</span>'+
+          '</div>';
+        }).join('');
       }).join('');
+      listEl.classList.add('open');
     };
 
-    window.mIngPicked=function(){
-      var sel=container.querySelector('#m-ing-pick');
-      var opt=sel.options[sel.selectedIndex];
-      if(!opt||!opt.value){ _curIng=null; return; }
-      _curIng={ name:opt.dataset.name||opt.text.split(' ')[0], pricePerUnit:parseFloat(opt.dataset.price)||0, unit:opt.dataset.unit||'份' };
-      mIngPreview();
+    window.bomPickIngredient=function(name,price,unit){
+      _curIng={ name:name, pricePerUnit:price, unit:unit };
+      var selEl=container.querySelector('#bom-selected');
+      if(selEl){ selEl.textContent=name+' ¥'+price+'/'+unit; selEl.style.color='var(--text)'; }
+      container.querySelector('#bom-search').value='';
+      container.querySelector('#bom-search-list').classList.remove('open');
+      // 触发用量预览
+      var qtyEl=container.querySelector('#m-ing-qty');
+      if(qtyEl&&parseFloat(qtyEl.value)>0){
+        var cost=(_curIng.pricePerUnit*parseFloat(qtyEl.value)).toFixed(2);
+        var prev=container.querySelector('#m-ing-preview');
+        if(prev){ prev.style.display='block'; prev.textContent='成本预计：¥'+cost+'（¥'+price+'/'+unit+' × '+qtyEl.value+unit+'）'; }
+      }
     };
-    window.mIngPreview=function(){
-      if(!_curIng){ container.querySelector('#m-ing-preview').style.display='none'; return; }
-      var qty=parseFloat(container.querySelector('#m-ing-qty').value)||0;
-      var cost=(_curIng.pricePerUnit*qty).toFixed(2);
-      var el=container.querySelector('#m-ing-preview');
-      el.style.display=qty>0?'block':'none';
-      el.textContent='成本预计：¥'+cost+'（¥'+_curIng.pricePerUnit+'/'+_curIng.unit+' × '+qty+_curIng.unit+'）';
-    };
+
+    // 用量输入触发预览
+    setTimeout(function(){
+      var qtyEl=container.querySelector('#m-ing-qty');
+      if(qtyEl) qtyEl.addEventListener('input',function(){
+        if(!_curIng){ return; }
+        var qty=parseFloat(this.value)||0;
+        var cost=(_curIng.pricePerUnit*qty).toFixed(2);
+        var prev=container.querySelector('#m-ing-preview');
+        if(prev){ prev.style.display=qty>0?'block':'none'; prev.textContent='成本预计：¥'+cost+'（¥'+_curIng.pricePerUnit+'/'+_curIng.unit+' × '+qty+_curIng.unit+'）'; }
+        mPreview();
+      });
+    },100);
     window.mBomAdd=function(){
       if(!_curIng){ var sel=container.querySelector('#m-ing-pick'); shake(sel,'请先选食材'); return; }
       var qty=parseFloat(container.querySelector('#m-ing-qty').value)||0;
@@ -992,6 +1023,7 @@ function renderMenu(container){
       var wastage=parseFloat(container.querySelector('#m-wastage').value)||0;
       var ingCost=FoodEngine.calcIngredientCost(_bomItems,wastage);
       var profit=sale-ingCost;
+      var margin = sale > 0 ? (profit/sale*100) : 0;
       var pv=container.querySelector('#m-preview');
       if(sale>0){
         pv.style.display='block';
@@ -1000,6 +1032,12 @@ function renderMenu(container){
         var pEl=container.querySelector('#mp-profit');
         pEl.textContent=(profit>=0?'¥':'-¥')+Math.abs(profit).toFixed(2);
         pEl.className='cp-val '+(profit>=0?'profit':'loss');
+        var marginEl = containr.querySelector('#mp-margin');
+        if(marginEl){
+          var col = margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--gold)' : 'var(--red)';
+          marginEl.textContent = margin.toFixed(1)+'%';
+          marginEl.style.color = col;
+        }
       } else pv.style.display='none';
     };
     window.mPreview=mPreview;
@@ -1070,14 +1108,14 @@ function renderNewOrder(container){
     '<div class="form-card">'+
       '<div class="section-label">点餐</div>'+
       // ★ 搜索框
-      '<input id="menu-search" class="quick-search" placeholder="🔍 输入一个字搜索菜品…" oninput="menuSearchFilter()">'+
-      '<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">'+
-        '<div style="flex:2"><select id="o-menu-pick" class="form-inp" onchange="oMenuPicked()">'+
-          '<option value="">选择菜品…</option>'+
-          menu.map(function(m){ return '<option value="'+m.id+'" data-price="'+m.salePrice+'" data-cost="'+m.ingredientCost.toFixed(4)+'" data-name="'+m.name+'">'+m.name+' ¥'+m.salePrice+'</option>'; }).join('')+
-        '</select></div>'+
-        '<div style="width:56px"><input id="o-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:11px 6px;text-align:center"></div>'+
-        '<button onclick="oItemAdd()" style="padding:11px 14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:var(--shadow-btn)">＋</button>'+
+      '<div style="position:relative">'+
+        '<input id="menu-search" class="quick-search" placeholder="🔍 输入菜名搜索…" autocomplete="off" oninput="menuSearchInput(this.value)">'+
+        '<div id="menu-search-list" class="search-list"></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;margin-top:8px">'+
+         '<div id="menu-selected" style="flex:1;padding:10px 12px;background:var(--bg-surface);border-radius:12px;font-size:13px;color:var(--text-3)">未选择菜品</div>'+
+         '<input id="o-qty" class="form-inp" type="number" min="1" step="1" value="1" style="width:56px;padding:11px 6px;text-align:center">'+
+         '<button onclick="oItemAdd()" style="padding:11px 14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:var(--shadow-btn);flex-shrink:0">＋</button>'+
       '</div>'+
       '<div id="o-items"></div>'+
       (menu.length?'':'<div style="color:var(--text-3);font-size:13px;padding:8px 0">请先在菜单管理中添加菜品</div>')+
@@ -1114,14 +1152,29 @@ function renderNewOrder(container){
   '</div>';
 
   // ★ 菜品搜索
-  var _allMenuItems=menu;
-  window.menuSearchFilter=function(){
-    var q=container.querySelector('#menu-search').value.trim();
-    var sel=container.querySelector('#o-menu-pick'); if(!sel) return;
-    var filtered=q?_allMenuItems.filter(function(m){ return m.name.indexOf(q)>=0; }):_allMenuItems;
-    sel.innerHTML='<option value="">选择菜品…</option>'+filtered.map(function(m){
-      return '<option value="'+m.id+'" data-price="'+m.salePrice+'" data-cost="'+m.ingredientCost.toFixed(4)+'" data-name="'+m.name+'">'+m.name+' ¥'+m.salePrice+'</option>';
+  window.menuSearchInput=function(q){
+    var listEl=container.querySelector('#menu-search-list');
+    if(!q.trim()){ listEl.classList.remove('open'); return; }
+    var filtered=menu.filter(function(m){ return m.name.indexOf(q)>=0; });
+    if(!filtered.length){
+      listEl.innerHTML='<div class="sl-item" style="color:var(--text-3)">没有匹配菜品</div>';
+      listEl.classList.add('open'); return;
+    }
+    listEl.innerHTML=filtered.map(function(m){
+      return '<div class="sl-item" onclick="menuPickItem(\''+m.id+'\',\''+m.name+'\','+m.salePrice+','+m.ingredientCost.toFixed(4)+')">'+
+        '<span>'+m.name+'</span>'+
+        '<span class="sl-item-sub">¥'+m.salePrice+'</span>'+
+      '</div>';
     }).join('');
+    listEl.classList.add('open');
+  };
+
+  window.menuPickItem=function(id,name,price,cost){
+    _curMenuItem={ id:id, name:name, salePrice:price, ingredientCost:cost };
+    var selEl=container.querySelector('#menu-selected');
+    if(selEl){ selEl.textContent=name+' ¥'+price; selEl.style.color='var(--text)'; }
+    container.querySelector('#menu-search').value='';
+    container.querySelector('#menu-search-list').classList.remove('open');
   };
 
   container.querySelectorAll('#channel-chips .cat-chip').forEach(function(btn){
@@ -1141,13 +1194,7 @@ function renderNewOrder(container){
   };
 
   var _curMenuItem=null;
-  window.oMenuPicked=function(){
-    var sel=container.querySelector('#o-menu-pick');
-    var opt=sel.options[sel.selectedIndex];
-    if(!opt||!opt.value){ _curMenuItem=null; return; }
-    _curMenuItem={ id:opt.value, name:opt.dataset.name, salePrice:parseFloat(opt.dataset.price)||0, ingredientCost:parseFloat(opt.dataset.cost)||0 };
-  };
-
+  
   window.oItemAdd=function(){
     if(!_curMenuItem){ shake(container.querySelector('#o-menu-pick'),'请选择菜品'); return; }
     var qty=Math.max(1,parseInt(container.querySelector('#o-qty').value)||1);
@@ -1159,6 +1206,9 @@ function renderNewOrder(container){
     if(container.querySelector('#menu-search')) container.querySelector('#menu-search').value='';
     _curMenuItem=null;
     renderItems(); oCalc();
+    var selEl=container.querySelector('#menu-selected');
+    if(selEl){ selEl.textContent='未选择菜品'; selEl.style.color='var(--text-3)'; }
+    container.querySelector('#o-qty').value='1';
   };
 
   function renderItems(){
