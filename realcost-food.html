@@ -430,50 +430,120 @@ var FoodEngine=(function(){
   }
   function _syncDay(dk){ var os=getOrders().filter(function(o){ return o.date===dk; }); var rev=os.reduce(function(a,o){ return a+o.totalRevenue; },0); var prf=os.reduce(function(a,o){ return a+o.profit; },0); setDay(dk,{revenue:rev,profit:prf,grossMargin:rev>0?(prf/rev*100):0,orderCount:os.length,variableCost:rev-prf}); }
 
+  // ── 库存（FIFO批次结构）──
+  // 每条stock记录: { id, name, tier, purchaseUnit, baseUnit,
+  //   batches: [ { batchId, unitCostPerBase, totalBaseQty, purchasePrice, purchaseUnit, addedAt } ]
+  //   totalBaseQty: 所有批次合计（冗余，方便显示）
+  //   unitCostPerBase: 当前FIFO头批次成本（BOM展示用）
+  // }
   function getStock(){ return ld(K.stock)||[]; }
+
   function addStock(item){
     var l=getStock();
-    item.unitCostPerBase=item.baseQtyPerPurchase>0?item.purchasePrice/item.baseQtyPerPurchase:item.purchasePrice;
-    item.totalBaseQty=item.baseQtyPerPurchase*(item.purchaseQty||1);
+    var unitCost=item.baseQtyPerPurchase>0?item.purchasePrice/item.baseQtyPerPurchase:item.purchasePrice;
+    var newQty=item.baseQtyPerPurchase*(item.purchaseQty||1);
+    var newBatch={ batchId:Date.now()+Math.random(), unitCostPerBase:unitCost,
+      totalBaseQty:newQty, purchasePrice:item.purchasePrice,
+      purchaseUnit:item.purchaseUnit, addedAt:Date.now() };
+
     var ex=l.find(function(s){ return s.name===item.name; });
-    if(ex){ ex.totalBaseQty=(parseFloat(ex.totalBaseQty)||0)+item.totalBaseQty; ex.unitCostPerBase=item.unitCostPerBase; ex.purchasePrice=item.purchasePrice; ex.purchaseUnit=item.purchaseUnit; }
-    else { item.id=Date.now()+Math.random(); l.push(item); }
+    if(ex){
+      // FIFO：新批次追加到队列末尾
+      if(!ex.batches) ex.batches=[{batchId:'legacy',unitCostPerBase:ex.unitCostPerBase||0,totalBaseQty:ex.totalBaseQty||0,purchasePrice:ex.purchasePrice||0,purchaseUnit:ex.purchaseUnit||'',addedAt:0}];
+      ex.batches.push(newBatch);
+      // 更新冗余字段
+      ex.totalBaseQty=ex.batches.reduce(function(a,b){ return a+(parseFloat(b.totalBaseQty)||0); },0);
+      ex.unitCostPerBase=ex.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; })
+        ? ex.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; }).unitCostPerBase : unitCost;
+      ex.purchasePrice=item.purchasePrice; ex.purchaseUnit=item.purchaseUnit;
+    } else {
+      item.id=Date.now()+Math.random();
+      item.unitCostPerBase=unitCost;
+      item.totalBaseQty=newQty;
+      item.batches=[newBatch];
+      l.push(item);
+    }
     sv(K.stock,l);
-    addLedger({name:item.name,qty:item.totalBaseQty,totalCost:item.purchasePrice*(item.purchaseQty||1),unit:item.baseUnit||item.purchaseUnit});
+    addLedger({name:item.name,qty:newQty,totalCost:item.purchasePrice*(item.purchaseQty||1),unit:item.baseUnit||item.purchaseUnit});
     var cost=item.purchasePrice*(item.purchaseQty||1);
     if(cost>0){
-      // 扣减现金
       var c=parseFloat(localStorage.getItem('finance_cash'))||0;
       localStorage.setItem('finance_cash',String(c-cost));
-      // 计入货品资产
       var assets=parseFloat(localStorage.getItem('food_goods_assets'))||0;
       localStorage.setItem('food_goods_assets',String(assets+cost));
     }
     return l;
   }
+
   function deleteStock(id){ sv(K.stock,getStock().filter(function(s){ return s.id!=id; })); }
-  function adjustStock(id,delta){ var l=getStock(); var it=l.find(function(s){ return s.id==id; }); if(it) it.totalBaseQty=Math.max(0,(parseFloat(it.totalBaseQty)||0)+delta); sv(K.stock,l); }
-  // 订单出售时按BOM扣减库存（同时减少货品资产账面值）
+
+  function adjustStock(id,delta){
+    var l=getStock(); var it=l.find(function(s){ return s.id==id; });
+    if(!it) return;
+    if(!it.batches) it.batches=[{batchId:'legacy',unitCostPerBase:it.unitCostPerBase||0,totalBaseQty:it.totalBaseQty||0,purchasePrice:it.purchasePrice||0,purchaseUnit:it.purchaseUnit||'',addedAt:0}];
+    if(delta>0){
+      // 补货直接加到最后批次
+      it.batches[it.batches.length-1].totalBaseQty=(parseFloat(it.batches[it.batches.length-1].totalBaseQty)||0)+delta;
+    } else {
+      // 减少：从最早批次开始扣（FIFO）
+      var toDeduct=Math.abs(delta);
+      for(var bi=0;bi<it.batches.length&&toDeduct>0;bi++){
+        var bq=parseFloat(it.batches[bi].totalBaseQty)||0;
+        if(bq>=toDeduct){ it.batches[bi].totalBaseQty=bq-toDeduct; toDeduct=0; }
+        else { toDeduct-=bq; it.batches[bi].totalBaseQty=0; }
+      }
+    }
+    it.totalBaseQty=it.batches.reduce(function(a,b){ return a+(parseFloat(b.totalBaseQty)||0); },0);
+    var firstLive=it.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; });
+    it.unitCostPerBase=firstLive?firstLive.unitCostPerBase:(it.batches.length?it.batches[it.batches.length-1].unitCostPerBase:0);
+    sv(K.stock,l);
+  }
+
+  // FIFO扣减并计算实际成本（返回该批次加权平均成本用于BOM）
+  function _fifoDeduct(stockItem, qty){
+    if(!stockItem.batches) stockItem.batches=[{batchId:'legacy',unitCostPerBase:stockItem.unitCostPerBase||0,totalBaseQty:stockItem.totalBaseQty||0,purchasePrice:stockItem.purchasePrice||0,purchaseUnit:stockItem.purchaseUnit||'',addedAt:0}];
+    var remaining=qty, totalCostDeducted=0;
+    for(var bi=0;bi<stockItem.batches.length&&remaining>0;bi++){
+      var bq=parseFloat(stockItem.batches[bi].totalBaseQty)||0;
+      var uc=parseFloat(stockItem.batches[bi].unitCostPerBase)||0;
+      if(bq<=0) continue;
+      var take=Math.min(bq,remaining);
+      stockItem.batches[bi].totalBaseQty=bq-take;
+      totalCostDeducted+=take*uc;
+      remaining-=take;
+    }
+    stockItem.totalBaseQty=stockItem.batches.reduce(function(a,b){ return a+(parseFloat(b.totalBaseQty)||0); },0);
+    var firstLive=stockItem.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; });
+    stockItem.unitCostPerBase=firstLive?firstLive.unitCostPerBase:(stockItem.batches.length?stockItem.batches[stockItem.batches.length-1].unitCostPerBase:0);
+    return totalCostDeducted;
+  }
+
+  // 订单出售时按BOM FIFO扣减库存
   function deductStockByBOM(menuItems){
     var l=getStock();
     menuItems.forEach(function(orderItem){
-      var menu=getMenu();
-      var menuDish=menu.find(function(m){ return m.id==orderItem.id||m.name===orderItem.name; });
+      var menuList=getMenu();
+      var menuDish=menuList.find(function(m){ return m.id==orderItem.id||m.name===orderItem.name; });
       if(!menuDish||!menuDish.bom) return;
       menuDish.bom.forEach(function(bomLine){
         var qty=bomLine.qty*orderItem.qty;
         var stockItem=l.find(function(s){ return s.name===bomLine.name; });
         if(stockItem){
-          var before=parseFloat(stockItem.totalBaseQty)||0;
-          stockItem.totalBaseQty=Math.max(0,before-qty);
-          // 同步减少货品资产账面值
-          var deductVal=(before-stockItem.totalBaseQty)*(parseFloat(stockItem.unitCostPerBase)||0);
+          var deductedCost=_fifoDeduct(stockItem,qty);
           var assets=parseFloat(localStorage.getItem('food_goods_assets'))||0;
-          localStorage.setItem('food_goods_assets',String(Math.max(0,assets-deductVal)));
+          localStorage.setItem('food_goods_assets',String(Math.max(0,assets-deductedCost)));
         }
       });
     });
     sv(K.stock,l);
+  }
+
+  // 获取某食材当前FIFO头批次单位成本（供BOM实时计算）
+  function getIngFIFOCost(name){
+    var l=getStock(); var it=l.find(function(s){ return s.name===name; });
+    if(!it) return null;
+    if(it.batches){ var b=it.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; }); if(b) return b.unitCostPerBase; }
+    return it.unitCostPerBase||null;
   }
 
   function getAcquire(){ return ld(K.acquire)||[]; }
@@ -496,7 +566,7 @@ var FoodEngine=(function(){
     }).sort(function(a,b){ return b.margin-a.margin; });
   }
 
-  return {getHistory,getDay,setDay,getIngredients,addIngredient,deleteIngredient,updateIngredientCost,getMisc,saveMisc,getMiscTotal,calcFeedback,getMenu,addMenuItem,deleteMenuItem,calcIngCost,getStaff,addStaff,deleteStaff,getOrders,recordOrder,getStock,addStock,deleteStock,adjustStock,deductStockByBOM,getAcquire,addAcquire,deleteAcquire,getMenuRanking,getProfitRanking,getMarginRanking,getMonthStats,fmtM,fmtP};
+  return {getHistory,getDay,setDay,getIngredients,addIngredient,deleteIngredient,updateIngredientCost,getMisc,saveMisc,getMiscTotal,calcFeedback,getMenu,addMenuItem,deleteMenuItem,calcIngCost,getStaff,addStaff,deleteStaff,getOrders,recordOrder,getStock,addStock,deleteStock,adjustStock,deductStockByBOM,getIngFIFOCost,getAcquire,addAcquire,deleteAcquire,getMenuRanking,getProfitRanking,getMarginRanking,getMonthStats,fmtM,fmtP};
 })();
 
 var now=new Date(),YEAR=now.getFullYear(),MONTH=now.getMonth(),TODAY=now.getDate();
@@ -804,13 +874,28 @@ function renderStock(container){
     var val=(parseFloat(s.totalBaseQty)||0)*(parseFloat(s.unitCostPerBase)||0);
     var tierCls=s.tier==='precise'?'tier-precise':s.tier==='misc'?'tier-misc':'tier-bulk';
     var tierTxt=s.tier==='precise'?'精确':s.tier==='misc'?'杂项':'普通';
+    var batches=s.batches||[{unitCostPerBase:s.unitCostPerBase,totalBaseQty:s.totalBaseQty}];
+    var liveBatches=batches.filter(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; });
+    var batchHtml='';
+    if(liveBatches.length>1){
+      batchHtml='<div style="margin-top:7px;padding-top:7px;border-top:1px dashed var(--border)">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.05em;margin-bottom:5px">FIFO批次</div>'+
+        liveBatches.map(function(b,bi){
+          return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0">'+
+            '<span style="color:var(--text-3)">批次'+(bi+1)+(bi===0?' <span style="color:var(--primary);font-weight:800">当前</span>':'')+'</span>'+
+            '<span style="color:var(--text-2);font-weight:700">'+parseFloat(b.totalBaseQty).toFixed(1)+(s.baseUnit||'')+' @ ¥'+parseFloat(b.unitCostPerBase).toFixed(4)+'</span>'+
+          '</div>';
+        }).join('')+
+      '</div>';
+    }
     return '<div class="stock-item">'+
       '<div class="stock-item-header">'+
         '<div><div class="stock-item-name">'+s.name+'</div><div style="margin-top:3px"><span class="ing-tier '+tierCls+'">'+tierTxt+'</span></div></div>'+
         '<div style="text-align:right"><div class="stock-item-qty">'+Number(parseFloat(s.totalBaseQty)||0).toFixed(1)+(s.baseUnit||s.purchaseUnit||'')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">库存剩余</div></div>'+
       '</div>'+
       '<div class="stock-item-body">'+
-        '<div class="stock-item-meta">采购价 ¥'+s.purchasePrice+'/'+s.purchaseUnit+'<br>BOM成本 ¥'+(parseFloat(s.unitCostPerBase)||0).toFixed(4)+'/'+(s.baseUnit||s.purchaseUnit||'')+'</div>'+
+        '<div class="stock-item-meta">采购价 ¥'+s.purchasePrice+'/'+s.purchaseUnit+'<br>当前BOM成本 ¥'+(parseFloat(s.unitCostPerBase)||0).toFixed(4)+'/'+(s.baseUnit||s.purchaseUnit||'')+(liveBatches.length>1?' · '+liveBatches.length+'批':'')+
+        '</div>'+
         '<div style="display:flex;align-items:center;gap:6px">'+
           '<span style="font-size:11px;color:var(--text-3)">账面 '+FoodEngine.fmtM(val)+'</span>'+
           '<div class="stock-item-actions">'+
@@ -820,6 +905,7 @@ function renderStock(container){
           '</div>'+
         '</div>'+
       '</div>'+
+      batchHtml+
     '</div>';
   }
 
@@ -851,11 +937,27 @@ function renderMenu(container){
           '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">分类</label><input id="mc" class="form-inp" type="text" placeholder="热菜 / 主食 / 饮品"></div>'+
         '</div>'+
         '<div class="form-row" style="margin-top:8px">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">售价 (¥)</label><input id="mp" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">分类</label><input id="mc" class="form-inp" type="text" placeholder="热菜 / 主食 / 饮品"></div>'+
           '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">损耗率 (%)</label><input id="mw" class="form-inp" type="number" step="1" min="0" max="50" placeholder="5" oninput="mPrev()"></div>'+
         '</div>'+
 
         '<div class="divider"></div>'+
+        '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">渠道售价</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+          '<div><label class="form-lbl">堂食</label><input id="mp-dine" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+          '<div><label class="form-lbl">美团外卖</label><input id="mp-meituan" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+          '<div><label class="form-lbl">饿了么</label><input id="mp-eleme" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+          '<div><label class="form-lbl">抖音团购</label><input id="mp-douyin" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+        '</div>'+
+        '<div style="background:rgba(184,150,62,0.06);border:1px solid rgba(184,150,62,0.2);border-radius:9px;padding:10px 12px;margin-bottom:2px">'+
+          '<div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">活动/引流价（可选）</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px">'+
+            '<div style="grid-column:span 1"><label class="form-lbl">活动名称</label><input id="mp-promo-name" class="form-inp" type="text" placeholder="限时特惠"></div>'+
+            '<div><label class="form-lbl">活动价</label><input id="mp-promo-price" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00" oninput="mPrev()"></div>'+
+            '<div><label class="form-lbl">截止日期</label><input id="mp-promo-end" class="form-inp" type="date"></div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--text-3);margin-top:6px;margin-bottom:2px">毛利预览基于堂食价。下单时按选择的渠道自动带入对应价格。</div>'+
         '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px">食材 BOM</div>'+
         '<div style="display:flex;gap:7px;align-items:center;margin-bottom:7px">'+
           '<div style="flex:2"><select id="mi-pick" class="form-inp" style="font-size:13px" onchange="mIngPick()">'+ingOpts+'</select></div>'+
@@ -915,7 +1017,7 @@ function renderMenu(container){
       }).join('');
     }
     window.mPrev=function(){
-      var sale=parseFloat(container.querySelector('#mp').value)||0;
+      var sale=parseFloat(container.querySelector('#mp-dine').value)||0;
       var wr=parseFloat(container.querySelector('#mw').value)||0;
       var incM=container.querySelector('#m-misc').checked;
       var ingC=FoodEngine.calcIngCost(_bom,wr),miscC=incM?FoodEngine.getMiscTotal():0,totC=ingC+miscC,prf=sale-totC,mgn=sale>0?(prf/sale*100):0;
@@ -923,20 +1025,34 @@ function renderMenu(container){
       if(sale>0||ingC>0){
         pv.style.display='block';
         var h='<div class="cost-preview">'+
-          '<div class="cp-row"><span class="cp-label">售价</span><span class="cp-val">'+(sale>0?'¥'+sale.toFixed(2):'—')+'</span></div>'+
+          '<div class="cp-row"><span class="cp-label">堂食售价</span><span class="cp-val">'+(sale>0?'¥'+sale.toFixed(2):'—')+'</span></div>'+
           '<div class="cp-row"><span class="cp-label">食材BOM成本</span><span class="cp-val">¥'+ingC.toFixed(3)+'</span></div>'+
           (incM?'<div class="cp-row"><span class="cp-label">调味杂项包</span><span class="cp-val">¥'+miscC.toFixed(2)+'</span></div>':'')+
-          '<div class="cp-row total"><span class="cp-label">单品毛利</span><span class="cp-val '+(prf>=0?'profit':'loss')+'">'+(prf>=0?'¥':'-¥')+Math.abs(prf).toFixed(2)+'</span></div>'+
+          '<div class="cp-row total"><span class="cp-label">单品毛利（堂食）</span><span class="cp-val '+(prf>=0?'profit':'loss')+'">'+(prf>=0?'¥':'-¥')+Math.abs(prf).toFixed(2)+'</span></div>'+
           '<div class="cp-row"><span class="cp-label">毛利率</span><span class="cp-val" style="color:'+(mgn>=60?'var(--green)':mgn>=40?'var(--gold)':'var(--red)')+'">'+FoodEngine.fmtP(mgn)+'</span></div>'+
         '</div>';
         pv.innerHTML=h;
       } else pv.style.display='none';
     };
     window.mSubmit=function(){
-      var n=(container.querySelector('#mn').value||'').trim(),price=parseFloat(container.querySelector('#mp').value)||0;
+      var n=(container.querySelector('#mn').value||'').trim();
+      var dinePr=parseFloat(container.querySelector('#mp-dine').value)||0;
       if(!n){ shake(container.querySelector('#mn')); return; }
-      if(!price){ shake(container.querySelector('#mp')); return; }
-      FoodEngine.addMenuItem({name:n,category:(container.querySelector('#mc').value||'').trim(),salePrice:price,bom:_bom.slice(),wastageRate:parseFloat(container.querySelector('#mw').value)||0,includeMisc:container.querySelector('#m-misc').checked});
+      if(!dinePr){ shake(container.querySelector('#mp-dine')); return; }
+      var prices={
+        dine: dinePr,
+        meituan: parseFloat(container.querySelector('#mp-meituan').value)||dinePr,
+        eleme:   parseFloat(container.querySelector('#mp-eleme').value)||dinePr,
+        douyin:  parseFloat(container.querySelector('#mp-douyin').value)||dinePr,
+      };
+      var promoName=(container.querySelector('#mp-promo-name').value||'').trim();
+      var promoPrice=parseFloat(container.querySelector('#mp-promo-price').value)||0;
+      var promoEnd=container.querySelector('#mp-promo-end').value||'';
+      if(promoPrice>0) prices.promo={name:promoName||'活动价',price:promoPrice,endDate:promoEnd};
+      FoodEngine.addMenuItem({name:n,category:(container.querySelector('#mc').value||'').trim(),
+        salePrice:dinePr, prices:prices,
+        bom:_bom.slice(),wastageRate:parseFloat(container.querySelector('#mw').value)||0,
+        includeMisc:container.querySelector('#m-misc').checked});
       _bom=[]; draw();
       var ok=container.querySelector('#m-ok'); ok.classList.remove('hidden'); setTimeout(function(){ ok.classList.add('hidden'); },2200);
     };
@@ -948,14 +1064,26 @@ function renderMenu(container){
     var tc=m.totalCost||m.ingredientCost||0,mgn=m.salePrice>0?((m.salePrice-tc)/m.salePrice*100):0;
     var mgCls=mgn>=60?'mg-good':mgn>=40?'mg-warn':'mg-bad';
     var barC=mgn>=60?'var(--green)':mgn>=40?'var(--gold)':'var(--red)';
+    var prices=m.prices||{dine:m.salePrice};
+    // 活动价是否有效
+    var promoActive=prices.promo&&prices.promo.price>0&&(!prices.promo.endDate||new Date(prices.promo.endDate)>=new Date());
+    var priceTagsHtml='';
+    var platMap={meituan:'美团',eleme:'饿了么',douyin:'抖音'};
+    Object.keys(platMap).forEach(function(k){
+      if(prices[k]&&prices[k]!==prices.dine){
+        priceTagsHtml+='<span style="font-size:10px;color:var(--text-3);padding:1px 5px;background:var(--bg-surface);border-radius:4px;border:1px solid var(--border)">'+platMap[k]+' ¥'+prices[k]+'</span>';
+      }
+    });
+    if(promoActive) priceTagsHtml+='<span style="font-size:10px;color:var(--gold);padding:1px 5px;background:rgba(184,150,62,0.08);border-radius:4px;border:1px solid rgba(184,150,62,0.2)">'+prices.promo.name+' ¥'+prices.promo.price+'</span>';
     return '<div class="menu-card">'+
       '<div class="menu-card-left">'+
         '<div class="menu-card-name">'+m.name+'</div>'+
         '<div class="menu-card-cat">'+(m.category||'未分类')+'</div>'+
+        (priceTagsHtml?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">'+priceTagsHtml+'</div>':'')+
         '<div class="menu-card-cost-detail">成本 ¥'+tc.toFixed(2)+(m.wastageRate?'+'+m.wastageRate+'%损耗':'')+(m.includeMisc?'+杂项':'')+' / BOM '+m.bom.length+'项</div>'+
         '<div class="margin-bar-wrap"><div class="margin-bar" style="width:'+Math.max(0,Math.min(100,mgn))+'%;background:'+barC+'"></div></div>'+
       '</div>'+
-      '<div class="menu-card-right"><div class="menu-card-price">¥'+m.salePrice+'</div><div class="menu-card-margin '+mgCls+'">'+FoodEngine.fmtP(mgn)+'</div></div>'+
+      '<div class="menu-card-right"><div class="menu-card-price">¥'+m.salePrice+'</div><div style="font-size:10px;color:var(--text-3);margin-top:1px">堂食</div><div class="menu-card-margin '+mgCls+'">'+FoodEngine.fmtP(mgn)+'</div></div>'+
       '<button class="menu-del" onclick="mDel(\''+m.id+'\')">'+I.trash+'</button>'+
     '</div>';
   }
@@ -968,8 +1096,32 @@ function renderMenu(container){
 // ══════════════════════════════════════════════════════
 function renderNewOrder(container){
   var menu=FoodEngine.getMenu(),staff=FoodEngine.getStaff(),orderItems=[];
-  var menuOpts='<option value="">选择菜品</option>'+menu.map(function(m){ var tc=m.totalCost||m.ingredientCost||0; return '<option value="'+m.id+'" data-price="'+m.salePrice+'" data-cost="'+tc.toFixed(4)+'" data-name="'+m.name+'">'+m.name+' ¥'+m.salePrice+'</option>'; }).join('');
+
+  function getChannelPrice(m, channel, platform){
+    var prices=m.prices||{dine:m.salePrice};
+    // 检查活动价是否有效
+    var promoActive=prices.promo&&prices.promo.price>0&&(!prices.promo.endDate||new Date(prices.promo.endDate)>=new Date());
+    if(channel==='takeout'){
+      if(platform==='meituan'&&prices.meituan) return {price:prices.meituan,label:'美团价',promo:promoActive?prices.promo:null};
+      if(platform==='eleme'&&prices.eleme)   return {price:prices.eleme,  label:'饿了么价',promo:promoActive?prices.promo:null};
+      if(platform==='douyin'&&prices.douyin) return {price:prices.douyin, label:'抖音价',promo:promoActive?prices.promo:null};
+      return {price:prices.dine||m.salePrice,label:'外卖价',promo:promoActive?prices.promo:null};
+    }
+    return {price:prices.dine||m.salePrice,label:'堂食价',promo:promoActive?prices.promo:null};
+  }
+
+  function buildMenuOpts(channel, platform){
+    return '<option value="">选择菜品</option>'+menu.map(function(m){
+      var tc=m.totalCost||m.ingredientCost||0;
+      var cp=getChannelPrice(m,channel,platform);
+      return '<option value="'+m.id+'" data-price="'+cp.price+'" data-cost="'+tc.toFixed(4)+'" data-name="'+m.name+'" data-promo="'+(cp.promo?cp.promo.price:'')+'" data-promoname="'+(cp.promo?cp.promo.name:'')+'">'+
+        m.name+' ¥'+cp.price+(cp.promo?' / 活动¥'+cp.promo.price:'')+
+      '</option>';
+    }).join('');
+  }
+
   var staffOpts='<option value="">不分配</option>'+staff.map(function(s){ return '<option value="'+s.id+'" data-rate="'+s.commRate+'">'+s.name+' '+s.commRate+'%</option>'; }).join('');
+
   container.innerHTML='<div>'+
     '<div class="page-title-bar"><span class="page-title-icon">'+I.clip+'</span><span class="page-title-text">新建订单</span></div>'+
     '<p class="page-subtitle">记录一笔销售，自动计算毛利</p>'+
@@ -988,11 +1140,13 @@ function renderNewOrder(container){
     '</div>'+
     '<div class="form-card">'+
       '<div class="section-label">点餐</div>'+
-      '<div style="display:flex;gap:7px;align-items:center;margin-bottom:8px">'+
-        '<div style="flex:2"><select id="o-pick" class="form-inp" onchange="oMenuPick()">'+menuOpts+'</select></div>'+
+      '<div style="display:flex;gap:7px;align-items:center;margin-bottom:4px">'+
+        '<div style="flex:2"><select id="o-pick" class="form-inp" onchange="oMenuPick()"><option value="">选择菜品</option></select></div>'+
         '<div style="width:48px"><input id="o-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:10px 5px;text-align:center"></div>'+
         '<button class="inline-btn primary" onclick="oAdd()">'+I.plus+'</button>'+
       '</div>'+
+      // 活动价提示
+      '<div id="o-promo-hint" style="display:none;font-size:11px;color:var(--gold);padding:5px 8px;background:rgba(184,150,62,0.07);border-radius:7px;margin-bottom:6px"></div>'+
       '<div id="o-items"></div>'+
       (menu.length?'':'<div style="font-size:12px;color:var(--text-3)">请先在菜单管理中添加菜品</div>')+
     '</div>'+
@@ -1012,17 +1166,59 @@ function renderNewOrder(container){
     '<div style="height:20px"></div>'+
   '</div>';
 
+  function getCurrentChannel(){
+    var active=container.querySelector('#cc .cat-chip.active');
+    return active?active.dataset.val:'dine';
+  }
+  function getCurrentPlatform(){
+    var sel=container.querySelector('#o-plat');
+    return sel?sel.value:'';
+  }
+  function refreshMenuOpts(){
+    var ch=getCurrentChannel(),pl=getCurrentPlatform();
+    container.querySelector('#o-pick').innerHTML=buildMenuOpts(ch,pl);
+    _cm=null;
+  }
+
   container.querySelectorAll('#cc .cat-chip').forEach(function(btn){
-    btn.onclick=function(){ container.querySelectorAll('#cc .cat-chip').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); container.querySelector('#pblock').style.display=btn.dataset.val==='takeout'?'block':'none'; oCalc(); };
+    btn.onclick=function(){
+      container.querySelectorAll('#cc .cat-chip').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      container.querySelector('#pblock').style.display=btn.dataset.val==='takeout'?'block':'none';
+      refreshMenuOpts(); oCalc();
+    };
   });
-  window.oPlatChg=function(){ var sel=container.querySelector('#o-plat'),opt=sel.options[sel.selectedIndex]; if(opt.dataset.comm!=='0') container.querySelector('#o-comm').value=opt.dataset.comm; oCalc(); };
+  window.oPlatChg=function(){
+    var sel=container.querySelector('#o-plat'),opt=sel.options[sel.selectedIndex];
+    if(opt.dataset.comm!=='0') container.querySelector('#o-comm').value=opt.dataset.comm;
+    refreshMenuOpts(); oCalc();
+  };
+
+  // 初始化菜品选项
+  refreshMenuOpts();
+
   var _cm=null;
-  window.oMenuPick=function(){ var sel=container.querySelector('#o-pick'),opt=sel.options[sel.selectedIndex]; if(!opt||!opt.value){ _cm=null; return; } _cm={id:opt.value,name:opt.dataset.name,salePrice:parseFloat(opt.dataset.price)||0,totalCost:parseFloat(opt.dataset.cost)||0,ingredientCost:parseFloat(opt.dataset.cost)||0}; };
+  window.oMenuPick=function(){
+    var sel=container.querySelector('#o-pick'),opt=sel.options[sel.selectedIndex];
+    if(!opt||!opt.value){ _cm=null; container.querySelector('#o-promo-hint').style.display='none'; return; }
+    _cm={id:opt.value,name:opt.dataset.name,salePrice:parseFloat(opt.dataset.price)||0,totalCost:parseFloat(opt.dataset.cost)||0,ingredientCost:parseFloat(opt.dataset.cost)||0};
+    // 活动价提示
+    var promoPrice=parseFloat(opt.dataset.promo)||0;
+    var promoHint=container.querySelector('#o-promo-hint');
+    if(promoPrice>0&&opt.dataset.promoname){
+      promoHint.style.display='block';
+      promoHint.innerHTML='活动"'+opt.dataset.promoname+'" 价格 ¥'+promoPrice+
+        ' · <button onclick="usePromoPrice('+promoPrice+')" style="background:none;border:none;cursor:pointer;color:var(--gold);font-weight:800;font-size:11px;font-family:inherit;text-decoration:underline">使用活动价</button>';
+    } else promoHint.style.display='none';
+  };
+  window.usePromoPrice=function(p){ if(_cm) _cm.salePrice=p; };
+
   window.oAdd=function(){
     if(!_cm){ shake(container.querySelector('#o-pick')); return; }
     var q=Math.max(1,parseInt(container.querySelector('#o-qty').value)||1);
     var ex=orderItems.find(function(i){ return i.id===_cm.id; }); if(ex) ex.qty+=q; else orderItems.push(Object.assign({qty:q},_cm));
-    container.querySelector('#o-pick').value=''; container.querySelector('#o-qty').value='1'; _cm=null; rItems(); oCalc();
+    container.querySelector('#o-pick').value=''; container.querySelector('#o-qty').value='1';
+    container.querySelector('#o-promo-hint').style.display='none'; _cm=null; rItems(); oCalc();
   };
   function rItems(){
     container.querySelector('#o-items').innerHTML=orderItems.map(function(it,i){
@@ -1032,7 +1228,7 @@ function renderNewOrder(container){
   window.orderItems=orderItems; window.rItems=rItems;
   window.oCalc=function(){
     if(!orderItems.length){ container.querySelector('#o-prev-card').style.display='none'; return; }
-    var isTakeout=container.querySelector('#cc .cat-chip.active').dataset.val==='takeout';
+    var isTakeout=getCurrentChannel()==='takeout';
     var commRate=isTakeout?(parseFloat(container.querySelector('#o-comm').value)||0):0;
     var packFee=isTakeout?(parseFloat(container.querySelector('#o-pack').value)||0):0;
     var delivFee=isTakeout?(parseFloat(container.querySelector('#o-deli').value)||0):0;
@@ -1054,15 +1250,14 @@ function renderNewOrder(container){
   };
   window.oSubmit=function(){
     if(!orderItems.length){ alert('请先添加菜品'); return; }
-    var isTakeout=container.querySelector('#cc .cat-chip.active').dataset.val==='takeout';
+    var isTakeout=getCurrentChannel()==='takeout';
     var commRate=isTakeout?(parseFloat(container.querySelector('#o-comm').value)||0):0;
     var packFee=isTakeout?(parseFloat(container.querySelector('#o-pack').value)||0):0;
     var delivFee=isTakeout?(parseFloat(container.querySelector('#o-deli').value)||0):0;
     var staffOpt=container.querySelector('#o-staff').options[container.querySelector('#o-staff').selectedIndex];
     var techRate=staffOpt?parseFloat(staffOpt.dataset.rate||0):0;
-    var platform=isTakeout?container.querySelector('#o-plat').value:'';
+    var platform=isTakeout?getCurrentPlatform():'';
     FoodEngine.recordOrder({channel:isTakeout?'takeout':'dine',platform:platform,items:orderItems.map(function(i){ return Object.assign({},i); }),techRate:techRate,commRate:commRate,packFee:packFee,deliveryFee:delivFee});
-    // 按BOM扣减食材库存
     FoodEngine.deductStockByBOM(orderItems.map(function(i){ return Object.assign({},i); }));
     var rev=orderItems.reduce(function(a,i){ return a+i.salePrice*i.qty; },0);
     var ingC=orderItems.reduce(function(a,i){ return a+(i.totalCost||0)*i.qty; },0);
@@ -1091,7 +1286,9 @@ function renderOrders(container){
       return '<div class="order-card'+(isTakeout?' takeout':'')+'">'+
         '<div class="oc-header"><div><div class="oc-name">'+o.items.map(function(i){ return i.name+'×'+i.qty; }).join(' / ')+'</div><div class="oc-date">'+o.date+' · '+(chL[o.channel]||o.channel)+(isTakeout&&o.platform?' · '+(pL[o.platform]||o.platform):'')+'</div></div>'+
         '<div class="oc-profit '+(o.profit>=0?'g':'r')+'">'+(o.profit>=0?'¥':'-¥')+Math.abs(o.profit).toFixed(2)+'</div></div>'+
-        '<div class="oc-tags"><span class="oc-tag '+(isTakeout?'takeout':'dine')+'">'+(chL[o.channel]||o.channel)+'</span><span class="oc-tag">毛利率 '+FoodEngine.fmtP(o.grossMargin)+'</span></div>'+
+        '<div class="oc-tags"><span class="oc-tag '+(isTakeout?'takeout':'dine')+'">'+(chL[o.channel]||o.channel)+'</span>'+
+        (function(){var gm=parseFloat(o.grossMargin)||0;var gmCls=gm>=60?'style="background:rgba(45,125,82,0.08);color:var(--green);border-color:rgba(45,125,82,0.2)"':gm>=40?'style="background:rgba(184,150,62,0.08);color:var(--gold);border-color:rgba(184,150,62,0.2)"':'style="background:rgba(244,63,94,0.08);color:var(--red);border-color:rgba(244,63,94,0.2)"';return '<span class="oc-tag" '+gmCls+'>毛利率 '+FoodEngine.fmtP(gm)+'</span>';})()+
+        '</div>'+
         '<div class="oc-costs">'+
           '<div class="oc-cost-item"><div class="oc-cost-lbl">营收</div><div class="oc-cost-val">¥'+o.totalRevenue.toFixed(2)+'</div></div>'+
           '<div class="oc-cost-item"><div class="oc-cost-lbl">食材</div><div class="oc-cost-val">¥'+o.ingredientCost.toFixed(2)+'</div></div>'+
