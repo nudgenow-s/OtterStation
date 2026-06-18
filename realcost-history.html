@@ -407,7 +407,7 @@ var HISTORY_KEYS = {
 var INVENTORY_KEYS = {
   beauty: 'beauty_m',   // 美业耗材（含产品）
   retail: 'otter_inventory',
-  food:   null,         // 餐饮无库存货品
+  food:   'food_goods_assets',         // 餐饮无库存货品
 };
 var HISTORY_KEY  = HISTORY_KEYS[industry]  || 'otter_history';
 var INVENTORY_KEY= INVENTORY_KEYS[industry];
@@ -445,22 +445,20 @@ function goBack(){ window.location.href = backUrl; }
 //  货品资产计算
 // ══════════════════════════════════════════════════════
 function getGoodsAsset(){
-  var total = 0;
-  if(INVENTORY_KEY) {
-    var inv = load(INVENTORY_KEY) || [];
-    if(industry === 'beauty'){
-    // 美业：耗材按进价×库存（isProduct 的也算）
-      inv.forEach(function(m){ total += (parseFloat(m.totalPrice)||0) * (parseFloat(m.stock)||0);});
-    } else {
-    // 零售：进价×库存数量
-      inv.forEach(function(p){ total += (parseFloat(p.costPrice)||0) * (parseFloat(p.qty)||0);});
-    }
-  }
   if(industry === 'food'){
-    var stock = load('food_stock') || [];
-    stock.forEach(function(s){ total += (parseFloat(s.costPerUnit)|| 0)*(parseFloat(s.qty)||0);});
-    } 
-  return total;
+    return parseFloat(localStorage.getItem('food_goods_assets')) || 0;
+  }
+  if(!INVENTORY_KEY) return 0;
+  var inv = load(INVENTORY_KEY) || [];
+  if(industry === 'beauty'){
+    return inv.reduce(function(a,m){
+      return a + (parseFloat(m.totalPrice)||0)*(parseFloat(m.stock)||0);
+    },0);
+  } else {
+    return inv.reduce(function(a,p){
+      return a + (parseFloat(p.costPrice)||0)*(parseFloat(p.qty)||0);
+    },0);
+   }
   }
 // ══════════════════════════════════════════════════════
 //  待支付列表生成
