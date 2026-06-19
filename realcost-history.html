@@ -446,7 +446,10 @@ function goBack(){ window.location.href = backUrl; }
 // ══════════════════════════════════════════════════════
 function getGoodsAsset(){
   if(industry === 'food'){
-    return parseFloat(localStorage.getItem('food_goods_assets')) || 0;
+    var stock = load('food_stock') || [];
+    return stock.reduce(function(a,s){
+      return a + (parseFloat(s.totalBaseQty) || 0) * (parseFloat(s.unitCostPerBase) || 0);
+    },0);
   }
   if(!INVENTORY_KEY) return 0;
   var inv = load(INVENTORY_KEY) || [];
