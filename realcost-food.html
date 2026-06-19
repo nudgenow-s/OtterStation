@@ -1066,13 +1066,20 @@ function renderMenu(container){
     var mgCls=mgn>=60?'mg-good':mgn>=40?'mg-warn':'mg-bad';
     var barC=mgn>=60?'var(--green)':mgn>=40?'var(--gold)':'var(--red)';
     var prices=m.prices||{dine:m.salePrice};
-    var promoActive=prices.promo&&prices.promo.price>0&&(!prices.promo.endDate||new Date(prices.promo.endDate)>=new Date());
-    var priceTagsHtml='';
+    var now=new Date();
     var platMap={meituan:'美团',eleme:'饿了么',douyin:'抖音'};
+    var priceTagsHtml='';
     Object.keys(platMap).forEach(function(k){
       if(prices[k]&&prices[k]!==prices.dine) priceTagsHtml+='<span style="font-size:10px;color:var(--text-3);padding:1px 5px;background:var(--bg-surface);border-radius:4px;border:1px solid var(--border)">'+platMap[k]+' ¥'+prices[k]+'</span>';
     });
-    if(promoActive) priceTagsHtml+='<span style="font-size:10px;color:var(--gold);padding:1px 5px;background:rgba(184,150,62,0.08);border-radius:4px;border:1px solid rgba(184,150,62,0.2)">'+prices.promo.name+' ¥'+prices.promo.price+'</span>';
+    var promos=prices.promos||{};
+    ['dine','meituan','eleme','douyin'].forEach(function(k){
+      var pr=promos[k];
+      if(pr&&pr.price>0&&(!pr.endDate||new Date(pr.endDate)>=now)){
+        var label=k==='dine'?'堂食':platMap[k]||k;
+        priceTagsHtml+='<span style="font-size:10px;color:var(--gold);padding:1px 5px;background:rgba(184,150,62,0.08);border-radius:4px;border:1px solid rgba(184,150,62,0.2)">'+label+'活动 ¥'+pr.price+'</span>';
+      }
+    });
     return '<div class="menu-card" onclick="openMenuEdit(\''+m.id+'\')" style="cursor:pointer">'+
       '<div class="menu-card-left">'+
         '<div class="menu-card-name">'+m.name+'</div>'+
@@ -1093,96 +1100,49 @@ function renderMenu(container){
     var miscTotal=FoodEngine.getMiscTotal();
     var editBom=m.bom?m.bom.map(function(b){ return Object.assign({},b); }):[];
     var prices=m.prices||{dine:m.salePrice};
+    var promos=prices.promos||{};
+    var now=new Date();
 
     var ingOpts='<option value="">选择食材</option>'+ings.map(function(i){
       return '<option value="'+i.id+'" data-price="'+(i.unitCostCalc||i.pricePerUnit)+'" data-unit="'+i.unit+'">'+i.name+' · ¥'+(i.unitCostCalc||i.pricePerUnit)+'/'+i.unit+'</option>';
     }).join('');
 
-    var sheet=document.querySelector('.sheet');
-    var handle=document.querySelector('.sh-handle');
-
-    // 重用overlay
-    var ov=document.getElementById('overlay');
-    ov.classList.add('open');
-
-    sheet.innerHTML=
-      '<div class="sh-handle"></div>'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
-        '<div style="font-size:18px;font-weight:900;color:var(--text)">'+m.name+'</div>'+
-        '<button onclick="closeSheet()" style="background:none;border:none;cursor:pointer;padding:4px">'+I.x+'</button>'+
-      '</div>'+
-
-      // 基础信息
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
-        '<div><label class="form-lbl">菜品名称</label><input id="edit-mn" class="form-inp" value="'+m.name+'" type="text"></div>'+
-        '<div><label class="form-lbl">分类</label><input id="edit-mc" class="form-inp" value="'+(m.category||'')+'" type="text" placeholder="热菜/主食"></div>'+
-        '<div><label class="form-lbl">损耗率 (%)</label><input id="edit-mw" class="form-inp" value="'+(m.wastageRate||0)+'" type="number" step="1" min="0" max="50" oninput="editPrev()"></div>'+
-        '<div style="display:flex;align-items:flex-end"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding-bottom:2px"><input type="checkbox" id="edit-misc" '+(m.includeMisc?'checked':'')+' onchange="editPrev()" style="accent-color:var(--primary);width:15px;height:15px"><span style="font-size:12px;font-weight:700;color:var(--text-2)">含杂项包 ¥'+miscTotal.toFixed(2)+'</span></label></div>'+
-      '</div>'+
-
-      // 渠道售价
-      '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">渠道售价</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px">'+
-        '<div><label class="form-lbl">堂食</label><input id="edit-dine" class="form-inp" type="number" step="0.01" value="'+(prices.dine||m.salePrice||'')+'" oninput="editPrev()"></div>'+
-        '<div><label class="form-lbl">美团</label><input id="edit-meituan" class="form-inp" type="number" step="0.01" value="'+(prices.meituan||'')+'" placeholder="同堂食"></div>'+
-        '<div><label class="form-lbl">饿了么</label><input id="edit-eleme" class="form-inp" type="number" step="0.01" value="'+(prices.eleme||'')+'" placeholder="同堂食"></div>'+
-        '<div><label class="form-lbl">抖音</label><input id="edit-douyin" class="form-inp" type="number" step="0.01" value="'+(prices.douyin||'')+'" placeholder="同堂食"></div>'+
-      '</div>'+
-
-      // BOM编辑
-      '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">食材 BOM</div>'+
-      '<div id="edit-bom-rows"></div>'+
-      '<div style="display:flex;gap:7px;align-items:center;margin-bottom:7px;margin-top:6px">'+
-        '<div style="flex:2"><select id="edit-ing-pick" class="form-inp" style="font-size:13px" onchange="editIngPick()">'+ingOpts+'</select></div>'+
-        '<div style="width:64px"><input id="edit-ing-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="text-align:center"></div>'+
-        '<span id="edit-ing-unit" style="font-size:12px;color:var(--text-3);min-width:18px"></span>'+
-        '<button class="inline-btn primary" onclick="editBomAdd()" style="height:38px;padding:0 10px">'+I.plus+'</button>'+
-      '</div>'+
-
-      // 成本预览
-      '<div id="edit-prev" style="margin-bottom:12px"></div>'+
-
-      '<div style="display:flex;gap:8px">'+
-        '<button class="form-submit" style="flex:3" onclick="saveMenuEdit(\''+m.id+'\')">保存修改</button>'+
-        '<button onclick="if(confirm(\'确定删除？\')){ FoodEngine.deleteMenuItem(\''+m.id+'\'); closeSheet(); renderMenu(document.getElementById(\'view-menu\')); }" style="flex:1;padding:13px;background:none;border:1.5px solid rgba(244,63,94,0.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--red);cursor:pointer;font-family:inherit">删除</button>'+
+    function promoRow(key, label){
+      var pr=promos[key]||{};
+      return '<div style="display:grid;grid-template-columns:56px 1fr 80px 106px;gap:5px;align-items:center;margin-bottom:6px">'+
+        '<span style="font-size:11px;font-weight:700;color:var(--text-2)">'+label+'</span>'+
+        '<input class="form-inp" id="epr-name-'+key+'" type="text" placeholder="活动名" value="'+(pr.name||'')+'" style="font-size:12px;padding:7px 8px">'+
+        '<input class="form-inp" id="epr-price-'+key+'" type="number" step="0.01" min="0" placeholder="活动价" value="'+(pr.price||'')+'" style="font-size:12px;padding:7px 8px;text-align:right">'+
+        '<input class="form-inp" id="epr-end-'+key+'" type="date" value="'+(pr.endDate||'')+'" style="font-size:12px;padding:7px 8px">'+
       '</div>';
-
-    // 渲染BOM行（可删除）
-    function renderEditBomRows(){
-      document.getElementById('edit-bom-rows').innerHTML=editBom.map(function(it,i){
-        return '<div class="bom-row">'+
-          '<div class="bom-name">'+it.name+'</div>'+
-          '<div class="bom-qty">'+it.qty+it.unit+'</div>'+
-          '<div class="bom-cost">¥'+it.cost.toFixed(3)+'</div>'+
-          '<button class="bom-del" onclick="editBomDel('+i+')">'+I.x+'</button>'+
-        '</div>';
-      }).join('');
-      editPrev();
     }
-    renderEditBomRows();
 
+    // 先定义所有函数再写 innerHTML，避免 onclick 找不到函数
     var _editCurIng=null;
+
     window.editIngPick=function(){
-      var sel=document.getElementById('edit-ing-pick'),opt=sel.options[sel.selectedIndex];
-      if(!opt||!opt.value){ _editCurIng=null; document.getElementById('edit-ing-unit').textContent=''; return; }
+      var sel=document.getElementById('edit-ing-pick'),opt=sel&&sel.options[sel.selectedIndex];
+      if(!opt||!opt.value){ _editCurIng=null; var u=document.getElementById('edit-ing-unit'); if(u) u.textContent=''; return; }
       _editCurIng={id:opt.value,name:opt.text.split(' · ')[0],pricePerUnit:parseFloat(opt.dataset.price)||0,unit:opt.dataset.unit||''};
-      document.getElementById('edit-ing-unit').textContent=_editCurIng.unit;
+      var u=document.getElementById('edit-ing-unit'); if(u) u.textContent=_editCurIng.unit;
     };
     window.editBomAdd=function(){
-      if(!_editCurIng){ shake(document.getElementById('edit-ing-pick')); return; }
-      var q=parseFloat(document.getElementById('edit-ing-qty').value)||0;
-      if(!q){ shake(document.getElementById('edit-ing-qty')); return; }
+      if(!_editCurIng){ var el=document.getElementById('edit-ing-pick'); if(el) shake(el); return; }
+      var qEl=document.getElementById('edit-ing-qty'),q=parseFloat(qEl&&qEl.value)||0;
+      if(!q){ if(qEl) shake(qEl); return; }
       editBom.push({ingredientId:_editCurIng.id,name:_editCurIng.name,qty:q,unit:_editCurIng.unit,cost:_editCurIng.pricePerUnit*q});
-      document.getElementById('edit-ing-pick').value=''; document.getElementById('edit-ing-qty').value='';
-      document.getElementById('edit-ing-unit').textContent=''; _editCurIng=null;
+      var pick=document.getElementById('edit-ing-pick'); if(pick) pick.value='';
+      if(qEl) qEl.value='';
+      var u=document.getElementById('edit-ing-unit'); if(u) u.textContent='';
+      _editCurIng=null;
       renderEditBomRows();
     };
     window.editBomDel=function(i){ editBom.splice(i,1); renderEditBomRows(); };
     window.editPrev=function(){
       var sale=parseFloat((document.getElementById('edit-dine')||{}).value)||0;
       var wr=parseFloat((document.getElementById('edit-mw')||{}).value)||0;
-      var incM=(document.getElementById('edit-misc')||{}).checked;
-      var ingC=FoodEngine.calcIngCost(editBom,wr),miscC=incM?FoodEngine.getMiscTotal():0,totC=ingC+miscC,prf=sale-totC,mgn=sale>0?(prf/sale*100):0;
+      var incM=!!(document.getElementById('edit-misc')||{}).checked;
+      var ingC=FoodEngine.calcIngCost(editBom,wr),miscC=incM?FoodEngine.getMiscTotal():0,prf=sale-(ingC+miscC),mgn=sale>0?(prf/sale*100):0;
       var el=document.getElementById('edit-prev'); if(!el) return;
       if(ingC>0||sale>0){
         var col=mgn>=60?'var(--green)':mgn>=40?'var(--gold)':'var(--red)';
@@ -1194,26 +1154,92 @@ function renderMenu(container){
         '</div>';
       } else el.innerHTML='';
     };
-    window.saveMenuEdit=function(id){
+    window.saveMenuEdit=function(){
       var n=(document.getElementById('edit-mn').value||'').trim();
       var dineP=parseFloat(document.getElementById('edit-dine').value)||0;
-      if(!n||!dineP) return;
+      if(!n){ var el=document.getElementById('edit-mn'); if(el) shake(el); return; }
+      if(!dineP){ var el2=document.getElementById('edit-dine'); if(el2) shake(el2); return; }
       var newPrices={
         dine:dineP,
         meituan:parseFloat(document.getElementById('edit-meituan').value)||dineP,
         eleme:  parseFloat(document.getElementById('edit-eleme').value)||dineP,
         douyin: parseFloat(document.getElementById('edit-douyin').value)||dineP,
       };
-      if(m.prices&&m.prices.promo) newPrices.promo=m.prices.promo;
-      FoodEngine.updateMenuItem(id,{
-        name:n, category:(document.getElementById('edit-mc').value||'').trim(),
-        salePrice:dineP, prices:newPrices, bom:editBom.slice(),
-        wastageRate:parseFloat(document.getElementById('edit-mw').value)||0,
-        includeMisc:(document.getElementById('edit-misc')||{}).checked,
+      var newPromos={};
+      ['dine','meituan','eleme','douyin'].forEach(function(k){
+        var pp=parseFloat(document.getElementById('epr-price-'+k).value)||0;
+        if(pp>0) newPromos[k]={name:(document.getElementById('epr-name-'+k).value||'活动价').trim(),price:pp,endDate:document.getElementById('epr-end-'+k).value||''};
       });
+      if(Object.keys(newPromos).length) newPrices.promos=newPromos;
+      FoodEngine.updateMenuItem(menuId,{name:n,category:(document.getElementById('edit-mc').value||'').trim(),salePrice:dineP,prices:newPrices,bom:editBom.slice(),wastageRate:parseFloat(document.getElementById('edit-mw').value)||0,includeMisc:!!(document.getElementById('edit-misc')||{}).checked});
       closeSheet();
       renderMenu(document.getElementById('view-menu'));
     };
+    window.deleteMenuEdit=function(){
+      if(!confirm('确定删除「'+m.name+'」？')) return;
+      FoodEngine.deleteMenuItem(menuId);
+      closeSheet();
+      renderMenu(document.getElementById('view-menu'));
+    };
+
+    // 函数定义完成后安全写 innerHTML
+    var ov=document.getElementById('overlay');
+    ov.classList.add('open');
+    document.querySelector('.sheet').innerHTML=
+      '<div class="sh-handle"></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+        '<div style="font-size:17px;font-weight:900;color:var(--text)">'+m.name+'</div>'+
+        '<button onclick="closeSheet()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center">'+I.x+'</button>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+        '<div><label class="form-lbl">菜品名称</label><input id="edit-mn" class="form-inp" value="'+m.name+'" type="text"></div>'+
+        '<div><label class="form-lbl">分类</label><input id="edit-mc" class="form-inp" value="'+(m.category||'')+'" type="text" placeholder="热菜/主食"></div>'+
+        '<div><label class="form-lbl">损耗率 (%)</label><input id="edit-mw" class="form-inp" value="'+(m.wastageRate||0)+'" type="number" step="1" min="0" max="50" oninput="editPrev()"></div>'+
+        '<div style="display:flex;align-items:flex-end"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding-bottom:4px"><input type="checkbox" id="edit-misc" '+(m.includeMisc?'checked':'')+' onchange="editPrev()" style="accent-color:var(--primary);width:15px;height:15px"><span style="font-size:12px;font-weight:700;color:var(--text-2)">含杂项包 ¥'+miscTotal.toFixed(2)+'</span></label></div>'+
+      '</div>'+
+      '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">渠道售价</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px">'+
+        '<div><label class="form-lbl">堂食</label><input id="edit-dine" class="form-inp" type="number" step="0.01" value="'+(prices.dine||m.salePrice||'')+'" oninput="editPrev()"></div>'+
+        '<div><label class="form-lbl">美团</label><input id="edit-meituan" class="form-inp" type="number" step="0.01" value="'+(prices.meituan||'')+'" placeholder="同堂食"></div>'+
+        '<div><label class="form-lbl">饿了么</label><input id="edit-eleme" class="form-inp" type="number" step="0.01" value="'+(prices.eleme||'')+'" placeholder="同堂食"></div>'+
+        '<div><label class="form-lbl">抖音</label><input id="edit-douyin" class="form-inp" type="number" step="0.01" value="'+(prices.douyin||'')+'" placeholder="同堂食"></div>'+
+      '</div>'+
+      '<div style="background:rgba(184,150,62,0.05);border:1px solid rgba(184,150,62,0.18);border-radius:10px;padding:11px 12px;margin-bottom:12px">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px">各平台活动价</div>'+
+        '<div style="display:grid;grid-template-columns:56px 1fr 80px 106px;gap:5px;margin-bottom:6px">'+
+          '<span></span>'+
+          '<span style="font-size:10px;font-weight:700;color:var(--text-3);text-align:center">活动名称</span>'+
+          '<span style="font-size:10px;font-weight:700;color:var(--text-3);text-align:center">活动价</span>'+
+          '<span style="font-size:10px;font-weight:700;color:var(--text-3);text-align:center">截止日期</span>'+
+        '</div>'+
+        promoRow('dine','堂食')+
+        promoRow('meituan','美团')+
+        promoRow('eleme','饿了么')+
+        promoRow('douyin','抖音')+
+        '<div style="font-size:10px;color:var(--text-3);margin-top:4px">填写活动价即启用；截止日期留空则长期有效；活动有效期内新建订单将自动使用活动价</div>'+
+      '</div>'+
+      '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">食材 BOM</div>'+
+      '<div id="edit-bom-rows"></div>'+
+      '<div style="display:flex;gap:7px;align-items:center;margin-top:6px;margin-bottom:6px">'+
+        '<div style="flex:2"><select id="edit-ing-pick" class="form-inp" style="font-size:13px" onchange="editIngPick()">'+ingOpts+'</select></div>'+
+        '<div style="width:64px"><input id="edit-ing-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="text-align:center"></div>'+
+        '<span id="edit-ing-unit" style="font-size:12px;color:var(--text-3);min-width:18px"></span>'+
+        '<button class="inline-btn primary" onclick="editBomAdd()" style="height:38px;padding:0 10px">'+I.plus+'</button>'+
+      '</div>'+
+      '<div id="edit-prev" style="margin-bottom:12px"></div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="form-submit" style="flex:3" onclick="saveMenuEdit()">保存修改</button>'+
+        '<button onclick="deleteMenuEdit()" style="flex:1;padding:13px;background:none;border:1.5px solid rgba(244,63,94,0.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--red);cursor:pointer;font-family:inherit">删除</button>'+
+      '</div>';
+
+    function renderEditBomRows(){
+      var el=document.getElementById('edit-bom-rows'); if(!el) return;
+      el.innerHTML=editBom.map(function(it,i){
+        return '<div class="bom-row"><div class="bom-name">'+it.name+'</div><div class="bom-qty">'+it.qty+it.unit+'</div><div class="bom-cost">¥'+it.cost.toFixed(3)+'</div><button class="bom-del" onclick="editBomDel('+i+')">'+I.x+'</button></div>';
+      }).join('');
+      editPrev();
+    }
+    renderEditBomRows();
   };
 
   draw();
@@ -1227,23 +1253,29 @@ function renderNewOrder(container){
 
   function getChannelPrice(m, channel, platform){
     var prices=m.prices||{dine:m.salePrice};
-    // 检查活动价是否有效
-    var promoActive=prices.promo&&prices.promo.price>0&&(!prices.promo.endDate||new Date(prices.promo.endDate)>=new Date());
-    if(channel==='takeout'){
-      if(platform==='meituan'&&prices.meituan) return {price:prices.meituan,label:'美团价',promo:promoActive?prices.promo:null};
-      if(platform==='eleme'&&prices.eleme)   return {price:prices.eleme,  label:'饿了么价',promo:promoActive?prices.promo:null};
-      if(platform==='douyin'&&prices.douyin) return {price:prices.douyin, label:'抖音价',promo:promoActive?prices.promo:null};
-      return {price:prices.dine||m.salePrice,label:'外卖价',promo:promoActive?prices.promo:null};
+    var promos=prices.promos||{};
+    var now=new Date();
+    // 取该渠道/平台的活动价（有效期内自动启用）
+    function getPromo(key){
+      var pr=promos[key];
+      return (pr&&pr.price>0&&(!pr.endDate||new Date(pr.endDate)>=now))?pr:null;
     }
-    return {price:prices.dine||m.salePrice,label:'堂食价',promo:promoActive?prices.promo:null};
+    if(channel==='takeout'){
+      var platKey=platform; // 'meituan'/'eleme'/'douyin'
+      var basePrice=prices[platKey]||prices.dine||m.salePrice;
+      var promo=getPromo(platKey);
+      return {price:promo?promo.price:basePrice, label:(promo?'活动':'')+(platKey==='meituan'?'美团':platKey==='eleme'?'饿了么':platKey==='douyin'?'抖音':'外卖')+'价', promoActive:!!promo, promoName:promo?promo.name:''};
+    }
+    var promo=getPromo('dine');
+    return {price:promo?promo.price:(prices.dine||m.salePrice), label:promo?'活动价':'堂食价', promoActive:!!promo, promoName:promo?promo.name:''};
   }
 
   function buildMenuOpts(channel, platform){
     return '<option value="">选择菜品</option>'+menu.map(function(m){
       var tc=m.totalCost||m.ingredientCost||0;
       var cp=getChannelPrice(m,channel,platform);
-      return '<option value="'+m.id+'" data-price="'+cp.price+'" data-cost="'+tc.toFixed(4)+'" data-name="'+m.name+'" data-promo="'+(cp.promo?cp.promo.price:'')+'" data-promoname="'+(cp.promo?cp.promo.name:'')+'">'+
-        m.name+' ¥'+cp.price+(cp.promo?' / 活动¥'+cp.promo.price:'')+
+      return '<option value="'+m.id+'" data-price="'+cp.price+'" data-cost="'+tc.toFixed(4)+'" data-name="'+m.name+'" data-promoactive="'+(cp.promoActive?'1':'')+'" data-promoname="'+cp.promoName+'">'+
+        m.name+' ¥'+cp.price+(cp.promoActive?' ['+cp.promoName+']':'')+
       '</option>';
     }).join('');
   }
@@ -1327,28 +1359,19 @@ function renderNewOrder(container){
 
   var _cm=null;
   window.oMenuPick=function(){
-    var sel=container.querySelector('#o-pick'),opt=sel.options[sel.selectedIndex];
+    var sel=container.querySelector('#o-pick'),opt=sel&&sel.options[sel.selectedIndex];
     if(!opt||!opt.value){ _cm=null; container.querySelector('#o-promo-hint').style.display='none'; return; }
     _cm={id:opt.value,name:opt.dataset.name,salePrice:parseFloat(opt.dataset.price)||0,totalCost:parseFloat(opt.dataset.cost)||0,ingredientCost:parseFloat(opt.dataset.cost)||0};
-    // 活动价提示
-    var promoPrice=parseFloat(opt.dataset.promo)||0;
-    var promoHint=container.querySelector('#o-promo-hint');
-    if(promoPrice>0&&opt.dataset.promoname){
-      promoHint.style.display='block';
-      promoHint.innerHTML='活动"'+opt.dataset.promoname+'" 价格 ¥'+promoPrice+
-        ' · <button onclick="usePromoPrice('+promoPrice+')" style="background:none;border:none;cursor:pointer;color:var(--gold);font-weight:800;font-size:11px;font-family:inherit;text-decoration:underline">使用活动价</button>';
-    } else promoHint.style.display='none';
-  };
-  window.usePromoPrice=function(p){
-    if(!_cm) return;
-    _cm.salePrice=p;
-    // 更新提示行为"已使用"状态
     var hint=container.querySelector('#o-promo-hint');
-    if(hint){
-      hint.style.background='rgba(45,125,82,0.08)';
+    if(opt.dataset.promoactive==='1'&&opt.dataset.promoname){
+      hint.style.display='block';
+      hint.style.background='rgba(45,125,82,0.07)';
       hint.style.color='var(--green)';
-      hint.style.borderColor='rgba(45,125,82,0.2)';
-      hint.innerHTML=I.check+' 活动价 ¥'+p+' 已生效，下次点击添加将使用此价格';
+      hint.style.border='1px solid rgba(45,125,82,0.2)';
+      hint.style.borderRadius='7px';
+      hint.innerHTML=I.check+' 「'+opt.dataset.promoname+'」活动价 ¥'+parseFloat(opt.dataset.price).toFixed(2)+' 已自动生效';
+    } else {
+      hint.style.display='none';
     }
   };
 
