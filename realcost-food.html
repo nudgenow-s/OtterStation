@@ -540,12 +540,25 @@ var FoodEngine=(function(){
     sv(K.stock,l);
   }
 
-  // 获取某食材当前FIFO头批次单位成本（供BOM实时计算）
-  function getIngFIFOCost(name){
-    var l=getStock(); var it=l.find(function(s){ return s.name===name; });
-    if(!it) return null;
-    if(it.batches){ var b=it.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; }); if(b) return b.unitCostPerBase; }
-    return it.unitCostPerBase||null;
+  // 获取食材当前实时单位成本：优先读stock FIFO头批次，fallback到ingredients静态价
+  function getLiveIngPrice(ingName){
+    var l=getStock();
+    var it=l.find(function(s){ return s.name===ingName; });
+    if(it){
+      if(it.batches){
+        var head=it.batches.find(function(b){ return (parseFloat(b.totalBaseQty)||0)>0; });
+        if(head) return parseFloat(head.unitCostPerBase)||0;
+      }
+      if(parseFloat(it.unitCostPerBase)||0) return parseFloat(it.unitCostPerBase);
+    }
+    return null; // 无库存记录时返回null，调用方fallback到ingredients
+  }
+
+  // 获取食材单位（从stock或ingredients）
+  function getIngUnit(ingName, ingId){
+    var ings=getIngredients();
+    var ing=ingId?ings.find(function(i){ return i.id==ingId; }):ings.find(function(i){ return i.name===ingName; });
+    return ing?ing.unit:'';
   }
 
   function getAcquire(){ return ld(K.acquire)||[]; }
@@ -568,7 +581,7 @@ var FoodEngine=(function(){
     }).sort(function(a,b){ return b.margin-a.margin; });
   }
 
-  return {getHistory,getDay,setDay,getIngredients,addIngredient,deleteIngredient,updateIngredientCost,getMisc,saveMisc,getMiscTotal,calcFeedback,getMenu,addMenuItem,updateMenuItem,deleteMenuItem,calcIngCost,getStaff,addStaff,deleteStaff,getOrders,recordOrder,getStock,addStock,deleteStock,adjustStock,deductStockByBOM,getIngFIFOCost,getAcquire,addAcquire,deleteAcquire,getMenuRanking,getProfitRanking,getMarginRanking,getMonthStats,fmtM,fmtP};
+  return {getHistory,getDay,setDay,getIngredients,addIngredient,deleteIngredient,updateIngredientCost,getMisc,saveMisc,getMiscTotal,calcFeedback,getMenu,addMenuItem,updateMenuItem,deleteMenuItem,calcIngCost,getStaff,addStaff,deleteStaff,getOrders,recordOrder,getStock,addStock,deleteStock,adjustStock,deductStockByBOM,getLiveIngPrice,getAcquire,addAcquire,deleteAcquire,getMenuRanking,getProfitRanking,getMarginRanking,getMonthStats,fmtM,fmtP};
 })();
 
 var now=new Date(),YEAR=now.getFullYear(),MONTH=now.getMonth(),TODAY=now.getDate();
@@ -925,7 +938,11 @@ function renderMenu(container){
     var cats=['all']; menu.forEach(function(m){ if(m.category&&cats.indexOf(m.category)<0) cats.push(m.category); });
     var filtered=_catFilter==='all'?menu:menu.filter(function(m){ return m.category===_catFilter; });
     var ingOpts='<option value="">选择食材</option>'+ings.map(function(i){
-      return '<option value="'+i.id+'" data-price="'+(i.unitCostCalc||i.pricePerUnit)+'" data-unit="'+i.unit+'">'+i.name+' · ¥'+(i.unitCostCalc||i.pricePerUnit)+'/'+i.unit+'</option>';
+      var livePrice=FoodEngine.getLiveIngPrice(i.name);
+      var price=livePrice!==null?livePrice:(i.unitCostCalc||i.pricePerUnit);
+      var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
+      return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
+    }).join('');
     }).join('');
 
     container.innerHTML=
@@ -1104,7 +1121,11 @@ function renderMenu(container){
     var now=new Date();
 
     var ingOpts='<option value="">选择食材</option>'+ings.map(function(i){
-      return '<option value="'+i.id+'" data-price="'+(i.unitCostCalc||i.pricePerUnit)+'" data-unit="'+i.unit+'">'+i.name+' · ¥'+(i.unitCostCalc||i.pricePerUnit)+'/'+i.unit+'</option>';
+      var livePrice=FoodEngine.getLiveIngPrice(i.name);
+      var price=livePrice!==null?livePrice:(i.unitCostCalc||i.pricePerUnit);
+      var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
+      return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
+    }).join('');
     }).join('');
 
     function promoRow(key, label){
