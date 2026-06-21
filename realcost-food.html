@@ -277,6 +277,61 @@ body { font-family:'PingFang SC','Helvetica Neue',sans-serif; background:var(--b
 .cat-filter-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
 .cat-filter-btn { padding:5px 11px; border-radius:20px; border:1px solid var(--border-md); background:var(--bg-card); font-size:11px; font-weight:700; color:var(--text-2); cursor:pointer; font-family:inherit; }
 .cat-filter-btn.active { background:var(--text); border-color:var(--text); color:#fff; }
+
+/* ══════════════════════════════════════════════
+   通用搜索选择器 (IngPicker / MenuPicker)
+══════════════════════════════════════════════ */
+.picker-wrap { position:relative; }
+.picker-search {
+  width:100%; padding:10px 36px 10px 12px; border:1px solid var(--border-md); border-radius:9px;
+  font-size:14px; font-family:inherit; outline:none; color:var(--text);
+  background:var(--bg-input); transition:border-color .2s,box-shadow .2s;
+}
+.picker-search:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(155,35,53,0.06); }
+.picker-search::placeholder { color:var(--text-3); }
+.picker-clear {
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:var(--text-3);
+  display:none; padding:2px; line-height:1;
+}
+.picker-clear svg { width:14px; height:14px; stroke:var(--text-3); }
+.picker-dropdown {
+  display:none; position:absolute; left:0; right:0; top:calc(100% + 4px);
+  background:var(--bg-card); border:1px solid var(--border-md); border-radius:11px;
+  box-shadow:0 8px 24px rgba(107,66,38,0.14); z-index:300;
+  max-height:240px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.picker-dropdown.open { display:block; }
+.picker-item {
+  display:flex; align-items:center; gap:10px; padding:11px 14px;
+  cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s;
+}
+.picker-item:last-child { border-bottom:none; }
+.picker-item:active, .picker-item.highlighted { background:var(--bg-surface); }
+.picker-item-main { flex:1; min-width:0; }
+.picker-item-name { font-size:13px; font-weight:800; color:var(--text); }
+.picker-item-sub  { font-size:11px; color:var(--text-3); margin-top:2px; }
+.picker-item-right { text-align:right; flex-shrink:0; }
+.picker-item-price { font-size:13px; font-weight:800; color:var(--primary); }
+.picker-item-stock { font-size:10px; color:var(--text-3); margin-top:1px; }
+.picker-item-promo { font-size:10px; color:var(--gold); font-weight:700; }
+.picker-empty { padding:16px 14px; font-size:13px; color:var(--text-3); text-align:center; }
+.picker-cat-row { display:flex; gap:5px; flex-wrap:wrap; padding:8px 10px; border-bottom:1px solid var(--border); }
+.picker-cat-btn {
+  padding:3px 10px; border-radius:20px; border:1px solid var(--border-md);
+  background:none; font-size:11px; font-weight:700; color:var(--text-3);
+  cursor:pointer; font-family:inherit;
+}
+.picker-cat-btn.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.picker-selected-tag {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 10px; background:rgba(155,35,53,0.08);
+  border:1px solid rgba(155,35,53,0.2); border-radius:7px;
+  font-size:12px; font-weight:700; color:var(--primary); margin-top:6px;
+}
+.picker-selected-tag button { background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; }
+.picker-selected-tag svg { width:12px; height:12px; stroke:var(--primary); }
+
 </style>
 </head>
 <body>
@@ -373,6 +428,177 @@ var I = {
 };
 
 // ── 主题 ──
+
+// ══════════════════════════════════════════════════════
+//  通用搜索选择器工厂
+// ══════════════════════════════════════════════════════
+
+
+function createIngPicker(wrapId, qtyId, unitId, previewId, onSelect){
+  var wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  var searchEl=wrap.querySelector('.picker-search');
+  var clearBtn=wrap.querySelector('.picker-clear');
+  var dropdown=wrap.querySelector('.picker-dropdown');
+  var selectedEl=wrap.querySelector('.picker-selected');
+  var _sel=null, _q='';
+
+  function getData(){
+    return FoodEngine.getIngredients().map(function(i){
+      var lp=FoodEngine.getLiveIngPrice(i.name);
+      var price=lp!==null?lp:(i.unitCostCalc||i.pricePerUnit);
+      var stock=FoodEngine.getStock().find(function(s){ return s.name===i.name; });
+      var stockQty=stock?(parseFloat(stock.totalBaseQty)||0).toFixed(1)+(stock.baseUnit||stock.purchaseUnit||''):null;
+      return {id:i.id,name:i.name,unit:i.unit,price:price,stockQty:stockQty,livePrice:lp!==null};
+    });
+  }
+
+  function doSelect(ingId){
+    var data=getData();
+    var ing=data.find(function(d){ return String(d.id)===String(ingId); });
+    if(!ing) return;
+    _sel={id:ing.id,name:ing.name,pricePerUnit:ing.price,unit:ing.unit};
+    searchEl.value=''; clearBtn.style.display='none';
+    dropdown.classList.remove('open');
+    if(selectedEl){
+      selectedEl.innerHTML='<span class="picker-selected-tag">'+ing.name+
+        ' · ¥'+parseFloat(ing.price).toFixed(4)+'/'+ing.unit+
+        '<button class="ptag-clear" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;margin-left:2px">'+
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+
+        '</button></span>';
+      selectedEl.querySelector('.ptag-clear').onclick=function(){ doClear(); };
+    }
+    var unitEl=document.getElementById(unitId); if(unitEl) unitEl.textContent=ing.unit;
+    if(onSelect) onSelect(_sel);
+  }
+
+  function doClear(){
+    _sel=null; _q=''; searchEl.value=''; clearBtn.style.display='none';
+    dropdown.classList.remove('open');
+    if(selectedEl) selectedEl.innerHTML='';
+    var unitEl=document.getElementById(unitId); if(unitEl) unitEl.textContent='';
+  }
+
+  function renderList(){
+    var data=getData();
+    var q=_q.trim().toLowerCase();
+    var filtered=q?data.filter(function(d){ return d.name.toLowerCase().indexOf(q)>=0; }):data;
+    dropdown.innerHTML = filtered.length ? filtered.map(function(d){
+      var el='<div class="picker-item" data-ingid="'+d.id+'">' +
+        '<div class="picker-item-main">' +
+          '<div class="picker-item-name">'+d.name+'</div>' +
+          (d.stockQty?'<div class="picker-item-sub">库存 '+d.stockQty+'</div>':'<div class="picker-item-sub" style="color:var(--red)">无库存记录</div>')+
+        '</div>' +
+        '<div class="picker-item-right">' +
+          '<div class="picker-item-price">¥'+parseFloat(d.price).toFixed(4)+'/'+d.unit+'</div>' +
+          (d.livePrice?'<div class="picker-item-stock">当前批次</div>':'')+
+        '</div>' +
+      '</div>';
+      return el;
+    }).join('') : '<div class="picker-empty">没有匹配的食材</div>';
+    dropdown.classList.add('open');
+  }
+
+  dropdown.addEventListener('click', function(e){
+    var item=e.target.closest('.picker-item');
+    if(item) doSelect(item.dataset.ingid);
+  });
+  searchEl.addEventListener('input',function(){
+    _q=this.value; _sel=null;
+    clearBtn.style.display=_q?'flex':'none';
+    if(selectedEl) selectedEl.innerHTML='';
+    var unitEl=document.getElementById(unitId); if(unitEl) unitEl.textContent='';
+    renderList();
+  });
+  searchEl.addEventListener('focus', function(){ renderList(); });
+  searchEl.addEventListener('picker-clear', function(){ doClear(); });
+  clearBtn.addEventListener('click', function(){ doClear(); });
+  document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) dropdown.classList.remove('open'); }, true);
+  wrap._getSelected=function(){ return _sel; };
+  wrap._clear=doClear;
+  wrap.dataset.unitid=unitId;
+}
+
+function createMenuPicker(wrapId, getDataFn, onSelect){
+  var wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  var searchEl=wrap.querySelector('.picker-search');
+  var clearBtn=wrap.querySelector('.picker-clear');
+  var dropdown=wrap.querySelector('.picker-dropdown');
+  var selectedEl=wrap.querySelector('.picker-selected');
+  var _q='', _cat='all';
+
+  function renderList(){
+    var data=getDataFn();
+    var q=_q.trim().toLowerCase();
+    var filtered=q?data.filter(function(d){ return d.name.toLowerCase().indexOf(q)>=0||(d.category||'').toLowerCase().indexOf(q)>=0; }):data;
+    if(_cat!=='all') filtered=filtered.filter(function(d){ return d.category===_cat; });
+    var cats=['all'];
+    data.forEach(function(d){ if(d.category&&cats.indexOf(d.category)<0) cats.push(d.category); });
+    var catHtml=cats.length>1?'<div class="picker-cat-row">'+cats.map(function(c){
+      return '<button class="picker-cat-btn'+(c===_cat?' active':'')+'" data-cat="'+c+'">'+(c==='all'?'全部':c)+'</button>';
+    }).join('')+'</div>':'';
+    var itemsHtml=filtered.length?filtered.map(function(d){
+      return '<div class="picker-item" data-dishid="'+d.id+'">' +
+        '<div class="picker-item-main">' +
+          '<div class="picker-item-name">'+d.name+'</div>' +
+          '<div class="picker-item-sub">'+(d.category||'未分类')+'</div>' +
+        '</div>' +
+        '<div class="picker-item-right">' +
+          '<div class="picker-item-price">¥'+d.price+'</div>' +
+          (d.promoActive?'<div class="picker-item-promo">'+d.promoName+'</div>':'')+
+        '</div>' +
+      '</div>';
+    }).join(''):'<div class="picker-empty">没有匹配的菜品</div>';
+    dropdown.innerHTML=catHtml+itemsHtml;
+    dropdown.classList.add('open');
+  }
+
+  function doSelect(dishId){
+    var data=getDataFn();
+    var d=data.find(function(x){ return String(x.id)===String(dishId); });
+    if(!d) return;
+    searchEl.value=''; clearBtn.style.display='none';
+    dropdown.classList.remove('open');
+    if(selectedEl){
+      selectedEl.innerHTML='<span class="picker-selected-tag">'+d.name+
+        (d.promoActive?' <span style="color:var(--gold);font-size:10px">[活动]</span>':'')+
+        ' · ¥'+d.price+
+        '<button class="ptag-clear" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;margin-left:2px">'+
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+
+        '</button></span>';
+      selectedEl.querySelector('.ptag-clear').onclick=function(){ doClear(); };
+    }
+    if(onSelect) onSelect(d);
+  }
+
+  function doClear(){
+    searchEl.value=''; _q=''; clearBtn.style.display='none';
+    dropdown.classList.remove('open');
+    if(selectedEl) selectedEl.innerHTML='';
+    if(wrap._onClear) wrap._onClear();
+  }
+
+  dropdown.addEventListener('click', function(e){
+    var item=e.target.closest('.picker-item');
+    if(item&&item.dataset.dishid) doSelect(item.dataset.dishid);
+    var catBtn=e.target.closest('.picker-cat-btn');
+    if(catBtn){ _cat=catBtn.dataset.cat; renderList(); }
+  });
+  searchEl.addEventListener('input',function(){
+    _q=this.value; clearBtn.style.display=_q?'flex':'none';
+    if(selectedEl) selectedEl.innerHTML='';
+    if(wrap._onClear) wrap._onClear();
+    renderList();
+  });
+  searchEl.addEventListener('focus', function(){ renderList(); });
+  clearBtn.addEventListener('click', function(){ doClear(); });
+  document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) dropdown.classList.remove('open'); }, true);
+  wrap._setCat=function(cat){ _cat=cat; };
+  wrap._onClear=null;
+  wrap._clear=doClear;
+}
+
 (function(){ try{ var c=IndustryAdapter.getCurrent(); if(c&&c.theme){ document.documentElement.style.setProperty('--primary',c.theme); document.documentElement.style.setProperty('--primary-dk',c.theme); var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content',c.theme); } }catch(e){} })();
 (function(){ if(localStorage.getItem('isActivated')!=='true') window.location.replace('gate.html'); })();
 
@@ -943,7 +1169,7 @@ function renderMenu(container){
       var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
       return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
     }).join('');
-    
+    }).join('');
 
     container.innerHTML=
       '<div class="page-title-bar"><span class="page-title-icon">'+I.book+'</span><span class="page-title-text">菜单管理</span></div>'+
@@ -977,11 +1203,18 @@ function renderMenu(container){
         '</div>'+
         '<div style="font-size:11px;color:var(--text-3);margin-top:6px;margin-bottom:2px">毛利预览基于堂食价。下单时按选择的渠道自动带入对应价格。</div>'+
         '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px">食材 BOM</div>'+
-        '<div style="display:flex;gap:7px;align-items:center;margin-bottom:7px">'+
-          '<div style="flex:2"><select id="mi-pick" class="form-inp" style="font-size:13px" onchange="mIngPick()">'+ingOpts+'</select></div>'+
-          '<div style="width:68px"><input id="mi-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="text-align:center" oninput="mIngPrev()"></div>'+
-          '<span id="mi-unit" style="font-size:12px;color:var(--text-3);min-width:18px"></span>'+
-          '<button class="inline-btn primary" onclick="mBomAdd()" style="height:39px;padding:0 11px">'+I.plus+'</button>'+
+        '<div id="mi-picker-wrap" class="picker-wrap">'+
+          '<div style="position:relative">'+
+            '<input class="picker-search" placeholder="搜索食材名称…" autocomplete="off">'+
+            '<button class="picker-clear">'+I.x+'</button>'+
+          '</div>'+
+          '<div class="picker-dropdown"></div>'+
+          '<div class="picker-selected"></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;margin-bottom:7px">'+
+          '<input id="mi-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="flex:1;text-align:center" oninput="mIngPrev()">'+
+          '<span id="mi-unit" style="font-size:12px;color:var(--text-3);min-width:22px"></span>'+
+          '<button class="inline-btn primary" onclick="mBomAdd()" style="height:39px;padding:0 14px">'+I.plus+' 加入BOM</button>'+
         '</div>'+
         '<div id="mi-prev" class="bom-preview-inline" style="display:none"></div>'+
         '<div id="m-bom-rows"></div>'+
@@ -1001,31 +1234,35 @@ function renderMenu(container){
       '</div>'+
 
       '<div class="section-label" style="display:flex;align-items:center;gap:7px">当前菜单<span class="count-badge">'+menu.length+'</span></div>'+
-      (cats.length>1?'<div class="cat-filter-row">'+cats.map(function(c){ return '<button class="cat-filter-btn'+(c===_catFilter?' active':'')+'" onclick="mCatF(\''+c+'\')"><'+(c==='all'?'全部':c)+'</button>'; }).join('')+'</div>':'')+
+      (cats.length>1?'<div class="cat-filter-row">'+cats.map(function(c){ return '<button class="cat-filter-btn'+(c===_catFilter?' active':'')+'" onclick="mCatF(\''+c+'\')">'+( c==='all'?'全部':c )+'</button>'; }).join('')+'</div>':'')+
       '<div class="menu-list">'+
         (filtered.length?filtered.map(renderMenuCard).join(''):
           '<div class="empty-state"><div class="empty-state-icon">'+I.book+'</div><div class="empty-state-text">暂无菜品<br>添加第一道菜开始计算成本</div></div>'
         )+
       '</div>';
 
+    // 初始化食材搜索选择器
+    createIngPicker('mi-picker-wrap','mi-qty','mi-unit','mi-prev',function(ing){
+      _curIng=ing;
+    });
+
     // 事件绑定
-    window.mIngPick=function(){
-      var sel=container.querySelector('#mi-pick'),opt=sel.options[sel.selectedIndex];
-      if(!opt||!opt.value){ _curIng=null; container.querySelector('#mi-unit').textContent=''; return; }
-      _curIng={id:opt.value,name:opt.text.split(' · ')[0],pricePerUnit:parseFloat(opt.dataset.price)||0,unit:opt.dataset.unit||''};
-      container.querySelector('#mi-unit').textContent=_curIng.unit; mIngPrev();
-    };
     window.mIngPrev=function(){
       if(!_curIng){ container.querySelector('#mi-prev').style.display='none'; return; }
       var q=parseFloat(container.querySelector('#mi-qty').value)||0,el=container.querySelector('#mi-prev');
       if(q>0){ el.style.display='block'; el.textContent=_curIng.name+' '+q+_curIng.unit+' → 成本 ¥'+(_curIng.pricePerUnit*q).toFixed(3); } else el.style.display='none';
     };
     window.mBomAdd=function(){
-      if(!_curIng){ shake(container.querySelector('#mi-pick')); return; }
+      var wrap=document.getElementById('mi-picker-wrap');
+      var ing=wrap&&wrap._getSelected?wrap._getSelected():_curIng;
+      if(!ing){ var s=wrap&&wrap.querySelector('.picker-search'); if(s) shake(s); return; }
       var q=parseFloat(container.querySelector('#mi-qty').value)||0;
       if(!q){ shake(container.querySelector('#mi-qty')); return; }
-      _bom.push({ingredientId:_curIng.id,name:_curIng.name,qty:q,unit:_curIng.unit,cost:_curIng.pricePerUnit*q});
-      container.querySelector('#mi-pick').value=''; container.querySelector('#mi-qty').value=''; container.querySelector('#mi-unit').textContent=''; _curIng=null;
+      _bom.push({ingredientId:ing.id,name:ing.name,qty:q,unit:ing.unit,cost:ing.pricePerUnit*q});
+      container.querySelector('#mi-qty').value=''; container.querySelector('#mi-unit').textContent='';
+      // clear picker
+      if(wrap){ var ss=wrap.querySelector('.picker-search'); if(ss) ss.dispatchEvent(new Event('picker-clear')); var sel=wrap.querySelector('.picker-selected'); if(sel) sel.innerHTML=''; }
+      _curIng=null;
       renderBomRows(); mPrev();
     };
     window.bomDel=function(i){ _bom.splice(i,1); renderBomRows(); mPrev(); };
@@ -1126,7 +1363,7 @@ function renderMenu(container){
       var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
       return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
     }).join('');
-    
+    }).join('');
 
     function promoRow(key, label){
       var pr=promos[key]||{};
@@ -1141,20 +1378,16 @@ function renderMenu(container){
     // 先定义所有函数再写 innerHTML，避免 onclick 找不到函数
     var _editCurIng=null;
 
-    window.editIngPick=function(){
-      var sel=document.getElementById('edit-ing-pick'),opt=sel&&sel.options[sel.selectedIndex];
-      if(!opt||!opt.value){ _editCurIng=null; var u=document.getElementById('edit-ing-unit'); if(u) u.textContent=''; return; }
-      _editCurIng={id:opt.value,name:opt.text.split(' · ')[0],pricePerUnit:parseFloat(opt.dataset.price)||0,unit:opt.dataset.unit||''};
-      var u=document.getElementById('edit-ing-unit'); if(u) u.textContent=_editCurIng.unit;
-    };
+    // editBomAdd uses IngPicker
     window.editBomAdd=function(){
-      if(!_editCurIng){ var el=document.getElementById('edit-ing-pick'); if(el) shake(el); return; }
+      var wrap=document.getElementById('edit-ing-picker-wrap');
+      var ing=wrap&&wrap._getSelected?wrap._getSelected():_editCurIng;
+      if(!ing){ var s=wrap&&wrap.querySelector('.picker-search'); if(s) shake(s); return; }
       var qEl=document.getElementById('edit-ing-qty'),q=parseFloat(qEl&&qEl.value)||0;
       if(!q){ if(qEl) shake(qEl); return; }
-      editBom.push({ingredientId:_editCurIng.id,name:_editCurIng.name,qty:q,unit:_editCurIng.unit,cost:_editCurIng.pricePerUnit*q});
-      var pick=document.getElementById('edit-ing-pick'); if(pick) pick.value='';
+      editBom.push({ingredientId:ing.id,name:ing.name,qty:q,unit:ing.unit,cost:ing.pricePerUnit*q});
       if(qEl) qEl.value='';
-      var u=document.getElementById('edit-ing-unit'); if(u) u.textContent='';
+      if(wrap){ var ss=wrap.querySelector('.picker-search'); if(ss) ss.dispatchEvent(new Event('picker-clear')); var sel=wrap.querySelector('.picker-selected'); if(sel) sel.innerHTML=''; }
       _editCurIng=null;
       renderEditBomRows();
     };
@@ -1241,11 +1474,18 @@ function renderMenu(container){
       '</div>'+
       '<div style="font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">食材 BOM</div>'+
       '<div id="edit-bom-rows"></div>'+
-      '<div style="display:flex;gap:7px;align-items:center;margin-top:6px;margin-bottom:6px">'+
-        '<div style="flex:2"><select id="edit-ing-pick" class="form-inp" style="font-size:13px" onchange="editIngPick()">'+ingOpts+'</select></div>'+
-        '<div style="width:64px"><input id="edit-ing-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="text-align:center"></div>'+
-        '<span id="edit-ing-unit" style="font-size:12px;color:var(--text-3);min-width:18px"></span>'+
-        '<button class="inline-btn primary" onclick="editBomAdd()" style="height:38px;padding:0 10px">'+I.plus+'</button>'+
+      '<div id="edit-ing-picker-wrap" class="picker-wrap" style="margin-top:8px">'+
+        '<div style="position:relative">'+
+          '<input class="picker-search" placeholder="搜索食材名称…" autocomplete="off">'+
+          '<button class="picker-clear">'+I.x+'</button>'+
+        '</div>'+
+        '<div class="picker-dropdown"></div>'+
+        '<div class="picker-selected"></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;margin-bottom:8px">'+
+        '<input id="edit-ing-qty" class="form-inp" type="number" step="0.01" min="0" placeholder="用量" style="flex:1;text-align:center">'+
+        '<span id="edit-ing-unit" style="font-size:12px;color:var(--text-3);min-width:22px"></span>'+
+        '<button class="inline-btn primary" onclick="editBomAdd()" style="height:38px;padding:0 12px">'+I.plus+' 加入</button>'+
       '</div>'+
       '<div id="edit-prev" style="margin-bottom:12px"></div>'+
       '<div style="display:flex;gap:8px">'+
@@ -1261,6 +1501,10 @@ function renderMenu(container){
       editPrev();
     }
     renderEditBomRows();
+    // 初始化编辑弹层食材搜索选择器
+    createIngPicker('edit-ing-picker-wrap','edit-ing-qty','edit-ing-unit','edit-prev',function(ing){
+      _editCurIng=ing;
+    });
   };
 
   draw();
@@ -1321,13 +1565,21 @@ function renderNewOrder(container){
     '</div>'+
     '<div class="form-card">'+
       '<div class="section-label">点餐</div>'+
-      '<div style="display:flex;gap:7px;align-items:center;margin-bottom:4px">'+
-        '<div style="flex:2"><select id="o-pick" class="form-inp" onchange="oMenuPick()"><option value="">选择菜品</option></select></div>'+
-        '<div style="width:48px"><input id="o-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:10px 5px;text-align:center"></div>'+
-        '<button class="inline-btn primary" onclick="oAdd()">'+I.plus+'</button>'+
+      // MenuPicker
+      '<div id="o-menu-picker-wrap" class="picker-wrap">'+
+        '<div style="position:relative">'+
+          '<input class="picker-search" placeholder="搜索菜品名称或分类…" autocomplete="off">'+
+          '<button class="picker-clear">'+I.x+'</button>'+
+        '</div>'+
+        '<div class="picker-dropdown"></div>'+
+        '<div class="picker-selected"></div>'+
       '</div>'+
-      // 活动价提示
-      '<div id="o-promo-hint" style="display:none;font-size:11px;color:var(--gold);padding:5px 8px;background:rgba(184,150,62,0.07);border-radius:7px;margin-bottom:6px"></div>'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;margin-bottom:4px">'+
+        '<input id="o-qty" class="form-inp" type="number" min="1" step="1" value="1" style="width:60px;padding:10px 6px;text-align:center">'+
+        '<span style="font-size:12px;color:var(--text-3)">份</span>'+
+        '<button class="inline-btn primary" onclick="oAdd()" style="flex:1;justify-content:center">'+I.plus+' 加入订单</button>'+
+      '</div>'+
+      '<div id="o-promo-hint" style="display:none;font-size:11px;padding:6px 10px;border-radius:7px;margin-bottom:6px"></div>'+
       '<div id="o-items"></div>'+
       (menu.length?'':'<div style="font-size:12px;color:var(--text-3)">请先在菜单管理中添加菜品</div>')+
     '</div>'+
@@ -1355,10 +1607,17 @@ function renderNewOrder(container){
     var sel=container.querySelector('#o-plat');
     return sel?sel.value:'';
   }
-  function refreshMenuOpts(){
-    var ch=getCurrentChannel(),pl=getCurrentPlatform();
-    container.querySelector('#o-pick').innerHTML=buildMenuOpts(ch,pl);
+
+  // 渠道/平台切换时刷新MenuPicker内容
+  function refreshMenuPicker(){
+    var wrap=document.getElementById('o-menu-picker-wrap');
+    if(!wrap) return;
+    // 清空已选和搜索
+    var ss=wrap.querySelector('.picker-search'); if(ss) ss.value='';
+    var sd=wrap.querySelector('.picker-selected'); if(sd) sd.innerHTML='';
+    var dd=wrap.querySelector('.picker-dropdown'); if(dd) dd.classList.remove('open');
     _cm=null;
+    var hint=container.querySelector('#o-promo-hint'); if(hint) hint.style.display='none';
   }
 
   container.querySelectorAll('#cc .cat-chip').forEach(function(btn){
@@ -1366,41 +1625,56 @@ function renderNewOrder(container){
       container.querySelectorAll('#cc .cat-chip').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       container.querySelector('#pblock').style.display=btn.dataset.val==='takeout'?'block':'none';
-      refreshMenuOpts(); oCalc();
+      refreshMenuPicker(); oCalc();
     };
   });
   window.oPlatChg=function(){
     var sel=container.querySelector('#o-plat'),opt=sel.options[sel.selectedIndex];
     if(opt.dataset.comm!=='0') container.querySelector('#o-comm').value=opt.dataset.comm;
-    refreshMenuOpts(); oCalc();
+    refreshMenuPicker(); oCalc();
   };
 
-  // 初始化菜品选项
-  refreshMenuOpts();
-
   var _cm=null;
-  window.oMenuPick=function(){
-    var sel=container.querySelector('#o-pick'),opt=sel&&sel.options[sel.selectedIndex];
-    if(!opt||!opt.value){ _cm=null; container.querySelector('#o-promo-hint').style.display='none'; return; }
-    _cm={id:opt.value,name:opt.dataset.name,salePrice:parseFloat(opt.dataset.price)||0,totalCost:parseFloat(opt.dataset.cost)||0,ingredientCost:parseFloat(opt.dataset.cost)||0};
+
+  // 初始化MenuPicker
+  createMenuPicker('o-menu-picker-wrap', function(){
+    var ch=getCurrentChannel(), pl=getCurrentPlatform();
+    return menu.map(function(m){
+      var cp=getChannelPrice(m,ch,pl);
+      var tc=m.totalCost||m.ingredientCost||0;
+      return { id:m.id, name:m.name, category:m.category||'', price:cp.price,
+        totalCost:tc, ingredientCost:tc,
+        promoActive:cp.promoActive, promoName:cp.promoName||'' };
+    });
+  }, function(d){
+    // 选中回调
+    _cm={ id:d.id, name:d.name, salePrice:d.price, totalCost:d.totalCost, ingredientCost:d.ingredientCost };
     var hint=container.querySelector('#o-promo-hint');
-    if(opt.dataset.promoactive==='1'&&opt.dataset.promoname){
+    if(d.promoActive&&d.promoName){
       hint.style.display='block';
       hint.style.background='rgba(45,125,82,0.07)';
       hint.style.color='var(--green)';
       hint.style.border='1px solid rgba(45,125,82,0.2)';
-      hint.style.borderRadius='7px';
-      hint.innerHTML=I.check+' 「'+opt.dataset.promoname+'」活动价 ¥'+parseFloat(opt.dataset.price).toFixed(2)+' 已自动生效';
+      hint.innerHTML=I.check+' 「'+d.promoName+'」活动价 ¥'+parseFloat(d.price).toFixed(2)+' 已自动生效';
     } else {
       hint.style.display='none';
     }
-  };
+  });
+
+  // 设置渠道切换时重新请求数据
+  var wrap=document.getElementById('o-menu-picker-wrap');
+  if(wrap) wrap._onClear=function(){ _cm=null; var hint=container.querySelector('#o-promo-hint'); if(hint) hint.style.display='none'; };
 
   window.oAdd=function(){
-    if(!_cm){ shake(container.querySelector('#o-pick')); return; }
+    if(!_cm){
+      var s=container.querySelector('#o-menu-picker-wrap .picker-search'); if(s) shake(s); return;
+    }
     var q=Math.max(1,parseInt(container.querySelector('#o-qty').value)||1);
     var ex=orderItems.find(function(i){ return i.id===_cm.id; }); if(ex) ex.qty+=q; else orderItems.push(Object.assign({qty:q},_cm));
-    container.querySelector('#o-pick').value=''; container.querySelector('#o-qty').value='1';
+    container.querySelector('#o-qty').value='1';
+    // 清空 picker 选中状态
+    var pw=document.getElementById('o-menu-picker-wrap');
+    if(pw){ var ss=pw.querySelector('.picker-search'); if(ss){ ss.value=''; ss.dispatchEvent(new Event('input')); } var sel=pw.querySelector('.picker-selected'); if(sel) sel.innerHTML=''; pw.querySelector('.picker-dropdown').classList.remove('open'); }
     container.querySelector('#o-promo-hint').style.display='none'; _cm=null; rItems(); oCalc();
   };
   function rItems(){
