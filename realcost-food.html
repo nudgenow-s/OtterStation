@@ -943,7 +943,7 @@ function renderMenu(container){
       var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
       return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
     }).join('');
-    }).join('');
+    
 
     container.innerHTML=
       '<div class="page-title-bar"><span class="page-title-icon">'+I.book+'</span><span class="page-title-text">菜单管理</span></div>'+
@@ -1126,7 +1126,7 @@ function renderMenu(container){
       var priceLabel=livePrice!==null?('¥'+parseFloat(price).toFixed(4)+' 当前批次'):'¥'+price;
       return '<option value="'+i.id+'" data-price="'+price+'" data-unit="'+i.unit+'">'+i.name+' · '+priceLabel+'/'+i.unit+'</option>';
     }).join('');
-    }).join('');
+    
 
     function promoRow(key, label){
       var pr=promos[key]||{};

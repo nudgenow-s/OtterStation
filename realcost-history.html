@@ -454,7 +454,7 @@ function getGoodsAsset(){
   if(!INVENTORY_KEY) return 0;
   var inv = load(INVENTORY_KEY) || [];
   if(industry === 'beauty'){
-    return inv.reduce(function(a,m){
+    return inv.reduce((a,m) =>{
       return a + (parseFloat(m.totalPrice)||0)*(parseFloat(m.stock)||0);
     },0);
   } else {
