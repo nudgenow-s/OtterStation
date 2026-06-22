@@ -308,6 +308,34 @@ animation:successPop .4s cubic-bezier(.34,1.56,.64,1);
 .ss-text { font-size:22px; font-weight:900; color:var(--text); margin-top:10px; }
 .ss-sub  { font-size:14px; color:var(--text-3); margin-top:6px; }
 
+/* ── 批次选择弹窗 ── */
+.batch-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.52);
+  z-index:600; align-items:flex-end;
+}
+.batch-overlay.open { display:flex; animation:fadeIn .2s ease; }
+.batch-sheet {
+  background:#fff; width:100%; border-radius:28px 28px 0 0;
+  padding:0 20px 40px; animation:sheetUp .3s ease; max-height:75vh; overflow-y:auto;
+}
+.batch-handle { width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px; }
+.batch-title  { font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px; }
+.batch-sub    { font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:16px; }
+.batch-item {
+  background:var(--gray-bg); border-radius:16px; padding:14px 16px;
+  margin-bottom:10px; cursor:pointer; border:2px solid transparent;
+  transition:all .15s;
+}
+.batch-item:active,.batch-item.selected { border-color:var(--orange); background:#FFF3EE; }
+.batch-item-top { display:flex; justify-content:space-between; align-items:center; }
+.batch-item-name { font-size:15px; font-weight:900; color:var(--text); }
+.batch-item-sale { font-size:17px; font-weight:900; color:var(--orange); }
+.batch-item-meta { font-size:12px; color:var(--text-3); margin-top:5px; display:flex; gap:12px; }
+.batch-fifo-tag {
+  display:inline-block; background:var(--green); color:#fff;
+  font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px;
+}
+
 /* --库存录入 / 进货表单-- */
 .form-subtitle { font-size:13px; color:var(--text-3); margin:-8px 0 16px; }
 
@@ -332,7 +360,7 @@ transition:all .15s; font-family:inherit;
 .cat-chip.active { background:var(--orange); border-color:var(--orange); color:#fff; }
 
 .margin-preview {
-background:var(–gray-bg); border-radius:12px; padding:10px 14px;
+background:var(--gray-bg); border-radius:12px; padding:10px 14px;
 display:flex; align-items:center; gap:12px; flex-wrap:wrap;
 }
 .mp-label { font-size:11px; font-weight:800; color:var(--text-3); }
@@ -373,9 +401,9 @@ box-shadow:0 1px 6px rgba(0,0,0,.05);
 .hi-exp  { font-size:10px; color:var(--text-3); text-align:right; margin-top:2px; }
 .hidden  { display:none !important; }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════════
 库存看板
-════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════════ */
 .inv-total-chip {
 background:var(--orange); color:#fff; font-size:12px; font-weight:800;
 padding:4px 10px; border-radius:20px;
@@ -418,6 +446,13 @@ color:var(--text-3); text-align:left; white-space:nowrap;
 .td-exp  { font-size:12px; white-space:nowrap; }
 .td-act  { text-align:center; }
 
+/* 批次标签 */
+.batch-tag {
+  display:inline-block; background:#F0F4FF; color:#4B6CB7;
+  font-size:10px; font-weight:800; padding:2px 6px; border-radius:5px; margin-left:4px;
+}
+.batch-fifo-row { background:#FFFDE7 !important; }
+
 .qty-zero { color:var(--red) !important; }
 .qty-low  { color:var(--orange) !important; }
 .exp-danger { color:var(--red) !important; font-weight:800 !important; }
@@ -428,9 +463,9 @@ color:var(--text-3); text-align:left; white-space:nowrap;
 
 .inv-del-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:4px; }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════════
 临期货品
-════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════════ */
 .exp-filter-row { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
 .exp-filter-btn {
 white-space:nowrap; padding:8px 14px; border-radius:20px; border:2px solid var(--border);
@@ -467,9 +502,9 @@ font-size:12px; font-weight:900; color:#fff;
 .exp-badge.exp-card-ok     { background:var(--green); }
 .exp-date { font-size:11px; color:var(--text-3); margin-top:6px; }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════════
 排行榜（游戏化）
-════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════════ */
 .rank-subtitle { font-size:12px; color:var(--text-3); font-weight:700; margin:-8px 0 16px; }
 .rank-empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:15px; }
 
@@ -508,7 +543,6 @@ transition:transform .1s;
 <body>
 
 <!-- TOPBAR -->
-
 <div class="topbar">
   <button class="topbar-back" onclick="window.location.href='main.html'">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -517,11 +551,9 @@ transition:transform .1s;
     </svg>
     返回
   </button>
-  
 </div>
 
 <!-- MONTH HEADER -->
-
 <div class="month-header" onclick="window.location.href='realcost-history.html?industry=retail&back=realcost-retail.html'" style="cursor:pointer;">
   <div class="mh-left">
     <div class="mh-title" id="mh-title"></div>
@@ -534,49 +566,22 @@ transition:transform .1s;
 </div>
 
 <!-- MAIN VIEW -->
-
 <div class="main-view" id="main-view">
-
-  <!-- 日历视图 -->
-
   <div class="calendar-view" id="view-calendar">
     <div class="snake-track" id="snake-track">
       <svg class="snake-svg" id="snake-svg"></svg>
     </div>
   </div>
-
-  <!-- 库存看板 -->
-
   <div class="page-view" id="view-inventory"></div>
-
-  <!-- 临期货品 -->
-
   <div class="page-view" id="view-expiring"></div>
-
-  <!-- 销量排行 -->
-
   <div class="page-view" id="view-sales"></div>
-
-  <!-- 毛利排行 -->
-
   <div class="page-view" id="view-profit"></div>
-
-  <!-- 库存录入 -->
-
   <div class="page-view" id="view-entry"></div>
-
-  <!-- 进货 -->
-
   <div class="page-view" id="view-restock"></div>
-
-  <!-- 开始收银 -->
-
   <div class="page-view" id="view-cashier"></div>
-
 </div>
 
 <!-- BOTTOM NAV -->
-
 <div class="bottom-nav">
   <button class="nav-btn active" data-view="calendar" onclick="switchTab(this,'calendar')">
     <span class="nav-ico">📅</span><span class="nav-lbl">日历</span>
@@ -599,7 +604,6 @@ transition:transform .1s;
 </div>
 
 <!-- 日历详情 SHEET -->
-
 <div class="overlay" id="overlay" onclick="overlayTap(event)">
   <div class="sheet">
     <div class="sh-handle"></div>
@@ -611,47 +615,47 @@ transition:transform .1s;
   </div>
 </div>
 
-
-
-
+<!-- 批次选择弹窗 -->
+<div class="batch-overlay" id="batch-overlay" onclick="if(event.target===this)closeBatchSheet()">
+  <div class="batch-sheet">
+    <div class="batch-handle"></div>
+    <div class="batch-title" id="batch-title">选择批次</div>
+    <div class="batch-sub" id="batch-sub">该商品有多个进货批次，请选择本次使用的批次</div>
+    <div id="batch-list"></div>
+    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="closeBatchSheet()">取消</button>
+  </div>
+</div>
 
 <script>
-  // ── 獭掌柜 · 核心数据引擎 engine.js ──────────────────────────────────────
-// 所有 localStorage 读写、业务逻辑计算均在此处理
-// ★ 从 config.js 读取主题色，覆盖美业版默认粉色
+// ── 獭掌柜 · 核心数据引擎 ──────────────────────────────────────────────────
 (function applyTheme() {
-    try {
-        var cfg = IndustryAdapter.getCurrent();
-        if (cfg && cfg.theme) {
-            var root = document.documentElement;
-            root.style.setProperty('--orange',    cfg.theme);
-            root.style.setProperty('--orange-dk', cfg.theme.replace(')', ', 0.8)').replace('rgb', 'rgba') || '#7A1828');
-            // 同步 meta theme-color
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', cfg.theme);
-        }
-    } catch(e) {}
+  try {
+    var cfg = IndustryAdapter.getCurrent();
+    if (cfg && cfg.theme) {
+      var root = document.documentElement;
+      root.style.setProperty('--orange',    cfg.theme);
+      root.style.setProperty('--orange-dk', cfg.theme.replace(')', ', 0.8)').replace('rgb', 'rgba') || '#7A1828');
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', cfg.theme);
+    }
+  } catch(e) {}
 })();
-const Engine = (function () {
 
-  // ── Key 定义 ──────────────────────────────────────────────────────────
+const Engine = (function () {
   const KEYS = {
-    history:   'otter_history',     // 日历收支历史
-    inventory: 'otter_inventory',   // 库存商品列表
-    sales:     'otter_sales',       // 销售流水记录
-    restock:   'otter_restock',     // 进货流水记录
+    history:   'otter_history',
+    inventory: 'otter_inventory',
+    sales:     'otter_sales',
+    restock:   'otter_restock',
   };
 
-  // ── 基础读写 ──────────────────────────────────────────────────────────
   function load(key) {
     try { return JSON.parse(localStorage.getItem(key)) || null; }
     catch (e) { return null; }
   }
-  function save(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
-  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-  // ── 日历历史 ──────────────────────────────────────────────────────────
+  // ── 日历历史 ────────────────────────────────────────────────────────────
   function getHistory()          { return load(KEYS.history) || {}; }
   function saveHistory(h)        { save(KEYS.history, h); }
   function getDay(dateKey)       { return getHistory()[dateKey] || null; }
@@ -661,42 +665,39 @@ const Engine = (function () {
     saveHistory(h);
   }
 
-  // ── 库存 ──────────────────────────────────────────────────────────────
+  // ── 库存 ────────────────────────────────────────────────────────────────
   // 商品结构：
-  // { id, name, category, qty, costPrice, salePrice, expireDate, source, createdAt }
-  // source: 'entry'(库存录入) | 'restock'(进货)
+  // { id, name, category, qty, costPrice, salePrice, expireDate, source,
+  //   barcode, batchNo, createdAt }
+  // ★ 每次录入始终新建批次，不再合并同名商品
+  // ★ batchNo 用于在收银时标记批次顺序（入库时间升序 = 先进先出）
 
-  function getInventory()    { return load(KEYS.inventory) || []; }
-  function saveInventory(v)  { save(KEYS.inventory, v); }
+  function getInventory()   { return load(KEYS.inventory) || []; }
+  function saveInventory(v) { save(KEYS.inventory, v); }
 
   function addProduct(product) {
     const inv = getInventory();
-    // 若同名同进价商品已存在，则累加数量
-    const existing = inv.find(p =>
-      p.name === product.name &&
-      parseFloat(p.costPrice) === parseFloat(product.costPrice) &&
-      p.category === product.category
-    );
-    if (existing) {
-      existing.qty = (parseFloat(existing.qty) || 0) + (parseFloat(product.qty) || 0);
-      existing.salePrice  = product.salePrice  || existing.salePrice;
-      existing.expireDate = product.expireDate || existing.expireDate;
-      existing.barcode = product.barcode || existing.barcode;
-    } else {
-      inv.push(Object.assign({ id: Date.now() + Math.random() }, product));
-    }
-    // ★ 新录入库存，扣减现金
-    var cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
-    if(cost > 0){
-        var c = parseFloat(localStorage.getItem('finance_cash')) || 0;
-        localStorage.setItem('finance_cash', String(c - cost));
+
+    // 计算同名商品已有多少批次，用于生成批次号显示
+    const sameName = inv.filter(p => p.name === product.name);
+    const batchNo  = sameName.length + 1;
+
+    inv.push(Object.assign(
+      { id: Date.now() + Math.random(), batchNo },
+      product
+    ));
+
+    // 扣减现金（进货成本）
+    const cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
+    if (cost > 0) {
+      const c = parseFloat(localStorage.getItem('finance_cash')) || 0;
+      localStorage.setItem('finance_cash', String(c - cost));
     }
     saveInventory(inv);
     return inv;
   }
 
   function updateProductQty(productId, deltaQty) {
-    // deltaQty < 0 表示减少（售出），> 0 表示增加（进货）
     const inv = getInventory();
     const p   = inv.find(p => p.id == productId);
     if (!p) return false;
@@ -706,18 +707,22 @@ const Engine = (function () {
   }
 
   function deleteProduct(productId) {
-    const inv = getInventory().filter(p => p.id != productId);
-    saveInventory(inv);
+    saveInventory(getInventory().filter(p => p.id != productId));
   }
 
-  // ── 销售流水 ──────────────────────────────────────────────────────────
-  // 每条记录：{ id, date, items:[{productId,name,qty,costPrice,salePrice}], total, profit, createdAt }
+  // ── 同名商品批次列表（按入库时间升序 = 先进先出顺序）────────────────────
+  // 返回有库存的批次，第一个即 FIFO 应优先出货的批次
+  function getBatchesByName(name) {
+    return getInventory()
+      .filter(p => p.name === name && parseFloat(p.qty) > 0)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
 
-  function getSales()    { return load(KEYS.sales) || []; }
-  function saveSales(v)  { save(KEYS.sales, v); }
+  // ── 销售流水 ────────────────────────────────────────────────────────────
+  function getSales()   { return load(KEYS.sales) || []; }
+  function saveSales(v) { save(KEYS.sales, v); }
 
   function recordSale(items) {
-    // items: [{ productId, name, qty, costPrice, salePrice }]
     const dateKey = new Date().toLocaleDateString();
     let total = 0, cost = 0;
     items.forEach(item => {
@@ -726,80 +731,64 @@ const Engine = (function () {
     });
     const profit = total - cost;
     const record = {
-      id:        Date.now(),
-      date:      dateKey,
-      items,
-      total,
-      profit,
+      id: Date.now(), date: dateKey, items, total, profit,
       createdAt: new Date().toISOString(),
     };
     const sales = getSales();
     sales.push(record);
     saveSales(sales);
 
-    // 扣减库存
-    items.forEach(item => {
-      updateProductQty(item.productId, -parseFloat(item.qty));
-    });
+    // 扣减库存（按 productId 精确扣减对应批次）
+    items.forEach(item => updateProductQty(item.productId, -parseFloat(item.qty)));
 
-    // 更新日历历史
     updateDayFromSales(dateKey);
-    
-    // ★ 同步毛利到 main.html（完整触发）
+
     const today = new Date().toLocaleDateString();
     const currentRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    const newRev = currentRev + profit; // 同步毛利而非营收
+    const newRev = currentRev + profit;
     localStorage.setItem('todayRev', String(newRev));
 
-    // 同步到 revenue_history（供 CSV 和快照用）
     try {
-        const dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        if (!history[today]) history[today] = {};
-        history[today].revenue     = newRev.toFixed(2);
-        history[today].profit      = (newRev - dc).toFixed(2);
-        history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
-        const r = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
-        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const o = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
-        const dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-        history[today].costSnapshot = {
-            rent:   (r/dim).toFixed(2),
-            salary: (s/dim).toFixed(2),
-            other:  (o/dim).toFixed(2),
-        };
-        localStorage.setItem('revenue_history', JSON.stringify(history));
+      const dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
+      const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+      if (!history[today]) history[today] = {};
+      history[today].revenue     = newRev.toFixed(2);
+      history[today].profit      = (newRev - dc).toFixed(2);
+      history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
+      const r = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
+      const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+      const o = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
+      const dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+      history[today].costSnapshot = {
+        rent:   (r/dim).toFixed(2),
+        salary: (s/dim).toFixed(2),
+        other:  (o/dim).toFixed(2),
+      };
+      localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
 
-    // ★ 直接更新现金余额
-    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
+    const currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
     localStorage.setItem('finance_cash', String(currentCash + total));
-    // 触发 main 的 storage 监听（成就+render）
     localStorage.setItem('realcost_trigger', JSON.stringify({
-    type:      'sale',
-    amount:    profit,
-    revenue:   total,
-    todayRev:  newRev,
-    timestamp: Date.now(),
-}));
+      type: 'sale', amount: profit, revenue: total,
+      todayRev: newRev, timestamp: Date.now(),
+    }));
 
     return record;
   }
 
   function updateDayFromSales(dateKey) {
-    const sales = getSales().filter(s => s.date === dateKey);
+    const sales   = getSales().filter(s => s.date === dateKey);
     const revenue = sales.reduce((a, s) => a + s.total, 0);
     const profit  = sales.reduce((a, s) => a + s.profit, 0);
     const gm      = revenue > 0 ? Math.round(profit / revenue * 100) : 0;
     setDay(dateKey, { revenue, profit, grossMargin: gm, variableCost: revenue - profit });
   }
 
-  // ── 销量排行 ──────────────────────────────────────────────────────────
-  // 返回 [{name, totalQty, totalRevenue}]
+  // ── 排行榜 ──────────────────────────────────────────────────────────────
   function getSalesRanking() {
-    const sales = getSales();
     const map = {};
-    sales.forEach(s => {
+    getSales().forEach(s => {
       s.items.forEach(item => {
         if (!map[item.name]) map[item.name] = { name: item.name, totalQty: 0, totalRevenue: 0, totalProfit: 0 };
         map[item.name].totalQty     += parseFloat(item.qty);
@@ -810,12 +799,9 @@ const Engine = (function () {
     return Object.values(map).sort((a, b) => b.totalQty - a.totalQty);
   }
 
-  // ── 毛利排行 ──────────────────────────────────────────────────────────
-  // 已售毛利排行：售价*售出数量 - 进价*售出数量，按商品聚合
   function getSoldProfitRanking() {
-    const sales = getSales();
     const map = {};
-    sales.forEach(s => {
+    getSales().forEach(s => {
       s.items.forEach(item => {
         if (!map[item.name]) map[item.name] = { name: item.name, profit: 0, qty: 0 };
         map[item.name].profit += (parseFloat(item.salePrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
@@ -825,37 +811,36 @@ const Engine = (function () {
     return Object.values(map).sort((a, b) => b.profit - a.profit);
   }
 
-  // 单品毛利排行：所有库存商品，不论是否售出，单件毛利 = 售价 - 进价
   function getUnitProfitRanking() {
-    return getInventory()
-      .map(p => ({
-        name:       p.name,
-        category:   p.category,
-        unitProfit: parseFloat(p.salePrice) - parseFloat(p.costPrice),
-        margin:     parseFloat(p.costPrice) > 0
-                    ? Math.round((parseFloat(p.salePrice) - parseFloat(p.costPrice)) / parseFloat(p.salePrice) * 100)
-                    : 0,
-        salePrice:  p.salePrice,
-        costPrice:  p.costPrice,
-      }))
-      .sort((a, b) => b.unitProfit - a.unitProfit);
+    // 同名商品去重，取各批次中单件毛利最高的那个展示
+    const map = {};
+    getInventory().forEach(p => {
+      const up = parseFloat(p.salePrice) - parseFloat(p.costPrice);
+      if (!map[p.name] || up > map[p.name].unitProfit) {
+        map[p.name] = {
+          name:       p.name,
+          category:   p.category,
+          unitProfit: up,
+          margin:     parseFloat(p.costPrice) > 0
+                      ? Math.round(up / parseFloat(p.salePrice) * 100) : 0,
+          salePrice:  p.salePrice,
+          costPrice:  p.costPrice,
+        };
+      }
+    });
+    return Object.values(map).sort((a, b) => b.unitProfit - a.unitProfit);
   }
 
-  // ── 临期货品 ──────────────────────────────────────────────────────────
-  // 返回 N 天内到期的商品，按到期日升序
+  // ── 临期货品 ─────────────────────────────────────────────────────────────
   function getExpiringProducts(days = 7) {
-    const now     = new Date();
-    const cutoff  = new Date(now.getTime() + days * 86400000);
+    const now    = new Date();
+    const cutoff = new Date(now.getTime() + days * 86400000);
     return getInventory()
-      .filter(p => {
-        if (!p.expireDate) return false;
-        const exp = new Date(p.expireDate);
-        return exp <= cutoff;
-      })
+      .filter(p => { if (!p.expireDate) return false; return new Date(p.expireDate) <= cutoff; })
       .sort((a, b) => new Date(a.expireDate) - new Date(b.expireDate));
   }
 
-  // ── 工具 ──────────────────────────────────────────────────────────────
+  // ── 工具 ─────────────────────────────────────────────────────────────────
   function fmtMoney(v) {
     v = parseFloat(v) || 0;
     return v >= 10000 ? '¥' + (v / 10000).toFixed(1) + 'w' : '¥' + v.toFixed(2).replace(/\.00$/, '');
@@ -867,11 +852,10 @@ const Engine = (function () {
   }
   function daysUntil(dateStr) {
     if (!dateStr) return null;
-    const diff = new Date(dateStr) - new Date();
-    return Math.ceil(diff / 86400000);
+    return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
   }
 
-  // ── 月度统计 ──────────────────────────────────────────────────────────
+  // ── 月度统计 ─────────────────────────────────────────────────────────────
   function getMonthStats(year, month) {
     const h = getHistory();
     let revenue = 0, profit = 0, days = 0;
@@ -899,10 +883,10 @@ const Engine = (function () {
     return s;
   }
 
-  // ── 公开 API ──────────────────────────────────────────────────────────
   return {
     getHistory, setDay, getDay,
     getInventory, addProduct, updateProductQty, deleteProduct,
+    getBatchesByName,
     getSales, recordSale,
     getSalesRanking, getSoldProfitRanking, getUnitProfitRanking,
     getExpiringProducts,
@@ -912,483 +896,147 @@ const Engine = (function () {
   };
 })();
 
-// ══════════════════════════════════════════════════════════════════════════
-//  数据迁移机制
-//  在 engine.js 末尾、window.Engine = Engine; 之前插入此段代码
-//  每次数据结构有变化时，递增 CURRENT_VERSION，并在 _migrations 里加对应函数
-// ══════════════════════════════════════════════════════════════════════════
-
-const CURRENT_VERSION = 1;
+// ── 数据迁移 ────────────────────────────────────────────────────────────────
+const CURRENT_VERSION = 2;
 const VERSION_KEY = 'otter_db_version';
 
 const _migrations = {
-
-  // v0 → v1：给所有已有库存商品补上 barcode 字段
   1: function() {
-    const inv = load(KEYS.inventory) || [];
+    const inv = JSON.parse(localStorage.getItem('otter_inventory')) || [];
     let changed = false;
+    inv.forEach(p => { if (!('barcode' in p)) { p.barcode = null; changed = true; } });
+    if (changed) localStorage.setItem('otter_inventory', JSON.stringify(inv));
+  },
+  // v1→v2：给旧商品补上 batchNo 字段（同名商品按 createdAt 排序后依次编号）
+  2: function() {
+    const inv = JSON.parse(localStorage.getItem('otter_inventory')) || [];
+    const nameMap = {};
+    // 按入库时间排序，再按名称分组编号
+    inv.sort((a, b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
     inv.forEach(p => {
-      if (!('barcode' in p)) {
-        p.barcode = null;
-        changed = true;
+      if (!p.batchNo) {
+        nameMap[p.name] = (nameMap[p.name] || 0) + 1;
+        p.batchNo = nameMap[p.name];
       }
     });
-    if (changed) save(KEYS.inventory, inv);
-    console.log('[Engine] Migration v1: barcode 字段补全完成');
+    localStorage.setItem('otter_inventory', JSON.stringify(inv));
   },
-
-  // 以后新版本在这里继续加：
-  // 2: function() { ... },
-  // 3: function() { ... },
 };
 
-function runMigrations() {
+(function runMigrations() {
   const current = parseInt(localStorage.getItem(VERSION_KEY) || '0');
   if (current >= CURRENT_VERSION) return;
-
   for (let v = current + 1; v <= CURRENT_VERSION; v++) {
-    if (_migrations[v]) {
-      try {
-        _migrations[v]();
-      } catch(e) {
-        console.error('[Engine] Migration v' + v + ' 失败:', e);
-      }
-    }
+    if (_migrations[v]) { try { _migrations[v](); } catch(e) {} }
   }
   localStorage.setItem(VERSION_KEY, String(CURRENT_VERSION));
-  console.log('[Engine] 数据已升级到 v' + CURRENT_VERSION);
-}
+})();
 
-// 启动时自动执行
-runMigrations();
-// 挂载到全局
 window.Engine = Engine;
-
 </script>
+
 <script>
-  // ── 獭掌柜 · 收银 & 库存录入 accounting.js ──────────────────────────────
-// 依赖 engine.js (window.Engine)
-// 新增：扫码录入功能（Cloudflare Worker + D1）
+// ── 批次选择弹窗 ────────────────────────────────────────────────────────────
+// 全局单例，供收银台调用
+const BatchPicker = (function () {
+  let _resolve = null;
 
-// ══════════════════════════════════════════════════════════════════════════
-//  ⚙️  配置区：部署后将此处替换为你的 Worker URL
-// ══════════════════════════════════════════════════════════════════════════
-const BARCODE_API = ' https://retail.nudgenow.xyz';
+  function open(productName, onPick) {
+    const batches = Engine.getBatchesByName(productName);
+    if (!batches.length) { onPick && onPick(null); return; }
 
-// ══════════════════════════════════════════════════════════════════════════
-//  扫码模块 — 优先用原生 BarcodeDetector（Safari/Chrome 系统级识别率）
-//             不支持时降级到 html5-qrcode
-// ══════════════════════════════════════════════════════════════════════════
-const BarcodeScanner = (function () {
-  let _onDetect  = null;
-  let _overlayEl = null;
-  let _stream    = null;
-  let _videoEl   = null;
-  let _rafId     = null;       // requestAnimationFrame id
-  let _scanner   = null;       // html5-qrcode 降级实例
-  let _scanning  = false;
-  let _lastFired = '';
-  let _lastTime  = 0;
+    // 只有一个批次，直接返回，无需弹窗
+    if (batches.length === 1) { onPick && onPick(batches[0]); return; }
 
-  // ── 防重复触发 ────────────────────────────────────────────────────
-  function _dedupe(code) {
-    const now = Date.now();
-    if (code === _lastFired && now - _lastTime < 1500) return;
-    _lastFired = code;
-    _lastTime  = now;
-    _beep();
-    _setStatus('✅ 识别：' + code);
-    _stop();
-    if (_onDetect) _onDetect(code);
-  }
+    // 多批次，弹窗让用户选择
+    const titleEl = document.getElementById('batch-title');
+    const subEl   = document.getElementById('batch-sub');
+    const listEl  = document.getElementById('batch-list');
 
-  // ── 滴声 ──────────────────────────────────────────────────────────
-  function _beep() {
-    try {
-      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1800, ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.12);
-    } catch(e) {}
-  }
+    titleEl.textContent = '选择批次 · ' + productName;
+    subEl.textContent   = '共 ' + batches.length + ' 个批次，🟡 为最早入库（先进先出建议优先出货）';
 
-  // ── DOM ───────────────────────────────────────────────────────────
-  function _ensureOverlay() {
-    if (_overlayEl) return;
-    _overlayEl = document.createElement('div');
-    _overlayEl.id = 'barcode-overlay';
-    _overlayEl.innerHTML = `
-      <div id="bco-inner">
-        <div id="bco-header">
-          <div id="bco-title">📷 扫描商品条形码</div>
-          <div id="bco-hint">手机离条形码 15-20cm，保持稳定</div>
-        </div>
-        <div id="bco-viewport">
-          <video id="bco-video" autoplay muted playsinline></video>
-          <div id="bco-frame">
-            <span class="bco-corner tl"></span>
-            <span class="bco-corner tr"></span>
-            <span class="bco-corner bl"></span>
-            <span class="bco-corner br"></span>
-            <div id="bco-scanline"></div>
+    listEl.innerHTML = batches.map((b, i) => {
+      const isFifo = i === 0;
+      const inDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '—';
+      return `
+        <div class="batch-item${isFifo ? ' batch-fifo-row' : ''}" data-idx="${i}"
+             onclick="BatchPicker._pick(${i})">
+          <div class="batch-item-top">
+            <span class="batch-item-name">
+              批次 ${b.batchNo || (i+1)}
+              ${isFifo ? '<span class="batch-fifo-tag">先进先出</span>' : ''}
+            </span>
+            <span class="batch-item-sale">售 ${Engine.fmtMoney(b.salePrice)}</span>
           </div>
-          <!-- 降级时 html5-qrcode 挂这里 -->
-          <div id="bco-reader" style="display:none;width:100%;height:100%;"></div>
+          <div class="batch-item-meta">
+            <span>进价 ${Engine.fmtMoney(b.costPrice)}</span>
+            <span>剩余 ${b.qty} 件</span>
+            <span>入库 ${inDate}</span>
+            ${b.expireDate ? '<span>到期 ' + Engine.fmtDate(b.expireDate) + '</span>' : ''}
+          </div>
         </div>
-        <div id="bco-status">正在启动摄像头…</div>
-        <div id="bco-manual-row">
-          <input id="bco-manual-inp" type="text" inputmode="numeric"
-                 placeholder="或手动输入条形码" autocomplete="off">
-          <button id="bco-manual-btn">查询</button>
-        </div>
-        <button id="bco-close">✕ 关闭</button>
-      </div>
-    `;
-    document.body.appendChild(_overlayEl);
-    _injectStyles();
-    _videoEl = _overlayEl.querySelector('#bco-video');
-    _overlayEl.querySelector('#bco-close').onclick = close;
-    _overlayEl.querySelector('#bco-manual-btn').onclick = () => {
-      const v = _overlayEl.querySelector('#bco-manual-inp').value.trim();
-      if (v) _dedupe(v);
-    };
-    _overlayEl.querySelector('#bco-manual-inp').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const v = _overlayEl.querySelector('#bco-manual-inp').value.trim();
-        if (v) _dedupe(v);
-      }
-    });
+      `;
+    }).join('');
+
+    _resolve = onPick;
+    _currentBatches = batches;
+    document.getElementById('batch-overlay').classList.add('open');
   }
 
-  function _injectStyles() {
-    if (document.getElementById('bco-styles')) return;
-    const s = document.createElement('style');
-    s.id = 'bco-styles';
-    s.textContent = `
-      #barcode-overlay {
-        display:none; position:fixed; inset:0;
-        background:rgba(0,0,0,.92); z-index:9999;
-        align-items:center; justify-content:center;
-      }
-      #barcode-overlay.open { display:flex; animation:bcoFadeIn .2s ease; }
-      @keyframes bcoFadeIn { from{opacity:0} to{opacity:1} }
+  let _currentBatches = [];
 
-      #bco-inner {
-        display:flex; flex-direction:column; align-items:center;
-        padding:20px 16px 28px; width:100%; max-width:380px;
-      }
-      #bco-header { text-align:center; margin-bottom:14px; }
-      #bco-title  { color:#fff; font-size:19px; font-weight:900; }
-      #bco-hint   { color:rgba(255,255,255,.6); font-size:12px; margin-top:5px; }
-
-      #bco-viewport {
-        position:relative;
-        width:100%; max-width:360px;
-        aspect-ratio:4/3;
-        border-radius:16px; overflow:hidden; background:#000;
-      }
-      #bco-video {
-        width:100%; height:100%; object-fit:cover; display:block;
-      }
-      #bco-frame {
-        position:absolute; inset:0; pointer-events:none;
-      }
-      .bco-corner {
-        position:absolute; width:28px; height:28px;
-        border-color:#FF6B35; border-style:solid;
-      }
-      .bco-corner.tl { top:16px;  left:16px;  border-width:3px 0 0 3px; border-radius:4px 0 0 0; }
-      .bco-corner.tr { top:16px;  right:16px; border-width:3px 3px 0 0; border-radius:0 4px 0 0; }
-      .bco-corner.bl { bottom:16px; left:16px;  border-width:0 0 3px 3px; border-radius:0 0 0 4px; }
-      .bco-corner.br { bottom:16px; right:16px; border-width:0 3px 3px 0; border-radius:0 0 4px 0; }
-
-      #bco-scanline {
-        position:absolute; left:16px; right:16px; height:2px;
-        background:linear-gradient(90deg,transparent,#FF6B35,transparent);
-        animation:bcoScan 2s ease-in-out infinite;
-      }
-      @keyframes bcoScan {
-        0%   { top:16px; opacity:0; }
-        10%  { opacity:1; }
-        90%  { opacity:1; }
-        100% { top:calc(100% - 18px); opacity:0; }
-      }
-
-      #bco-status {
-        color:rgba(255,255,255,.8); font-size:13px; font-weight:700;
-        margin-top:14px; min-height:18px; text-align:center;
-      }
-      #bco-manual-row {
-        display:flex; gap:8px; margin-top:14px; width:100%; max-width:360px;
-      }
-      #bco-manual-inp {
-        flex:1; background:rgba(255,255,255,.1);
-        border:1.5px solid rgba(255,255,255,.25); border-radius:10px;
-        padding:10px 12px; font-size:14px; color:#fff; outline:none;
-        font-family:inherit;
-      }
-      #bco-manual-inp::placeholder { color:rgba(255,255,255,.35); }
-      #bco-manual-btn {
-        background:#FF6B35; border:none; border-radius:10px;
-        padding:10px 16px; color:#fff; font-size:14px; font-weight:900;
-        cursor:pointer; font-family:inherit;
-      }
-      #bco-close {
-        margin-top:18px; background:rgba(255,255,255,.1);
-        border:1.5px solid rgba(255,255,255,.2); color:#fff;
-        padding:11px 36px; border-radius:30px;
-        font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
-      }
-      .f-name-wrap { position:relative; display:flex; align-items:center; }
-      .f-name-wrap .form-inp { padding-right:52px; }
-      .scan-trigger-btn {
-        position:absolute; right:6px; width:38px; height:38px;
-        background:#FF6B35; border:none; border-radius:10px;
-        display:flex; align-items:center; justify-content:center;
-        cursor:pointer; flex-shrink:0;
-        transition:transform .12s; box-shadow:0 3px 0 #C44D1A;
-      }
-      .scan-trigger-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #C44D1A; }
-      .scan-trigger-btn svg { width:19px; height:19px; }
-      .f-barcode-tag { font-size:11px; font-weight:700; color:#999; margin-top:4px; display:none; }
-      .f-barcode-tag.show { display:block; }
-      .f-barcode-tag span { color:#FF6B35; }
-      @keyframes autoFill {
-        0%   { background:#FFF3EE; border-color:#FF6B35; }
-        100% { background:#fff;    border-color:#EBEBEB; }
-      }
-      .auto-filled { animation:autoFill 1.8s ease forwards; }
-    `;
-    document.head.appendChild(s);
-  }
-
-  function _setStatus(msg) {
-    if (_overlayEl) _overlayEl.querySelector('#bco-status').textContent = msg;
-  }
-
-  // ── 停止所有扫描 ──────────────────────────────────────────────────
-  function _stop() {
-    _scanning = false;
-    if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
-    if (_stream) { _stream.getTracks().forEach(t => t.stop()); _stream = null; }
-    if (_videoEl) _videoEl.srcObject = null;
-    if (_scanner) { _scanner.stop().catch(() => {}); _scanner = null; }
-  }
-
-  // ── 方案A：原生 BarcodeDetector ──────────────────────────────────
-  function _startNative(supportedFormats) {
-    const wanted = ['ean_13','ean-13','ean_8','ean-8','code_128','code-128',
-                    'code_39','code-39','upc_a','upc-a','upc_e','upc-e'];
-    const formats = supportedFormats
-      ? wanted.filter(f => supportedFormats.includes(f))
-      : wanted;
-
-    const detector = new BarcodeDetector({ formats });
-
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    }).then(stream => {
-      _stream = stream;
-      _videoEl.srcObject = stream;
-      _videoEl.style.display = 'block';
-      _overlayEl.querySelector('#bco-reader').style.display = 'none';
-
-      // 同时监听多个事件，哪个先触发用哪个，解决 PWA 模式 onloadedmetadata 不触发的问题
-      let _started = false;
-      function _startScanLoop() {
-        if (_started) return;
-        _started = true;
-        _setStatus('🔍 对准条形码，手机离远一点效果更好…');
-
-        const canvas = document.createElement('canvas');
-        const ctx2d  = canvas.getContext('2d');
-
-        function scan() {
-          if (!_scanning) return;
-          if (_videoEl.videoWidth === 0 || _videoEl.videoHeight === 0) {
-            _rafId = requestAnimationFrame(scan);
-            return;
-          }
-          canvas.width  = _videoEl.videoWidth;
-          canvas.height = _videoEl.videoHeight;
-          ctx2d.drawImage(_videoEl, 0, 0);
-          createImageBitmap(canvas).then(bitmap => {
-            return detector.detect(bitmap).then(codes => {
-              bitmap.close();
-              if (codes.length > 0) _dedupe(codes[0].rawValue);
-            });
-          }).catch(() => {}).finally(() => {
-            if (_scanning) _rafId = requestAnimationFrame(scan);
-          });
-        }
-        _rafId = requestAnimationFrame(scan);
-      }
-
-      _videoEl.onloadedmetadata  = () => { _videoEl.play(); _startScanLoop(); };
-      _videoEl.onloadeddata      = () => { _videoEl.play(); _startScanLoop(); };
-      _videoEl.oncanplay         = () => { _videoEl.play(); _startScanLoop(); };
-
-      // 兜底：500ms 后如果还没启动，强制 play
-      setTimeout(() => {
-        _videoEl.play().then(_startScanLoop).catch(() => {});
-      }, 500);
-
-    }).catch(err => {
-      _setStatus('⚠️ 摄像头启动失败，请手动输入');
-      console.warn('[BarcodeScanner native]', err);
-    });
-  }
-
-  // ── 方案B：html5-qrcode 降级 ─────────────────────────────────────
-  function _startFallback() {
-    _videoEl.style.display = 'none';
-    const readerEl = _overlayEl.querySelector('#bco-reader');
-    readerEl.style.display = 'block';
-    readerEl.innerHTML = '';
-
-    function _loadLib(cb) {
-      if (window.Html5Qrcode) { cb(); return; }
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
-      s.onload = cb;
-      s.onerror = () => _setStatus('⚠️ 扫码库加载失败，请手动输入');
-      document.head.appendChild(s);
-    }
-
-    _loadLib(() => {
-      try { _scanner = new Html5Qrcode('bco-reader'); } catch(e) {
-        _setStatus('⚠️ 初始化失败，请手动输入'); return;
-      }
-      _scanner.start(
-        { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: (w, h) => ({ width: Math.round(w * 0.85), height: Math.round(h * 0.35) }),
-          aspectRatio: 1.333,
-          supportedScanTypes: [ Html5QrcodeScanType.SCAN_TYPE_CAMERA ],
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E,
-          ],
-        },
-        (code) => { if (_scanner) _dedupe(code); },
-        () => {}
-      ).then(() => {
-        _setStatus('🔍 对准条形码，手机离远一点效果更好…');
-      }).catch(err => {
-        _setStatus('⚠️ 摄像头启动失败，请手动输入');
-        console.warn('[BarcodeScanner fallback]', err);
-      });
-    });
-  }
-
-  // ── open ──────────────────────────────────────────────────────────
-  function open(onDetectCb) {
-    _onDetect = onDetectCb;
-    _ensureOverlay();
-    _overlayEl.classList.add('open');
-    _overlayEl.querySelector('#bco-manual-inp').value = '';
-    _lastFired = ''; _lastTime = 0;
-
-    if (_scanning) { _stop(); }
-    _scanning = true;
-    _setStatus('正在启动摄像头…');
-
-    // 优先用原生 BarcodeDetector（Safari 16.4+ / Chrome 83+）
-    if (window.BarcodeDetector) {
-      BarcodeDetector.getSupportedFormats().then(formats => {
-        // 显示支持的格式，方便调试
-        _setStatus('检测格式：' + formats.join(',').substring(0, 40));
-        setTimeout(() => {
-          // Safari 用 'ean-13'（连字符），Chrome 用 'ean_13'（下划线），都要兼容
-          const hasBarcode = formats.some(f =>
-            ['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f)
-          );
-          if (hasBarcode) {
-            _setStatus('✨ 使用系统级扫码引擎…');
-            _startNative(formats);
-          } else {
-            _setStatus('降级到 JS 引擎…');
-            _startFallback();
-          }
-        }, 1500);
-      }).catch(() => _startFallback());
-    } else {
-      _startFallback();
-    }
+  function _pick(idx) {
+    document.getElementById('batch-overlay').classList.remove('open');
+    if (_resolve) _resolve(_currentBatches[idx]);
+    _resolve = null;
   }
 
   function close() {
-    _stop();
-    if (_overlayEl) _overlayEl.classList.remove('open');
+    document.getElementById('batch-overlay').classList.remove('open');
+    if (_resolve) _resolve(null);
+    _resolve = null;
   }
 
-  return { open, close };
+  return { open, _pick, close };
 })();
 
-window.BarcodeScanner = BarcodeScanner;
+window.BatchPicker = BatchPicker;
+function closeBatchSheet() { BatchPicker.close(); }
+</script>
 
-// ══════════════════════════════════════════════════════════════════════════
-//  Cloudflare 条码数据库查询 / 上报
-// ══════════════════════════════════════════════════════════════════════════
-const BarcodeDB = (function () {
+<script>
+// ── 收银 & 库存录入 ─────────────────────────────────────────────────────────
+const BARCODE_API = 'https://retail.nudgenow.xyz';
 
-  // 获取用户大致地区（IP 定位，失败则用"未知"）
-  let _region = null;
-  async function getRegion() {
-    if (_region) return _region;
-    try {
-      const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
-      const d = await r.json();
-      _region = [d.region || '', d.city || ''].filter(Boolean).join('-') || '未知';
-    } catch {
-      _region = '未知';
-    }
-    return _region;
-  }
-
-  // 查询条形码 → { found, name, salePrice, category }
-  async function query(barcode) {
-    const region = await getRegion();
-    const url = `${BARCODE_API}/api/product/${encodeURIComponent(barcode)}?region=${encodeURIComponent(region)}`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }
-
-  // 上报入库数据（入库成功后调用，丰富数据库）
-  // payload: { barcode, name, category, costPrice, salePrice, qty, expireDate }
-  // 上报内容包括进价，供数据库记录完整成本数据
-  // 无条码时仍上报入库明细（inventory 表），但不写 products 参考表
-  async function report(payload) {
-    const region = await getRegion();
-    fetch(`${BARCODE_API}/api/inventory`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...payload, region }),
-    }).catch(() => {});   // 静默失败，不影响本地流程
-  }
-
-  return { query, report, getRegion };
+// ── BarcodeScanner（原样保留）──────────────────────────────────────────────
+const BarcodeScanner = (function () {
+  let _onDetect=null,_overlayEl=null,_stream=null,_videoEl=null,_rafId=null,_scanner=null,_scanning=false,_lastFired='',_lastTime=0;
+  function _dedupe(code){const now=Date.now();if(code===_lastFired&&now-_lastTime<1500)return;_lastFired=code;_lastTime=now;_beep();_setStatus('✅ 识别：'+code);_stop();if(_onDetect)_onDetect(code);}
+  function _beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='square';osc.frequency.setValueAtTime(1800,ctx.currentTime);gain.gain.setValueAtTime(0.3,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.12);}catch(e){}}
+  function _ensureOverlay(){if(_overlayEl)return;_overlayEl=document.createElement('div');_overlayEl.id='barcode-overlay';_overlayEl.innerHTML=`<div id="bco-inner"><div id="bco-header"><div id="bco-title">📷 扫描商品条形码</div><div id="bco-hint">手机离条形码 15-20cm，保持稳定</div></div><div id="bco-viewport"><video id="bco-video" autoplay muted playsinline></video><div id="bco-frame"><span class="bco-corner tl"></span><span class="bco-corner tr"></span><span class="bco-corner bl"></span><span class="bco-corner br"></span><div id="bco-scanline"></div></div><div id="bco-reader" style="display:none;width:100%;height:100%;"></div></div><div id="bco-status">正在启动摄像头…</div><div id="bco-manual-row"><input id="bco-manual-inp" type="text" inputmode="numeric" placeholder="或手动输入条形码" autocomplete="off"><button id="bco-manual-btn">查询</button></div><button id="bco-close">✕ 关闭</button></div>`;document.body.appendChild(_overlayEl);_injectStyles();_videoEl=_overlayEl.querySelector('#bco-video');_overlayEl.querySelector('#bco-close').onclick=close;_overlayEl.querySelector('#bco-manual-btn').onclick=()=>{const v=_overlayEl.querySelector('#bco-manual-inp').value.trim();if(v)_dedupe(v);};_overlayEl.querySelector('#bco-manual-inp').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=_overlayEl.querySelector('#bco-manual-inp').value.trim();if(v)_dedupe(v);}});}
+  function _injectStyles(){if(document.getElementById('bco-styles'))return;const s=document.createElement('style');s.id='bco-styles';s.textContent=`#barcode-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;}#barcode-overlay.open{display:flex;animation:bcoFadeIn .2s ease;}@keyframes bcoFadeIn{from{opacity:0}to{opacity:1}}#bco-inner{display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px;width:100%;max-width:380px;}#bco-header{text-align:center;margin-bottom:14px;}#bco-title{color:#fff;font-size:19px;font-weight:900;}#bco-hint{color:rgba(255,255,255,.6);font-size:12px;margin-top:5px;}#bco-viewport{position:relative;width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#000;}#bco-video{width:100%;height:100%;object-fit:cover;display:block;}#bco-frame{position:absolute;inset:0;pointer-events:none;}.bco-corner{position:absolute;width:28px;height:28px;border-color:#FF6B35;border-style:solid;}.bco-corner.tl{top:16px;left:16px;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}.bco-corner.tr{top:16px;right:16px;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}.bco-corner.bl{bottom:16px;left:16px;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}.bco-corner.br{bottom:16px;right:16px;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}#bco-scanline{position:absolute;left:16px;right:16px;height:2px;background:linear-gradient(90deg,transparent,#FF6B35,transparent);animation:bcoScan 2s ease-in-out infinite;}@keyframes bcoScan{0%{top:16px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(100% - 18px);opacity:0;}}#bco-status{color:rgba(255,255,255,.8);font-size:13px;font-weight:700;margin-top:14px;min-height:18px;text-align:center;}#bco-manual-row{display:flex;gap:8px;margin-top:14px;width:100%;max-width:360px;}#bco-manual-inp{flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 12px;font-size:14px;color:#fff;outline:none;font-family:inherit;}#bco-manual-inp::placeholder{color:rgba(255,255,255,.35);}#bco-manual-btn{background:#FF6B35;border:none;border-radius:10px;padding:10px 16px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}#bco-close{margin-top:18px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;padding:11px 36px;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}.f-name-wrap{position:relative;display:flex;align-items:center;}.f-name-wrap .form-inp{padding-right:52px;}.scan-trigger-btn{position:absolute;right:6px;width:38px;height:38px;background:#FF6B35;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s;box-shadow:0 3px 0 #C44D1A;}.scan-trigger-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #C44D1A;}.scan-trigger-btn svg{width:19px;height:19px;}.f-barcode-tag{font-size:11px;font-weight:700;color:#999;margin-top:4px;display:none;}.f-barcode-tag.show{display:block;}.f-barcode-tag span{color:#FF6B35;}@keyframes autoFill{0%{background:#FFF3EE;border-color:#FF6B35;}100%{background:#fff;border-color:#EBEBEB;}}.auto-filled{animation:autoFill 1.8s ease forwards;}`;document.head.appendChild(s);}
+  function _setStatus(msg){if(_overlayEl)_overlayEl.querySelector('#bco-status').textContent=msg;}
+  function _stop(){_scanning=false;if(_rafId){cancelAnimationFrame(_rafId);_rafId=null;}if(_stream){_stream.getTracks().forEach(t=>t.stop());_stream=null;}if(_videoEl)_videoEl.srcObject=null;if(_scanner){_scanner.stop().catch(()=>{});_scanner=null;}}
+  function _startNative(supportedFormats){const wanted=['ean_13','ean-13','ean_8','ean-8','code_128','code-128','code_39','code-39','upc_a','upc-a','upc_e','upc-e'];const formats=supportedFormats?wanted.filter(f=>supportedFormats.includes(f)):wanted;const detector=new BarcodeDetector({formats});navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}}).then(stream=>{_stream=stream;_videoEl.srcObject=stream;_videoEl.style.display='block';_overlayEl.querySelector('#bco-reader').style.display='none';let _started=false;function _startScanLoop(){if(_started)return;_started=true;_setStatus('🔍 对准条形码，手机离远一点效果更好…');const canvas=document.createElement('canvas');const ctx2d=canvas.getContext('2d');function scan(){if(!_scanning)return;if(_videoEl.videoWidth===0||_videoEl.videoHeight===0){_rafId=requestAnimationFrame(scan);return;}canvas.width=_videoEl.videoWidth;canvas.height=_videoEl.videoHeight;ctx2d.drawImage(_videoEl,0,0);createImageBitmap(canvas).then(bitmap=>{return detector.detect(bitmap).then(codes=>{bitmap.close();if(codes.length>0)_dedupe(codes[0].rawValue);});}).catch(()=>{}).finally(()=>{if(_scanning)_rafId=requestAnimationFrame(scan);});}_rafId=requestAnimationFrame(scan);}_videoEl.onloadedmetadata=()=>{_videoEl.play();_startScanLoop();};_videoEl.onloadeddata=()=>{_videoEl.play();_startScanLoop();};_videoEl.oncanplay=()=>{_videoEl.play();_startScanLoop();};setTimeout(()=>{_videoEl.play().then(_startScanLoop).catch(()=>{});},500);}).catch(err=>{_setStatus('⚠️ 摄像头启动失败，请手动输入');});}
+  function _startFallback(){_videoEl.style.display='none';const readerEl=_overlayEl.querySelector('#bco-reader');readerEl.style.display='block';readerEl.innerHTML='';function _loadLib(cb){if(window.Html5Qrcode){cb();return;}const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=cb;s.onerror=()=>_setStatus('⚠️ 扫码库加载失败，请手动输入');document.head.appendChild(s);}_loadLib(()=>{try{_scanner=new Html5Qrcode('bco-reader');}catch(e){_setStatus('⚠️ 初始化失败，请手动输入');return;}_scanner.start({facingMode:'environment'},{fps:10,qrbox:(w,h)=>({width:Math.round(w*.85),height:Math.round(h*.35)}),aspectRatio:1.333,supportedScanTypes:[Html5QrcodeScanType.SCAN_TYPE_CAMERA],formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E],},(code)=>{if(_scanner)_dedupe(code);},()=>{}).then(()=>{_setStatus('🔍 对准条形码，手机离远一点效果更好…');}).catch(err=>{_setStatus('⚠️ 摄像头启动失败，请手动输入');});});}
+  function open(onDetectCb){_onDetect=onDetectCb;_ensureOverlay();_overlayEl.classList.add('open');_overlayEl.querySelector('#bco-manual-inp').value='';_lastFired='';_lastTime=0;if(_scanning){_stop();}_scanning=true;_setStatus('正在启动摄像头…');if(window.BarcodeDetector){BarcodeDetector.getSupportedFormats().then(formats=>{_setStatus('检测格式：'+formats.join(',').substring(0,40));setTimeout(()=>{const hasBarcode=formats.some(f=>['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f));if(hasBarcode){_setStatus('✨ 使用系统级扫码引擎…');_startNative(formats);}else{_setStatus('降级到 JS 引擎…');_startFallback();}},1500);}).catch(()=>_startFallback());}else{_startFallback();}}
+  function close(){_stop();if(_overlayEl)_overlayEl.classList.remove('open');}
+  return{open,close};
 })();
+window.BarcodeScanner=BarcodeScanner;
 
-window.BarcodeDB = BarcodeDB;
+// ── BarcodeDB ───────────────────────────────────────────────────────────────
+const BarcodeDB=(function(){let _region=null;async function getRegion(){if(_region)return _region;try{const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});const d=await r.json();_region=[d.region||'',d.city||''].filter(Boolean).join('-')||'未知';}catch{_region='未知';}return _region;}async function query(barcode){const region=await getRegion();const url=`${BARCODE_API}/api/product/${encodeURIComponent(barcode)}?region=${encodeURIComponent(region)}`;const r=await fetch(url,{signal:AbortSignal.timeout(6000)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}async function report(payload){const region=await getRegion();fetch(`${BARCODE_API}/api/inventory`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,region}),}).catch(()=>{});}return{query,report,getRegion};})();
+window.BarcodeDB=BarcodeDB;
 
-// ══════════════════════════════════════════════════════════════════════════
-//  Accounting 模块
-// ══════════════════════════════════════════════════════════════════════════
+// ── Accounting ──────────────────────────────────────────────────────────────
 const Accounting = (function () {
 
-// ════════════════════════════════════════════════════════════════════════
-//  开始收银（不变）
-// ════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+//  收银台
+//  ★ 改动：搜索结果按商品名聚合；点击后若多批次则弹 BatchPicker
+// ════════════════════════════════════════════════════════════════════════════
 function renderCashier(container) {
   let cart = [];
 
@@ -1404,7 +1052,6 @@ function renderCashier(container) {
           <input id="cashier-search" class="search-inp" type="text"
                  placeholder="搜索商品名称…" autocomplete="off"
                  style="padding-right:52px;">
-          <!-- 扫码按钮 -->
           <button class="scan-trigger-btn" style="position:absolute;right:6px;"
                   title="扫描条形码" onclick="Accounting._cashierScan()">
             <svg viewBox="0 0 24 24" fill="none"
@@ -1423,12 +1070,12 @@ function renderCashier(container) {
       </div>
       <div class="section-label">已选商品</div>
       <div id="cashier-cart" class="cart-list"></div>
-      <div class="cashier-total-bar" id="cashier-total-bar">
+      <div class="cashier-total-bar">
         <div class="ct-left">
           <div class="ct-items" id="ct-items">0 件商品</div>
           <div class="ct-total" id="ct-total">¥0.00</div>
         </div>
-        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()">出售</button>
+        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>出售</button>
       </div>
       <div id="cashier-success" class="sale-success hidden">
         <div class="ss-icon">🎉</div>
@@ -1441,47 +1088,50 @@ function renderCashier(container) {
   const inp = container.querySelector('#cashier-search');
   const dd  = container.querySelector('#cashier-dropdown');
 
-  // ── 扫码加入购物车 ────────────────────────────────────────────────
+  // ── 扫码加入购物车 ──────────────────────────────────────────────────────
   Accounting._cashierScan = () => {
     BarcodeScanner.open((code) => {
       BarcodeScanner.close();
-
-      // 在本地库存里用条形码匹配（barcode 字段，录入时已保存）
       const inv  = Engine.getInventory().filter(p => parseFloat(p.qty) > 0);
       const prod = inv.find(p => p.barcode === code);
-
       if (prod) {
-        // 找到了：填入搜索框名称 + 直接加入购物车
-        inp.value = prod.name;
-        addToCart(prod);
-        inp.value = '';
-        _showToast('✅ 已加入：' + prod.name);
+        // 扫码命中，再走批次选择
+        _pickAndAdd(prod.name);
       } else {
-        // 没找到：把条形码填入搜索框，让用户看到提示
-        inp.value = '';
         _showToast('⚠️ 库存中没有条码 ' + code + ' 的商品，请先录入');
       }
     });
   };
 
-  // ── 文字搜索 ──────────────────────────────────────────────────────
+  // ── 文字搜索（按商品名聚合，每个名称只显示一行）──────────────────────────
   inp.addEventListener('input', () => {
     const q   = inp.value.trim().toLowerCase();
     const inv = Engine.getInventory().filter(p => parseFloat(p.qty) > 0);
     if (!q) { dd.classList.add('hidden'); return; }
-    // 同时支持按商品名称和条形码搜索
-    const results = inv.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      (p.barcode && p.barcode.includes(q))
-    );
+
+    // 聚合：同名商品合并为一个搜索结果，显示总库存
+    const nameMap = {};
+    inv.forEach(p => {
+      if (!p.name.toLowerCase().includes(q) && !(p.barcode && p.barcode.includes(q))) return;
+      if (!nameMap[p.name]) nameMap[p.name] = { name: p.name, totalQty: 0, batches: 0 };
+      nameMap[p.name].totalQty += parseFloat(p.qty);
+      nameMap[p.name].batches++;
+    });
+    const results = Object.values(nameMap);
+
     dd.innerHTML = results.length
-      ? results.map(p => `<div class="dd-item" data-id="${p.id}"><span class="dd-name">${p.name}</span><span class="dd-info">库存${p.qty}件 · ${Engine.fmtMoney(p.salePrice)}</span></div>`).join('')
+      ? results.map(r => `
+          <div class="dd-item" data-name="${r.name}">
+            <span class="dd-name">${r.name}</span>
+            <span class="dd-info">库存${r.totalQty}件${r.batches > 1 ? ' · ' + r.batches + '个批次' : ''}</span>
+          </div>`).join('')
       : '<div class="dd-empty">没有找到商品</div>';
+
     dd.querySelectorAll('.dd-item').forEach(el => {
       el.onclick = () => {
-        const prod = inv.find(p => p.id == el.dataset.id);
-        if (prod) addToCart(prod);
-        inp.value = ''; dd.classList.add('hidden');
+        inp.value = '';
+        dd.classList.add('hidden');
+        _pickAndAdd(el.dataset.name);
       };
     });
     dd.classList.remove('hidden');
@@ -1491,14 +1141,29 @@ function renderCashier(container) {
     if (!container.querySelector('.search-wrap').contains(e.target)) dd.classList.add('hidden');
   });
 
+  // ── 核心：批次选择后加入购物车 ─────────────────────────────────────────
+  function _pickAndAdd(productName) {
+    BatchPicker.open(productName, (batch) => {
+      if (!batch) return;  // 用户取消
+      addToCart(batch);
+    });
+  }
+
   function addToCart(prod) {
+    // 同一批次（同 id）累加
     const existing = cart.find(c => c.productId === prod.id);
     if (existing) {
       existing.qty = Math.min(existing.qty + 1, parseFloat(prod.qty));
     } else {
-      cart.push({ productId: prod.id, name: prod.name, qty: 1,
-        costPrice: parseFloat(prod.costPrice), salePrice: parseFloat(prod.salePrice),
-        maxQty: parseFloat(prod.qty) });
+      cart.push({
+        productId: prod.id,
+        name:      prod.name,
+        batchNo:   prod.batchNo,
+        qty:       1,
+        costPrice: parseFloat(prod.costPrice),
+        salePrice: parseFloat(prod.salePrice),
+        maxQty:    parseFloat(prod.qty),
+      });
     }
     renderCart();
   }
@@ -1509,8 +1174,11 @@ function renderCashier(container) {
       ? cart.map((item, i) => `
           <div class="cart-item">
             <div class="ci-info">
-              <div class="ci-name">${item.name}</div>
-              <div class="ci-price">${Engine.fmtMoney(item.salePrice)} / 件</div>
+              <div class="ci-name">
+                ${item.name}
+                ${item.batchNo ? '<span style="font-size:11px;color:#999;font-weight:700;margin-left:4px">批次${item.batchNo}</span>' : ''}
+              </div>
+              <div class="ci-price">${Engine.fmtMoney(item.salePrice)} / 件 · 进价 ${Engine.fmtMoney(item.costPrice)}</div>
             </div>
             <div class="ci-qty-ctrl">
               <button class="qty-btn" onclick="Accounting._cartQty(${i},-1)">−</button>
@@ -1519,8 +1187,7 @@ function renderCashier(container) {
             </div>
             <div class="ci-subtotal">${Engine.fmtMoney(item.salePrice * item.qty)}</div>
             <button class="ci-del" onclick="Accounting._cartDel(${i})">✕</button>
-          </div>`)
-        .join('')
+          </div>`).join('')
       : '<div class="cart-empty">搜索或扫码添加商品 🛍️</div>';
     updateTotal();
   }
@@ -1533,14 +1200,18 @@ function renderCashier(container) {
     container.querySelector('#ct-btn').disabled = cart.length === 0;
   }
 
-  Accounting._cartQty = (i, d) => { cart[i].qty = Math.max(1, Math.min(cart[i].qty + d, cart[i].maxQty)); renderCart(); };
-  Accounting._cartDel = (i)    => { cart.splice(i, 1); renderCart(); };
+  Accounting._cartQty = (i, d) => {
+    cart[i].qty = Math.max(1, Math.min(cart[i].qty + d, cart[i].maxQty));
+    renderCart();
+  };
+  Accounting._cartDel = (i) => { cart.splice(i, 1); renderCart(); };
   Accounting._submitSale = () => {
     if (!cart.length) return;
     const record = Engine.recordSale(cart);
     cart = []; renderCart();
     const su = container.querySelector('#cashier-success');
-    container.querySelector('#ss-sub').textContent = '共收 ' + Engine.fmtMoney(record.total) + ' · 毛利 ' + Engine.fmtMoney(record.profit);
+    container.querySelector('#ss-sub').textContent =
+      '共收 ' + Engine.fmtMoney(record.total) + ' · 毛利 ' + Engine.fmtMoney(record.profit);
     su.classList.remove('hidden');
     su.style.animation = 'none';
     requestAnimationFrame(() => { su.style.animation = ''; });
@@ -1551,15 +1222,11 @@ function renderCashier(container) {
   renderCart();
 }
 
-// ════════════════════════════════════════════════════════════════════════
-//  库存录入 / 进货（共用 _renderForm）
-// ════════════════════════════════════════════════════════════════════════
-function renderEntry(container) {
-  _renderForm(container, 'entry',   '库存录入', '➕', '将现有商品录入库存系统');
-}
-function renderRestock(container) {
-  _renderForm(container, 'restock', '进货',     '📦', '记录新到货商品，自动补充库存');
-}
+// ════════════════════════════════════════════════════════════════════════════
+//  库存录入 / 进货（★ 始终新建批次，不再合并）
+// ════════════════════════════════════════════════════════════════════════════
+function renderEntry(container)   { _renderForm(container, 'entry',   '库存录入', '➕', '将现有商品录入库存系统'); }
+function renderRestock(container) { _renderForm(container, 'restock', '进货',     '📦', '记录新到货商品，自动补充库存'); }
 
 const CATS = ['食品饮料', '日用百货', '休闲零食', '冷冻冷藏', '酒水', '烟草', '其他'];
 
@@ -1571,10 +1238,7 @@ function _renderForm(container, source, title, icon, subtitle) {
         <span class="page-title-text">${title}</span>
       </div>
       <div class="form-subtitle">${subtitle}</div>
-
       <div class="form-card">
-
-        <!-- ▼ 商品名称（含扫码按钮）▼ -->
         <div class="form-group">
           <label class="form-lbl">商品名称 *</label>
           <div class="f-name-wrap">
@@ -1582,7 +1246,6 @@ function _renderForm(container, source, title, icon, subtitle) {
                    placeholder="例：农夫山泉 550ml" autocomplete="off">
             <button class="scan-trigger-btn" title="扫描条形码"
                     onclick="Accounting._openScanner()">
-              <!-- 条形码图标 SVG -->
               <svg viewBox="0 0 24 24" fill="none"
                    stroke="#fff" stroke-width="2.2"
                    stroke-linecap="round" stroke-linejoin="round">
@@ -1595,19 +1258,14 @@ function _renderForm(container, source, title, icon, subtitle) {
               </svg>
             </button>
           </div>
-          <!-- 已扫条形码回显 -->
-          <div class="f-barcode-tag" id="f-barcode-tag">
-            条形码：<span id="f-barcode-val"></span>
-          </div>
+          <div class="f-barcode-tag" id="f-barcode-tag">条形码：<span id="f-barcode-val"></span></div>
         </div>
-
         <div class="form-group">
           <label class="form-lbl">商品分类</label>
           <div class="cat-chips" id="cat-chips">
-            ${CATS.map((c, i) => `<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${c}</button>`).join('')}
+            ${CATS.map((c,i)=>`<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${c}</button>`).join('')}
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group half">
             <label class="form-lbl">进价 (¥) *</label>
@@ -1618,7 +1276,6 @@ function _renderForm(container, source, title, icon, subtitle) {
             <input id="f-sale" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00">
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group half">
             <label class="form-lbl">数量 *</label>
@@ -1629,20 +1286,17 @@ function _renderForm(container, source, title, icon, subtitle) {
             <input id="f-exp" class="form-inp" type="date">
           </div>
         </div>
-
         <div class="margin-preview" id="margin-preview" style="display:none">
           <span class="mp-label">毛利预览</span>
           <span class="mp-unit" id="mp-unit">单件毛利 ¥—</span>
           <span class="mp-rate" id="mp-rate">毛利率 —%</span>
         </div>
-
-      </div><!-- /form-card -->
+      </div>
 
       <button class="form-submit" id="f-submit"
               onclick="Accounting._submitForm('${source}')">
         <span>${icon}</span> 确认${title}
       </button>
-
       <div class="form-success hidden" id="f-success">✅ ${title}成功！</div>
 
       <div class="section-label" style="margin-top:24px">${title}历史</div>
@@ -1650,51 +1304,40 @@ function _renderForm(container, source, title, icon, subtitle) {
     </div>
   `;
 
-  // 当前扫描到的条形码（供提交时上报）
   let _currentBarcode = null;
 
-  // ── 扫码回调 ───────────────────────────────────────────────────────
   Accounting._openScanner = () => {
     BarcodeScanner.open(async (code) => {
       BarcodeScanner.close();
-
-      // 显示条形码
       _currentBarcode = code;
       const tagEl = container.querySelector('#f-barcode-tag');
       const valEl = container.querySelector('#f-barcode-val');
       if (tagEl && valEl) { valEl.textContent = code; tagEl.classList.add('show'); }
-
-      // 查询数据库
       try {
         const data = await BarcodeDB.query(code);
         if (data.found) {
-          // 自动填入商品名称 + 进价 + 售价
           const nameEl = container.querySelector('#f-name');
           const costEl = container.querySelector('#f-cost');
           const saleEl = container.querySelector('#f-sale');
           if (nameEl) { nameEl.value = data.name; nameEl.classList.add('auto-filled'); }
           if (costEl && data.costPrice) { costEl.value = data.costPrice; costEl.classList.add('auto-filled'); }
           if (saleEl && data.salePrice) { saleEl.value = data.salePrice; saleEl.classList.add('auto-filled'); }
-          // 自动选分类
           if (data.category) {
             container.querySelectorAll('.cat-chip').forEach(btn => {
               btn.classList.toggle('active', btn.dataset.cat === data.category);
             });
           }
           _showToast('✅ 已自动填入：' + data.name);
-          // 触发毛利预览更新
           container.querySelector('#f-cost').dispatchEvent(new Event('input'));
         } else {
           _showToast('📝 新商品，请填写商品信息后录入');
         }
       } catch (e) {
         _showToast('⚠️ 查询失败，请手动填写商品信息');
-        console.warn('[BarcodeDB]', e);
       }
     });
   };
 
-  // ── 分类选择 ──────────────────────────────────────────────────────
   container.querySelectorAll('.cat-chip').forEach(btn => {
     btn.onclick = () => {
       container.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
@@ -1702,7 +1345,6 @@ function _renderForm(container, source, title, icon, subtitle) {
     };
   });
 
-  // ── 实时毛利预览 ──────────────────────────────────────────────────
   ['f-cost', 'f-sale'].forEach(id => {
     container.querySelector('#' + id).addEventListener('input', () => {
       const cost = parseFloat(container.querySelector('#f-cost').value) || 0;
@@ -1722,7 +1364,6 @@ function _renderForm(container, source, title, icon, subtitle) {
     });
   });
 
-  // ── 提交 ──────────────────────────────────────────────────────────
   Accounting._submitForm = (src) => {
     const name    = container.querySelector('#f-name').value.trim();
     const cost    = parseFloat(container.querySelector('#f-cost').value);
@@ -1731,23 +1372,25 @@ function _renderForm(container, source, title, icon, subtitle) {
     const expDate = container.querySelector('#f-exp').value;
     const cat     = container.querySelector('.cat-chip.active')?.dataset.cat || '其他';
 
-    if (!name)                return _shake(container.querySelector('#f-name'),  '请填写商品名称');
+    if (!name)                   return _shake(container.querySelector('#f-name'),  '请填写商品名称');
     if (isNaN(cost) || cost < 0) return _shake(container.querySelector('#f-cost'), '请填写有效进价');
     if (isNaN(sale) || sale < 0) return _shake(container.querySelector('#f-sale'), '请填写有效售价');
     if (isNaN(qty)  || qty  < 1) return _shake(container.querySelector('#f-qty'),  '数量至少为1');
 
-    // 本地存储（含条形码字段）
-    Engine.addProduct({ barcode: _currentBarcode || null, name, category: cat, qty, costPrice: cost, salePrice: sale,
-      expireDate: expDate, source: src, createdAt: new Date().toISOString() });
+    Engine.addProduct({
+      barcode: _currentBarcode || null,
+      name, category: cat, qty,
+      costPrice: cost, salePrice: sale,
+      expireDate: expDate, source: src,
+      createdAt: new Date().toISOString(),
+    });
 
-    // 上报到 Cloudflare（有条形码时才上报，静默）
     BarcodeDB.report({
-      barcode:    _currentBarcode,
+      barcode: _currentBarcode,
       name, category: cat, costPrice: cost, salePrice: sale,
       qty, expireDate: expDate,
     });
 
-    // 重置
     ['f-name','f-cost','f-sale','f-qty','f-exp'].forEach(id => {
       container.querySelector('#' + id).value = '';
     });
@@ -1756,7 +1399,6 @@ function _renderForm(container, source, title, icon, subtitle) {
     if (tagEl) tagEl.classList.remove('show');
     _currentBarcode = null;
 
-    // 成功提示
     const su = container.querySelector('#f-success');
     su.classList.remove('hidden');
     setTimeout(() => su.classList.add('hidden'), 2000);
@@ -1765,7 +1407,6 @@ function _renderForm(container, source, title, icon, subtitle) {
     if (window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
   };
 
-  // ── 历史记录 ──────────────────────────────────────────────────────
   function renderHistory() {
     const el  = container.querySelector('#form-history');
     const inv = Engine.getInventory().filter(p => p.source === source).slice(-10).reverse();
@@ -1773,7 +1414,10 @@ function _renderForm(container, source, title, icon, subtitle) {
       ? inv.map(p => `
           <div class="hist-item">
             <div class="hi-left">
-              <div class="hi-name">${p.name}</div>
+              <div class="hi-name">
+                ${p.name}
+                ${p.batchNo ? '<span style="font-size:10px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>' : ''}
+              </div>
               <div class="hi-meta">${p.category} · 进价${Engine.fmtMoney(p.costPrice)} · 售价${Engine.fmtMoney(p.salePrice)}</div>
             </div>
             <div class="hi-right">
@@ -1787,61 +1431,34 @@ function _renderForm(container, source, title, icon, subtitle) {
   renderHistory();
 }
 
-// ── 工具 ──────────────────────────────────────────────────────────────
 function _shake(el, msg) {
-  el.style.borderColor = '#F44336';
-  el.placeholder = msg;
+  el.style.borderColor = '#F44336'; el.placeholder = msg;
   el.classList.add('shake');
   setTimeout(() => { el.classList.remove('shake'); el.style.borderColor = ''; }, 600);
 }
 
-// 轻量 Toast（不依赖外部库）
 function _showToast(msg) {
   let t = document.getElementById('bco-toast');
   if (!t) {
-    t = document.createElement('div');
-    t.id = 'bco-toast';
+    t = document.createElement('div'); t.id = 'bco-toast';
     const ts = document.createElement('style');
-    ts.textContent = `
-      #bco-toast {
-        position:fixed; top:72px; left:50%;
-        transform:translateX(-50%) translateY(-12px);
-        background:rgba(0,0,0,.78); color:#fff;
-        padding:9px 18px; border-radius:20px;
-        font-size:14px; font-weight:700;
-        z-index:10000; opacity:0; pointer-events:none;
-        transition:opacity .25s, transform .25s;
-        white-space:nowrap; max-width:300px;
-        font-family:'PingFang SC','Helvetica Neue',sans-serif;
-      }
-      #bco-toast.show {
-        opacity:1; transform:translateX(-50%) translateY(0);
-      }
-    `;
-    document.head.appendChild(ts);
-    document.body.appendChild(t);
+    ts.textContent = `#bco-toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-12px);background:rgba(0,0,0,.78);color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;font-weight:700;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:300px;font-family:'PingFang SC','Helvetica Neue',sans-serif;}#bco-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}`;
+    document.head.appendChild(ts); document.body.appendChild(t);
   }
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 return { renderCashier, renderEntry, renderRestock };
 })();
 
 window.Accounting = Accounting;
-
 </script>
-<script>
-  // ── 獭掌柜 · 看板模块 dashboard.js ──────────────────────────────────────
-// 依赖 engine.js (window.Engine)
 
+<script>
+// ── 看板模块 ────────────────────────────────────────────────────────────────
 const Dashboard = (function () {
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  库存看板
-  // ════════════════════════════════════════════════════════════════════════
   let _inventoryContainer = null;
 
   function renderInventory(container) {
@@ -1851,17 +1468,14 @@ const Dashboard = (function () {
 
   function _drawInventory(container) {
     const inv = Engine.getInventory();
-    const CATS = [...new Set(inv.map(p => p.category || '其他'))].sort();
 
     container.innerHTML = `
       <div class="page-dashboard">
         <div class="page-title-bar">
           <span class="page-title-icon">📦</span>
           <span class="page-title-text">库存看板</span>
-          <span class="inv-total-chip">${inv.length} 种商品</span>
+          <span class="inv-total-chip">${inv.length} 条批次</span>
         </div>
-
-        <!-- 汇总卡片 -->
         <div class="inv-summary-row">
           <div class="inv-sc">
             <div class="inv-sc-val">${inv.reduce((a,p)=>a+(parseFloat(p.qty)||0),0)}</div>
@@ -1876,16 +1490,11 @@ const Dashboard = (function () {
             <div class="inv-sc-lbl">库存售价总值</div>
           </div>
         </div>
-
-        <!-- 搜索 -->
         <div class="inv-search-wrap">
           <span class="search-ico">🔍</span>
           <input id="inv-search" class="search-inp" type="text" placeholder="搜索商品名称…">
         </div>
-
         ${!inv.length ? '<div class="inv-empty">暂无库存商品<br>请先在「库存录入」或「进货」中添加</div>' : ''}
-
-        <!-- 分类表格 -->
         <div id="inv-tables"></div>
       </div>
     `;
@@ -1920,15 +1529,29 @@ const Dashboard = (function () {
 
       tbContainer.innerHTML = Object.keys(grouped).sort().map(cat => {
         const items = grouped[cat];
-        const rows  = items.map(p => {
+        // 在同一分类里，同名商品按批次号排序，便于对比
+        const sorted = [...items].sort((a, b) =>
+          a.name.localeCompare(b.name) || (a.batchNo||0) - (b.batchNo||0)
+        );
+
+        const rows = sorted.map((p, idx) => {
           const daysLeft = Engine.daysUntil(p.expireDate);
           const expClass = daysLeft !== null && daysLeft <= 3 ? 'exp-danger'
                          : daysLeft !== null && daysLeft <= 7 ? 'exp-warn' : '';
           const qtyClass = parseFloat(p.qty) === 0 ? 'qty-zero'
                          : parseFloat(p.qty) <= 5  ? 'qty-low' : '';
+
+          // 判断是否是同名商品中最早批次（先进先出标记）
+          const sameName = sorted.filter(q => q.name === p.name);
+          const isFifo   = sameName.length > 1 && sameName[0].id === p.id;
+
           return `
-            <tr class="inv-row" data-id="${p.id}">
-              <td class="inv-td td-name">${p.name}</td>
+            <tr class="${isFifo ? 'batch-fifo-row' : ''}">
+              <td class="inv-td td-name">
+                ${p.name}
+                <span class="batch-tag">批${p.batchNo||1}</span>
+                ${isFifo ? '<span style="font-size:10px;color:var(--green);font-weight:800">先出</span>' : ''}
+              </td>
               <td class="inv-td td-qty ${qtyClass}">${p.qty}</td>
               <td class="inv-td td-cost">${Engine.fmtMoney(p.costPrice)}</td>
               <td class="inv-td td-sale">${Engine.fmtMoney(p.salePrice)}</td>
@@ -1950,7 +1573,7 @@ const Dashboard = (function () {
           <div class="inv-cat-section">
             <div class="inv-cat-header">
               <span class="inv-cat-name">${cat}</span>
-              <span class="inv-cat-count">${items.length} 种</span>
+              <span class="inv-cat-count">${items.length} 条</span>
             </div>
             <div class="inv-table-wrap">
               <table class="inv-table">
@@ -1974,22 +1597,18 @@ const Dashboard = (function () {
 
     renderTables();
 
-    // 删除按钮
     Dashboard._deleteProduct = (id) => {
-      if (!confirm('确定删除此商品？')) return;
+      if (!confirm('确定删除此批次？')) return;
       Engine.deleteProduct(id);
       _drawInventory(container);
     };
   }
 
-  // 供外部刷新
   function refresh() {
     if (_inventoryContainer) _drawInventory(_inventoryContainer);
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  临期货品
-  // ════════════════════════════════════════════════════════════════════════
+  // 临期货品（原样保留）
   function renderExpiring(container) {
     container.innerHTML = `
       <div class="page-expiring">
@@ -1997,19 +1616,15 @@ const Dashboard = (function () {
           <span class="page-title-icon">⏰</span>
           <span class="page-title-text">临期货品</span>
         </div>
-
-        <!-- 天数筛选 -->
         <div class="exp-filter-row">
           <button class="exp-filter-btn active" data-days="7">7天内</button>
           <button class="exp-filter-btn" data-days="14">14天内</button>
           <button class="exp-filter-btn" data-days="30">30天内</button>
           <button class="exp-filter-btn" data-days="0">已过期</button>
         </div>
-
         <div id="exp-content"></div>
       </div>
     `;
-
     let activeDays = 7;
     container.querySelectorAll('.exp-filter-btn').forEach(btn => {
       btn.onclick = () => {
@@ -2019,12 +1634,10 @@ const Dashboard = (function () {
         renderExpContent();
       };
     });
-
     function renderExpContent() {
       const el = container.querySelector('#exp-content');
       let items;
       if (activeDays === 0) {
-        // 已过期
         items = Engine.getInventory().filter(p => {
           if (!p.expireDate) return false;
           return Engine.daysUntil(p.expireDate) < 0;
@@ -2032,68 +1645,46 @@ const Dashboard = (function () {
       } else {
         items = Engine.getExpiringProducts(activeDays);
       }
-
       if (!items.length) {
-        el.innerHTML = `<div class="exp-empty">
-          <div class="exp-empty-icon">✨</div>
-          <div>暂无${activeDays === 0 ? '过期' : activeDays + '天内临期'}商品</div>
-        </div>`;
+        el.innerHTML = `<div class="exp-empty"><div class="exp-empty-icon">✨</div><div>暂无${activeDays===0?'过期':activeDays+'天内临期'}商品</div></div>`;
         return;
       }
-
       el.innerHTML = `
         <div class="exp-summary">共 <b>${items.length}</b> 种商品需要关注</div>
         ${items.map(p => {
           const d = Engine.daysUntil(p.expireDate);
-          const urgency = d < 0 ? 'exp-card-danger'
-                        : d === 0 ? 'exp-card-danger'
-                        : d <= 3  ? 'exp-card-warn'
-                        : 'exp-card-ok';
-          const badge = d < 0  ? `已过期 ${Math.abs(d)} 天`
-                      : d === 0 ? '今天到期'
-                      : `还剩 ${d} 天`;
-          return `
-            <div class="exp-card ${urgency}">
-              <div class="exp-card-left">
-                <div class="exp-card-name">${p.name}</div>
-                <div class="exp-card-meta">${p.category || '其他'} · 库存 ${p.qty} 件</div>
-                <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
-              </div>
-              <div class="exp-card-right">
-                <div class="exp-badge ${urgency}">${badge}</div>
-                <div class="exp-date">${p.expireDate}</div>
-              </div>
+          const urgency = d < 0 ? 'exp-card-danger' : d === 0 ? 'exp-card-danger' : d <= 3 ? 'exp-card-warn' : 'exp-card-ok';
+          const badge = d < 0 ? `已过期 ${Math.abs(d)} 天` : d === 0 ? '今天到期' : `还剩 ${d} 天`;
+          return `<div class="exp-card ${urgency}">
+            <div class="exp-card-left">
+              <div class="exp-card-name">${p.name}${p.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
+              <div class="exp-card-meta">${p.category||'其他'} · 库存 ${p.qty} 件</div>
+              <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
             </div>
-          `;
+            <div class="exp-card-right">
+              <div class="exp-badge ${urgency}">${badge}</div>
+              <div class="exp-date">${p.expireDate}</div>
+            </div>
+          </div>`;
         }).join('')}
       `;
     }
-
     renderExpContent();
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  销量排行（游戏化）
-  // ════════════════════════════════════════════════════════════════════════
+  // 排行榜（原样保留）
   function renderSalesRanking(container) {
     const data = Engine.getSalesRanking();
     _renderRanking(container, {
-      title: '销量排行',
-      icon:  '📊',
-      subtitle: '统计开业以来累计售出数量',
-      data,
-      valueKey:  'totalQty',
-      valueUnit: '件',
-      valueFmt:  v => v + ' 件',
-      subFmt:    item => '营收 ' + Engine.fmtMoney(item.totalRevenue),
-      emptyMsg:  '还没有销售记录，快去收银吧！',
-      medalColors: ['#FFD700','#C0C0C0','#CD7F32'],
+      title:'销量排行', icon:'📊',
+      subtitle:'统计开业以来累计售出数量',
+      data, valueKey:'totalQty',
+      valueFmt: v => v + ' 件',
+      subFmt: item => '营收 ' + Engine.fmtMoney(item.totalRevenue),
+      emptyMsg:'还没有销售记录，快去收银吧！',
     });
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  毛利排行（游戏化）
-  // ════════════════════════════════════════════════════════════════════════
   function renderProfitRanking(container) {
     container.innerHTML = `
       <div class="page-ranking">
@@ -2101,47 +1692,37 @@ const Dashboard = (function () {
           <span class="page-title-icon">💹</span>
           <span class="page-title-text">毛利排行</span>
         </div>
-
-        <!-- 双榜切换 -->
         <div class="rank-tab-row">
           <button class="rank-tab active" id="rtab-sold" onclick="Dashboard._switchRankTab('sold')">已售毛利榜</button>
           <button class="rank-tab" id="rtab-unit" onclick="Dashboard._switchRankTab('unit')">单品毛利榜</button>
         </div>
-
         <div id="rank-panel-sold"></div>
         <div id="rank-panel-unit" style="display:none"></div>
       </div>
     `;
-
     Dashboard._switchRankTab = (tab) => {
       ['sold','unit'].forEach(t => {
-        container.querySelector('#rtab-' + t).classList.toggle('active', t === tab);
-        container.querySelector('#rank-panel-' + t).style.display = t === tab ? '' : 'none';
+        container.querySelector('#rtab-'+t).classList.toggle('active', t===tab);
+        container.querySelector('#rank-panel-'+t).style.display = t===tab ? '' : 'none';
       });
     };
-
-    // 已售毛利榜
     const soldData = Engine.getSoldProfitRanking();
     const maxSold  = soldData.length ? soldData[0].profit : 1;
-    container.querySelector('#rank-panel-sold').innerHTML = soldData.length ? `
-      <div class="rank-subtitle">售价×售出量 − 进价×售出量，贡献总毛利</div>
-      ${soldData.map((item, i) => _rankCard(item, i, item.profit, maxSold, Engine.fmtMoney(item.profit), `已售 ${item.qty} 件`)).join('')}
-    ` : '<div class="rank-empty">暂无销售数据</div>';
-
-    // 单品毛利榜
+    container.querySelector('#rank-panel-sold').innerHTML = soldData.length
+      ? `<div class="rank-subtitle">售价×售出量 − 进价×售出量，贡献总毛利</div>
+         ${soldData.map((item,i)=>_rankCard(item,i,item.profit,maxSold,Engine.fmtMoney(item.profit),`已售 ${item.qty} 件`)).join('')}`
+      : '<div class="rank-empty">暂无销售数据</div>';
     const unitData = Engine.getUnitProfitRanking();
     const maxUnit  = unitData.length ? unitData[0].unitProfit : 1;
-    container.querySelector('#rank-panel-unit').innerHTML = unitData.length ? `
-      <div class="rank-subtitle">所有商品单件毛利（售价 − 进价），不论是否售出</div>
-      ${unitData.map((item, i) => _rankCard(item, i, item.unitProfit, maxUnit, Engine.fmtMoney(item.unitProfit) + '/件', `毛利率 ${item.margin}%`)).join('')}
-    ` : '<div class="rank-empty">请先录入商品</div>';
+    container.querySelector('#rank-panel-unit').innerHTML = unitData.length
+      ? `<div class="rank-subtitle">所有商品单件毛利（售价 − 进价），不论是否售出</div>
+         ${unitData.map((item,i)=>_rankCard(item,i,item.unitProfit,maxUnit,Engine.fmtMoney(item.unitProfit)+'/件',`毛利率 ${item.margin}%`)).join('')}`
+      : '<div class="rank-empty">请先录入商品</div>';
   }
 
-  // ── 通用排行渲染 ───────────────────────────────────────────────────────
   function _renderRanking(container, opts) {
-    const { title, icon, subtitle, data, valueFmt, subFmt, emptyMsg, medalColors } = opts;
+    const { title, icon, subtitle, data, valueFmt, subFmt, emptyMsg } = opts;
     const max = data.length ? data[0][opts.valueKey] : 1;
-
     container.innerHTML = `
       <div class="page-ranking">
         <div class="page-title-bar">
@@ -2149,28 +1730,24 @@ const Dashboard = (function () {
           <span class="page-title-text">${title}</span>
         </div>
         <div class="rank-subtitle">${subtitle}</div>
-        ${!data.length
-          ? `<div class="rank-empty">${emptyMsg}</div>`
-          : data.map((item, i) => _rankCard(item, i, item[opts.valueKey], max, valueFmt(item[opts.valueKey]), subFmt(item))).join('')
-        }
+        ${!data.length ? `<div class="rank-empty">${emptyMsg}</div>`
+          : data.map((item,i) => _rankCard(item,i,item[opts.valueKey],max,valueFmt(item[opts.valueKey]),subFmt(item))).join('')}
       </div>
     `;
   }
 
   function _rankCard(item, i, val, max, valLabel, subLabel) {
-    const medals   = ['🥇','🥈','🥉'];
-    const barColors= ['#FF6B35','#FF9900','#4CAF50','#2196F3','#9C27B0'];
-    const pct      = max > 0 ? Math.max(4, Math.round(val / max * 100)) : 4;
-    const medal    = i < 3 ? medals[i] : `<span class="rank-num">${i+1}</span>`;
-    const barColor = barColors[Math.min(i, barColors.length - 1)];
-
+    const medals=['🥇','🥈','🥉'];
+    const barColors=['#FF6B35','#FF9900','#4CAF50','#2196F3','#9C27B0'];
+    const pct = max > 0 ? Math.max(4, Math.round(val/max*100)) : 4;
+    const medal = i < 3 ? medals[i] : `<span class="rank-num">${i+1}</span>`;
     return `
-      <div class="rank-card ${i < 3 ? 'rank-top-' + (i+1) : ''}">
+      <div class="rank-card ${i < 3 ? 'rank-top-'+(i+1) : ''}">
         <div class="rc-medal">${medal}</div>
         <div class="rc-body">
           <div class="rc-name">${item.name}</div>
           <div class="rc-bar-wrap">
-            <div class="rc-bar" style="width:${pct}%;background:${barColor}"></div>
+            <div class="rc-bar" style="width:${pct}%;background:${barColors[Math.min(i,4)]}"></div>
           </div>
           <div class="rc-sub">${subLabel}</div>
         </div>
@@ -2183,14 +1760,10 @@ const Dashboard = (function () {
 })();
 
 window.Dashboard = Dashboard;
-
 </script>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════
-//  主应用逻辑
-// ══════════════════════════════════════════════════════════════════════════
-
+// ── 主应用逻辑 ───────────────────────────────────────────────────────────────
 var now   = new Date();
 var YEAR  = now.getFullYear();
 var MONTH = now.getMonth();
@@ -2200,30 +1773,20 @@ var MN    = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10�
 
 function dateKey(d) { return new Date(YEAR, MONTH, d).toLocaleDateString(); }
 
-// ── 页面切换 ──────────────────────────────────────────────────────────────
 var currentTab = 'calendar';
-var rendered   = {};
 
 function switchTab(btn, viewId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  
-  if  (btn && btn.classList) { 
-    btn.classList.add('active');
-  }
-    
-  // 隐藏所有
+  if (btn && btn.classList) btn.classList.add('active');
   document.querySelectorAll('.page-view').forEach(v => v.classList.remove('visible'));
   var calView = document.getElementById('view-calendar');
   calView.style.display = 'none';
-
-
   if (viewId === 'calendar') {
     calView.style.display = '';
   } else {
     var el = document.getElementById('view-' + viewId);
     if (el) {
       el.classList.add('visible');
-      // 按需渲染（每次切换重绘，保证数据最新）
       if      (viewId === 'inventory') Dashboard.renderInventory(el);
       else if (viewId === 'expiring')  Dashboard.renderExpiring(el);
       else if (viewId === 'sales')     Dashboard.renderSalesRanking(el);
@@ -2236,16 +1799,13 @@ function switchTab(btn, viewId) {
   currentTab = viewId;
 }
 
-// ── 头部更新 ─────────────────────────────────────────────────────────────
 function updateHeader() {
   var s = Engine.getMonthStats(YEAR, MONTH);
   document.getElementById('mh-title').textContent = YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent   = '本月已记录 '+s.days+' 天';
   document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.profit);
-  
 }
 
-// ── 蛇形路径 ─────────────────────────────────────────────────────────────
 var X_POSITIONS = [50, 68, 80, 68, 50, 32, 20, 32];
 var Y_STEP = 100, Y_START = 70;
 
@@ -2264,11 +1824,8 @@ function buildSnake() {
   track.style.height = trackH + 'px';
   svg.setAttribute('height', trackH);
   svg.setAttribute('viewBox', '0 0 '+W+' '+trackH);
-
   var coords = [];
   for (var i = 0; i <= DAYS; i++) coords.push(getNodeCoords(i, W));
-
-  // 连线
   var pathD = '';
   for (var i = 0; i < coords.length - 1; i++) {
     var a = coords[i], b = coords[i+1];
@@ -2283,8 +1840,6 @@ function buildSnake() {
   pathEl.setAttribute('stroke-width','8');
   pathEl.setAttribute('stroke-linecap','round');
   svg.appendChild(pathEl);
-
-  // 日期节点
   for (var day = 1; day <= DAYS; day++) {
     var idx = day - 1;
     var pos = coords[idx];
@@ -2294,41 +1849,32 @@ function buildSnake() {
     var isToday  = day === TODAY;
     var isPast   = day < TODAY;
     var isFuture = day > TODAY;
-
     var node = document.createElement('div');
     node.className = 'day-node';
     node.style.left = pos.x + 'px';
     node.style.top  = pos.y + 'px';
     node.style.animationDelay = (idx * 35) + 'ms';
-
     if (isToday)       node.classList.add('n-today');
     else if (isFuture) node.classList.add('n-future');
     else if (hasSales) node.classList.add('n-done');
     else               node.classList.add('n-missed');
-
     if (isToday) {
       var tag = document.createElement('div');
       tag.className = 'today-tag'; tag.textContent = '今天';
       node.appendChild(tag);
     }
-
     var numEl = document.createElement('div');
     numEl.className = 'nd-num'; numEl.textContent = day;
     node.appendChild(numEl);
-
     var icoEl = document.createElement('div');
     icoEl.className = 'nd-ico';
     icoEl.textContent = isToday ? '⭐' : hasSales ? '✓' : isPast ? '✗' : '';
     node.appendChild(icoEl);
-
     (function(d,k,dat,isT,isF,isP,hS){
       node.onclick = function() { openSheet(d,k,dat,isT,isF,isP,hS); };
     })(day,key,data,isToday,isFuture,isPast,hasSales);
-
     track.appendChild(node);
   }
-
-  // 吉祥物
   var mi = Math.floor(DAYS / 2);
   var mp = coords[mi];
   var mascot = document.createElement('div');
@@ -2338,9 +1884,7 @@ function buildSnake() {
   mascot.style.top  = mp.y + 'px';
   mascot.textContent = '🦦';
   track.appendChild(mascot);
-
-  // 宝箱
-  var cp    = coords[DAYS];
+  var cp = coords[DAYS];
   var chest = document.createElement('div');
   chest.className = 'chest-node';
   chest.style.left = cp.x + 'px';
@@ -2350,12 +1894,10 @@ function buildSnake() {
   track.appendChild(chest);
 }
 
-// ── 日历弹窗 ─────────────────────────────────────────────────────────────
 function openSheet(day, key, data, isToday, isFuture, isPast, hasSales) {
   document.getElementById('sh-date').textContent = (MONTH+1)+'月'+day+'日';
   var metrics = document.getElementById('sh-metrics');
   var btnRow  = document.getElementById('sh-btn-row');
-
   if (isFuture) {
     document.getElementById('sh-status').textContent = '还没到这天哦 🔒';
     metrics.innerHTML = ''; btnRow.innerHTML = '';
@@ -2365,16 +1907,16 @@ function openSheet(day, key, data, isToday, isFuture, isPast, hasSales) {
     btnRow.innerHTML = '';
   } else {
     const currentData = Engine.getDay(key) || data || {};
-    var rev  = parseFloat(currentData.revenue)|| 0;
-    var prof = parseFloat(currentData.profit)|| 0;
-    var varC = parseFloat(currentData.variableCost)|| (rev - prof);
-    var gm   = currentData.grossMargin || (rev >0 ? Math.round(prof / rev * 100) : null);
+    var rev  = parseFloat(currentData.revenue)||0;
+    var prof = parseFloat(currentData.profit)||0;
+    var varC = parseFloat(currentData.variableCost)||(rev-prof);
+    var gm   = currentData.grossMargin||(rev>0?Math.round(prof/rev*100):null);
     document.getElementById('sh-status').textContent = isToday ? '今天 · 进行中' : (hasSales ? '已完成 ✓' : '暂无记录');
     metrics.innerHTML =
       `<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val o">${Engine.fmtMoney(rev)}</div></div>` +
-      `<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val ${prof >= 0 ? 'g' : 'r'}">${Engine.fmtMoney(prof)}</div></div>` +
+      `<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val ${prof>=0?'g':'r'}">${Engine.fmtMoney(prof)}</div></div>` +
       `<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">${Engine.fmtMoney(varC)}</div></div>` +
-      `<div class="mc"><div class="mc-lbl">毛利率</div><div class="mc-val ${gm && gm >= 50 ? 'g' : 'o'}">${gm ? gm + '%' : '—'}</div></div>`;
+      `<div class="mc"><div class="mc-lbl">毛利率</div><div class="mc-val ${gm&&gm>=50?'g':'o'}">${gm?gm+'%':'—'}</div></div>`;
     if (isToday) {
       btnRow.innerHTML =
         '<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'cashier\')"><span>🛒</span> 开始收银</button>'+
@@ -2401,23 +1943,16 @@ function scrollToToday() {
   }, 600);
 }
 
-// ── 初始化 ───────────────────────────────────────────────────────────────
-// 确保日历视图初始显示
 document.getElementById('view-calendar').style.display = '';
-
 updateHeader();
 buildSnake();
 scrollToToday();
 
-// 添加收银入口到底部导航（隐藏的额外按钮通过日历弹窗触达，或直接从日历跳转）
-// 同时确保 data-view 属性齐全
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
   var view = btn.getAttribute('data-view');
   if (!view) return;
   btn.onclick = function() { switchTab(btn, view); };
 });
-
-
 </script>
 
 </body>
