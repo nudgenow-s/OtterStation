@@ -503,8 +503,11 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
     <div class="form-success hidden" id="ar-success">✅ 应收账款已登记！</div>
     <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="closeARSheet()">关闭</button>
   </div>
-</div> 
-  <div class="modal-sheet" onclick="if(event.target===this)LossSheet.close()">
+</div>
+
+<!-- ★ 损耗记录弹窗 -->
+<div class="modal-overlay" id="loss-overlay" onclick="if(event.target===this)LossSheet.close()">
+  <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" style="color:var(--red)">📦 记录损耗</div>
     <div class="modal-sub">损耗进价成本计入当日支出，库存同步扣减</div>
@@ -1565,19 +1568,22 @@ const Dashboard = (function () {
         ?Engine.getInventory().filter(p=>p.expireDate&&Engine.daysUntil(p.expireDate)<0).sort((a,b)=>new Date(a.expireDate)-new Date(b.expireDate))
         :Engine.getExpiringProducts(activeDays);
       if(!items.length){el.innerHTML=`<div class="exp-empty"><div class="exp-empty-icon">✨</div><div>暂无${activeDays===0?'过期':activeDays+'天内临期'}商品</div></div>`;return;}
+
+      // ★ 用全局 id 索引传参，避免 JSON 序列化遇到特殊字符时崩溃
+      window._expProds = {};
+      items.forEach(p => { window._expProds[p.id] = p; });
+
       el.innerHTML=`<div class="exp-summary">共 <b>${items.length}</b> 种商品需要关注</div>`
         +items.map(p=>{
           const d=Engine.daysUntil(p.expireDate);
           const u=d<0?'exp-card-danger':d===0?'exp-card-danger':d<=3?'exp-card-warn':'exp-card-ok';
           const badge=d<0?`已过期 ${Math.abs(d)} 天`:d===0?'今天到期':`还剩 ${d} 天`;
-          // ★ 序列化 product 对象用于传参（避免 JSON.stringify 的引号转义问题）
-          const prodJson=encodeURIComponent(JSON.stringify(p));
           return `<div class="exp-card ${u}">
             <div class="exp-card-left">
               <div class="exp-card-name">${p.name}${p.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
               <div class="exp-card-meta">${p.category||'其他'} · 库存 ${p.qty} 件</div>
               <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
-              <button class="exp-loss-btn" onclick="LossSheet.open(JSON.parse(decodeURIComponent('${prodJson}')))">📦 记录损耗</button>
+              <button class="exp-loss-btn" onclick="LossSheet.open(window._expProds[${p.id}])">📦 记录损耗</button>
             </div>
             <div class="exp-card-right"><div class="exp-badge ${u}">${badge}</div><div class="exp-date">${p.expireDate}</div></div>
           </div>`;
