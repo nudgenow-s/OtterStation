@@ -503,8 +503,8 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
     <div class="form-success hidden" id="ar-success">✅ 应收账款已登记！</div>
     <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="closeARSheet()">关闭</button>
   </div>
-</div> onclick="if(event.target===this)LossSheet.close()">
-  <div class="modal-sheet">
+</div> 
+  <div class="modal-sheet" onclick="if(event.target===this)LossSheet.close()">
     <div class="modal-handle"></div>
     <div class="modal-title" style="color:var(--red)">📦 记录损耗</div>
     <div class="modal-sub">损耗进价成本计入当日支出，库存同步扣减</div>
