@@ -477,8 +477,33 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
   </div>
 </div>
 
-<!-- ★ 损耗记录弹窗 -->
-<div class="modal-overlay" id="loss-overlay" onclick="if(event.target===this)LossSheet.close()">
+<!-- ★ 应收账款快速登记弹窗（收银台换购后使用）-->
+<div class="modal-overlay" id="ar-overlay" onclick="if(event.target===this)closeARSheet()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📬 登记应收账款</div>
+    <div class="modal-sub">差价补贴、换购补款等厂家应付款项</div>
+    <div style="margin-bottom:12px">
+      <label class="form-lbl">欠款方（厂家/品牌）*</label>
+      <input id="ar-cp" class="form-inp" type="text" placeholder="如：农夫山泉、东鹏饮料">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-lbl">应收金额 (¥) *</label>
+      <input id="ar-amt" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-lbl">备注</label>
+      <input id="ar-nt" class="form-inp" type="text" placeholder="如：东方树叶瓶盖换购差价">
+    </div>
+    <div style="margin-bottom:20px">
+      <label class="form-lbl">预计到账日（月结填月末）</label>
+      <input id="ar-due-inp" class="form-inp" type="date">
+    </div>
+    <button class="form-submit" onclick="ARSheet.confirm()">📬 确认登记</button>
+    <div class="form-success hidden" id="ar-success">✅ 应收账款已登记！</div>
+    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="closeARSheet()">关闭</button>
+  </div>
+</div> onclick="if(event.target===this)LossSheet.close()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" style="color:var(--red)">📦 记录损耗</div>
@@ -668,6 +693,31 @@ const Engine = (function () {
     return { productName:p.name, qty:lossQty, lossCost, dateKey:dk };
   }
 
+  // ★ 应收账款快速登记（收银台换购后调用）
+  // 写入 finance_receivables，通过 realcost_trigger 通知 history 页
+  function recordReceivable(counterparty, amount, note, dueDate) {
+    const entry = {
+      id:           Date.now(),
+      counterparty: counterparty || '待填写',
+      amount:       parseFloat(amount) || 0,
+      note:         note || '',
+      date:         new Date().toLocaleDateString(),
+      dueDate:      dueDate || null,
+      status:       'pending',
+      settledDate:  null,
+    };
+    // 写入本地（供 history 同域读取）
+    const list = JSON.parse(localStorage.getItem('finance_receivables')||'[]');
+    list.push(entry);
+    localStorage.setItem('finance_receivables', JSON.stringify(list));
+    // 触发 history 页的 storage 监听
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+      type:'ar', amount:entry.amount, counterparty:entry.counterparty,
+      note:entry.note, dueDate:entry.dueDate, timestamp:Date.now(),
+    }));
+    return entry;
+  }
+
   function getSalesRanking() {
     const map = {};
     getSales().forEach(s => s.items.forEach(item => {
@@ -753,7 +803,7 @@ const Engine = (function () {
   return {
     getHistory, setDay, getDay,
     getInventory, addProduct, updateProductQty, deleteProduct, getBatchesByName,
-    getSales, recordSale, recordLoss,
+    getSales, recordSale, recordLoss, recordReceivable,
     getSalesRanking, getSoldProfitRanking, getUnitProfitRanking,
     getExpiringProducts, getMonthStats, getStreak,
     fmtMoney, fmtDate, daysUntil, KEYS,
@@ -1013,6 +1063,58 @@ const LossSheet = (function () {
   return { open, adj, confirm, close };
 })();
 window.LossSheet=LossSheet;
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ ARSheet — 应收账款快速登记
+//  从收银台呼出，预填差价金额；也可手动填写任意应收
+// ════════════════════════════════════════════════════════════════════════════
+const ARSheet = (function(){
+  function open(prefill) {
+    // prefill: { counterparty, amount, note, dueDate }（可选）
+    prefill = prefill || {};
+    document.getElementById('ar-cp').value       = prefill.counterparty || '';
+    document.getElementById('ar-amt').value      = prefill.amount       || '';
+    document.getElementById('ar-nt').value       = prefill.note         || '';
+    document.getElementById('ar-due-inp').value  = prefill.dueDate      || _defaultDueDate();
+    document.getElementById('ar-success').classList.add('hidden');
+    document.getElementById('ar-overlay').classList.add('open');
+  }
+
+  function _defaultDueDate() {
+    // 默认填下月末（月结场景）
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate());
+    return d.toISOString().slice(0, 10);
+  }
+
+  function confirm() {
+    const cp  = document.getElementById('ar-cp').value.trim();
+    const amt = parseFloat(document.getElementById('ar-amt').value);
+    const nt  = document.getElementById('ar-nt').value.trim();
+    const due = document.getElementById('ar-due-inp').value;
+    if (!cp)        { _shake(document.getElementById('ar-cp'));  return; }
+    if (!amt||amt<=0){ _shake(document.getElementById('ar-amt')); return; }
+    Engine.recordReceivable(cp, amt, nt, due);
+    document.getElementById('ar-success').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('ar-success').classList.add('hidden');
+      document.getElementById('ar-overlay').classList.remove('open');
+    }, 1800);
+  }
+
+  function _shake(el) {
+    el.style.borderColor='#F44336';
+    el.classList.add('shake');
+    setTimeout(()=>{ el.classList.remove('shake'); el.style.borderColor=''; }, 600);
+  }
+
+  function close() { document.getElementById('ar-overlay').classList.remove('open'); }
+
+  return { open, confirm, close };
+})();
+window.ARSheet = ARSheet;
+function closeARSheet() { ARSheet.close(); }
 </script>
 
 <script>
@@ -1091,6 +1193,12 @@ function renderCashier(container) {
         <!-- ★ 优惠按钮 -->
         <button class="ct-disc-btn" id="ct-disc-btn" disabled onclick="Accounting._openDiscount()">🏷️ 优惠</button>
         <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>出售</button>
+      </div>
+      <!-- ★ 应收快捷入口（独立于收银流程，随时可用）-->
+      <div style="text-align:center;margin-top:-4px;margin-bottom:8px">
+        <button onclick="ARSheet.open()" style="background:none;border:none;color:var(--orange);font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;padding:4px 0">
+          📬 登记应收账款（换购差价/厂家补贴）
+        </button>
       </div>
       <div id="cashier-success" class="sale-success hidden">
         <div class="ss-icon">🎉</div>
