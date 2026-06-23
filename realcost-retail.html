@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#6B4226">
 <title>獭掌柜</title>
@@ -48,8 +47,6 @@ flex-direction: column;
 overflow-x: hidden;
 }
 
-/* ── TOPBAR ── */
-
 .topbar-back {
   display:flex; align-items:center; gap:4px;
   font-size:14px; font-weight:700; color:var(--orange);
@@ -57,7 +54,7 @@ overflow-x: hidden;
   font-family:inherit; padding:4px 0; flex-shrink:0;
 }
 .topbar-back:active { opacity:0.7; }
-/* ── MONTH HEADER ── */
+
 .month-header {
 background: var(--orange);
 margin: 14px 16px 0;
@@ -73,14 +70,7 @@ box-shadow: 0 5px 0 var(--orange-dk);
 .mh-right .mh-rev  { color:#fff; font-size:26px; font-weight:900; text-align:right; }
 .mh-right .mh-rlbl { color:rgba(255,255,255,.65); font-size:11px; font-weight:700; text-align:right; }
 
-/* ── MAIN VIEW ── */
-.main-view {
-flex: 1;
-overflow-y: auto;
--webkit-overflow-scrolling: touch;
-}
-
-/* ── 日历 SCROLL ── */
+.main-view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .calendar-view { padding: 24px 0 160px; }
 .page-view { padding:16px 16px 160px; display:none; }
 .page-view.visible { display: block; }
@@ -88,48 +78,39 @@ overflow-y: auto;
 /* ── SNAKE TRACK ── */
 .snake-track { position: relative; width: 100%; }
 .snake-svg { position:absolute; top:0; left:0; width:100%; pointer-events:none; z-index:0; }
-
 .day-node {
 position:absolute; width:74px; height:74px; border-radius:50%;
 display:flex; flex-direction:column; align-items:center; justify-content:center;
-cursor:pointer; z-index:2;
-transform:translate(-50%,-50%);
-transition:transform .12s ease;
-opacity:0;
-animation:popIn .38s ease forwards;
+cursor:pointer; z-index:2; transform:translate(-50%,-50%);
+transition:transform .12s ease; opacity:0; animation:popIn .38s ease forwards;
 }
 .day-node:active { transform:translate(-50%,calc(-50% + 4px)) scale(.9); }
-
 @keyframes popIn {
 0%   { opacity:0; transform:translate(-50%,-50%) scale(.35); }
 70%  { transform:translate(-50%,-50%) scale(1.1); }
 100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
 }
-
 .n-future  { background:#EEE; box-shadow:0 5px 0 #C8C8C8; border:3px solid #C8C8C8; }
-.n-future  .nd-num { color:#AAA; }
-.n-future  .nd-ico { color:#BBB; }
+.n-future  .nd-num { color:#AAA; } .n-future .nd-ico { color:#BBB; }
 .n-done    { background:var(--orange); box-shadow:0 5px 0 var(--orange-dk); border:3px solid var(--orange-dk); }
-.n-done    .nd-num { color:#fff; }
-.n-done    .nd-ico { color:#fff; }
+.n-done    .nd-num { color:#fff; } .n-done .nd-ico { color:#fff; }
 .n-missed  { background:#fff; box-shadow:0 5px 0 #C8C8C8; border:3px solid #DDD; }
-.n-missed  .nd-num { color:#C0C0C0; }
-.n-missed  .nd-ico { color:#CCC; }
+.n-missed  .nd-num { color:#C0C0C0; } .n-missed .nd-ico { color:#CCC; }
 .n-today   {
 background:var(--yellow); box-shadow:0 5px 0 var(--yellow-dk); border:3px solid var(--yellow-dk);
 animation:popIn .38s ease forwards, todayPulse 2.2s .5s ease-in-out infinite;
 }
-.n-today .nd-num { color:#333; }
-.n-today .nd-ico { color:#555; }
+.n-today .nd-num { color:#333; } .n-today .nd-ico { color:#555; }
+/* ★ 损耗节点：红色，仅有损耗无销售时显示 */
+.n-loss    { background:var(--red); box-shadow:0 5px 0 #B71C1C; border:3px solid #B71C1C; }
+.n-loss    .nd-num { color:#fff; } .n-loss .nd-ico { color:#fff; }
 
 @keyframes todayPulse {
 0%,100% { box-shadow:0 5px 0 var(--yellow-dk), 0 0 0 0 rgba(255,208,0,.5); }
 50%      { box-shadow:0 5px 0 var(--yellow-dk), 0 0 0 14px rgba(255,208,0,0); }
 }
-
 .nd-num { font-size:23px; font-weight:900; line-height:1; }
 .nd-ico { font-size:13px; margin-top:3px; font-weight:700; }
-
 .today-tag {
 position:absolute; top:-26px; left:50%; transform:translateX(-50%);
 background:var(--yellow); color:#333; font-size:10px; font-weight:900;
@@ -139,7 +120,6 @@ padding:3px 9px; border-radius:8px; white-space:nowrap; box-shadow:0 2px 0 var(-
 content:''; position:absolute; bottom:-5px; left:50%; transform:translateX(-50%);
 border:4px solid transparent; border-top-color:var(--yellow);
 }
-
 .chest-node {
 position:absolute; width:82px; height:82px; background:#fff;
 border-radius:20px; border:3px solid #DDD; box-shadow:0 5px 0 #C4C4C4;
@@ -147,9 +127,7 @@ display:flex; flex-direction:column; align-items:center; justify-content:center;
 cursor:pointer; z-index:2; transform:translate(-50%,-50%); transition:transform .12s;
 }
 .chest-node:active { transform:translate(-50%,calc(-50% + 4px)) scale(.9); }
-.ch-icon  { font-size:34px; }
-.ch-label { font-size:10px; font-weight:800; color:#999; margin-top:4px; }
-
+.ch-icon  { font-size:34px; } .ch-label { font-size:10px; font-weight:800; color:#999; margin-top:4px; }
 .mascot-node {
 position:absolute; font-size:60px; transform:translate(-50%,-50%); z-index:1;
 animation:mFloat 3s ease-in-out infinite;
@@ -164,116 +142,60 @@ filter:drop-shadow(0 6px 10px rgba(255,107,53,.2)); pointer-events:none;
 .bottom-nav {
   position:fixed; bottom:env(safe-area-inset-bottom,0px); left:50%; transform:translateX(-50%);
   width:100%; max-width:480px; background:#fff; border-top:2px solid var(--border);
-  display:flex; z-index:200; padding-bottom:8px;
-  overflow-x:auto;
+  display:flex; z-index:200; padding-bottom:8px; overflow-x:auto;
 }
-.nav-btn {
-flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-padding:9px 2px 7px; border:none; background:none; cursor:pointer; gap:3px;
-}
-.nav-ico   { font-size:20px; transition:transform .15s; }
-.nav-lbl   { font-size:9px; font-weight:800; color:#AAA; }
-.nav-btn.active .nav-lbl { color:var(--orange); }
-.nav-btn.active .nav-ico { transform:scale(1.18); }
-.nav-btn:active .nav-ico { transform:scale(.88); }
+.nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 2px 7px; border:none; background:none; cursor:pointer; gap:3px; }
+.nav-ico { font-size:20px; transition:transform .15s; } .nav-lbl { font-size:9px; font-weight:800; color:#AAA; }
+.nav-btn.active .nav-lbl { color:var(--orange); } .nav-btn.active .nav-ico { transform:scale(1.18); } .nav-btn:active .nav-ico { transform:scale(.88); }
 
-/* ── SHEET (日历弹窗) ── */
-.overlay {
-display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:500; align-items:flex-end;
-}
+/* ── SHEET ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:500; align-items:flex-end; }
 .overlay.open { display:flex; animation:fadeIn .2s ease; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-
-.sheet {
-background:#fff; width:100%; border-radius:28px 28px 0 0;
-padding:0 24px 44px; animation:sheetUp .3s ease; max-height:82vh; overflow-y:auto;
-}
+.sheet { background:#fff; width:100%; border-radius:28px 28px 0 0; padding:0 24px 44px; animation:sheetUp .3s ease; max-height:82vh; overflow-y:auto; }
 @keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-
 .sh-handle { width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 20px; }
 .sh-date   { font-size:22px;font-weight:900;color:#222; }
 .sh-status { font-size:13px;font-weight:700;color:#999;margin:4px 0 18px; }
-
 .metrics-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
 .mc { background:#F5F5F5;border-radius:16px;padding:14px 12px; }
 .mc-lbl { font-size:11px;font-weight:700;color:#999;margin-bottom:5px; }
 .mc-val { font-size:20px;font-weight:900;color:#222; }
-.mc-val.g { color:var(--green); }
-.mc-val.o { color:var(--orange); }
-.mc-val.r { color:var(--red); }
-
+.mc-val.g { color:var(--green); } .mc-val.o { color:var(--orange); } .mc-val.r { color:var(--red); }
 .btn-row { display:flex;gap:10px;margin-bottom:10px; }
-.btn-sh {
-flex:1; padding:15px 8px; border:none; border-radius:18px;
-font-size:15px; font-weight:900; font-family:inherit;
-cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
-transition:all .1s;
-}
+.btn-sh { flex:1; padding:15px 8px; border:none; border-radius:18px; font-size:15px; font-weight:900; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .1s; }
 .btn-primary { background:var(--orange);color:#fff;box-shadow:0 5px 0 var(--orange-dk); }
 .btn-primary:active { transform:translateY(4px);box-shadow:0 1px 0 var(--orange-dk); }
-.btn-stock   { background:var(--green);color:#fff;box-shadow:0 5px 0 var(--green-dk); }
+.btn-stock { background:var(--green);color:#fff;box-shadow:0 5px 0 var(--green-dk); }
 .btn-stock:active { transform:translateY(4px);box-shadow:0 1px 0 var(--green-dk); }
-.btn-ghost   { background:#F0F0F0;color:#555;box-shadow:0 4px 0 #CECECE;width:100%; }
+.btn-ghost { background:#F0F0F0;color:#555;box-shadow:0 4px 0 #CECECE;width:100%; }
 .btn-ghost:active { transform:translateY(3px);box-shadow:0 1px 0 #CECECE; }
 
-/* --页面通用组件-- */
-.page-title-bar {
-display:flex; align-items:center; gap:8px; margin-bottom:16px;
-}
-.page-title-icon { font-size:24px; }
-.page-title-text { font-size:22px; font-weight:900; color:var(--text); flex:1; }
-
-.section-label {
-font-size:12px; font-weight:800; color:var(--text-3);
-text-transform:uppercase; letter-spacing:.06em;
-margin:18px 0 10px;
-}
-
-/* --搜索框-- */
+/* 通用组件 */
+.page-title-bar { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+.page-title-icon { font-size:24px; } .page-title-text { font-size:22px; font-weight:900; color:var(--text); flex:1; }
+.section-label { font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 10px; }
 .search-wrap { position:relative; margin-bottom:12px; }
 .search-box  { display:flex; align-items:center; background:#fff; border:2px solid var(--border); border-radius:14px; padding:0 14px; }
 .search-ico  { font-size:16px; margin-right:8px; }
 .search-inp  { flex:1; border:none; outline:none; font-size:15px; padding:12px 0; background:transparent; font-family:inherit; }
-.search-dropdown {
-position:absolute; top:100%; left:0; right:0; background:#fff;
-border:2px solid var(--border); border-radius:14px; z-index:50;
-overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.1); margin-top:4px; max-height:220px; overflow-y:auto;
-}
+.search-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:2px solid var(--border); border-radius:14px; z-index:50; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.1); margin-top:4px; max-height:220px; overflow-y:auto; }
 .search-dropdown.hidden { display:none; }
-.dd-item {
-display:flex; align-items:center; justify-content:space-between;
-padding:12px 16px; cursor:pointer; transition:background .1s;
-}
+.dd-item { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; cursor:pointer; transition:background .1s; }
 .dd-item:hover,.dd-item:active { background:var(--gray-bg); }
-.dd-name { font-size:15px; font-weight:700; color:var(--text); }
-.dd-info { font-size:12px; color:var(--text-3); }
+.dd-name { font-size:15px; font-weight:700; color:var(--text); } .dd-info { font-size:12px; color:var(--text-3); }
 .dd-empty { padding:16px; text-align:center; color:var(--text-3); font-size:14px; }
 
-/* --收银台-- */
+/* 收银台 */
 .cart-list { display:flex; flex-direction:column; gap:8px; margin-bottom:80px; }
 .cart-empty { text-align:center; color:var(--text-3); font-size:15px; padding:40px 20px; }
-
-.cart-item {
-background:#fff; border-radius:16px; padding:14px 12px;
-display:flex; align-items:center; gap:10px;
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-.ci-info { flex:1; }
-.ci-name { font-size:15px; font-weight:800; color:var(--text); }
-.ci-price { font-size:12px; color:var(--text-3); margin-top:2px; }
+.cart-item { background:#fff; border-radius:16px; padding:14px 12px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.ci-info { flex:1; } .ci-name { font-size:15px; font-weight:800; color:var(--text); } .ci-price { font-size:12px; color:var(--text-3); margin-top:2px; }
 .ci-qty-ctrl { display:flex; align-items:center; gap:8px; }
-.qty-btn {
-width:30px; height:30px; border-radius:10px; border:none;
-background:var(--gray-bg); font-size:18px; font-weight:900; cursor:pointer;
-display:flex; align-items:center; justify-content:center; color:var(--text);
-}
+.qty-btn { width:30px; height:30px; border-radius:10px; border:none; background:var(--gray-bg); font-size:18px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text); }
 .qty-val { font-size:16px; font-weight:900; min-width:24px; text-align:center; }
 .ci-subtotal { font-size:16px; font-weight:900; color:var(--orange); min-width:52px; text-align:right; }
-.ci-del {
-width:28px; height:28px; border-radius:50%; border:none; background:#FFE5E5;
-color:var(--red); font-size:12px; cursor:pointer; font-weight:900;
-}
-
+.ci-del { width:28px; height:28px; border-radius:50%; border:none; background:#FFE5E5; color:var(--red); font-size:12px; cursor:pointer; font-weight:900; }
 .cashier-total-bar {
 position:fixed; bottom:calc(env(safe-area-inset-bottom,6px) + 62px);
 left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:448px;
@@ -281,233 +203,160 @@ background:#fff; border-radius:20px; padding:14px 16px;
 display:flex; align-items:center; justify-content:space-between;
 box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 }
-.ct-left { flex:1; }
-.ct-items { font-size:12px; color:var(--text-3); font-weight:700; }
-.ct-total { font-size:22px; font-weight:900; color:var(--text); }
-.ct-btn {
-background:var(--orange); color:#fff; border:none; border-radius:16px;
-padding:14px 24px; font-size:16px; font-weight:900; cursor:pointer;
-box-shadow:0 4px 0 var(--orange-dk); font-family:inherit;
-transition:all .1s;
-}
+.ct-left { flex:1; } .ct-items { font-size:12px; color:var(--text-3); font-weight:700; } .ct-total { font-size:22px; font-weight:900; color:var(--text); }
+.ct-btn { background:var(--orange); color:#fff; border:none; border-radius:16px; padding:14px 24px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 4px 0 var(--orange-dk); font-family:inherit; transition:all .1s; }
 .ct-btn:active { transform:translateY(4px); box-shadow:0 0 0 var(--orange-dk); }
 .ct-btn:disabled { background:#CCC; box-shadow:0 4px 0 #AAA; cursor:not-allowed; }
-
-.sale-success {
-position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-background:#fff; border-radius:24px; padding:32px 40px; text-align:center;
-box-shadow:0 20px 60px rgba(0,0,0,.2); z-index:300;
-animation:successPop .4s cubic-bezier(.34,1.56,.64,1);
-}
+/* ★ 优惠按钮 */
+.ct-disc-btn { background:#fff; color:var(--orange); border:2px solid var(--orange); border-radius:16px; padding:12px 16px; font-size:14px; font-weight:900; cursor:pointer; font-family:inherit; transition:all .1s; margin-right:8px; }
+.ct-disc-btn:active { transform:translateY(2px); }
+.ct-disc-btn:disabled { color:#CCC; border-color:#CCC; cursor:not-allowed; }
+.sale-success { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border-radius:24px; padding:32px 40px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); z-index:300; animation:successPop .4s cubic-bezier(.34,1.56,.64,1); }
 .sale-success.hidden { display:none; }
-@keyframes successPop {
-0% { transform:translate(-50%,-50%) scale(.5); opacity:0; }
-100% { transform:translate(-50%,-50%) scale(1); opacity:1; }
-}
-.ss-icon { font-size:56px; }
-.ss-text { font-size:22px; font-weight:900; color:var(--text); margin-top:10px; }
-.ss-sub  { font-size:14px; color:var(--text-3); margin-top:6px; }
+@keyframes successPop { 0%{transform:translate(-50%,-50%) scale(.5);opacity:0;} 100%{transform:translate(-50%,-50%) scale(1);opacity:1;} }
+.ss-icon { font-size:56px; } .ss-text { font-size:22px; font-weight:900; color:var(--text); margin-top:10px; } .ss-sub { font-size:14px; color:var(--text-3); margin-top:6px; }
 
-/* --库存录入 / 进货表单-- */
+/* ── 批次选择弹窗 ── */
+.batch-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:600; align-items:flex-end; }
+.batch-overlay.open { display:flex; animation:fadeIn .2s ease; }
+.batch-sheet { background:#fff; width:100%; border-radius:28px 28px 0 0; padding:0 20px 40px; animation:sheetUp .3s ease; max-height:75vh; overflow-y:auto; }
+.batch-handle { width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px; }
+.batch-title  { font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px; }
+.batch-sub    { font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:16px; }
+.batch-item { background:var(--gray-bg); border-radius:16px; padding:14px 16px; margin-bottom:10px; cursor:pointer; border:2px solid transparent; transition:all .15s; }
+.batch-item:active,.batch-item.selected { border-color:var(--orange); background:#FFF3EE; }
+.batch-item-top { display:flex; justify-content:space-between; align-items:center; }
+.batch-item-name { font-size:15px; font-weight:900; color:var(--text); }
+.batch-item-sale { font-size:17px; font-weight:900; color:var(--orange); }
+.batch-item-meta { font-size:12px; color:var(--text-3); margin-top:5px; display:flex; gap:12px; flex-wrap:wrap; }
+.batch-fifo-tag { display:inline-block; background:var(--green); color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px; }
+.batch-fifo-row { background:#FFFDE7; }
+
+/* ★ 优惠弹窗 */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:700; align-items:flex-end; }
+.modal-overlay.open { display:flex; animation:fadeIn .2s ease; }
+.modal-sheet { background:#fff; width:100%; border-radius:28px 28px 0 0; padding:0 20px 44px; animation:sheetUp .3s ease; max-height:80vh; overflow-y:auto; }
+.modal-handle { width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px; }
+.modal-title  { font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px; }
+.modal-sub    { font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:16px; }
+/* 快捷折扣按钮 */
+.disc-pct-row { display:flex; gap:8px; margin-bottom:10px; }
+.disc-pct-btn { flex:1; padding:11px 4px; border-radius:12px; border:2px solid var(--border); background:#fff; font-size:13px; font-weight:900; color:var(--text-2); cursor:pointer; font-family:inherit; text-align:center; transition:all .15s; }
+.disc-pct-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+.disc-custom-row { display:flex; gap:10px; align-items:center; margin-bottom:20px; }
+.disc-custom-inp { flex:1; padding:11px 14px; border:2px solid var(--border); border-radius:12px; font-size:16px; font-weight:900; font-family:inherit; outline:none; color:var(--text); }
+.disc-custom-inp:focus { border-color:var(--orange); }
+.disc-custom-unit { font-size:14px; font-weight:800; color:var(--text-3); white-space:nowrap; }
+/* 逐行改价 */
+.disc-item-row { background:var(--gray-bg); border-radius:14px; padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+.disc-item-info { flex:1; }
+.disc-item-name { font-size:14px; font-weight:800; color:var(--text); }
+.disc-item-orig { font-size:11px; color:var(--text-3); margin-top:2px; }
+.disc-item-inp  { width:80px; padding:8px 10px; border:2px solid var(--border); border-radius:10px; font-size:14px; font-weight:900; font-family:inherit; outline:none; color:var(--orange); text-align:right; }
+.disc-item-inp:focus { border-color:var(--orange); }
+/* 预览条 */
+.disc-preview { background:#FFF3EE; border-radius:14px; padding:12px 16px; margin:12px 0 16px; display:flex; justify-content:space-between; align-items:center; }
+.disc-preview-left .disc-preview-lbl { font-size:12px; font-weight:800; color:var(--text-3); }
+.disc-preview-left .disc-save { font-size:12px; font-weight:800; color:var(--green); margin-top:2px; }
+.disc-preview-total { font-size:22px; font-weight:900; color:var(--orange); }
+
+/* ★ 损耗弹窗 */
+.loss-info-box { background:#FFF5F5; border-radius:14px; padding:14px 16px; margin-bottom:16px; }
+.loss-info-name { font-size:16px; font-weight:900; color:var(--text); margin-bottom:4px; }
+.loss-info-meta { font-size:12px; color:var(--text-3); }
+.loss-qty-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.loss-qty-lbl { font-size:14px; font-weight:800; color:var(--text); flex:1; }
+.loss-calc { background:var(--gray-bg); border-radius:12px; padding:11px 14px; margin-bottom:20px; font-size:13px; color:var(--text-2); font-weight:700; }
+.loss-calc span { color:var(--red); font-size:16px; font-weight:900; }
+.btn-loss { width:100%; padding:15px; background:var(--red); color:#fff; border:none; border-radius:18px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 5px 0 #B71C1C; font-family:inherit; transition:all .1s; }
+.btn-loss:active { transform:translateY(4px); box-shadow:0 1px 0 #B71C1C; }
+/* 临期页损耗按钮 */
+.exp-loss-btn { display:inline-block; margin-top:8px; padding:6px 12px; background:#FFF5F5; color:var(--red); border:1.5px solid #FFCDD2; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .15s; }
+.exp-loss-btn:active { background:#FFCDD2; }
+
+/* 表单 */
 .form-subtitle { font-size:13px; color:var(--text-3); margin:-8px 0 16px; }
-
 .form-card { background:#fff; border-radius:20px; padding:20px 16px; margin-bottom:16px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
-.form-group { margin-bottom:16px; }
-.form-group.half { flex:1; }
-.form-row { display:flex; gap:12px; }
+.form-group { margin-bottom:16px; } .form-group.half { flex:1; } .form-row { display:flex; gap:12px; }
 .form-lbl { display:block; font-size:12px; font-weight:800; color:var(--text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
-.form-inp {
-width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:12px;
-font-size:15px; font-family:inherit; outline:none; color:var(--text);
-transition:border-color .2s;
-}
+.form-inp { width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; outline:none; color:var(--text); transition:border-color .2s; }
 .form-inp:focus { border-color:var(--orange); }
-
 .cat-chips { display:flex; flex-wrap:wrap; gap:8px; }
-.cat-chip {
-padding:7px 12px; border-radius:20px; border:2px solid var(--border);
-background:#fff; font-size:12px; font-weight:800; color:var(--text-2); cursor:pointer;
-transition:all .15s; font-family:inherit;
-}
+.cat-chip { padding:7px 12px; border-radius:20px; border:2px solid var(--border); background:#fff; font-size:12px; font-weight:800; color:var(--text-2); cursor:pointer; transition:all .15s; font-family:inherit; }
 .cat-chip.active { background:var(--orange); border-color:var(--orange); color:#fff; }
-
-.margin-preview {
-background:var(–gray-bg); border-radius:12px; padding:10px 14px;
-display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-}
-.mp-label { font-size:11px; font-weight:800; color:var(--text-3); }
-.mp-unit  { font-size:14px; font-weight:900; color:var(--text); }
-.mp-rate  { font-size:14px; font-weight:900; }
-
-.form-submit {
-width:100%; padding:16px; background:var(--orange); color:#fff;
-border:none; border-radius:18px; font-size:16px; font-weight:900;
-cursor:pointer; box-shadow:0 5px 0 var(--orange-dk); font-family:inherit;
-display:flex; align-items:center; justify-content:center; gap:8px;
-transition:all .1s;
-}
+.margin-preview { background:var(--gray-bg); border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.mp-label { font-size:11px; font-weight:800; color:var(--text-3); } .mp-unit { font-size:14px; font-weight:900; color:var(--text); } .mp-rate { font-size:14px; font-weight:900; }
+.form-submit { width:100%; padding:16px; background:var(--orange); color:#fff; border:none; border-radius:18px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 5px 0 var(--orange-dk); font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; transition:all .1s; }
 .form-submit:active { transform:translateY(4px); box-shadow:0 1px 0 var(--orange-dk); }
-
-.form-success {
-text-align:center; padding:14px; background:#E8F5E9; color:var(--green);
-border-radius:14px; font-weight:800; margin-top:12px; font-size:15px;
-}
-
-@keyframes shake {
-0%,100% { transform:translateX(0); }
-20%,60%  { transform:translateX(-6px); }
-40%,80%  { transform:translateX(6px); }
-}
+.form-success { text-align:center; padding:14px; background:#E8F5E9; color:var(--green); border-radius:14px; font-weight:800; margin-top:12px; font-size:15px; }
+@keyframes shake { 0%,100%{transform:translateX(0);} 20%,60%{transform:translateX(-6px);} 40%,80%{transform:translateX(6px);} }
 .shake { animation:shake .4s ease; border-color:var(--red) !important; }
-
 .form-history-list { display:flex; flex-direction:column; gap:8px; }
 .hist-empty { text-align:center; color:var(--text-3); padding:24px; font-size:14px; }
-.hist-item {
-background:#fff; border-radius:14px; padding:12px 14px;
-display:flex; align-items:center; justify-content:space-between;
-box-shadow:0 1px 6px rgba(0,0,0,.05);
-}
-.hi-name { font-size:14px; font-weight:800; color:var(--text); }
-.hi-meta { font-size:11px; color:var(--text-3); margin-top:2px; }
-.hi-qty  { font-size:16px; font-weight:900; color:var(--orange); text-align:right; }
-.hi-exp  { font-size:10px; color:var(--text-3); text-align:right; margin-top:2px; }
+.hist-item { background:#fff; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 6px rgba(0,0,0,.05); }
+.hi-name { font-size:14px; font-weight:800; color:var(--text); } .hi-meta { font-size:11px; color:var(--text-3); margin-top:2px; }
+.hi-qty  { font-size:16px; font-weight:900; color:var(--orange); text-align:right; } .hi-exp { font-size:10px; color:var(--text-3); text-align:right; margin-top:2px; }
 .hidden  { display:none !important; }
 
-/* ════════════════════════════════════════════
-库存看板
-════════════════════════════════════════════ */
-.inv-total-chip {
-background:var(--orange); color:#fff; font-size:12px; font-weight:800;
-padding:4px 10px; border-radius:20px;
-}
-
-.inv-summary-row {
-display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;
-}
+/* 库存看板 */
+.inv-total-chip { background:var(--orange); color:#fff; font-size:12px; font-weight:800; padding:4px 10px; border-radius:20px; }
+.inv-summary-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px; }
 .inv-sc { background:#fff; border-radius:16px; padding:14px 10px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.05); }
-.inv-sc-val { font-size:16px; font-weight:900; color:var(--text); }
-.inv-sc-lbl { font-size:10px; color:var(--text-3); font-weight:700; margin-top:4px; }
-
-.inv-search-wrap {
-display:flex; align-items:center; background:#fff; border:2px solid var(--border);
-border-radius:14px; padding:0 14px; margin-bottom:16px;
-}
-
+.inv-sc-val { font-size:16px; font-weight:900; color:var(--text); } .inv-sc-lbl { font-size:10px; color:var(--text-3); font-weight:700; margin-top:4px; }
+.inv-search-wrap { display:flex; align-items:center; background:#fff; border:2px solid var(--border); border-radius:14px; padding:0 14px; margin-bottom:16px; }
 .inv-empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:15px; line-height:1.8; }
-
 .inv-cat-section { margin-bottom:20px; }
-.inv-cat-header {
-display:flex; align-items:center; justify-content:space-between;
-margin-bottom:8px;
-}
-.inv-cat-name { font-size:14px; font-weight:900; color:var(--text); }
-.inv-cat-count { font-size:12px; color:var(--text-3); font-weight:700; }
-
+.inv-cat-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.inv-cat-name { font-size:14px; font-weight:900; color:var(--text); } .inv-cat-count { font-size:12px; color:var(--text-3); font-weight:700; }
 .inv-table-wrap { overflow-x:auto; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
 .inv-table { width:100%; border-collapse:collapse; background:#fff; min-width:360px; }
-.inv-th {
-background:var(--gray-bg); padding:10px 8px; font-size:11px; font-weight:800;
-color:var(--text-3); text-align:left; white-space:nowrap;
-}
-.inv-th:first-child { border-radius:16px 0 0 0; }
-.inv-th:last-child  { border-radius:0 16px 0 0; }
+.inv-th { background:var(--gray-bg); padding:10px 8px; font-size:11px; font-weight:800; color:var(--text-3); text-align:left; white-space:nowrap; }
+.inv-th:first-child { border-radius:16px 0 0 0; } .inv-th:last-child { border-radius:0 16px 0 0; }
 .inv-td { padding:11px 8px; font-size:13px; color:var(--text); border-top:1px solid var(--border); }
-.td-name { font-weight:800; max-width:90px; }
-.td-qty  { font-weight:900; text-align:center; }
-.td-cost,.td-sale { font-weight:700; }
-.td-exp  { font-size:12px; white-space:nowrap; }
-.td-act  { text-align:center; }
-
-.qty-zero { color:var(--red) !important; }
-.qty-low  { color:var(--orange) !important; }
-.exp-danger { color:var(--red) !important; font-weight:800 !important; }
-.exp-warn   { color:var(--orange) !important; font-weight:800 !important; }
-
+.td-name { font-weight:800; max-width:90px; } .td-qty { font-weight:900; text-align:center; } .td-cost,.td-sale { font-weight:700; } .td-exp { font-size:12px; white-space:nowrap; } .td-act { text-align:center; }
+.batch-tag { display:inline-block; background:#F0F4FF; color:#4B6CB7; font-size:10px; font-weight:800; padding:2px 6px; border-radius:5px; margin-left:4px; }
+.batch-fifo-row { background:#FFFDE7 !important; }
+.qty-zero { color:var(--red) !important; } .qty-low { color:var(--orange) !important; }
+.exp-danger { color:var(--red) !important; font-weight:800 !important; } .exp-warn { color:var(--orange) !important; font-weight:800 !important; }
 .expired-badge { background:var(--red); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px; }
-.exp-today     { background:var(--orange); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px; }
-
+.exp-today { background:var(--orange); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px; }
 .inv-del-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:4px; }
 
-/* ════════════════════════════════════════════
-临期货品
-════════════════════════════════════════════ */
+/* 临期 */
 .exp-filter-row { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
-.exp-filter-btn {
-white-space:nowrap; padding:8px 14px; border-radius:20px; border:2px solid var(--border);
-background:#fff; font-size:13px; font-weight:800; color:var(--text-2);
-cursor:pointer; font-family:inherit; transition:all .15s;
-}
+.exp-filter-btn { white-space:nowrap; padding:8px 14px; border-radius:20px; border:2px solid var(--border); background:#fff; font-size:13px; font-weight:800; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15s; }
 .exp-filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; }
-
 .exp-empty { text-align:center; padding:60px 20px; }
 .exp-empty-icon { font-size:56px; margin-bottom:12px; }
-.exp-empty { color:var(--text-3); font-size:15px; font-weight:700; }
-
 .exp-summary { font-size:13px; color:var(--text-3); margin-bottom:12px; font-weight:700; }
-
-.exp-card {
-background:#fff; border-radius:18px; padding:16px; margin-bottom:10px;
-display:flex; justify-content:space-between; align-items:flex-start;
-box-shadow:0 2px 10px rgba(0,0,0,.06); border-left:4px solid transparent;
-}
-.exp-card-danger { border-left-color:var(--red); }
-.exp-card-warn   { border-left-color:var(--orange); }
-.exp-card-ok     { border-left-color:var(--green); }
-.exp-card-name   { font-size:16px; font-weight:900; color:var(--text); }
-.exp-card-meta   { font-size:12px; color:var(--text-3); margin-top:4px; }
-.exp-card-price  { font-size:12px; color:var(--text-2); margin-top:4px; }
-.exp-card-right  { text-align:right; }
-
-.exp-badge {
-display:inline-block; padding:5px 10px; border-radius:10px;
-font-size:12px; font-weight:900; color:#fff;
-}
-.exp-badge.exp-card-danger { background:var(--red); }
-.exp-badge.exp-card-warn   { background:var(--orange); }
-.exp-badge.exp-card-ok     { background:var(--green); }
+.exp-card { background:#fff; border-radius:18px; padding:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; box-shadow:0 2px 10px rgba(0,0,0,.06); border-left:4px solid transparent; }
+.exp-card-danger { border-left-color:var(--red); } .exp-card-warn { border-left-color:var(--orange); } .exp-card-ok { border-left-color:var(--green); }
+.exp-card-name { font-size:16px; font-weight:900; color:var(--text); } .exp-card-meta { font-size:12px; color:var(--text-3); margin-top:4px; } .exp-card-price { font-size:12px; color:var(--text-2); margin-top:4px; } .exp-card-right { text-align:right; }
+.exp-badge { display:inline-block; padding:5px 10px; border-radius:10px; font-size:12px; font-weight:900; color:#fff; }
+.exp-badge.exp-card-danger { background:var(--red); } .exp-badge.exp-card-warn { background:var(--orange); } .exp-badge.exp-card-ok { background:var(--green); }
 .exp-date { font-size:11px; color:var(--text-3); margin-top:6px; }
 
-/* ════════════════════════════════════════════
-排行榜（游戏化）
-════════════════════════════════════════════ */
-.rank-subtitle { font-size:12px; color:var(--text-3); font-weight:700; margin:-8px 0 16px; }
-.rank-empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:15px; }
-
+/* 排行 */
+.rank-subtitle { font-size:12px; color:var(--text-3); font-weight:700; margin:-8px 0 16px; } .rank-empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:15px; }
 .rank-tab-row { display:flex; gap:8px; margin-bottom:16px; }
-.rank-tab {
-flex:1; padding:10px; border-radius:14px; border:2px solid var(--border);
-background:#fff; font-size:13px; font-weight:800; color:var(--text-2);
-cursor:pointer; font-family:inherit; transition:all .15s;
-}
+.rank-tab { flex:1; padding:10px; border-radius:14px; border:2px solid var(--border); background:#fff; font-size:13px; font-weight:800; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15s; }
 .rank-tab.active { background:var(--orange); border-color:var(--orange); color:#fff; }
-
-.rank-card {
-background:#fff; border-radius:18px; padding:14px 16px; margin-bottom:10px;
-display:flex; align-items:center; gap:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.06);
-transition:transform .1s;
-}
+.rank-card { background:#fff; border-radius:18px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 10px rgba(0,0,0,.06); transition:transform .1s; }
 .rank-card:active { transform:scale(.98); }
 .rank-top-1 { border:2px solid #FFD700; background:linear-gradient(135deg,#FFFDE7,#fff); }
 .rank-top-2 { border:2px solid #C0C0C0; background:linear-gradient(135deg,#FAFAFA,#fff); }
 .rank-top-3 { border:2px solid #CD7F32; background:linear-gradient(135deg,#FFF3E0,#fff); }
-
 .rc-medal { font-size:28px; min-width:36px; text-align:center; }
 .rank-num { display:inline-block; width:28px; height:28px; background:var(--gray-bg); border-radius:50%; font-size:13px; font-weight:900; color:var(--text-3); line-height:28px; text-align:center; }
-
-.rc-body { flex:1; }
-.rc-name { font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; }
+.rc-body { flex:1; } .rc-name { font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; }
 .rc-bar-wrap { background:var(--gray-bg); border-radius:6px; height:8px; overflow:hidden; margin-bottom:6px; }
 .rc-bar { height:100%; border-radius:6px; transition:width .6s cubic-bezier(.34,1.56,.64,1); }
 .rc-sub { font-size:12px; color:var(--text-3); font-weight:700; }
-
 .rc-val { font-size:16px; font-weight:900; color:var(--orange); min-width:60px; text-align:right; }
 </style>
 
 </head>
 <body>
-
-<!-- TOPBAR -->
 
 <div class="topbar">
   <button class="topbar-back" onclick="window.location.href='main.html'">
@@ -517,10 +366,7 @@ transition:transform .1s;
     </svg>
     返回
   </button>
-  
 </div>
-
-<!-- MONTH HEADER -->
 
 <div class="month-header" onclick="window.location.href='realcost-history.html?industry=retail&back=realcost-retail.html'" style="cursor:pointer;">
   <div class="mh-left">
@@ -533,49 +379,20 @@ transition:transform .1s;
   </div>
 </div>
 
-<!-- MAIN VIEW -->
-
 <div class="main-view" id="main-view">
-
-  <!-- 日历视图 -->
-
   <div class="calendar-view" id="view-calendar">
     <div class="snake-track" id="snake-track">
       <svg class="snake-svg" id="snake-svg"></svg>
     </div>
   </div>
-
-  <!-- 库存看板 -->
-
   <div class="page-view" id="view-inventory"></div>
-
-  <!-- 临期货品 -->
-
   <div class="page-view" id="view-expiring"></div>
-
-  <!-- 销量排行 -->
-
   <div class="page-view" id="view-sales"></div>
-
-  <!-- 毛利排行 -->
-
   <div class="page-view" id="view-profit"></div>
-
-  <!-- 库存录入 -->
-
   <div class="page-view" id="view-entry"></div>
-
-  <!-- 进货 -->
-
   <div class="page-view" id="view-restock"></div>
-
-  <!-- 开始收银 -->
-
   <div class="page-view" id="view-cashier"></div>
-
 </div>
-
-<!-- BOTTOM NAV -->
 
 <div class="bottom-nav">
   <button class="nav-btn active" data-view="calendar" onclick="switchTab(this,'calendar')">
@@ -599,7 +416,6 @@ transition:transform .1s;
 </div>
 
 <!-- 日历详情 SHEET -->
-
 <div class="overlay" id="overlay" onclick="overlayTap(event)">
   <div class="sheet">
     <div class="sh-handle"></div>
@@ -611,47 +427,114 @@ transition:transform .1s;
   </div>
 </div>
 
+<!-- 批次选择弹窗 -->
+<div class="batch-overlay" id="batch-overlay" onclick="if(event.target===this)closeBatchSheet()">
+  <div class="batch-sheet">
+    <div class="batch-handle"></div>
+    <div class="batch-title" id="batch-title">选择批次</div>
+    <div class="batch-sub" id="batch-sub">该商品有多个进货批次，请选择本次使用的批次</div>
+    <div id="batch-list"></div>
+    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="closeBatchSheet()">取消</button>
+  </div>
+</div>
 
+<!-- ★ 优惠弹窗 -->
+<div class="modal-overlay" id="discount-overlay" onclick="if(event.target===this)DiscountSheet.close()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🏷️ 优惠设置</div>
+    <div class="modal-sub">整单打折或对单项商品改价，不影响库存原始售价</div>
 
+    <div class="section-label" style="margin-top:0">整单折扣</div>
+    <div class="disc-pct-row">
+      <button class="disc-pct-btn" data-pct="95" onclick="DiscountSheet.setPct(95)">九五折</button>
+      <button class="disc-pct-btn" data-pct="90" onclick="DiscountSheet.setPct(90)">九折</button>
+      <button class="disc-pct-btn" data-pct="80" onclick="DiscountSheet.setPct(80)">八折</button>
+      <button class="disc-pct-btn" data-pct="70" onclick="DiscountSheet.setPct(70)">七折</button>
+    </div>
+    <div class="disc-custom-row">
+      <input id="disc-custom-inp" class="disc-custom-inp" type="number" min="1" max="100"
+             placeholder="自定义折扣" oninput="DiscountSheet.onCustomPct()">
+      <span class="disc-custom-unit">% 的原价</span>
+    </div>
 
+    <div class="section-label">逐行改价</div>
+    <div id="disc-items-list"></div>
+
+    <div class="disc-preview">
+      <div class="disc-preview-left">
+        <div class="disc-preview-lbl">优惠后合计</div>
+        <div class="disc-save" id="disc-save-lbl"></div>
+      </div>
+      <div class="disc-preview-total" id="disc-total-preview">¥0</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-sh btn-primary" onclick="DiscountSheet.apply()">✅ 确认优惠</button>
+      <button class="btn-sh btn-ghost" style="box-shadow:0 4px 0 #CECECE" onclick="DiscountSheet.reset()">重置</button>
+    </div>
+    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="DiscountSheet.close()">取消</button>
+  </div>
+</div>
+
+<!-- ★ 损耗记录弹窗 -->
+<div class="modal-overlay" id="loss-overlay" onclick="if(event.target===this)LossSheet.close()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:var(--red)">📦 记录损耗</div>
+    <div class="modal-sub">损耗进价成本计入当日支出，库存同步扣减</div>
+    <div class="loss-info-box">
+      <div class="loss-info-name" id="loss-prod-name">—</div>
+      <div class="loss-info-meta" id="loss-prod-meta">—</div>
+    </div>
+    <div class="loss-qty-row">
+      <span class="loss-qty-lbl">损耗数量</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="qty-btn" onclick="LossSheet.adj(-1)">−</button>
+        <span class="qty-val" id="loss-qty-val">1</span>
+        <button class="qty-btn" onclick="LossSheet.adj(1)">+</button>
+      </div>
+    </div>
+    <div class="loss-calc" id="loss-calc">损耗成本：<span>¥0</span></div>
+    <button class="btn-loss" onclick="LossSheet.confirm()">确认记录损耗</button>
+    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="LossSheet.close()">取消</button>
+  </div>
+</div>
 
 <script>
-  // ── 獭掌柜 · 核心数据引擎 engine.js ──────────────────────────────────────
-// 所有 localStorage 读写、业务逻辑计算均在此处理
-// ★ 从 config.js 读取主题色，覆盖美业版默认粉色
+// ════════════════════════════════════════════════════════════════════════════
+//  主题
+// ════════════════════════════════════════════════════════════════════════════
 (function applyTheme() {
-    try {
-        var cfg = IndustryAdapter.getCurrent();
-        if (cfg && cfg.theme) {
-            var root = document.documentElement;
-            root.style.setProperty('--orange',    cfg.theme);
-            root.style.setProperty('--orange-dk', cfg.theme.replace(')', ', 0.8)').replace('rgb', 'rgba') || '#7A1828');
-            // 同步 meta theme-color
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', cfg.theme);
-        }
-    } catch(e) {}
+  try {
+    var cfg = IndustryAdapter.getCurrent();
+    if (cfg && cfg.theme) {
+      var root = document.documentElement;
+      root.style.setProperty('--orange',    cfg.theme);
+      root.style.setProperty('--orange-dk', cfg.theme.replace(')', ', 0.8)').replace('rgb', 'rgba') || '#7A1828');
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', cfg.theme);
+    }
+  } catch(e) {}
 })();
-const Engine = (function () {
 
-  // ── Key 定义 ──────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+//  Engine — 核心数据引擎
+// ════════════════════════════════════════════════════════════════════════════
+const Engine = (function () {
   const KEYS = {
-    history:   'otter_history',     // 日历收支历史
-    inventory: 'otter_inventory',   // 库存商品列表
-    sales:     'otter_sales',       // 销售流水记录
-    restock:   'otter_restock',     // 进货流水记录
+    history:   'otter_history',
+    inventory: 'otter_inventory',
+    sales:     'otter_sales',
+    restock:   'otter_restock',
   };
 
-  // ── 基础读写 ──────────────────────────────────────────────────────────
   function load(key) {
     try { return JSON.parse(localStorage.getItem(key)) || null; }
     catch (e) { return null; }
   }
-  function save(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
-  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-  // ── 日历历史 ──────────────────────────────────────────────────────────
   function getHistory()          { return load(KEYS.history) || {}; }
   function saveHistory(h)        { save(KEYS.history, h); }
   function getDay(dateKey)       { return getHistory()[dateKey] || null; }
@@ -661,42 +544,23 @@ const Engine = (function () {
     saveHistory(h);
   }
 
-  // ── 库存 ──────────────────────────────────────────────────────────────
-  // 商品结构：
-  // { id, name, category, qty, costPrice, salePrice, expireDate, source, createdAt }
-  // source: 'entry'(库存录入) | 'restock'(进货)
-
-  function getInventory()    { return load(KEYS.inventory) || []; }
-  function saveInventory(v)  { save(KEYS.inventory, v); }
+  function getInventory()   { return load(KEYS.inventory) || []; }
+  function saveInventory(v) { save(KEYS.inventory, v); }
 
   function addProduct(product) {
     const inv = getInventory();
-    // 若同名同进价商品已存在，则累加数量
-    const existing = inv.find(p =>
-      p.name === product.name &&
-      parseFloat(p.costPrice) === parseFloat(product.costPrice) &&
-      p.category === product.category
-    );
-    if (existing) {
-      existing.qty = (parseFloat(existing.qty) || 0) + (parseFloat(product.qty) || 0);
-      existing.salePrice  = product.salePrice  || existing.salePrice;
-      existing.expireDate = product.expireDate || existing.expireDate;
-      existing.barcode = product.barcode || existing.barcode;
-    } else {
-      inv.push(Object.assign({ id: Date.now() + Math.random() }, product));
-    }
-    // ★ 新录入库存，扣减现金
-    var cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
-    if(cost > 0){
-        var c = parseFloat(localStorage.getItem('finance_cash')) || 0;
-        localStorage.setItem('finance_cash', String(c - cost));
+    const batchNo = inv.filter(p => p.name === product.name).length + 1;
+    inv.push(Object.assign({ id: Date.now() + Math.random(), batchNo }, product));
+    const cost = (parseFloat(product.costPrice)||0) * (parseFloat(product.qty)||0);
+    if (cost > 0) {
+      const c = parseFloat(localStorage.getItem('finance_cash')) || 0;
+      localStorage.setItem('finance_cash', String(c - cost));
     }
     saveInventory(inv);
     return inv;
   }
 
   function updateProductQty(productId, deltaQty) {
-    // deltaQty < 0 表示减少（售出），> 0 表示增加（进货）
     const inv = getInventory();
     const p   = inv.find(p => p.id == productId);
     if (!p) return false;
@@ -706,18 +570,19 @@ const Engine = (function () {
   }
 
   function deleteProduct(productId) {
-    const inv = getInventory().filter(p => p.id != productId);
-    saveInventory(inv);
+    saveInventory(getInventory().filter(p => p.id != productId));
   }
 
-  // ── 销售流水 ──────────────────────────────────────────────────────────
-  // 每条记录：{ id, date, items:[{productId,name,qty,costPrice,salePrice}], total, profit, createdAt }
+  function getBatchesByName(name) {
+    return getInventory()
+      .filter(p => p.name === name && parseFloat(p.qty) > 0)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
 
-  function getSales()    { return load(KEYS.sales) || []; }
-  function saveSales(v)  { save(KEYS.sales, v); }
+  function getSales()   { return load(KEYS.sales) || []; }
+  function saveSales(v) { save(KEYS.sales, v); }
 
   function recordSale(items) {
-    // items: [{ productId, name, qty, costPrice, salePrice }]
     const dateKey = new Date().toLocaleDateString();
     let total = 0, cost = 0;
     items.forEach(item => {
@@ -725,670 +590,469 @@ const Engine = (function () {
       cost  += parseFloat(item.costPrice) * parseFloat(item.qty);
     });
     const profit = total - cost;
-    const record = {
-      id:        Date.now(),
-      date:      dateKey,
-      items,
-      total,
-      profit,
-      createdAt: new Date().toISOString(),
-    };
-    const sales = getSales();
-    sales.push(record);
-    saveSales(sales);
-
-    // 扣减库存
-    items.forEach(item => {
-      updateProductQty(item.productId, -parseFloat(item.qty));
-    });
-
-    // 更新日历历史
+    const record = { id: Date.now(), date: dateKey, items, total, profit, createdAt: new Date().toISOString() };
+    const sales = getSales(); sales.push(record); saveSales(sales);
+    items.forEach(item => updateProductQty(item.productId, -parseFloat(item.qty)));
     updateDayFromSales(dateKey);
-    
-    // ★ 同步毛利到 main.html（完整触发）
     const today = new Date().toLocaleDateString();
-    const currentRev = parseFloat(localStorage.getItem('todayRev')) || 0;
-    const newRev = currentRev + profit; // 同步毛利而非营收
+    const newRev = (parseFloat(localStorage.getItem('todayRev')) || 0) + profit;
     localStorage.setItem('todayRev', String(newRev));
-
-    // 同步到 revenue_history（供 CSV 和快照用）
     try {
-        const dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
-        const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
-        if (!history[today]) history[today] = {};
-        history[today].revenue     = newRev.toFixed(2);
-        history[today].profit      = (newRev - dc).toFixed(2);
-        history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
-        const r = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
-        const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
-        const o = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
-        const dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-        history[today].costSnapshot = {
-            rent:   (r/dim).toFixed(2),
-            salary: (s/dim).toFixed(2),
-            other:  (o/dim).toFixed(2),
-        };
-        localStorage.setItem('revenue_history', JSON.stringify(history));
+      const dc = parseFloat(localStorage.getItem('dailyCost')) || 0;
+      const history = JSON.parse(localStorage.getItem('revenue_history')) || {};
+      if (!history[today]) history[today] = {};
+      history[today].revenue     = newRev.toFixed(2);
+      history[today].profit      = (newRev - dc).toFixed(2);
+      history[today].achievement = dc > 0 ? Math.floor((newRev / dc) * 100) : 100;
+      const r = parseFloat(localStorage.getItem('monthlyRent'))   || 0;
+      const s = parseFloat(localStorage.getItem('monthlySalary')) || 0;
+      const o = parseFloat(localStorage.getItem('monthlyOther'))  || 0;
+      const dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+      history[today].costSnapshot = { rent:(r/dim).toFixed(2), salary:(s/dim).toFixed(2), other:(o/dim).toFixed(2) };
+      localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
-
-    // ★ 直接更新现金余额
-    var currentCash = parseFloat(localStorage.getItem('finance_cash')) || 0;
-    localStorage.setItem('finance_cash', String(currentCash + total));
-    // 触发 main 的 storage 监听（成就+render）
+    localStorage.setItem('finance_cash', String((parseFloat(localStorage.getItem('finance_cash'))||0) + total));
     localStorage.setItem('realcost_trigger', JSON.stringify({
-    type:      'sale',
-    amount:    profit,
-    revenue:   total,
-    todayRev:  newRev,
-    timestamp: Date.now(),
-}));
-
+      type:'sale', amount:profit, revenue:total, todayRev:newRev, timestamp:Date.now(),
+    }));
     return record;
   }
 
   function updateDayFromSales(dateKey) {
-    const sales = getSales().filter(s => s.date === dateKey);
+    const sales   = getSales().filter(s => s.date === dateKey);
     const revenue = sales.reduce((a, s) => a + s.total, 0);
     const profit  = sales.reduce((a, s) => a + s.profit, 0);
-    const gm      = revenue > 0 ? Math.round(profit / revenue * 100) : 0;
-    setDay(dateKey, { revenue, profit, grossMargin: gm, variableCost: revenue - profit });
+    setDay(dateKey, { revenue, profit, grossMargin: revenue>0?Math.round(profit/revenue*100):0, variableCost: revenue-profit });
   }
 
-  // ── 销量排行 ──────────────────────────────────────────────────────────
-  // 返回 [{name, totalQty, totalRevenue}]
+  // ★ 损耗记录
+  // 口径：进价成本（亏了多少本钱）
+  // 影响：① 日历历史 loss/lossCount/profit ② revenue_history（realcost-history 联动）
+  //       ③ finance_cash 减少  ④ 库存数量扣减
+  function recordLoss(productId, qty) {
+    const inv = getInventory();
+    const p   = inv.find(x => x.id == productId);
+    if (!p) return null;
+    const lossQty  = Math.min(parseFloat(qty)||1, parseFloat(p.qty)||0);
+    const lossCost = lossQty * (parseFloat(p.costPrice)||0);
+    const dk       = new Date().toLocaleDateString();
+
+    // 扣库存
+    p.qty = Math.max(0, parseFloat(p.qty) - lossQty);
+    saveInventory(inv);
+
+    // 写日历历史
+    const h = getHistory();
+    if (!h[dk]) h[dk] = {};
+    h[dk].loss      = (parseFloat(h[dk].loss)||0) + lossCost;
+    h[dk].lossCount = (parseInt(h[dk].lossCount)||0) + 1;
+    h[dk].profit    = (parseFloat(h[dk].profit)||0) - lossCost;
+    saveHistory(h);
+
+    // 写 revenue_history（供 realcost-history 现金流页面联动）
+    try {
+      const rh = JSON.parse(localStorage.getItem('revenue_history'))||{};
+      if (!rh[dk]) rh[dk] = {};
+      rh[dk].loss      = ((parseFloat(rh[dk].loss)||0)      + lossCost).toFixed(2);
+      rh[dk].lossCount = (parseInt(rh[dk].lossCount)||0)    + 1;
+      rh[dk].profit    = ((parseFloat(rh[dk].profit)||0)    - lossCost).toFixed(2);
+      localStorage.setItem('revenue_history', JSON.stringify(rh));
+    } catch(e) {}
+
+    // 注意：现金不变（进货时已付款），损耗只减少库存资产账面价值
+    // 触发 main 监听
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+      type:'loss', amount:lossCost, productName:p.name, qty:lossQty, timestamp:Date.now(),
+    }));
+
+    return { productName:p.name, qty:lossQty, lossCost, dateKey:dk };
+  }
+
   function getSalesRanking() {
-    const sales = getSales();
     const map = {};
-    sales.forEach(s => {
-      s.items.forEach(item => {
-        if (!map[item.name]) map[item.name] = { name: item.name, totalQty: 0, totalRevenue: 0, totalProfit: 0 };
-        map[item.name].totalQty     += parseFloat(item.qty);
-        map[item.name].totalRevenue += parseFloat(item.salePrice) * parseFloat(item.qty);
-        map[item.name].totalProfit  += (parseFloat(item.salePrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
-      });
-    });
-    return Object.values(map).sort((a, b) => b.totalQty - a.totalQty);
+    getSales().forEach(s => s.items.forEach(item => {
+      if (!map[item.name]) map[item.name] = { name:item.name, totalQty:0, totalRevenue:0, totalProfit:0 };
+      map[item.name].totalQty     += parseFloat(item.qty);
+      map[item.name].totalRevenue += parseFloat(item.salePrice) * parseFloat(item.qty);
+      map[item.name].totalProfit  += (parseFloat(item.salePrice)-parseFloat(item.costPrice)) * parseFloat(item.qty);
+    }));
+    return Object.values(map).sort((a,b) => b.totalQty-a.totalQty);
   }
 
-  // ── 毛利排行 ──────────────────────────────────────────────────────────
-  // 已售毛利排行：售价*售出数量 - 进价*售出数量，按商品聚合
   function getSoldProfitRanking() {
-    const sales = getSales();
     const map = {};
-    sales.forEach(s => {
-      s.items.forEach(item => {
-        if (!map[item.name]) map[item.name] = { name: item.name, profit: 0, qty: 0 };
-        map[item.name].profit += (parseFloat(item.salePrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
-        map[item.name].qty    += parseFloat(item.qty);
-      });
-    });
-    return Object.values(map).sort((a, b) => b.profit - a.profit);
+    getSales().forEach(s => s.items.forEach(item => {
+      if (!map[item.name]) map[item.name] = { name:item.name, profit:0, qty:0 };
+      map[item.name].profit += (parseFloat(item.salePrice)-parseFloat(item.costPrice))*parseFloat(item.qty);
+      map[item.name].qty    += parseFloat(item.qty);
+    }));
+    return Object.values(map).sort((a,b) => b.profit-a.profit);
   }
 
-  // 单品毛利排行：所有库存商品，不论是否售出，单件毛利 = 售价 - 进价
   function getUnitProfitRanking() {
-    return getInventory()
-      .map(p => ({
-        name:       p.name,
-        category:   p.category,
-        unitProfit: parseFloat(p.salePrice) - parseFloat(p.costPrice),
-        margin:     parseFloat(p.costPrice) > 0
-                    ? Math.round((parseFloat(p.salePrice) - parseFloat(p.costPrice)) / parseFloat(p.salePrice) * 100)
-                    : 0,
-        salePrice:  p.salePrice,
-        costPrice:  p.costPrice,
-      }))
-      .sort((a, b) => b.unitProfit - a.unitProfit);
+    const map = {};
+    getInventory().forEach(p => {
+      const up = parseFloat(p.salePrice) - parseFloat(p.costPrice);
+      if (!map[p.name] || up > map[p.name].unitProfit) {
+        map[p.name] = { name:p.name, category:p.category, unitProfit:up,
+          margin: parseFloat(p.costPrice)>0 ? Math.round(up/parseFloat(p.salePrice)*100):0,
+          salePrice:p.salePrice, costPrice:p.costPrice };
+      }
+    });
+    return Object.values(map).sort((a,b) => b.unitProfit-a.unitProfit);
   }
 
-  // ── 临期货品 ──────────────────────────────────────────────────────────
-  // 返回 N 天内到期的商品，按到期日升序
   function getExpiringProducts(days = 7) {
-    const now     = new Date();
-    const cutoff  = new Date(now.getTime() + days * 86400000);
+    const cutoff = new Date(Date.now() + days*86400000);
     return getInventory()
-      .filter(p => {
-        if (!p.expireDate) return false;
-        const exp = new Date(p.expireDate);
-        return exp <= cutoff;
-      })
-      .sort((a, b) => new Date(a.expireDate) - new Date(b.expireDate));
+      .filter(p => p.expireDate && new Date(p.expireDate) <= cutoff)
+      .sort((a,b) => new Date(a.expireDate)-new Date(b.expireDate));
   }
 
-  // ── 工具 ──────────────────────────────────────────────────────────────
   function fmtMoney(v) {
     v = parseFloat(v) || 0;
-    return v >= 10000 ? '¥' + (v / 10000).toFixed(1) + 'w' : '¥' + v.toFixed(2).replace(/\.00$/, '');
+    return v >= 10000 ? '¥'+(v/10000).toFixed(1)+'w' : '¥'+v.toFixed(2).replace(/\.00$/,'');
   }
   function fmtDate(iso) {
     if (!iso) return '—';
     const d = new Date(iso);
-    return (d.getMonth() + 1) + '/' + d.getDate();
+    return (d.getMonth()+1)+'/'+d.getDate();
   }
   function daysUntil(dateStr) {
     if (!dateStr) return null;
-    const diff = new Date(dateStr) - new Date();
-    return Math.ceil(diff / 86400000);
+    return Math.ceil((new Date(dateStr)-new Date())/86400000);
   }
 
-  // ── 月度统计 ──────────────────────────────────────────────────────────
   function getMonthStats(year, month) {
     const h = getHistory();
-    let revenue = 0, profit = 0, days = 0;
+    let revenue=0, profit=0, days=0, totalLoss=0;
     Object.keys(h).forEach(k => {
       const d = new Date(k);
-      if (d.getFullYear() === year && d.getMonth() === month) {
-        revenue += parseFloat(h[k].revenue) || 0;
-        profit  += parseFloat(h[k].profit)  || 0;
-        if ((parseFloat(h[k].revenue) || 0) > 0) days++;
+      if (d.getFullYear()===year && d.getMonth()===month) {
+        revenue    += parseFloat(h[k].revenue)||0;
+        profit     += parseFloat(h[k].profit)||0;
+        totalLoss  += parseFloat(h[k].loss)||0;
+        // 有销售或有损耗都算经营日
+        if ((parseFloat(h[k].revenue)||0)>0 || (parseFloat(h[k].loss)||0)>0) days++;
       }
     });
-    return { revenue, profit, days, gm: revenue > 0 ? Math.round(profit / revenue * 100) : 0 };
+    return { revenue, profit, days, totalLoss, gm: revenue>0?Math.round(profit/revenue*100):0 };
   }
 
   function getStreak() {
-    const h = getHistory();
-    const now = new Date();
-    let s = 0;
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(now); d.setDate(d.getDate() - i);
-      const k = d.toLocaleDateString();
-      if (h[k] && parseFloat(h[k].revenue) > 0) s++;
-      else if (i > 0) break;
+    const h=getHistory(), now=new Date(); let s=0;
+    for (let i=0;i<365;i++) {
+      const d=new Date(now); d.setDate(d.getDate()-i);
+      const k=d.toLocaleDateString();
+      if (h[k] && parseFloat(h[k].revenue)>0) s++;
+      else if (i>0) break;
     }
     return s;
   }
 
-  // ── 公开 API ──────────────────────────────────────────────────────────
   return {
     getHistory, setDay, getDay,
-    getInventory, addProduct, updateProductQty, deleteProduct,
-    getSales, recordSale,
+    getInventory, addProduct, updateProductQty, deleteProduct, getBatchesByName,
+    getSales, recordSale, recordLoss,
     getSalesRanking, getSoldProfitRanking, getUnitProfitRanking,
-    getExpiringProducts,
-    getMonthStats, getStreak,
-    fmtMoney, fmtDate, daysUntil,
-    KEYS,
+    getExpiringProducts, getMonthStats, getStreak,
+    fmtMoney, fmtDate, daysUntil, KEYS,
   };
 })();
 
-// ══════════════════════════════════════════════════════════════════════════
-//  数据迁移机制
-//  在 engine.js 末尾、window.Engine = Engine; 之前插入此段代码
-//  每次数据结构有变化时，递增 CURRENT_VERSION，并在 _migrations 里加对应函数
-// ══════════════════════════════════════════════════════════════════════════
-
-const CURRENT_VERSION = 1;
-const VERSION_KEY = 'otter_db_version';
-
-const _migrations = {
-
-  // v0 → v1：给所有已有库存商品补上 barcode 字段
-  1: function() {
-    const inv = load(KEYS.inventory) || [];
-    let changed = false;
-    inv.forEach(p => {
-      if (!('barcode' in p)) {
-        p.barcode = null;
-        changed = true;
-      }
-    });
-    if (changed) save(KEYS.inventory, inv);
-    console.log('[Engine] Migration v1: barcode 字段补全完成');
-  },
-
-  // 以后新版本在这里继续加：
-  // 2: function() { ... },
-  // 3: function() { ... },
-};
-
-function runMigrations() {
-  const current = parseInt(localStorage.getItem(VERSION_KEY) || '0');
-  if (current >= CURRENT_VERSION) return;
-
-  for (let v = current + 1; v <= CURRENT_VERSION; v++) {
-    if (_migrations[v]) {
-      try {
-        _migrations[v]();
-      } catch(e) {
-        console.error('[Engine] Migration v' + v + ' 失败:', e);
-      }
-    }
-  }
-  localStorage.setItem(VERSION_KEY, String(CURRENT_VERSION));
-  console.log('[Engine] 数据已升级到 v' + CURRENT_VERSION);
-}
-
-// 启动时自动执行
-runMigrations();
-// 挂载到全局
-window.Engine = Engine;
-
-</script>
-<script>
-  // ── 獭掌柜 · 收银 & 库存录入 accounting.js ──────────────────────────────
-// 依赖 engine.js (window.Engine)
-// 新增：扫码录入功能（Cloudflare Worker + D1）
-
-// ══════════════════════════════════════════════════════════════════════════
-//  ⚙️  配置区：部署后将此处替换为你的 Worker URL
-// ══════════════════════════════════════════════════════════════════════════
-const BARCODE_API = ' https://retail.nudgenow.xyz';
-
-// ══════════════════════════════════════════════════════════════════════════
-//  扫码模块 — 优先用原生 BarcodeDetector（Safari/Chrome 系统级识别率）
-//             不支持时降级到 html5-qrcode
-// ══════════════════════════════════════════════════════════════════════════
-const BarcodeScanner = (function () {
-  let _onDetect  = null;
-  let _overlayEl = null;
-  let _stream    = null;
-  let _videoEl   = null;
-  let _rafId     = null;       // requestAnimationFrame id
-  let _scanner   = null;       // html5-qrcode 降级实例
-  let _scanning  = false;
-  let _lastFired = '';
-  let _lastTime  = 0;
-
-  // ── 防重复触发 ────────────────────────────────────────────────────
-  function _dedupe(code) {
-    const now = Date.now();
-    if (code === _lastFired && now - _lastTime < 1500) return;
-    _lastFired = code;
-    _lastTime  = now;
-    _beep();
-    _setStatus('✅ 识别：' + code);
-    _stop();
-    if (_onDetect) _onDetect(code);
-  }
-
-  // ── 滴声 ──────────────────────────────────────────────────────────
-  function _beep() {
+// ── 数据迁移 ────────────────────────────────────────────────────────────────
+(function runMigrations() {
+  const VK='otter_db_version', CV=2;
+  const cur = parseInt(localStorage.getItem(VK)||'0');
+  if (cur >= CV) return;
+  if (cur < 1) {
     try {
-      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1800, ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.12);
+      const inv = JSON.parse(localStorage.getItem('otter_inventory'))||[];
+      let ch=false;
+      inv.forEach(p => { if (!('barcode' in p)) { p.barcode=null; ch=true; } });
+      if (ch) localStorage.setItem('otter_inventory', JSON.stringify(inv));
     } catch(e) {}
   }
+  if (cur < 2) {
+    try {
+      const inv = JSON.parse(localStorage.getItem('otter_inventory'))||[];
+      const nm={};
+      inv.sort((a,b) => new Date(a.createdAt||0)-new Date(b.createdAt||0));
+      inv.forEach(p => { if (!p.batchNo) { nm[p.name]=(nm[p.name]||0)+1; p.batchNo=nm[p.name]; } });
+      localStorage.setItem('otter_inventory', JSON.stringify(inv));
+    } catch(e) {}
+  }
+  localStorage.setItem(VK, String(CV));
+})();
 
-  // ── DOM ───────────────────────────────────────────────────────────
-  function _ensureOverlay() {
-    if (_overlayEl) return;
-    _overlayEl = document.createElement('div');
-    _overlayEl.id = 'barcode-overlay';
-    _overlayEl.innerHTML = `
-      <div id="bco-inner">
-        <div id="bco-header">
-          <div id="bco-title">📷 扫描商品条形码</div>
-          <div id="bco-hint">手机离条形码 15-20cm，保持稳定</div>
-        </div>
-        <div id="bco-viewport">
-          <video id="bco-video" autoplay muted playsinline></video>
-          <div id="bco-frame">
-            <span class="bco-corner tl"></span>
-            <span class="bco-corner tr"></span>
-            <span class="bco-corner bl"></span>
-            <span class="bco-corner br"></span>
-            <div id="bco-scanline"></div>
+window.Engine = Engine;
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  BatchPicker — 批次选择弹窗
+// ════════════════════════════════════════════════════════════════════════════
+const BatchPicker = (function () {
+  let _resolve = null, _currentBatches = [];
+
+  function open(productName, onPick) {
+    const batches = Engine.getBatchesByName(productName);
+    if (!batches.length) { onPick && onPick(null); return; }
+    if (batches.length === 1) { onPick && onPick(batches[0]); return; }
+
+    document.getElementById('batch-title').textContent = '选择批次 · ' + productName;
+    document.getElementById('batch-sub').textContent   = '共 '+batches.length+' 个批次，🟡 为最早入库（先进先出建议优先出货）';
+
+    document.getElementById('batch-list').innerHTML = batches.map((b, i) => {
+      const isFifo = i === 0;
+      const inDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '—';
+      return `
+        <div class="batch-item${isFifo?' batch-fifo-row':''}" onclick="BatchPicker._pick(${i})">
+          <div class="batch-item-top">
+            <span class="batch-item-name">批次 ${b.batchNo||(i+1)}${isFifo?'<span class="batch-fifo-tag">先进先出</span>':''}</span>
+            <span class="batch-item-sale">售 ${Engine.fmtMoney(b.salePrice)}</span>
           </div>
-          <!-- 降级时 html5-qrcode 挂这里 -->
-          <div id="bco-reader" style="display:none;width:100%;height:100%;"></div>
-        </div>
-        <div id="bco-status">正在启动摄像头…</div>
-        <div id="bco-manual-row">
-          <input id="bco-manual-inp" type="text" inputmode="numeric"
-                 placeholder="或手动输入条形码" autocomplete="off">
-          <button id="bco-manual-btn">查询</button>
-        </div>
-        <button id="bco-close">✕ 关闭</button>
-      </div>
-    `;
-    document.body.appendChild(_overlayEl);
-    _injectStyles();
-    _videoEl = _overlayEl.querySelector('#bco-video');
-    _overlayEl.querySelector('#bco-close').onclick = close;
-    _overlayEl.querySelector('#bco-manual-btn').onclick = () => {
-      const v = _overlayEl.querySelector('#bco-manual-inp').value.trim();
-      if (v) _dedupe(v);
-    };
-    _overlayEl.querySelector('#bco-manual-inp').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const v = _overlayEl.querySelector('#bco-manual-inp').value.trim();
-        if (v) _dedupe(v);
-      }
-    });
+          <div class="batch-item-meta">
+            <span>进价 ${Engine.fmtMoney(b.costPrice)}</span>
+            <span>剩余 ${b.qty} 件</span>
+            <span>入库 ${inDate}</span>
+            ${b.expireDate?'<span>到期 '+Engine.fmtDate(b.expireDate)+'</span>':''}
+          </div>
+        </div>`;
+    }).join('');
+
+    _resolve = onPick;
+    _currentBatches = batches;
+    document.getElementById('batch-overlay').classList.add('open');
   }
 
-  function _injectStyles() {
-    if (document.getElementById('bco-styles')) return;
-    const s = document.createElement('style');
-    s.id = 'bco-styles';
-    s.textContent = `
-      #barcode-overlay {
-        display:none; position:fixed; inset:0;
-        background:rgba(0,0,0,.92); z-index:9999;
-        align-items:center; justify-content:center;
-      }
-      #barcode-overlay.open { display:flex; animation:bcoFadeIn .2s ease; }
-      @keyframes bcoFadeIn { from{opacity:0} to{opacity:1} }
-
-      #bco-inner {
-        display:flex; flex-direction:column; align-items:center;
-        padding:20px 16px 28px; width:100%; max-width:380px;
-      }
-      #bco-header { text-align:center; margin-bottom:14px; }
-      #bco-title  { color:#fff; font-size:19px; font-weight:900; }
-      #bco-hint   { color:rgba(255,255,255,.6); font-size:12px; margin-top:5px; }
-
-      #bco-viewport {
-        position:relative;
-        width:100%; max-width:360px;
-        aspect-ratio:4/3;
-        border-radius:16px; overflow:hidden; background:#000;
-      }
-      #bco-video {
-        width:100%; height:100%; object-fit:cover; display:block;
-      }
-      #bco-frame {
-        position:absolute; inset:0; pointer-events:none;
-      }
-      .bco-corner {
-        position:absolute; width:28px; height:28px;
-        border-color:#FF6B35; border-style:solid;
-      }
-      .bco-corner.tl { top:16px;  left:16px;  border-width:3px 0 0 3px; border-radius:4px 0 0 0; }
-      .bco-corner.tr { top:16px;  right:16px; border-width:3px 3px 0 0; border-radius:0 4px 0 0; }
-      .bco-corner.bl { bottom:16px; left:16px;  border-width:0 0 3px 3px; border-radius:0 0 0 4px; }
-      .bco-corner.br { bottom:16px; right:16px; border-width:0 3px 3px 0; border-radius:0 0 4px 0; }
-
-      #bco-scanline {
-        position:absolute; left:16px; right:16px; height:2px;
-        background:linear-gradient(90deg,transparent,#FF6B35,transparent);
-        animation:bcoScan 2s ease-in-out infinite;
-      }
-      @keyframes bcoScan {
-        0%   { top:16px; opacity:0; }
-        10%  { opacity:1; }
-        90%  { opacity:1; }
-        100% { top:calc(100% - 18px); opacity:0; }
-      }
-
-      #bco-status {
-        color:rgba(255,255,255,.8); font-size:13px; font-weight:700;
-        margin-top:14px; min-height:18px; text-align:center;
-      }
-      #bco-manual-row {
-        display:flex; gap:8px; margin-top:14px; width:100%; max-width:360px;
-      }
-      #bco-manual-inp {
-        flex:1; background:rgba(255,255,255,.1);
-        border:1.5px solid rgba(255,255,255,.25); border-radius:10px;
-        padding:10px 12px; font-size:14px; color:#fff; outline:none;
-        font-family:inherit;
-      }
-      #bco-manual-inp::placeholder { color:rgba(255,255,255,.35); }
-      #bco-manual-btn {
-        background:#FF6B35; border:none; border-radius:10px;
-        padding:10px 16px; color:#fff; font-size:14px; font-weight:900;
-        cursor:pointer; font-family:inherit;
-      }
-      #bco-close {
-        margin-top:18px; background:rgba(255,255,255,.1);
-        border:1.5px solid rgba(255,255,255,.2); color:#fff;
-        padding:11px 36px; border-radius:30px;
-        font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
-      }
-      .f-name-wrap { position:relative; display:flex; align-items:center; }
-      .f-name-wrap .form-inp { padding-right:52px; }
-      .scan-trigger-btn {
-        position:absolute; right:6px; width:38px; height:38px;
-        background:#FF6B35; border:none; border-radius:10px;
-        display:flex; align-items:center; justify-content:center;
-        cursor:pointer; flex-shrink:0;
-        transition:transform .12s; box-shadow:0 3px 0 #C44D1A;
-      }
-      .scan-trigger-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #C44D1A; }
-      .scan-trigger-btn svg { width:19px; height:19px; }
-      .f-barcode-tag { font-size:11px; font-weight:700; color:#999; margin-top:4px; display:none; }
-      .f-barcode-tag.show { display:block; }
-      .f-barcode-tag span { color:#FF6B35; }
-      @keyframes autoFill {
-        0%   { background:#FFF3EE; border-color:#FF6B35; }
-        100% { background:#fff;    border-color:#EBEBEB; }
-      }
-      .auto-filled { animation:autoFill 1.8s ease forwards; }
-    `;
-    document.head.appendChild(s);
-  }
-
-  function _setStatus(msg) {
-    if (_overlayEl) _overlayEl.querySelector('#bco-status').textContent = msg;
-  }
-
-  // ── 停止所有扫描 ──────────────────────────────────────────────────
-  function _stop() {
-    _scanning = false;
-    if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
-    if (_stream) { _stream.getTracks().forEach(t => t.stop()); _stream = null; }
-    if (_videoEl) _videoEl.srcObject = null;
-    if (_scanner) { _scanner.stop().catch(() => {}); _scanner = null; }
-  }
-
-  // ── 方案A：原生 BarcodeDetector ──────────────────────────────────
-  function _startNative(supportedFormats) {
-    const wanted = ['ean_13','ean-13','ean_8','ean-8','code_128','code-128',
-                    'code_39','code-39','upc_a','upc-a','upc_e','upc-e'];
-    const formats = supportedFormats
-      ? wanted.filter(f => supportedFormats.includes(f))
-      : wanted;
-
-    const detector = new BarcodeDetector({ formats });
-
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    }).then(stream => {
-      _stream = stream;
-      _videoEl.srcObject = stream;
-      _videoEl.style.display = 'block';
-      _overlayEl.querySelector('#bco-reader').style.display = 'none';
-
-      // 同时监听多个事件，哪个先触发用哪个，解决 PWA 模式 onloadedmetadata 不触发的问题
-      let _started = false;
-      function _startScanLoop() {
-        if (_started) return;
-        _started = true;
-        _setStatus('🔍 对准条形码，手机离远一点效果更好…');
-
-        const canvas = document.createElement('canvas');
-        const ctx2d  = canvas.getContext('2d');
-
-        function scan() {
-          if (!_scanning) return;
-          if (_videoEl.videoWidth === 0 || _videoEl.videoHeight === 0) {
-            _rafId = requestAnimationFrame(scan);
-            return;
-          }
-          canvas.width  = _videoEl.videoWidth;
-          canvas.height = _videoEl.videoHeight;
-          ctx2d.drawImage(_videoEl, 0, 0);
-          createImageBitmap(canvas).then(bitmap => {
-            return detector.detect(bitmap).then(codes => {
-              bitmap.close();
-              if (codes.length > 0) _dedupe(codes[0].rawValue);
-            });
-          }).catch(() => {}).finally(() => {
-            if (_scanning) _rafId = requestAnimationFrame(scan);
-          });
-        }
-        _rafId = requestAnimationFrame(scan);
-      }
-
-      _videoEl.onloadedmetadata  = () => { _videoEl.play(); _startScanLoop(); };
-      _videoEl.onloadeddata      = () => { _videoEl.play(); _startScanLoop(); };
-      _videoEl.oncanplay         = () => { _videoEl.play(); _startScanLoop(); };
-
-      // 兜底：500ms 后如果还没启动，强制 play
-      setTimeout(() => {
-        _videoEl.play().then(_startScanLoop).catch(() => {});
-      }, 500);
-
-    }).catch(err => {
-      _setStatus('⚠️ 摄像头启动失败，请手动输入');
-      console.warn('[BarcodeScanner native]', err);
-    });
-  }
-
-  // ── 方案B：html5-qrcode 降级 ─────────────────────────────────────
-  function _startFallback() {
-    _videoEl.style.display = 'none';
-    const readerEl = _overlayEl.querySelector('#bco-reader');
-    readerEl.style.display = 'block';
-    readerEl.innerHTML = '';
-
-    function _loadLib(cb) {
-      if (window.Html5Qrcode) { cb(); return; }
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
-      s.onload = cb;
-      s.onerror = () => _setStatus('⚠️ 扫码库加载失败，请手动输入');
-      document.head.appendChild(s);
-    }
-
-    _loadLib(() => {
-      try { _scanner = new Html5Qrcode('bco-reader'); } catch(e) {
-        _setStatus('⚠️ 初始化失败，请手动输入'); return;
-      }
-      _scanner.start(
-        { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: (w, h) => ({ width: Math.round(w * 0.85), height: Math.round(h * 0.35) }),
-          aspectRatio: 1.333,
-          supportedScanTypes: [ Html5QrcodeScanType.SCAN_TYPE_CAMERA ],
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E,
-          ],
-        },
-        (code) => { if (_scanner) _dedupe(code); },
-        () => {}
-      ).then(() => {
-        _setStatus('🔍 对准条形码，手机离远一点效果更好…');
-      }).catch(err => {
-        _setStatus('⚠️ 摄像头启动失败，请手动输入');
-        console.warn('[BarcodeScanner fallback]', err);
-      });
-    });
-  }
-
-  // ── open ──────────────────────────────────────────────────────────
-  function open(onDetectCb) {
-    _onDetect = onDetectCb;
-    _ensureOverlay();
-    _overlayEl.classList.add('open');
-    _overlayEl.querySelector('#bco-manual-inp').value = '';
-    _lastFired = ''; _lastTime = 0;
-
-    if (_scanning) { _stop(); }
-    _scanning = true;
-    _setStatus('正在启动摄像头…');
-
-    // 优先用原生 BarcodeDetector（Safari 16.4+ / Chrome 83+）
-    if (window.BarcodeDetector) {
-      BarcodeDetector.getSupportedFormats().then(formats => {
-        // 显示支持的格式，方便调试
-        _setStatus('检测格式：' + formats.join(',').substring(0, 40));
-        setTimeout(() => {
-          // Safari 用 'ean-13'（连字符），Chrome 用 'ean_13'（下划线），都要兼容
-          const hasBarcode = formats.some(f =>
-            ['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f)
-          );
-          if (hasBarcode) {
-            _setStatus('✨ 使用系统级扫码引擎…');
-            _startNative(formats);
-          } else {
-            _setStatus('降级到 JS 引擎…');
-            _startFallback();
-          }
-        }, 1500);
-      }).catch(() => _startFallback());
-    } else {
-      _startFallback();
-    }
+  function _pick(idx) {
+    document.getElementById('batch-overlay').classList.remove('open');
+    if (_resolve) _resolve(_currentBatches[idx]);
+    _resolve = null;
   }
 
   function close() {
-    _stop();
-    if (_overlayEl) _overlayEl.classList.remove('open');
+    document.getElementById('batch-overlay').classList.remove('open');
+    if (_resolve) _resolve(null);
+    _resolve = null;
   }
 
-  return { open, close };
+  return { open, _pick, close };
 })();
 
-window.BarcodeScanner = BarcodeScanner;
+window.BatchPicker = BatchPicker;
+function closeBatchSheet() { BatchPicker.close(); }
 
-// ══════════════════════════════════════════════════════════════════════════
-//  Cloudflare 条码数据库查询 / 上报
-// ══════════════════════════════════════════════════════════════════════════
-const BarcodeDB = (function () {
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ DiscountSheet — 优惠弹窗
+//  整单快捷折 + 自定义折扣 + 逐行改价，两种方式互斥
+//  不修改库存原始售价，仅影响本次交易实收
+// ════════════════════════════════════════════════════════════════════════════
+const DiscountSheet = (function () {
+  let _cart=[], _cb=null, _overrides={}, _wholePct=null;
 
-  // 获取用户大致地区（IP 定位，失败则用"未知"）
-  let _region = null;
-  async function getRegion() {
-    if (_region) return _region;
-    try {
-      const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
-      const d = await r.json();
-      _region = [d.region || '', d.city || ''].filter(Boolean).join('-') || '未知';
-    } catch {
-      _region = '未知';
-    }
-    return _region;
+  function open(cart, onApply) {
+    _cart=cart; _cb=onApply; _overrides={}; _wholePct=null;
+    // 重置 UI
+    document.querySelectorAll('.disc-pct-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('disc-custom-inp').value='';
+    // 渲染逐行列表
+    document.getElementById('disc-items-list').innerHTML = cart.map((item, i) => `
+      <div class="disc-item-row">
+        <div class="disc-item-info">
+          <div class="disc-item-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+item.batchNo+'</span>':''}</div>
+          <div class="disc-item-orig">原价 ${Engine.fmtMoney(item.salePrice)} × ${item.qty} 件</div>
+        </div>
+        <input class="disc-item-inp" type="number" step="0.01" min="0"
+               placeholder="${(item.origSalePrice||item.salePrice).toFixed(2)}"
+               data-idx="${i}" oninput="DiscountSheet.onItemPrice(${i},this.value)">
+      </div>`).join('');
+    _updatePreview();
+    document.getElementById('discount-overlay').classList.add('open');
   }
 
-  // 查询条形码 → { found, name, salePrice, category }
-  async function query(barcode) {
-    const region = await getRegion();
-    const url = `${BARCODE_API}/api/product/${encodeURIComponent(barcode)}?region=${encodeURIComponent(region)}`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
+  function setPct(pct) {
+    _wholePct=pct; _overrides={};
+    document.querySelectorAll('.disc-pct-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.pct)===pct));
+    document.getElementById('disc-custom-inp').value=pct;
+    document.querySelectorAll('.disc-item-inp').forEach(inp=>inp.value='');
+    _updatePreview();
   }
 
-  // 上报入库数据（入库成功后调用，丰富数据库）
-  // payload: { barcode, name, category, costPrice, salePrice, qty, expireDate }
-  // 上报内容包括进价，供数据库记录完整成本数据
-  // 无条码时仍上报入库明细（inventory 表），但不写 products 参考表
-  async function report(payload) {
-    const region = await getRegion();
-    fetch(`${BARCODE_API}/api/inventory`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...payload, region }),
-    }).catch(() => {});   // 静默失败，不影响本地流程
+  function onCustomPct() {
+    const v = parseFloat(document.getElementById('disc-custom-inp').value);
+    _wholePct = (v>0&&v<=100) ? v : null;
+    _overrides={};
+    document.querySelectorAll('.disc-pct-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.disc-item-inp').forEach(inp=>inp.value='');
+    _updatePreview();
   }
 
-  return { query, report, getRegion };
+  function onItemPrice(idx, val) {
+    _wholePct=null;
+    document.querySelectorAll('.disc-pct-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('disc-custom-inp').value='';
+    const v=parseFloat(val);
+    if (!isNaN(v)&&v>=0) _overrides[idx]=v; else delete _overrides[idx];
+    _updatePreview();
+  }
+
+  function _effectivePrice(item, idx) {
+    if (_overrides[idx]!==undefined) return _overrides[idx];
+    const base = item.origSalePrice||item.salePrice;
+    if (_wholePct!==null) return +(base*_wholePct/100).toFixed(2);
+    return item.salePrice;
+  }
+
+  function _updatePreview() {
+    let total=0, origTotal=0;
+    _cart.forEach((item,i)=>{
+      total     += _effectivePrice(item,i)*item.qty;
+      origTotal += (item.origSalePrice||item.salePrice)*item.qty;
+    });
+    const saved=origTotal-total;
+    document.getElementById('disc-total-preview').textContent=Engine.fmtMoney(total);
+    document.getElementById('disc-save-lbl').textContent=saved>0.005?'优惠 '+Engine.fmtMoney(saved):'';
+  }
+
+  function apply() {
+    const newCart=_cart.map((item,i)=>({
+      ...item,
+      origSalePrice: item.origSalePrice||item.salePrice,
+      salePrice: _effectivePrice(item,i),
+    }));
+    document.getElementById('discount-overlay').classList.remove('open');
+    if (_cb) _cb(newCart);
+  }
+
+  function reset() {
+    _wholePct=null; _overrides={};
+    document.querySelectorAll('.disc-pct-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('disc-custom-inp').value='';
+    document.querySelectorAll('.disc-item-inp').forEach(inp=>inp.value='');
+    _updatePreview();
+  }
+
+  function close() { document.getElementById('discount-overlay').classList.remove('open'); }
+
+  return { open, setPct, onCustomPct, onItemPrice, apply, reset, close };
 })();
+window.DiscountSheet=DiscountSheet;
 
-window.BarcodeDB = BarcodeDB;
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ LossSheet — 损耗记录弹窗
+//  从临期货品页面呼出，记录进价损耗
+// ════════════════════════════════════════════════════════════════════════════
+const LossSheet = (function () {
+  let _prod=null, _qty=1;
 
-// ══════════════════════════════════════════════════════════════════════════
-//  Accounting 模块
-// ══════════════════════════════════════════════════════════════════════════
+  function open(product) {
+    _prod=product; _qty=1;
+    document.getElementById('loss-prod-name').textContent =
+      product.name + (product.batchNo ? '（批次'+product.batchNo+'）' : '');
+    document.getElementById('loss-prod-meta').textContent =
+      '进价 '+Engine.fmtMoney(product.costPrice)+' · 当前库存 '+product.qty+' 件';
+    _render();
+    document.getElementById('loss-overlay').classList.add('open');
+  }
+
+  function adj(d) {
+    _qty = Math.max(1, Math.min(_qty+d, parseFloat(_prod.qty)||1));
+    _render();
+  }
+
+  function _render() {
+    document.getElementById('loss-qty-val').textContent=_qty;
+    const cost=_qty*(parseFloat(_prod.costPrice)||0);
+    document.getElementById('loss-calc').innerHTML=
+      '损耗成本：<span>'+Engine.fmtMoney(cost)+'</span>（'+_qty+' 件 × 进价 '+Engine.fmtMoney(_prod.costPrice)+'）';
+  }
+
+  function confirm() {
+    if (!_prod) return;
+    const result = Engine.recordLoss(_prod.id, _qty);
+    document.getElementById('loss-overlay').classList.remove('open');
+    // 刷新相关视图
+    if (window.Dashboard&&window.Dashboard.refresh) window.Dashboard.refresh();
+    const expEl=document.getElementById('view-expiring');
+    if (expEl&&expEl.classList.contains('visible')) Dashboard.renderExpiring(expEl);
+    // 日历节点补丁：今天若仅有损耗无销售，变为红色
+    _patchTodayNode();
+    _toast('已记录损耗：'+result.productName+' × '+result.qty+' 件，损耗成本 '+Engine.fmtMoney(result.lossCost));
+  }
+
+  function _patchTodayNode() {
+    const dk  = new Date().toLocaleDateString();
+    const h   = Engine.getHistory()[dk]||{};
+    const hasS= parseFloat(h.revenue||0)>0;
+    const hasL= parseFloat(h.loss||0)>0;
+    if (!hasL||hasS) return; // 有销售时节点颜色不变
+    const today=new Date().getDate();
+    document.querySelectorAll('.day-node').forEach(el=>{
+      const numEl=el.querySelector('.nd-num');
+      if (numEl&&parseInt(numEl.textContent)===today) {
+        // 移除旧颜色类，加上损耗类
+        ['n-done','n-missed','n-future'].forEach(c=>el.classList.remove(c));
+        el.classList.add('n-loss');
+        const ico=el.querySelector('.nd-ico');
+        if (ico) ico.textContent='⚠';
+      }
+    });
+  }
+
+  function _toast(msg) {
+    let t=document.getElementById('bco-toast');
+    if (!t){t=document.createElement('div');t.id='bco-toast';document.body.appendChild(t);}
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500);
+  }
+
+  function close() { document.getElementById('loss-overlay').classList.remove('open'); }
+
+  return { open, adj, confirm, close };
+})();
+window.LossSheet=LossSheet;
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  BarcodeScanner & BarcodeDB（原样保留）
+// ════════════════════════════════════════════════════════════════════════════
+const BARCODE_API = 'https://retail.nudgenow.xyz';
+const BarcodeScanner=(function(){
+  let _od=null,_ov=null,_st=null,_vid=null,_raf=null,_sc=null,_run=false,_lf='',_lt=0;
+  function _dd(c){const n=Date.now();if(c===_lf&&n-_lt<1500)return;_lf=c;_lt=n;_beep();_ss('✅ 识别：'+c);_stop();if(_od)_od(c);}
+  function _beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='square';o.frequency.setValueAtTime(1800,ctx.currentTime);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.12);}catch(e){}}
+  function _eo(){if(_ov)return;_ov=document.createElement('div');_ov.id='barcode-overlay';_ov.innerHTML=`<div id="bco-inner"><div id="bco-header"><div id="bco-title">📷 扫描商品条形码</div><div id="bco-hint">手机离条形码 15-20cm，保持稳定</div></div><div id="bco-viewport"><video id="bco-video" autoplay muted playsinline></video><div id="bco-frame"><span class="bco-corner tl"></span><span class="bco-corner tr"></span><span class="bco-corner bl"></span><span class="bco-corner br"></span><div id="bco-scanline"></div></div><div id="bco-reader" style="display:none;width:100%;height:100%;"></div></div><div id="bco-status">正在启动摄像头…</div><div id="bco-manual-row"><input id="bco-manual-inp" type="text" inputmode="numeric" placeholder="或手动输入条形码" autocomplete="off"><button id="bco-manual-btn">查询</button></div><button id="bco-close">✕ 关闭</button></div>`;document.body.appendChild(_ov);_is();_vid=_ov.querySelector('#bco-video');_ov.querySelector('#bco-close').onclick=close;_ov.querySelector('#bco-manual-btn').onclick=()=>{const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);};_ov.querySelector('#bco-manual-inp').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);}});}
+  function _is(){if(document.getElementById('bco-styles'))return;const s=document.createElement('style');s.id='bco-styles';s.textContent=`#barcode-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;}#barcode-overlay.open{display:flex;animation:bcoFadeIn .2s ease;}@keyframes bcoFadeIn{from{opacity:0}to{opacity:1}}#bco-inner{display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px;width:100%;max-width:380px;}#bco-header{text-align:center;margin-bottom:14px;}#bco-title{color:#fff;font-size:19px;font-weight:900;}#bco-hint{color:rgba(255,255,255,.6);font-size:12px;margin-top:5px;}#bco-viewport{position:relative;width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#000;}#bco-video{width:100%;height:100%;object-fit:cover;display:block;}#bco-frame{position:absolute;inset:0;pointer-events:none;}.bco-corner{position:absolute;width:28px;height:28px;border-color:#FF6B35;border-style:solid;}.bco-corner.tl{top:16px;left:16px;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}.bco-corner.tr{top:16px;right:16px;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}.bco-corner.bl{bottom:16px;left:16px;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}.bco-corner.br{bottom:16px;right:16px;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}#bco-scanline{position:absolute;left:16px;right:16px;height:2px;background:linear-gradient(90deg,transparent,#FF6B35,transparent);animation:bcoScan 2s ease-in-out infinite;}@keyframes bcoScan{0%{top:16px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(100% - 18px);opacity:0;}}#bco-status{color:rgba(255,255,255,.8);font-size:13px;font-weight:700;margin-top:14px;min-height:18px;text-align:center;}#bco-manual-row{display:flex;gap:8px;margin-top:14px;width:100%;max-width:360px;}#bco-manual-inp{flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 12px;font-size:14px;color:#fff;outline:none;font-family:inherit;}#bco-manual-inp::placeholder{color:rgba(255,255,255,.35);}#bco-manual-btn{background:#FF6B35;border:none;border-radius:10px;padding:10px 16px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}#bco-close{margin-top:18px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;padding:11px 36px;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}.f-name-wrap{position:relative;display:flex;align-items:center;}.f-name-wrap .form-inp{padding-right:52px;}.scan-trigger-btn{position:absolute;right:6px;width:38px;height:38px;background:#FF6B35;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s;box-shadow:0 3px 0 #C44D1A;}.scan-trigger-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #C44D1A;}.scan-trigger-btn svg{width:19px;height:19px;}.f-barcode-tag{font-size:11px;font-weight:700;color:#999;margin-top:4px;display:none;}.f-barcode-tag.show{display:block;}.f-barcode-tag span{color:#FF6B35;}@keyframes autoFill{0%{background:#FFF3EE;border-color:#FF6B35;}100%{background:#fff;border-color:#EBEBEB;}}.auto-filled{animation:autoFill 1.8s ease forwards;}#bco-toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-12px);background:rgba(0,0,0,.78);color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;font-weight:700;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:90vw;font-family:'PingFang SC','Helvetica Neue',sans-serif;}#bco-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}`;document.head.appendChild(s);}
+  function _ss(m){if(_ov)_ov.querySelector('#bco-status').textContent=m;}
+  function _stop(){_run=false;if(_raf){cancelAnimationFrame(_raf);_raf=null;}if(_st){_st.getTracks().forEach(t=>t.stop());_st=null;}if(_vid)_vid.srcObject=null;if(_sc){_sc.stop().catch(()=>{});_sc=null;}}
+  function _native(fmts){const wanted=['ean_13','ean-13','ean_8','ean-8','code_128','code-128','code_39','code-39','upc_a','upc-a','upc_e','upc-e'];const formats=fmts?wanted.filter(f=>fmts.includes(f)):wanted;const det=new BarcodeDetector({formats});navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}}).then(stream=>{_st=stream;_vid.srcObject=stream;_vid.style.display='block';_ov.querySelector('#bco-reader').style.display='none';let started=false;function sl(){if(started)return;started=true;_ss('🔍 对准条形码，手机离远一点效果更好…');const cv=document.createElement('canvas');const ctx=cv.getContext('2d');function scan(){if(!_run)return;if(!_vid.videoWidth){_raf=requestAnimationFrame(scan);return;}cv.width=_vid.videoWidth;cv.height=_vid.videoHeight;ctx.drawImage(_vid,0,0);createImageBitmap(cv).then(b=>det.detect(b).then(cs=>{b.close();if(cs.length)_dd(cs[0].rawValue);}).catch(()=>{})).catch(()=>{}).finally(()=>{if(_run)_raf=requestAnimationFrame(scan);});}_raf=requestAnimationFrame(scan);}_vid.onloadedmetadata=()=>{_vid.play();sl();};_vid.onloadeddata=()=>{_vid.play();sl();};_vid.oncanplay=()=>{_vid.play();sl();};setTimeout(()=>{_vid.play().then(sl).catch(()=>{});},500);}).catch(()=>{_ss('⚠️ 摄像头启动失败，请手动输入');});}
+  function _fallback(){_vid.style.display='none';const re=_ov.querySelector('#bco-reader');re.style.display='block';re.innerHTML='';function ll(cb){if(window.Html5Qrcode){cb();return;}const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=cb;s.onerror=()=>_ss('⚠️ 扫码库加载失败');document.head.appendChild(s);}ll(()=>{try{_sc=new Html5Qrcode('bco-reader');}catch(e){_ss('⚠️ 初始化失败');return;}_sc.start({facingMode:'environment'},{fps:10,qrbox:(w,h)=>({width:Math.round(w*.85),height:Math.round(h*.35)}),aspectRatio:1.333,supportedScanTypes:[Html5QrcodeScanType.SCAN_TYPE_CAMERA],formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E]},(c)=>{if(_sc)_dd(c);},()=>{}).then(()=>{_ss('🔍 对准条形码…');}).catch(()=>{_ss('⚠️ 摄像头启动失败');});});}
+  function open(cb){_od=cb;_eo();_ov.classList.add('open');_ov.querySelector('#bco-manual-inp').value='';_lf='';_lt=0;if(_run)_stop();_run=true;_ss('正在启动摄像头…');if(window.BarcodeDetector){BarcodeDetector.getSupportedFormats().then(fmts=>{_ss('检测格式：'+fmts.join(',').substring(0,40));setTimeout(()=>{const ok=fmts.some(f=>['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f));if(ok){_ss('✨ 使用系统级扫码引擎…');_native(fmts);}else{_ss('降级到 JS 引擎…');_fallback();}},1500);}).catch(()=>_fallback());}else{_fallback();}}
+  function close(){_stop();if(_ov)_ov.classList.remove('open');}
+  return{open,close};
+})();
+window.BarcodeScanner=BarcodeScanner;
+
+const BarcodeDB=(function(){
+  let _r=null;
+  async function getRegion(){if(_r)return _r;try{const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});const d=await r.json();_r=[d.region||'',d.city||''].filter(Boolean).join('-')||'未知';}catch{_r='未知';}return _r;}
+  async function query(bc){const rg=await getRegion();const r=await fetch(`${BARCODE_API}/api/product/${encodeURIComponent(bc)}?region=${encodeURIComponent(rg)}`,{signal:AbortSignal.timeout(6000)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+  async function report(p){const rg=await getRegion();fetch(`${BARCODE_API}/api/inventory`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,region:rg})}).catch(()=>{});}
+  return{query,report,getRegion};
+})();
+window.BarcodeDB=BarcodeDB;
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  Accounting — 收银台 & 库存录入
+// ════════════════════════════════════════════════════════════════════════════
 const Accounting = (function () {
 
-// ════════════════════════════════════════════════════════════════════════
-//  开始收银（不变）
-// ════════════════════════════════════════════════════════════════════════
+// ── 收银台 ──────────────────────────────────────────────────────────────────
 function renderCashier(container) {
   let cart = [];
 
@@ -1402,14 +1066,10 @@ function renderCashier(container) {
         <div class="search-box" style="position:relative;">
           <span class="search-ico">🔍</span>
           <input id="cashier-search" class="search-inp" type="text"
-                 placeholder="搜索商品名称…" autocomplete="off"
-                 style="padding-right:52px;">
-          <!-- 扫码按钮 -->
+                 placeholder="搜索商品名称…" autocomplete="off" style="padding-right:52px;">
           <button class="scan-trigger-btn" style="position:absolute;right:6px;"
                   title="扫描条形码" onclick="Accounting._cashierScan()">
-            <svg viewBox="0 0 24 24" fill="none"
-                 stroke="#fff" stroke-width="2.2"
-                 stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2"  y="4" width="2"  height="16" rx=".4"/>
               <rect x="6"  y="4" width="1"  height="16" rx=".4"/>
               <rect x="9"  y="4" width="2"  height="16" rx=".4"/>
@@ -1423,774 +1083,461 @@ function renderCashier(container) {
       </div>
       <div class="section-label">已选商品</div>
       <div id="cashier-cart" class="cart-list"></div>
-      <div class="cashier-total-bar" id="cashier-total-bar">
+      <div class="cashier-total-bar">
         <div class="ct-left">
           <div class="ct-items" id="ct-items">0 件商品</div>
           <div class="ct-total" id="ct-total">¥0.00</div>
         </div>
-        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()">出售</button>
+        <!-- ★ 优惠按钮 -->
+        <button class="ct-disc-btn" id="ct-disc-btn" disabled onclick="Accounting._openDiscount()">🏷️ 优惠</button>
+        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>出售</button>
       </div>
       <div id="cashier-success" class="sale-success hidden">
         <div class="ss-icon">🎉</div>
         <div class="ss-text">出售成功！</div>
         <div class="ss-sub" id="ss-sub"></div>
       </div>
-    </div>
-  `;
+    </div>`;
 
   const inp = container.querySelector('#cashier-search');
   const dd  = container.querySelector('#cashier-dropdown');
 
-  // ── 扫码加入购物车 ────────────────────────────────────────────────
   Accounting._cashierScan = () => {
     BarcodeScanner.open((code) => {
       BarcodeScanner.close();
-
-      // 在本地库存里用条形码匹配（barcode 字段，录入时已保存）
-      const inv  = Engine.getInventory().filter(p => parseFloat(p.qty) > 0);
-      const prod = inv.find(p => p.barcode === code);
-
-      if (prod) {
-        // 找到了：填入搜索框名称 + 直接加入购物车
-        inp.value = prod.name;
-        addToCart(prod);
-        inp.value = '';
-        _showToast('✅ 已加入：' + prod.name);
-      } else {
-        // 没找到：把条形码填入搜索框，让用户看到提示
-        inp.value = '';
-        _showToast('⚠️ 库存中没有条码 ' + code + ' 的商品，请先录入');
-      }
+      const prod = Engine.getInventory().filter(p=>parseFloat(p.qty)>0).find(p=>p.barcode===code);
+      if (prod) { _pickAndAdd(prod.name); }
+      else { _showToast('⚠️ 库存中没有条码 '+code+' 的商品，请先录入'); }
     });
   };
 
-  // ── 文字搜索 ──────────────────────────────────────────────────────
+  // ★ 优惠按钮入口
+  Accounting._openDiscount = () => {
+    if (!cart.length) return;
+    DiscountSheet.open(cart, (newCart) => { cart=newCart; renderCart(); });
+  };
+
   inp.addEventListener('input', () => {
     const q   = inp.value.trim().toLowerCase();
-    const inv = Engine.getInventory().filter(p => parseFloat(p.qty) > 0);
+    const inv = Engine.getInventory().filter(p=>parseFloat(p.qty)>0);
     if (!q) { dd.classList.add('hidden'); return; }
-    // 同时支持按商品名称和条形码搜索
-    const results = inv.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      (p.barcode && p.barcode.includes(q))
-    );
-    dd.innerHTML = results.length
-      ? results.map(p => `<div class="dd-item" data-id="${p.id}"><span class="dd-name">${p.name}</span><span class="dd-info">库存${p.qty}件 · ${Engine.fmtMoney(p.salePrice)}</span></div>`).join('')
-      : '<div class="dd-empty">没有找到商品</div>';
-    dd.querySelectorAll('.dd-item').forEach(el => {
-      el.onclick = () => {
-        const prod = inv.find(p => p.id == el.dataset.id);
-        if (prod) addToCart(prod);
-        inp.value = ''; dd.classList.add('hidden');
-      };
+    const nameMap={};
+    inv.forEach(p=>{
+      if (!p.name.toLowerCase().includes(q)&&!(p.barcode&&p.barcode.includes(q))) return;
+      if (!nameMap[p.name]) nameMap[p.name]={name:p.name,totalQty:0,batches:0};
+      nameMap[p.name].totalQty+=parseFloat(p.qty);
+      nameMap[p.name].batches++;
+    });
+    const results=Object.values(nameMap);
+    dd.innerHTML=results.length
+      ?results.map(r=>`<div class="dd-item" data-name="${r.name}"><span class="dd-name">${r.name}</span><span class="dd-info">库存${r.totalQty}件${r.batches>1?' · '+r.batches+'个批次':''}</span></div>`).join('')
+      :'<div class="dd-empty">没有找到商品</div>';
+    dd.querySelectorAll('.dd-item').forEach(el=>{
+      el.onclick=()=>{inp.value='';dd.classList.add('hidden');_pickAndAdd(el.dataset.name);};
     });
     dd.classList.remove('hidden');
   });
 
-  document.addEventListener('click', e => {
+  document.addEventListener('click', e=>{
     if (!container.querySelector('.search-wrap').contains(e.target)) dd.classList.add('hidden');
   });
 
+  function _pickAndAdd(productName) {
+    BatchPicker.open(productName, (batch)=>{ if(batch) addToCart(batch); });
+  }
+
   function addToCart(prod) {
-    const existing = cart.find(c => c.productId === prod.id);
-    if (existing) {
-      existing.qty = Math.min(existing.qty + 1, parseFloat(prod.qty));
-    } else {
-      cart.push({ productId: prod.id, name: prod.name, qty: 1,
-        costPrice: parseFloat(prod.costPrice), salePrice: parseFloat(prod.salePrice),
-        maxQty: parseFloat(prod.qty) });
+    const existing=cart.find(c=>c.productId===prod.id);
+    if (existing) { existing.qty=Math.min(existing.qty+1,parseFloat(prod.qty)); }
+    else {
+      cart.push({ productId:prod.id, name:prod.name, batchNo:prod.batchNo, qty:1,
+        costPrice:parseFloat(prod.costPrice), salePrice:parseFloat(prod.salePrice),
+        maxQty:parseFloat(prod.qty) });
     }
     renderCart();
   }
 
   function renderCart() {
-    const el = container.querySelector('#cashier-cart');
-    el.innerHTML = cart.length
-      ? cart.map((item, i) => `
-          <div class="cart-item">
-            <div class="ci-info">
-              <div class="ci-name">${item.name}</div>
-              <div class="ci-price">${Engine.fmtMoney(item.salePrice)} / 件</div>
+    const el=container.querySelector('#cashier-cart');
+    el.innerHTML=cart.length
+      ?cart.map((item,i)=>`
+        <div class="cart-item">
+          <div class="ci-info">
+            <div class="ci-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;font-weight:700;margin-left:4px">批次'+item.batchNo+'</span>':''}</div>
+            <div class="ci-price">
+              ${item.origSalePrice&&item.origSalePrice!==item.salePrice
+                ?'<span style="text-decoration:line-through;color:#CCC;margin-right:3px">'+Engine.fmtMoney(item.origSalePrice)+'</span><span style="color:var(--red)">'+Engine.fmtMoney(item.salePrice)+'</span>'
+                :Engine.fmtMoney(item.salePrice)}/件 · 进价 ${Engine.fmtMoney(item.costPrice)}
             </div>
-            <div class="ci-qty-ctrl">
-              <button class="qty-btn" onclick="Accounting._cartQty(${i},-1)">−</button>
-              <span class="qty-val">${item.qty}</span>
-              <button class="qty-btn" onclick="Accounting._cartQty(${i},1)">+</button>
-            </div>
-            <div class="ci-subtotal">${Engine.fmtMoney(item.salePrice * item.qty)}</div>
-            <button class="ci-del" onclick="Accounting._cartDel(${i})">✕</button>
-          </div>`)
-        .join('')
-      : '<div class="cart-empty">搜索或扫码添加商品 🛍️</div>';
-    updateTotal();
+          </div>
+          <div class="ci-qty-ctrl">
+            <button class="qty-btn" onclick="Accounting._cartQty(${i},-1)">−</button>
+            <span class="qty-val">${item.qty}</span>
+            <button class="qty-btn" onclick="Accounting._cartQty(${i},1)">+</button>
+          </div>
+          <div class="ci-subtotal">${Engine.fmtMoney(item.salePrice*item.qty)}</div>
+          <button class="ci-del" onclick="Accounting._cartDel(${i})">✕</button>
+        </div>`).join('')
+      :'<div class="cart-empty">搜索或扫码添加商品 🛍️</div>';
+    _updateTotal();
   }
 
-  function updateTotal() {
-    const total = cart.reduce((a, c) => a + c.salePrice * c.qty, 0);
-    const count = cart.reduce((a, c) => a + c.qty, 0);
-    container.querySelector('#ct-items').textContent = count + ' 件商品';
-    container.querySelector('#ct-total').textContent = Engine.fmtMoney(total);
-    container.querySelector('#ct-btn').disabled = cart.length === 0;
+  function _updateTotal() {
+    const total=cart.reduce((a,c)=>a+c.salePrice*c.qty,0);
+    const count=cart.reduce((a,c)=>a+c.qty,0);
+    container.querySelector('#ct-items').textContent=count+' 件商品';
+    container.querySelector('#ct-total').textContent=Engine.fmtMoney(total);
+    const empty=cart.length===0;
+    container.querySelector('#ct-btn').disabled=empty;
+    container.querySelector('#ct-disc-btn').disabled=empty;
   }
 
-  Accounting._cartQty = (i, d) => { cart[i].qty = Math.max(1, Math.min(cart[i].qty + d, cart[i].maxQty)); renderCart(); };
-  Accounting._cartDel = (i)    => { cart.splice(i, 1); renderCart(); };
-  Accounting._submitSale = () => {
-    if (!cart.length) return;
-    const record = Engine.recordSale(cart);
-    cart = []; renderCart();
-    const su = container.querySelector('#cashier-success');
-    container.querySelector('#ss-sub').textContent = '共收 ' + Engine.fmtMoney(record.total) + ' · 毛利 ' + Engine.fmtMoney(record.profit);
-    su.classList.remove('hidden');
-    su.style.animation = 'none';
-    requestAnimationFrame(() => { su.style.animation = ''; });
-    setTimeout(() => su.classList.add('hidden'), 3000);
-    if (window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
+  Accounting._cartQty=(i,d)=>{cart[i].qty=Math.max(1,Math.min(cart[i].qty+d,cart[i].maxQty));renderCart();};
+  Accounting._cartDel=(i)=>{cart.splice(i,1);renderCart();};
+  Accounting._submitSale=()=>{
+    if(!cart.length)return;
+    const record=Engine.recordSale(cart);
+    cart=[];renderCart();
+    const su=container.querySelector('#cashier-success');
+    container.querySelector('#ss-sub').textContent='共收 '+Engine.fmtMoney(record.total)+' · 毛利 '+Engine.fmtMoney(record.profit);
+    su.classList.remove('hidden');su.style.animation='none';
+    requestAnimationFrame(()=>{su.style.animation='';});
+    setTimeout(()=>su.classList.add('hidden'),3000);
+    if(window.Dashboard&&window.Dashboard.refresh)window.Dashboard.refresh();
   };
 
   renderCart();
 }
 
-// ════════════════════════════════════════════════════════════════════════
-//  库存录入 / 进货（共用 _renderForm）
-// ════════════════════════════════════════════════════════════════════════
-function renderEntry(container) {
-  _renderForm(container, 'entry',   '库存录入', '➕', '将现有商品录入库存系统');
-}
-function renderRestock(container) {
-  _renderForm(container, 'restock', '进货',     '📦', '记录新到货商品，自动补充库存');
-}
+// ── 库存录入 / 进货 ─────────────────────────────────────────────────────────
+function renderEntry(container)   { _renderForm(container,'entry',  '库存录入','➕','将现有商品录入库存系统'); }
+function renderRestock(container) { _renderForm(container,'restock','进货',    '📦','记录新到货商品，自动补充库存'); }
 
-const CATS = ['食品饮料', '日用百货', '休闲零食', '冷冻冷藏', '酒水', '烟草', '其他'];
+const CATS = ['食品饮料','日用百货','休闲零食','冷冻冷藏','酒水','烟草','其他'];
 
 function _renderForm(container, source, title, icon, subtitle) {
   container.innerHTML = `
     <div class="page-form">
-      <div class="page-title-bar">
-        <span class="page-title-icon">${icon}</span>
-        <span class="page-title-text">${title}</span>
-      </div>
+      <div class="page-title-bar"><span class="page-title-icon">${icon}</span><span class="page-title-text">${title}</span></div>
       <div class="form-subtitle">${subtitle}</div>
-
       <div class="form-card">
-
-        <!-- ▼ 商品名称（含扫码按钮）▼ -->
         <div class="form-group">
           <label class="form-lbl">商品名称 *</label>
           <div class="f-name-wrap">
-            <input id="f-name" class="form-inp" type="text"
-                   placeholder="例：农夫山泉 550ml" autocomplete="off">
-            <button class="scan-trigger-btn" title="扫描条形码"
-                    onclick="Accounting._openScanner()">
-              <!-- 条形码图标 SVG -->
-              <svg viewBox="0 0 24 24" fill="none"
-                   stroke="#fff" stroke-width="2.2"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2"  y="4" width="2"  height="16" rx=".4"/>
-                <rect x="6"  y="4" width="1"  height="16" rx=".4"/>
-                <rect x="9"  y="4" width="2"  height="16" rx=".4"/>
-                <rect x="13" y="4" width="1"  height="16" rx=".4"/>
-                <rect x="16" y="4" width="2"  height="16" rx=".4"/>
-                <rect x="20" y="4" width="2"  height="16" rx=".4"/>
+            <input id="f-name" class="form-inp" type="text" placeholder="例：农夫山泉 550ml" autocomplete="off">
+            <button class="scan-trigger-btn" title="扫描条形码" onclick="Accounting._openScanner()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2"  y="4" width="2"  height="16" rx=".4"/><rect x="6"  y="4" width="1"  height="16" rx=".4"/>
+                <rect x="9"  y="4" width="2"  height="16" rx=".4"/><rect x="13" y="4" width="1"  height="16" rx=".4"/>
+                <rect x="16" y="4" width="2"  height="16" rx=".4"/><rect x="20" y="4" width="2"  height="16" rx=".4"/>
               </svg>
             </button>
           </div>
-          <!-- 已扫条形码回显 -->
-          <div class="f-barcode-tag" id="f-barcode-tag">
-            条形码：<span id="f-barcode-val"></span>
-          </div>
+          <div class="f-barcode-tag" id="f-barcode-tag">条形码：<span id="f-barcode-val"></span></div>
         </div>
-
         <div class="form-group">
           <label class="form-lbl">商品分类</label>
           <div class="cat-chips" id="cat-chips">
-            ${CATS.map((c, i) => `<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${c}</button>`).join('')}
+            ${CATS.map((c,i)=>`<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${c}</button>`).join('')}
           </div>
         </div>
-
         <div class="form-row">
-          <div class="form-group half">
-            <label class="form-lbl">进价 (¥) *</label>
-            <input id="f-cost" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00">
-          </div>
-          <div class="form-group half">
-            <label class="form-lbl">售价 (¥) *</label>
-            <input id="f-sale" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00">
-          </div>
+          <div class="form-group half"><label class="form-lbl">进价 (¥) *</label><input id="f-cost" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
+          <div class="form-group half"><label class="form-lbl">售价 (¥) *</label><input id="f-sale" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
         </div>
-
         <div class="form-row">
-          <div class="form-group half">
-            <label class="form-lbl">数量 *</label>
-            <input id="f-qty" class="form-inp" type="number" min="1" step="1" placeholder="0">
-          </div>
-          <div class="form-group half">
-            <label class="form-lbl">过期日期</label>
-            <input id="f-exp" class="form-inp" type="date">
-          </div>
+          <div class="form-group half"><label class="form-lbl">数量 *</label><input id="f-qty" class="form-inp" type="number" min="1" step="1" placeholder="0"></div>
+          <div class="form-group half"><label class="form-lbl">过期日期</label><input id="f-exp" class="form-inp" type="date"></div>
         </div>
-
         <div class="margin-preview" id="margin-preview" style="display:none">
           <span class="mp-label">毛利预览</span>
           <span class="mp-unit" id="mp-unit">单件毛利 ¥—</span>
           <span class="mp-rate" id="mp-rate">毛利率 —%</span>
         </div>
-
-      </div><!-- /form-card -->
-
-      <button class="form-submit" id="f-submit"
-              onclick="Accounting._submitForm('${source}')">
-        <span>${icon}</span> 确认${title}
-      </button>
-
+      </div>
+      <button class="form-submit" onclick="Accounting._submitForm('${source}')"><span>${icon}</span> 确认${title}</button>
       <div class="form-success hidden" id="f-success">✅ ${title}成功！</div>
-
       <div class="section-label" style="margin-top:24px">${title}历史</div>
       <div id="form-history" class="form-history-list"></div>
-    </div>
-  `;
+    </div>`;
 
-  // 当前扫描到的条形码（供提交时上报）
   let _currentBarcode = null;
 
-  // ── 扫码回调 ───────────────────────────────────────────────────────
   Accounting._openScanner = () => {
     BarcodeScanner.open(async (code) => {
       BarcodeScanner.close();
-
-      // 显示条形码
-      _currentBarcode = code;
-      const tagEl = container.querySelector('#f-barcode-tag');
-      const valEl = container.querySelector('#f-barcode-val');
-      if (tagEl && valEl) { valEl.textContent = code; tagEl.classList.add('show'); }
-
-      // 查询数据库
+      _currentBarcode=code;
+      const tg=container.querySelector('#f-barcode-tag'),vl=container.querySelector('#f-barcode-val');
+      if(tg&&vl){vl.textContent=code;tg.classList.add('show');}
       try {
-        const data = await BarcodeDB.query(code);
-        if (data.found) {
-          // 自动填入商品名称 + 进价 + 售价
-          const nameEl = container.querySelector('#f-name');
-          const costEl = container.querySelector('#f-cost');
-          const saleEl = container.querySelector('#f-sale');
-          if (nameEl) { nameEl.value = data.name; nameEl.classList.add('auto-filled'); }
-          if (costEl && data.costPrice) { costEl.value = data.costPrice; costEl.classList.add('auto-filled'); }
-          if (saleEl && data.salePrice) { saleEl.value = data.salePrice; saleEl.classList.add('auto-filled'); }
-          // 自动选分类
-          if (data.category) {
-            container.querySelectorAll('.cat-chip').forEach(btn => {
-              btn.classList.toggle('active', btn.dataset.cat === data.category);
-            });
-          }
-          _showToast('✅ 已自动填入：' + data.name);
-          // 触发毛利预览更新
+        const data=await BarcodeDB.query(code);
+        if(data.found){
+          const ne=container.querySelector('#f-name'),ce=container.querySelector('#f-cost'),se=container.querySelector('#f-sale');
+          if(ne){ne.value=data.name;ne.classList.add('auto-filled');}
+          if(ce&&data.costPrice){ce.value=data.costPrice;ce.classList.add('auto-filled');}
+          if(se&&data.salePrice){se.value=data.salePrice;se.classList.add('auto-filled');}
+          if(data.category)container.querySelectorAll('.cat-chip').forEach(b=>b.classList.toggle('active',b.dataset.cat===data.category));
+          _showToast('✅ 已自动填入：'+data.name);
           container.querySelector('#f-cost').dispatchEvent(new Event('input'));
-        } else {
-          _showToast('📝 新商品，请填写商品信息后录入');
-        }
-      } catch (e) {
-        _showToast('⚠️ 查询失败，请手动填写商品信息');
-        console.warn('[BarcodeDB]', e);
-      }
+        } else { _showToast('📝 新商品，请填写商品信息后录入'); }
+      } catch(e) { _showToast('⚠️ 查询失败，请手动填写商品信息'); }
     });
   };
 
-  // ── 分类选择 ──────────────────────────────────────────────────────
-  container.querySelectorAll('.cat-chip').forEach(btn => {
-    btn.onclick = () => {
-      container.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    };
+  container.querySelectorAll('.cat-chip').forEach(btn=>{
+    btn.onclick=()=>{container.querySelectorAll('.cat-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');};
   });
 
-  // ── 实时毛利预览 ──────────────────────────────────────────────────
-  ['f-cost', 'f-sale'].forEach(id => {
-    container.querySelector('#' + id).addEventListener('input', () => {
-      const cost = parseFloat(container.querySelector('#f-cost').value) || 0;
-      const sale = parseFloat(container.querySelector('#f-sale').value) || 0;
-      const mp   = container.querySelector('#margin-preview');
-      if (cost > 0 && sale > 0) {
-        const profit = sale - cost;
-        const rate   = Math.round(profit / sale * 100);
-        mp.style.display = 'flex';
-        container.querySelector('#mp-unit').textContent = '单件毛利 ' + Engine.fmtMoney(profit);
-        const rateEl = container.querySelector('#mp-rate');
-        rateEl.textContent = '毛利率 ' + rate + '%';
-        rateEl.style.color = rate >= 20 ? '#4CAF50' : rate >= 0 ? '#FF6B35' : '#F44336';
-      } else {
-        mp.style.display = 'none';
-      }
+  ['f-cost','f-sale'].forEach(id=>{
+    container.querySelector('#'+id).addEventListener('input',()=>{
+      const c=parseFloat(container.querySelector('#f-cost').value)||0;
+      const s=parseFloat(container.querySelector('#f-sale').value)||0;
+      const mp=container.querySelector('#margin-preview');
+      if(c>0&&s>0){const p=s-c,r=Math.round(p/s*100);mp.style.display='flex';
+        container.querySelector('#mp-unit').textContent='单件毛利 '+Engine.fmtMoney(p);
+        const re=container.querySelector('#mp-rate');re.textContent='毛利率 '+r+'%';
+        re.style.color=r>=20?'#4CAF50':r>=0?'#FF6B35':'#F44336';}
+      else mp.style.display='none';
     });
   });
 
-  // ── 提交 ──────────────────────────────────────────────────────────
   Accounting._submitForm = (src) => {
-    const name    = container.querySelector('#f-name').value.trim();
-    const cost    = parseFloat(container.querySelector('#f-cost').value);
-    const sale    = parseFloat(container.querySelector('#f-sale').value);
-    const qty     = parseFloat(container.querySelector('#f-qty').value);
-    const expDate = container.querySelector('#f-exp').value;
-    const cat     = container.querySelector('.cat-chip.active')?.dataset.cat || '其他';
-
-    if (!name)                return _shake(container.querySelector('#f-name'),  '请填写商品名称');
-    if (isNaN(cost) || cost < 0) return _shake(container.querySelector('#f-cost'), '请填写有效进价');
-    if (isNaN(sale) || sale < 0) return _shake(container.querySelector('#f-sale'), '请填写有效售价');
-    if (isNaN(qty)  || qty  < 1) return _shake(container.querySelector('#f-qty'),  '数量至少为1');
-
-    // 本地存储（含条形码字段）
-    Engine.addProduct({ barcode: _currentBarcode || null, name, category: cat, qty, costPrice: cost, salePrice: sale,
-      expireDate: expDate, source: src, createdAt: new Date().toISOString() });
-
-    // 上报到 Cloudflare（有条形码时才上报，静默）
-    BarcodeDB.report({
-      barcode:    _currentBarcode,
-      name, category: cat, costPrice: cost, salePrice: sale,
-      qty, expireDate: expDate,
-    });
-
-    // 重置
-    ['f-name','f-cost','f-sale','f-qty','f-exp'].forEach(id => {
-      container.querySelector('#' + id).value = '';
-    });
-    container.querySelector('#margin-preview').style.display = 'none';
-    const tagEl = container.querySelector('#f-barcode-tag');
-    if (tagEl) tagEl.classList.remove('show');
-    _currentBarcode = null;
-
-    // 成功提示
-    const su = container.querySelector('#f-success');
-    su.classList.remove('hidden');
-    setTimeout(() => su.classList.add('hidden'), 2000);
-
+    const name   =container.querySelector('#f-name').value.trim();
+    const cost   =parseFloat(container.querySelector('#f-cost').value);
+    const sale   =parseFloat(container.querySelector('#f-sale').value);
+    const qty    =parseFloat(container.querySelector('#f-qty').value);
+    const expDate=container.querySelector('#f-exp').value;
+    const cat    =container.querySelector('.cat-chip.active')?.dataset.cat||'其他';
+    if(!name)                  return _shake(container.querySelector('#f-name'), '请填写商品名称');
+    if(isNaN(cost)||cost<0)    return _shake(container.querySelector('#f-cost'), '请填写有效进价');
+    if(isNaN(sale)||sale<0)    return _shake(container.querySelector('#f-sale'), '请填写有效售价');
+    if(isNaN(qty)||qty<1)      return _shake(container.querySelector('#f-qty'),  '数量至少为1');
+    Engine.addProduct({barcode:_currentBarcode||null,name,category:cat,qty,costPrice:cost,salePrice:sale,expireDate:expDate,source:src,createdAt:new Date().toISOString()});
+    BarcodeDB.report({barcode:_currentBarcode,name,category:cat,costPrice:cost,salePrice:sale,qty,expireDate:expDate});
+    ['f-name','f-cost','f-sale','f-qty','f-exp'].forEach(id=>container.querySelector('#'+id).value='');
+    container.querySelector('#margin-preview').style.display='none';
+    const tg=container.querySelector('#f-barcode-tag');if(tg)tg.classList.remove('show');_currentBarcode=null;
+    const su=container.querySelector('#f-success');su.classList.remove('hidden');setTimeout(()=>su.classList.add('hidden'),2000);
     renderHistory();
-    if (window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
+    if(window.Dashboard&&window.Dashboard.refresh)window.Dashboard.refresh();
   };
 
-  // ── 历史记录 ──────────────────────────────────────────────────────
   function renderHistory() {
-    const el  = container.querySelector('#form-history');
-    const inv = Engine.getInventory().filter(p => p.source === source).slice(-10).reverse();
-    el.innerHTML = inv.length
-      ? inv.map(p => `
-          <div class="hist-item">
-            <div class="hi-left">
-              <div class="hi-name">${p.name}</div>
-              <div class="hi-meta">${p.category} · 进价${Engine.fmtMoney(p.costPrice)} · 售价${Engine.fmtMoney(p.salePrice)}</div>
-            </div>
-            <div class="hi-right">
-              <div class="hi-qty">×${p.qty}</div>
-              ${p.expireDate ? `<div class="hi-exp">到期${Engine.fmtDate(p.expireDate)}</div>` : ''}
-            </div>
-          </div>`).join('')
-      : '<div class="hist-empty">暂无记录</div>';
+    const el=container.querySelector('#form-history');
+    const inv=Engine.getInventory().filter(p=>p.source===source).slice(-10).reverse();
+    el.innerHTML=inv.length
+      ?inv.map(p=>`<div class="hist-item">
+          <div class="hi-left">
+            <div class="hi-name">${p.name}${p.batchNo?'<span style="font-size:10px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
+            <div class="hi-meta">${p.category} · 进价${Engine.fmtMoney(p.costPrice)} · 售价${Engine.fmtMoney(p.salePrice)}</div>
+          </div>
+          <div class="hi-right">
+            <div class="hi-qty">×${p.qty}</div>
+            ${p.expireDate?`<div class="hi-exp">到期${Engine.fmtDate(p.expireDate)}</div>`:''}
+          </div>
+        </div>`).join('')
+      :'<div class="hist-empty">暂无记录</div>';
   }
-
   renderHistory();
 }
 
-// ── 工具 ──────────────────────────────────────────────────────────────
-function _shake(el, msg) {
-  el.style.borderColor = '#F44336';
-  el.placeholder = msg;
-  el.classList.add('shake');
-  setTimeout(() => { el.classList.remove('shake'); el.style.borderColor = ''; }, 600);
-}
+function _shake(el,msg){el.style.borderColor='#F44336';el.placeholder=msg;el.classList.add('shake');setTimeout(()=>{el.classList.remove('shake');el.style.borderColor='';},600);}
 
-// 轻量 Toast（不依赖外部库）
-function _showToast(msg) {
-  let t = document.getElementById('bco-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'bco-toast';
-    const ts = document.createElement('style');
-    ts.textContent = `
-      #bco-toast {
-        position:fixed; top:72px; left:50%;
-        transform:translateX(-50%) translateY(-12px);
-        background:rgba(0,0,0,.78); color:#fff;
-        padding:9px 18px; border-radius:20px;
-        font-size:14px; font-weight:700;
-        z-index:10000; opacity:0; pointer-events:none;
-        transition:opacity .25s, transform .25s;
-        white-space:nowrap; max-width:300px;
-        font-family:'PingFang SC','Helvetica Neue',sans-serif;
-      }
-      #bco-toast.show {
-        opacity:1; transform:translateX(-50%) translateY(0);
-      }
-    `;
-    document.head.appendChild(ts);
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+function _showToast(msg){
+  let t=document.getElementById('bco-toast');
+  if(!t){t=document.createElement('div');t.id='bco-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
 return { renderCashier, renderEntry, renderRestock };
 })();
-
-window.Accounting = Accounting;
-
+window.Accounting=Accounting;
 </script>
+
 <script>
-  // ── 獭掌柜 · 看板模块 dashboard.js ──────────────────────────────────────
-// 依赖 engine.js (window.Engine)
-
+// ════════════════════════════════════════════════════════════════════════════
+//  Dashboard — 库存看板、临期货品、排行榜
+// ════════════════════════════════════════════════════════════════════════════
 const Dashboard = (function () {
-
-  // ════════════════════════════════════════════════════════════════════════
-  //  库存看板
-  // ════════════════════════════════════════════════════════════════════════
   let _inventoryContainer = null;
 
-  function renderInventory(container) {
-    _inventoryContainer = container;
-    _drawInventory(container);
-  }
+  function renderInventory(container) { _inventoryContainer=container; _drawInventory(container); }
 
   function _drawInventory(container) {
     const inv = Engine.getInventory();
-    const CATS = [...new Set(inv.map(p => p.category || '其他'))].sort();
-
     container.innerHTML = `
       <div class="page-dashboard">
         <div class="page-title-bar">
           <span class="page-title-icon">📦</span>
           <span class="page-title-text">库存看板</span>
-          <span class="inv-total-chip">${inv.length} 种商品</span>
+          <span class="inv-total-chip">${inv.length} 条批次</span>
         </div>
-
-        <!-- 汇总卡片 -->
         <div class="inv-summary-row">
-          <div class="inv-sc">
-            <div class="inv-sc-val">${inv.reduce((a,p)=>a+(parseFloat(p.qty)||0),0)}</div>
-            <div class="inv-sc-lbl">总库存件数</div>
-          </div>
-          <div class="inv-sc">
-            <div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.costPrice)||0)*(parseFloat(p.qty)||0),0))}</div>
-            <div class="inv-sc-lbl">库存进价总值</div>
-          </div>
-          <div class="inv-sc">
-            <div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.salePrice)||0)*(parseFloat(p.qty)||0),0))}</div>
-            <div class="inv-sc-lbl">库存售价总值</div>
-          </div>
+          <div class="inv-sc"><div class="inv-sc-val">${inv.reduce((a,p)=>a+(parseFloat(p.qty)||0),0)}</div><div class="inv-sc-lbl">总库存件数</div></div>
+          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.costPrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">库存进价总值</div></div>
+          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.salePrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">库存售价总值</div></div>
         </div>
-
-        <!-- 搜索 -->
-        <div class="inv-search-wrap">
-          <span class="search-ico">🔍</span>
-          <input id="inv-search" class="search-inp" type="text" placeholder="搜索商品名称…">
-        </div>
-
-        ${!inv.length ? '<div class="inv-empty">暂无库存商品<br>请先在「库存录入」或「进货」中添加</div>' : ''}
-
-        <!-- 分类表格 -->
+        <div class="inv-search-wrap"><span class="search-ico">🔍</span><input id="inv-search" class="search-inp" type="text" placeholder="搜索商品名称…"></div>
+        ${!inv.length?'<div class="inv-empty">暂无库存商品<br>请先在「库存录入」或「进货」中添加</div>':''}
         <div id="inv-tables"></div>
-      </div>
-    `;
+      </div>`;
 
-    let filterQ = '';
-    const searchEl = container.querySelector('#inv-search');
-    if (searchEl) {
-      searchEl.addEventListener('input', () => {
-        filterQ = searchEl.value.trim().toLowerCase();
-        renderTables();
-      });
-    }
+    let filterQ='';
+    const searchEl=container.querySelector('#inv-search');
+    if(searchEl){searchEl.addEventListener('input',()=>{filterQ=searchEl.value.trim().toLowerCase();renderTables();});}
 
     function renderTables() {
-      const tbContainer = container.querySelector('#inv-tables');
-      if (!tbContainer) return;
-      const filtered = filterQ
-        ? inv.filter(p => p.name.toLowerCase().includes(filterQ))
-        : inv;
+      const tbContainer=container.querySelector('#inv-tables');if(!tbContainer)return;
+      const filtered=filterQ?inv.filter(p=>p.name.toLowerCase().includes(filterQ)):inv;
+      if(!filtered.length){tbContainer.innerHTML='<div class="inv-empty">没有匹配的商品</div>';return;}
+      const grouped={};
+      filtered.forEach(p=>{const cat=p.category||'其他';if(!grouped[cat])grouped[cat]=[];grouped[cat].push(p);});
+      tbContainer.innerHTML=Object.keys(grouped).sort().map(cat=>{
+        const items=grouped[cat];
+        const sorted=[...items].sort((a,b)=>a.name.localeCompare(b.name)||(a.batchNo||0)-(b.batchNo||0));
+        const nameCount={};sorted.forEach(p=>{nameCount[p.name]=(nameCount[p.name]||0)+1;});
+        const nameFirst={};
+        const fifoIds=new Set();
+        sorted.forEach(p=>{if(!nameFirst[p.name]){nameFirst[p.name]=p.id;fifoIds.add(p.id);}});
 
-      if (!filtered.length) {
-        tbContainer.innerHTML = '<div class="inv-empty">没有匹配的商品</div>';
-        return;
-      }
-
-      const grouped = {};
-      filtered.forEach(p => {
-        const cat = p.category || '其他';
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(p);
-      });
-
-      tbContainer.innerHTML = Object.keys(grouped).sort().map(cat => {
-        const items = grouped[cat];
-        const rows  = items.map(p => {
-          const daysLeft = Engine.daysUntil(p.expireDate);
-          const expClass = daysLeft !== null && daysLeft <= 3 ? 'exp-danger'
-                         : daysLeft !== null && daysLeft <= 7 ? 'exp-warn' : '';
-          const qtyClass = parseFloat(p.qty) === 0 ? 'qty-zero'
-                         : parseFloat(p.qty) <= 5  ? 'qty-low' : '';
-          return `
-            <tr class="inv-row" data-id="${p.id}">
-              <td class="inv-td td-name">${p.name}</td>
-              <td class="inv-td td-qty ${qtyClass}">${p.qty}</td>
-              <td class="inv-td td-cost">${Engine.fmtMoney(p.costPrice)}</td>
-              <td class="inv-td td-sale">${Engine.fmtMoney(p.salePrice)}</td>
-              <td class="inv-td td-exp ${expClass}">
-                ${p.expireDate
-                  ? (daysLeft < 0 ? '<span class="expired-badge">已过期</span>'
-                     : daysLeft === 0 ? '<span class="exp-today">今天到期</span>'
-                     : Engine.fmtDate(p.expireDate) + ' (' + daysLeft + 'd)')
-                  : '—'}
-              </td>
-              <td class="inv-td td-act">
-                <button class="inv-del-btn" onclick="Dashboard._deleteProduct(${p.id})">🗑</button>
-              </td>
-            </tr>
-          `;
+        const rows=sorted.map(p=>{
+          const dl=Engine.daysUntil(p.expireDate);
+          const ec=dl!==null&&dl<=3?'exp-danger':dl!==null&&dl<=7?'exp-warn':'';
+          const qc=parseFloat(p.qty)===0?'qty-zero':parseFloat(p.qty)<=5?'qty-low':'';
+          const showFifo=nameCount[p.name]>1&&fifoIds.has(p.id);
+          return `<tr${showFifo?' class="batch-fifo-row"':''}>
+            <td class="inv-td td-name">
+              ${p.name}<span class="batch-tag">批${p.batchNo||1}</span>
+              ${showFifo?'<span style="font-size:10px;color:var(--green);font-weight:800;margin-left:2px">先出</span>':''}
+            </td>
+            <td class="inv-td td-qty ${qc}">${p.qty}</td>
+            <td class="inv-td td-cost">${Engine.fmtMoney(p.costPrice)}</td>
+            <td class="inv-td td-sale">${Engine.fmtMoney(p.salePrice)}</td>
+            <td class="inv-td td-exp ${ec}">
+              ${p.expireDate?(dl<0?'<span class="expired-badge">已过期</span>':dl===0?'<span class="exp-today">今天到期</span>':Engine.fmtDate(p.expireDate)+'('+dl+'d)'):'—'}
+            </td>
+            <td class="inv-td td-act"><button class="inv-del-btn" onclick="Dashboard._deleteProduct(${p.id})">🗑</button></td>
+          </tr>`;
         }).join('');
 
-        return `
-          <div class="inv-cat-section">
-            <div class="inv-cat-header">
-              <span class="inv-cat-name">${cat}</span>
-              <span class="inv-cat-count">${items.length} 种</span>
-            </div>
-            <div class="inv-table-wrap">
-              <table class="inv-table">
-                <thead>
-                  <tr>
-                    <th class="inv-th">商品名称</th>
-                    <th class="inv-th">数量</th>
-                    <th class="inv-th">进价</th>
-                    <th class="inv-th">售价</th>
-                    <th class="inv-th">过期日</th>
-                    <th class="inv-th"></th>
-                  </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-              </table>
-            </div>
-          </div>
-        `;
+        return `<div class="inv-cat-section">
+          <div class="inv-cat-header"><span class="inv-cat-name">${cat}</span><span class="inv-cat-count">${items.length} 条</span></div>
+          <div class="inv-table-wrap"><table class="inv-table">
+            <thead><tr><th class="inv-th">商品名称</th><th class="inv-th">数量</th><th class="inv-th">进价</th><th class="inv-th">售价</th><th class="inv-th">过期日</th><th class="inv-th"></th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>
+        </div>`;
       }).join('');
     }
-
     renderTables();
-
-    // 删除按钮
-    Dashboard._deleteProduct = (id) => {
-      if (!confirm('确定删除此商品？')) return;
-      Engine.deleteProduct(id);
-      _drawInventory(container);
-    };
+    Dashboard._deleteProduct=(id)=>{if(!confirm('确定删除此批次？'))return;Engine.deleteProduct(id);_drawInventory(container);};
   }
 
-  // 供外部刷新
-  function refresh() {
-    if (_inventoryContainer) _drawInventory(_inventoryContainer);
-  }
+  function refresh() { if(_inventoryContainer) _drawInventory(_inventoryContainer); }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  临期货品
-  // ════════════════════════════════════════════════════════════════════════
   function renderExpiring(container) {
     container.innerHTML = `
       <div class="page-expiring">
-        <div class="page-title-bar">
-          <span class="page-title-icon">⏰</span>
-          <span class="page-title-text">临期货品</span>
-        </div>
-
-        <!-- 天数筛选 -->
+        <div class="page-title-bar"><span class="page-title-icon">⏰</span><span class="page-title-text">临期货品</span></div>
         <div class="exp-filter-row">
           <button class="exp-filter-btn active" data-days="7">7天内</button>
           <button class="exp-filter-btn" data-days="14">14天内</button>
           <button class="exp-filter-btn" data-days="30">30天内</button>
           <button class="exp-filter-btn" data-days="0">已过期</button>
         </div>
-
         <div id="exp-content"></div>
-      </div>
-    `;
-
-    let activeDays = 7;
-    container.querySelectorAll('.exp-filter-btn').forEach(btn => {
-      btn.onclick = () => {
-        container.querySelectorAll('.exp-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeDays = parseInt(btn.dataset.days);
-        renderExpContent();
-      };
+      </div>`;
+    let activeDays=7;
+    container.querySelectorAll('.exp-filter-btn').forEach(btn=>{
+      btn.onclick=()=>{container.querySelectorAll('.exp-filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeDays=parseInt(btn.dataset.days);renderExpContent();};
     });
-
     function renderExpContent() {
-      const el = container.querySelector('#exp-content');
-      let items;
-      if (activeDays === 0) {
-        // 已过期
-        items = Engine.getInventory().filter(p => {
-          if (!p.expireDate) return false;
-          return Engine.daysUntil(p.expireDate) < 0;
-        }).sort((a, b) => new Date(a.expireDate) - new Date(b.expireDate));
-      } else {
-        items = Engine.getExpiringProducts(activeDays);
-      }
-
-      if (!items.length) {
-        el.innerHTML = `<div class="exp-empty">
-          <div class="exp-empty-icon">✨</div>
-          <div>暂无${activeDays === 0 ? '过期' : activeDays + '天内临期'}商品</div>
-        </div>`;
-        return;
-      }
-
-      el.innerHTML = `
-        <div class="exp-summary">共 <b>${items.length}</b> 种商品需要关注</div>
-        ${items.map(p => {
-          const d = Engine.daysUntil(p.expireDate);
-          const urgency = d < 0 ? 'exp-card-danger'
-                        : d === 0 ? 'exp-card-danger'
-                        : d <= 3  ? 'exp-card-warn'
-                        : 'exp-card-ok';
-          const badge = d < 0  ? `已过期 ${Math.abs(d)} 天`
-                      : d === 0 ? '今天到期'
-                      : `还剩 ${d} 天`;
-          return `
-            <div class="exp-card ${urgency}">
-              <div class="exp-card-left">
-                <div class="exp-card-name">${p.name}</div>
-                <div class="exp-card-meta">${p.category || '其他'} · 库存 ${p.qty} 件</div>
-                <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
-              </div>
-              <div class="exp-card-right">
-                <div class="exp-badge ${urgency}">${badge}</div>
-                <div class="exp-date">${p.expireDate}</div>
-              </div>
+      const el=container.querySelector('#exp-content');
+      const items=activeDays===0
+        ?Engine.getInventory().filter(p=>p.expireDate&&Engine.daysUntil(p.expireDate)<0).sort((a,b)=>new Date(a.expireDate)-new Date(b.expireDate))
+        :Engine.getExpiringProducts(activeDays);
+      if(!items.length){el.innerHTML=`<div class="exp-empty"><div class="exp-empty-icon">✨</div><div>暂无${activeDays===0?'过期':activeDays+'天内临期'}商品</div></div>`;return;}
+      el.innerHTML=`<div class="exp-summary">共 <b>${items.length}</b> 种商品需要关注</div>`
+        +items.map(p=>{
+          const d=Engine.daysUntil(p.expireDate);
+          const u=d<0?'exp-card-danger':d===0?'exp-card-danger':d<=3?'exp-card-warn':'exp-card-ok';
+          const badge=d<0?`已过期 ${Math.abs(d)} 天`:d===0?'今天到期':`还剩 ${d} 天`;
+          // ★ 序列化 product 对象用于传参（避免 JSON.stringify 的引号转义问题）
+          const prodJson=encodeURIComponent(JSON.stringify(p));
+          return `<div class="exp-card ${u}">
+            <div class="exp-card-left">
+              <div class="exp-card-name">${p.name}${p.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
+              <div class="exp-card-meta">${p.category||'其他'} · 库存 ${p.qty} 件</div>
+              <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
+              <button class="exp-loss-btn" onclick="LossSheet.open(JSON.parse(decodeURIComponent('${prodJson}')))">📦 记录损耗</button>
             </div>
-          `;
-        }).join('')}
-      `;
+            <div class="exp-card-right"><div class="exp-badge ${u}">${badge}</div><div class="exp-date">${p.expireDate}</div></div>
+          </div>`;
+        }).join('');
     }
-
     renderExpContent();
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  销量排行（游戏化）
-  // ════════════════════════════════════════════════════════════════════════
   function renderSalesRanking(container) {
-    const data = Engine.getSalesRanking();
-    _renderRanking(container, {
-      title: '销量排行',
-      icon:  '📊',
-      subtitle: '统计开业以来累计售出数量',
-      data,
-      valueKey:  'totalQty',
-      valueUnit: '件',
-      valueFmt:  v => v + ' 件',
-      subFmt:    item => '营收 ' + Engine.fmtMoney(item.totalRevenue),
-      emptyMsg:  '还没有销售记录，快去收银吧！',
-      medalColors: ['#FFD700','#C0C0C0','#CD7F32'],
-    });
+    const data=Engine.getSalesRanking();
+    _renderRanking(container,{title:'销量排行',icon:'📊',subtitle:'统计开业以来累计售出数量',
+      data,valueKey:'totalQty',valueFmt:v=>v+' 件',subFmt:item=>'营收 '+Engine.fmtMoney(item.totalRevenue),emptyMsg:'还没有销售记录，快去收银吧！'});
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  毛利排行（游戏化）
-  // ════════════════════════════════════════════════════════════════════════
   function renderProfitRanking(container) {
-    container.innerHTML = `
-      <div class="page-ranking">
-        <div class="page-title-bar">
-          <span class="page-title-icon">💹</span>
-          <span class="page-title-text">毛利排行</span>
-        </div>
-
-        <!-- 双榜切换 -->
-        <div class="rank-tab-row">
-          <button class="rank-tab active" id="rtab-sold" onclick="Dashboard._switchRankTab('sold')">已售毛利榜</button>
-          <button class="rank-tab" id="rtab-unit" onclick="Dashboard._switchRankTab('unit')">单品毛利榜</button>
-        </div>
-
-        <div id="rank-panel-sold"></div>
-        <div id="rank-panel-unit" style="display:none"></div>
+    container.innerHTML=`<div class="page-ranking">
+      <div class="page-title-bar"><span class="page-title-icon">💹</span><span class="page-title-text">毛利排行</span></div>
+      <div class="rank-tab-row">
+        <button class="rank-tab active" id="rtab-sold" onclick="Dashboard._switchRankTab('sold')">已售毛利榜</button>
+        <button class="rank-tab" id="rtab-unit" onclick="Dashboard._switchRankTab('unit')">单品毛利榜</button>
       </div>
-    `;
-
-    Dashboard._switchRankTab = (tab) => {
-      ['sold','unit'].forEach(t => {
-        container.querySelector('#rtab-' + t).classList.toggle('active', t === tab);
-        container.querySelector('#rank-panel-' + t).style.display = t === tab ? '' : 'none';
-      });
-    };
-
-    // 已售毛利榜
-    const soldData = Engine.getSoldProfitRanking();
-    const maxSold  = soldData.length ? soldData[0].profit : 1;
-    container.querySelector('#rank-panel-sold').innerHTML = soldData.length ? `
-      <div class="rank-subtitle">售价×售出量 − 进价×售出量，贡献总毛利</div>
-      ${soldData.map((item, i) => _rankCard(item, i, item.profit, maxSold, Engine.fmtMoney(item.profit), `已售 ${item.qty} 件`)).join('')}
-    ` : '<div class="rank-empty">暂无销售数据</div>';
-
-    // 单品毛利榜
-    const unitData = Engine.getUnitProfitRanking();
-    const maxUnit  = unitData.length ? unitData[0].unitProfit : 1;
-    container.querySelector('#rank-panel-unit').innerHTML = unitData.length ? `
-      <div class="rank-subtitle">所有商品单件毛利（售价 − 进价），不论是否售出</div>
-      ${unitData.map((item, i) => _rankCard(item, i, item.unitProfit, maxUnit, Engine.fmtMoney(item.unitProfit) + '/件', `毛利率 ${item.margin}%`)).join('')}
-    ` : '<div class="rank-empty">请先录入商品</div>';
+      <div id="rank-panel-sold"></div><div id="rank-panel-unit" style="display:none"></div>
+    </div>`;
+    Dashboard._switchRankTab=(tab)=>{['sold','unit'].forEach(t=>{container.querySelector('#rtab-'+t).classList.toggle('active',t===tab);container.querySelector('#rank-panel-'+t).style.display=t===tab?'':'none';});};
+    const sd=Engine.getSoldProfitRanking(),ms=sd.length?sd[0].profit:1;
+    container.querySelector('#rank-panel-sold').innerHTML=sd.length
+      ?`<div class="rank-subtitle">售价×售出量 − 进价×售出量，贡献总毛利</div>${sd.map((it,i)=>_rankCard(it,i,it.profit,ms,Engine.fmtMoney(it.profit),'已售 '+it.qty+' 件')).join('')}`
+      :'<div class="rank-empty">暂无销售数据</div>';
+    const ud=Engine.getUnitProfitRanking(),mu=ud.length?ud[0].unitProfit:1;
+    container.querySelector('#rank-panel-unit').innerHTML=ud.length
+      ?`<div class="rank-subtitle">所有商品单件毛利（售价 − 进价），不论是否售出</div>${ud.map((it,i)=>_rankCard(it,i,it.unitProfit,mu,Engine.fmtMoney(it.unitProfit)+'/件','毛利率 '+it.margin+'%')).join('')}`
+      :'<div class="rank-empty">请先录入商品</div>';
   }
 
-  // ── 通用排行渲染 ───────────────────────────────────────────────────────
-  function _renderRanking(container, opts) {
-    const { title, icon, subtitle, data, valueFmt, subFmt, emptyMsg, medalColors } = opts;
-    const max = data.length ? data[0][opts.valueKey] : 1;
-
-    container.innerHTML = `
-      <div class="page-ranking">
-        <div class="page-title-bar">
-          <span class="page-title-icon">${icon}</span>
-          <span class="page-title-text">${title}</span>
-        </div>
-        <div class="rank-subtitle">${subtitle}</div>
-        ${!data.length
-          ? `<div class="rank-empty">${emptyMsg}</div>`
-          : data.map((item, i) => _rankCard(item, i, item[opts.valueKey], max, valueFmt(item[opts.valueKey]), subFmt(item))).join('')
-        }
-      </div>
-    `;
+  function _renderRanking(container,opts) {
+    const{title,icon,subtitle,data,valueFmt,subFmt,emptyMsg}=opts;
+    const max=data.length?data[0][opts.valueKey]:1;
+    container.innerHTML=`<div class="page-ranking">
+      <div class="page-title-bar"><span class="page-title-icon">${icon}</span><span class="page-title-text">${title}</span></div>
+      <div class="rank-subtitle">${subtitle}</div>
+      ${!data.length?`<div class="rank-empty">${emptyMsg}</div>`:data.map((it,i)=>_rankCard(it,i,it[opts.valueKey],max,valueFmt(it[opts.valueKey]),subFmt(it))).join('')}
+    </div>`;
   }
 
-  function _rankCard(item, i, val, max, valLabel, subLabel) {
-    const medals   = ['🥇','🥈','🥉'];
-    const barColors= ['#FF6B35','#FF9900','#4CAF50','#2196F3','#9C27B0'];
-    const pct      = max > 0 ? Math.max(4, Math.round(val / max * 100)) : 4;
-    const medal    = i < 3 ? medals[i] : `<span class="rank-num">${i+1}</span>`;
-    const barColor = barColors[Math.min(i, barColors.length - 1)];
-
-    return `
-      <div class="rank-card ${i < 3 ? 'rank-top-' + (i+1) : ''}">
-        <div class="rc-medal">${medal}</div>
-        <div class="rc-body">
-          <div class="rc-name">${item.name}</div>
-          <div class="rc-bar-wrap">
-            <div class="rc-bar" style="width:${pct}%;background:${barColor}"></div>
-          </div>
-          <div class="rc-sub">${subLabel}</div>
-        </div>
-        <div class="rc-val">${valLabel}</div>
+  function _rankCard(item,i,val,max,vl,sl) {
+    const medals=['🥇','🥈','🥉'],bc=['#FF6B35','#FF9900','#4CAF50','#2196F3','#9C27B0'];
+    const pct=max>0?Math.max(4,Math.round(val/max*100)):4;
+    const medal=i<3?medals[i]:'<span class="rank-num">'+(i+1)+'</span>';
+    return `<div class="rank-card ${i<3?'rank-top-'+(i+1):''}">
+      <div class="rc-medal">${medal}</div>
+      <div class="rc-body">
+        <div class="rc-name">${item.name}</div>
+        <div class="rc-bar-wrap"><div class="rc-bar" style="width:${pct}%;background:${bc[Math.min(i,4)]}"></div></div>
+        <div class="rc-sub">${sl}</div>
       </div>
-    `;
+      <div class="rc-val">${vl}</div>
+    </div>`;
   }
 
   return { renderInventory, renderExpiring, renderSalesRanking, renderProfitRanking, refresh };
 })();
-
 window.Dashboard = Dashboard;
-
 </script>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  主应用逻辑
-// ══════════════════════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════════════════════════════
 var now   = new Date();
 var YEAR  = now.getFullYear();
 var MONTH = now.getMonth();
@@ -2200,30 +1547,18 @@ var MN    = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10�
 
 function dateKey(d) { return new Date(YEAR, MONTH, d).toLocaleDateString(); }
 
-// ── 页面切换 ──────────────────────────────────────────────────────────────
-var currentTab = 'calendar';
-var rendered   = {};
-
 function switchTab(btn, viewId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  
-  if  (btn && btn.classList) { 
-    btn.classList.add('active');
-  }
-    
-  // 隐藏所有
+  if (btn && btn.classList) btn.classList.add('active');
   document.querySelectorAll('.page-view').forEach(v => v.classList.remove('visible'));
   var calView = document.getElementById('view-calendar');
   calView.style.display = 'none';
-
-
   if (viewId === 'calendar') {
     calView.style.display = '';
   } else {
     var el = document.getElementById('view-' + viewId);
     if (el) {
       el.classList.add('visible');
-      // 按需渲染（每次切换重绘，保证数据最新）
       if      (viewId === 'inventory') Dashboard.renderInventory(el);
       else if (viewId === 'expiring')  Dashboard.renderExpiring(el);
       else if (viewId === 'sales')     Dashboard.renderSalesRanking(el);
@@ -2233,19 +1568,15 @@ function switchTab(btn, viewId) {
       else if (viewId === 'cashier')   Accounting.renderCashier(el);
     }
   }
-  currentTab = viewId;
 }
 
-// ── 头部更新 ─────────────────────────────────────────────────────────────
 function updateHeader() {
   var s = Engine.getMonthStats(YEAR, MONTH);
   document.getElementById('mh-title').textContent = YEAR+'年'+MN[MONTH];
   document.getElementById('mh-sub').textContent   = '本月已记录 '+s.days+' 天';
   document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.profit);
-  
 }
 
-// ── 蛇形路径 ─────────────────────────────────────────────────────────────
 var X_POSITIONS = [50, 68, 80, 68, 50, 32, 20, 32];
 var Y_STEP = 100, Y_START = 70;
 
@@ -2259,165 +1590,123 @@ function buildSnake() {
   var svg   = document.getElementById('snake-svg');
   var h     = Engine.getHistory();
   var W     = track.offsetWidth || 375;
-  var totalNodes = DAYS + 1;
-  var trackH = Y_START + totalNodes * Y_STEP + 60;
+  var trackH = Y_START + (DAYS+1) * Y_STEP + 60;
   track.style.height = trackH + 'px';
   svg.setAttribute('height', trackH);
   svg.setAttribute('viewBox', '0 0 '+W+' '+trackH);
-
   var coords = [];
   for (var i = 0; i <= DAYS; i++) coords.push(getNodeCoords(i, W));
-
   // 连线
   var pathD = '';
-  for (var i = 0; i < coords.length - 1; i++) {
-    var a = coords[i], b = coords[i+1];
-    if (i === 0) pathD = 'M '+a.x+' '+a.y;
-    var my = (a.y + b.y) / 2;
-    pathD += ' Q '+a.x+' '+my+' '+b.x+' '+b.y;
+  for (var i = 0; i < coords.length-1; i++) {
+    var a=coords[i], b=coords[i+1];
+    if (i===0) pathD='M '+a.x+' '+a.y;
+    var my=(a.y+b.y)/2;
+    pathD+=' Q '+a.x+' '+my+' '+b.x+' '+b.y;
   }
-  var pathEl = document.createElementNS('http://www.w3.org/2000/svg','path');
-  pathEl.setAttribute('d', pathD);
-  pathEl.setAttribute('fill','none');
-  pathEl.setAttribute('stroke','#E0E0E0');
-  pathEl.setAttribute('stroke-width','8');
-  pathEl.setAttribute('stroke-linecap','round');
+  var pathEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+  pathEl.setAttribute('d',pathD);pathEl.setAttribute('fill','none');
+  pathEl.setAttribute('stroke','#E0E0E0');pathEl.setAttribute('stroke-width','8');pathEl.setAttribute('stroke-linecap','round');
   svg.appendChild(pathEl);
-
   // 日期节点
   for (var day = 1; day <= DAYS; day++) {
-    var idx = day - 1;
-    var pos = coords[idx];
-    var key = dateKey(day);
-    var data = h[key] || null;
-    var hasSales = data && parseFloat(data.revenue) > 0;
-    var isToday  = day === TODAY;
-    var isPast   = day < TODAY;
-    var isFuture = day > TODAY;
-
-    var node = document.createElement('div');
-    node.className = 'day-node';
-    node.style.left = pos.x + 'px';
-    node.style.top  = pos.y + 'px';
-    node.style.animationDelay = (idx * 35) + 'ms';
-
-    if (isToday)       node.classList.add('n-today');
-    else if (isFuture) node.classList.add('n-future');
-    else if (hasSales) node.classList.add('n-done');
-    else               node.classList.add('n-missed');
-
+    var idx=day-1, pos=coords[idx], key=dateKey(day), data=h[key]||null;
+    var hasSales = data && parseFloat(data.revenue)>0;
+    var hasLoss  = data && parseFloat(data.loss||0)>0;   // ★ 损耗判断
+    var isToday=day===TODAY, isPast=day<TODAY, isFuture=day>TODAY;
+    var node=document.createElement('div');
+    node.className='day-node';
+    node.style.left=pos.x+'px'; node.style.top=pos.y+'px';
+    node.style.animationDelay=(idx*35)+'ms';
+    if (isToday)            node.classList.add('n-today');
+    else if (isFuture)      node.classList.add('n-future');
+    else if (hasSales)      node.classList.add('n-done');
+    else if (hasLoss)       node.classList.add('n-loss');   // ★ 仅有损耗无销售：红色
+    else                    node.classList.add('n-missed');
     if (isToday) {
-      var tag = document.createElement('div');
-      tag.className = 'today-tag'; tag.textContent = '今天';
-      node.appendChild(tag);
+      var tag=document.createElement('div');tag.className='today-tag';tag.textContent='今天';node.appendChild(tag);
     }
-
-    var numEl = document.createElement('div');
-    numEl.className = 'nd-num'; numEl.textContent = day;
-    node.appendChild(numEl);
-
-    var icoEl = document.createElement('div');
-    icoEl.className = 'nd-ico';
-    icoEl.textContent = isToday ? '⭐' : hasSales ? '✓' : isPast ? '✗' : '';
+    var numEl=document.createElement('div');numEl.className='nd-num';numEl.textContent=day;node.appendChild(numEl);
+    var icoEl=document.createElement('div');icoEl.className='nd-ico';
+    icoEl.textContent=isToday?'⭐':hasSales?'✓':hasLoss?'⚠':isPast?'✗':'';  // ★ 损耗图标
     node.appendChild(icoEl);
-
-    (function(d,k,dat,isT,isF,isP,hS){
-      node.onclick = function() { openSheet(d,k,dat,isT,isF,isP,hS); };
-    })(day,key,data,isToday,isFuture,isPast,hasSales);
-
+    (function(d,k,dat,isT,isF,isP,hS,hL){
+      node.onclick=function(){ openSheet(d,k,dat,isT,isF,isP,hS,hL); };
+    })(day,key,data,isToday,isFuture,isPast,hasSales,hasLoss);
     track.appendChild(node);
   }
-
   // 吉祥物
-  var mi = Math.floor(DAYS / 2);
-  var mp = coords[mi];
-  var mascot = document.createElement('div');
-  mascot.className = 'mascot-node';
-  var mxo = mp.x > W * 0.5 ? -80 : 80;
-  mascot.style.left = (mp.x + mxo) + 'px';
-  mascot.style.top  = mp.y + 'px';
-  mascot.textContent = '🦦';
+  var mi=Math.floor(DAYS/2), mp=coords[mi];
+  var mascot=document.createElement('div');mascot.className='mascot-node';
+  mascot.style.left=(mp.x+(mp.x>W*.5?-80:80))+'px';mascot.style.top=mp.y+'px';mascot.textContent='🦦';
   track.appendChild(mascot);
-
   // 宝箱
-  var cp    = coords[DAYS];
-  var chest = document.createElement('div');
-  chest.className = 'chest-node';
-  chest.style.left = cp.x + 'px';
-  chest.style.top  = cp.y + 'px';
-  chest.innerHTML  = '<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">月度总结</div>';
-  chest.onclick    = openChest;
-  track.appendChild(chest);
+  var cp=coords[DAYS], chest=document.createElement('div');chest.className='chest-node';
+  chest.style.left=cp.x+'px';chest.style.top=cp.y+'px';
+  chest.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">月度总结</div>';
+  chest.onclick=openChest;track.appendChild(chest);
 }
 
-// ── 日历弹窗 ─────────────────────────────────────────────────────────────
-function openSheet(day, key, data, isToday, isFuture, isPast, hasSales) {
+function openSheet(day, key, data, isToday, isFuture, isPast, hasSales, hasLoss) {
   document.getElementById('sh-date').textContent = (MONTH+1)+'月'+day+'日';
-  var metrics = document.getElementById('sh-metrics');
-  var btnRow  = document.getElementById('sh-btn-row');
+  var metrics=document.getElementById('sh-metrics'), btnRow=document.getElementById('sh-btn-row');
 
   if (isFuture) {
-    document.getElementById('sh-status').textContent = '还没到这天哦 🔒';
-    metrics.innerHTML = ''; btnRow.innerHTML = '';
-  } else if (!hasSales && !isToday) {
-    document.getElementById('sh-status').textContent = '这天没有记录';
-    metrics.innerHTML = '<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">经营盈余</div><div class="mc-val">—</div></div>';
-    btnRow.innerHTML = '';
+    document.getElementById('sh-status').textContent='还没到这天哦 🔒';
+    metrics.innerHTML=''; btnRow.innerHTML='';
+  } else if (!hasSales && !hasLoss && !isToday) {
+    document.getElementById('sh-status').textContent='这天没有记录';
+    metrics.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">经营盈余</div><div class="mc-val">—</div></div>';
+    btnRow.innerHTML='';
   } else {
-    const currentData = Engine.getDay(key) || data || {};
-    var rev  = parseFloat(currentData.revenue)|| 0;
-    var prof = parseFloat(currentData.profit)|| 0;
-    var varC = parseFloat(currentData.variableCost)|| (rev - prof);
-    var gm   = currentData.grossMargin || (rev >0 ? Math.round(prof / rev * 100) : null);
-    document.getElementById('sh-status').textContent = isToday ? '今天 · 进行中' : (hasSales ? '已完成 ✓' : '暂无记录');
-    metrics.innerHTML =
-      `<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val o">${Engine.fmtMoney(rev)}</div></div>` +
-      `<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val ${prof >= 0 ? 'g' : 'r'}">${Engine.fmtMoney(prof)}</div></div>` +
-      `<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">${Engine.fmtMoney(varC)}</div></div>` +
-      `<div class="mc"><div class="mc-lbl">毛利率</div><div class="mc-val ${gm && gm >= 50 ? 'g' : 'o'}">${gm ? gm + '%' : '—'}</div></div>`;
+    const cd=Engine.getDay(key)||data||{};
+    var rev=parseFloat(cd.revenue)||0, prof=parseFloat(cd.profit)||0;
+    var varC=parseFloat(cd.variableCost)||(rev-prof);
+    var gm=cd.grossMargin||(rev>0?Math.round(prof/rev*100):null);
+    var loss=parseFloat(cd.loss)||0;
+    var statusTxt=isToday?'今天 · 进行中':(hasSales?'已完成 ✓':(hasLoss?'有损耗记录 ⚠':'暂无记录'));
+    document.getElementById('sh-status').textContent=statusTxt;
+    metrics.innerHTML=
+      `<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val o">${Engine.fmtMoney(rev)}</div></div>`+
+      `<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val ${prof>=0?'g':'r'}">${Engine.fmtMoney(prof)}</div></div>`+
+      `<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">${Engine.fmtMoney(varC)}</div></div>`+
+      `<div class="mc"><div class="mc-lbl">损耗成本</div><div class="mc-val r">${loss>0?Engine.fmtMoney(loss):'—'}</div></div>`;
     if (isToday) {
-      btnRow.innerHTML =
+      btnRow.innerHTML=
         '<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'cashier\')"><span>🛒</span> 开始收银</button>'+
         '<button class="btn-sh btn-stock"   onclick="closeSheet();switchTab(null,\'restock\')"><span>📦</span> 进货</button>';
     } else {
-      btnRow.innerHTML = '';
+      btnRow.innerHTML='';
     }
   }
   document.getElementById('overlay').classList.add('open');
 }
 
-function overlayTap(e) { if (e.target===document.getElementById('overlay')) closeSheet(); }
+function overlayTap(e) { if(e.target===document.getElementById('overlay')) closeSheet(); }
 function closeSheet()  { document.getElementById('overlay').classList.remove('open'); }
 
 function openChest() {
-  var s = Engine.getMonthStats(YEAR, MONTH);
-  alert('📊 '+(MONTH+1)+'月月度总结\n\n营业天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+'\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+s.gm+'%');
+  var s=Engine.getMonthStats(YEAR,MONTH);
+  alert('📊 '+(MONTH+1)+'月月度总结\n\n营业天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+'\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+s.gm+'%'+(s.totalLoss>0?'\n本月损耗：'+Engine.fmtMoney(s.totalLoss):''));
 }
 
 function scrollToToday() {
   setTimeout(function(){
-    var node = document.querySelector('.n-today');
-    if (node) node.scrollIntoView({ behavior:'smooth', block:'center' });
-  }, 600);
+    var node=document.querySelector('.n-today');
+    if(node) node.scrollIntoView({behavior:'smooth',block:'center'});
+  },600);
 }
 
-// ── 初始化 ───────────────────────────────────────────────────────────────
-// 确保日历视图初始显示
-document.getElementById('view-calendar').style.display = '';
-
+document.getElementById('view-calendar').style.display='';
 updateHeader();
 buildSnake();
 scrollToToday();
 
-// 添加收银入口到底部导航（隐藏的额外按钮通过日历弹窗触达，或直接从日历跳转）
-// 同时确保 data-view 属性齐全
-document.querySelectorAll('.nav-btn').forEach(function(btn) {
-  var view = btn.getAttribute('data-view');
-  if (!view) return;
-  btn.onclick = function() { switchTab(btn, view); };
+document.querySelectorAll('.nav-btn').forEach(function(btn){
+  var view=btn.getAttribute('data-view');
+  if(!view)return;
+  btn.onclick=function(){switchTab(btn,view);};
 });
-
-
 </script>
 
 </body>
