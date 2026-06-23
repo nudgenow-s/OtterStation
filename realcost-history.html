@@ -202,6 +202,25 @@ body {
 .hmc-val  { font-size:14px; font-weight:900; color:var(--text); }
 .hmc-lbl  { font-size:9px; color:var(--text-3); margin-top:3px; font-weight:700; }
 
+/* ── 应收账款 ── */
+.ar-item {
+  background:var(--bg-surface); border-radius:14px; padding:13px 14px;
+  margin-bottom:8px; display:flex; align-items:flex-start; gap:10px;
+  border:1px solid var(--border);
+}
+.ar-item.settled { opacity:.5; }
+.ar-info { flex:1; }
+.ar-counterparty { font-size:14px; font-weight:800; color:var(--text); }
+.ar-note         { font-size:11px; color:var(--text-3); margin-top:2px; }
+.ar-due          { font-size:11px; color:var(--warn); margin-top:2px; font-weight:700; }
+.ar-amount       { font-size:16px; font-weight:900; color:var(--green); flex-shrink:0; text-align:right; }
+.ar-amount.settled { color:var(--text-3); text-decoration:line-through; }
+.ar-actions      { display:flex; flex-direction:column; gap:4px; align-items:flex-end; }
+.btn-ar-settle   { padding:5px 10px; background:var(--green); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.btn-ar-del      { background:none; border:none; cursor:pointer; font-size:13px; color:var(--text-3); padding:2px 4px; }
+.ar-badge-pending  { display:inline-block; padding:2px 7px; background:#FFF3CD; color:var(--warn); border-radius:6px; font-size:10px; font-weight:800; margin-left:6px; }
+.ar-badge-settled  { display:inline-block; padding:2px 7px; background:#E8F5E9; color:var(--green); border-radius:6px; font-size:10px; font-weight:800; margin-left:6px; }
+
 /* ── 空状态 ── */
 .empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:14px; line-height:2; }
 
@@ -262,6 +281,10 @@ body {
       <span class="cf-label">待支付合计</span>
       <span class="cf-val warn" id="cf-pending">¥0</span>
     </div>
+    <div class="cf-row">
+      <span class="cf-label">应收账款（未核销）<span style="font-size:10px;color:var(--text-3)"> · 厂家待补款</span></span>
+      <span class="cf-val warn" id="cf-receivables">—</span>
+    </div>
     <div class="cf-row" style="border-bottom:none;padding-bottom:0">
       <span class="cf-label" style="font-weight:800;color:var(--text)">真实可用现金</span>
       <span class="cf-val" id="cf-real" style="font-size:18px"></span>
@@ -296,6 +319,40 @@ body {
         </div>
       </div>
       <button onclick="addPendingItem()" class="btn-primary">＋ 添加</button>
+    </div>
+  </div>
+
+  <!-- ★ 应收账款 -->
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📬 应收账款</span>
+      <span style="font-size:11px;color:var(--text-3);font-weight:600" id="ar-total-badge"></span>
+    </div>
+    <div id="ar-list"></div>
+    <!-- 添加应收账款 -->
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <div class="form-lbl">登记新应收账款</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-lbl">对方（欠款方）</label>
+          <input id="ar-counterparty" class="form-inp" type="text" placeholder="厂家/品牌名称">
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">金额 *</label>
+          <input id="ar-amount" class="form-inp" type="number" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-lbl">备注</label>
+          <input id="ar-note" class="form-inp" type="text" placeholder="如：东方树叶换购差价补贴">
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">预计到账日</label>
+          <input id="ar-due" class="form-inp" type="date">
+        </div>
+      </div>
+      <button onclick="addReceivable()" class="btn-primary">＋ 登记应收</button>
     </div>
   </div>
 
@@ -416,10 +473,11 @@ var INVENTORY_KEY= INVENTORY_KEYS[industry];
 //  全局 localStorage Keys（资产现金流，跨行业共用）
 // ══════════════════════════════════════════════════════
 var KEYS = {
-  cash:        'finance_cash',        // 当前现金余额
-  pending:     'finance_pending',     // 待支付列表
-  pendingPaid: 'finance_pending_paid',// 本月已付状态 { id: bool }
-  loans:       'finance_loans',       // 贷款列表
+  cash:        'finance_cash',
+  pending:     'finance_pending',
+  pendingPaid: 'finance_pending_paid',
+  loans:       'finance_loans',
+  receivables: 'finance_receivables',  // ★ 应收账款
 };
 
 function load(k){ try{ return JSON.parse(localStorage.getItem(k))||null; }catch(e){ return null; } }
@@ -498,7 +556,12 @@ function buildPendingItems(){
 function renderAssets(){
   var cash       = parseFloat(load(KEYS.cash)) || 0;
   var goods      = getGoodsAsset();
-  var totalAsset = cash + goods;
+  // ★ 应收账款（只统计未核销的）
+  var receivables = (load(KEYS.receivables)||[])
+    .filter(function(r){ return r.status !== 'settled'; })
+    .reduce(function(a,r){ return a + (parseFloat(r.amount)||0); }, 0);
+
+  var totalAsset = cash + goods + receivables;  // ★ 总资产含应收
   var items      = buildPendingItems();
   var paidState  = load(KEYS.pendingPaid) || {};
   var pendingTotal = items.reduce(function(a,item){
@@ -510,7 +573,7 @@ function renderAssets(){
   document.getElementById('asset-hero').innerHTML =
     '<div class="ah-label">总资产</div>'+
     '<div class="ah-total">'+fmt(totalAsset)+'</div>'+
-    '<div class="ah-sub">现金 + 货品资产</div>'+
+    '<div class="ah-sub">现金 + 货品资产 + 应收账款</div>'+
     '<div class="ah-grid">'+
       '<div class="ah-item"><div class="ah-item-val">'+fmt(cash)+'</div><div class="ah-item-lbl">现金</div></div>'+
       '<div class="ah-item"><div class="ah-item-val">'+fmt(goods)+'</div><div class="ah-item-lbl">货品资产</div></div>'+
@@ -521,6 +584,12 @@ function renderAssets(){
   document.getElementById('cf-cash').textContent    = fmt(cash);
   document.getElementById('cf-goods').textContent   = fmt(goods);
   document.getElementById('cf-pending').textContent = fmt(pendingTotal);
+  // ★ 应收账款行
+  var arEl = document.getElementById('cf-receivables');
+  if(arEl) {
+    arEl.textContent = receivables > 0 ? fmt(receivables) : '—';
+    arEl.className   = 'cf-val' + (receivables > 0 ? ' warn' : '');
+  }
   var realEl = document.getElementById('cf-real');
   realEl.textContent = fmt(realCash);
   realEl.className   = 'cf-val ' + (realCash >= 0 ? 'positive' : 'negative');
@@ -544,6 +613,8 @@ function renderAssets(){
       '<button class="pi-paid '+(paid?'checked':'')+'" onclick="togglePaid(\''+item.id+'\')">'+(paid?'✓':'')+'</button>'+
     '</div>';
   }).join('');
+  // ★ 同步渲染应收账款列表
+  renderReceivables();
 }
 
 function togglePaid(id){
@@ -702,6 +773,124 @@ function renderHistoryMonth(history, year, month){
 }
 
 // ══════════════════════════════════════════════════════
+//  ★ 应收账款管理
+//  结构：{ id, counterparty, amount, note, date, dueDate, status, settledDate }
+//  status: 'pending' | 'settled'
+//  核销时：现金增加，status 变为 settled
+// ══════════════════════════════════════════════════════
+function renderReceivables(){
+  var list  = load(KEYS.receivables) || [];
+  var el    = document.getElementById('ar-list');
+  var badge = document.getElementById('ar-total-badge');
+  if (!el) return;
+
+  var pending = list.filter(function(r){ return r.status !== 'settled'; });
+  var total   = pending.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
+
+  if(badge) badge.textContent = pending.length > 0
+    ? '待核销 '+pending.length+' 笔 · '+fmt(total) : '无待核销';
+
+  if(!list.length){
+    el.innerHTML = '<div class="empty" style="padding:16px 0;font-size:13px">暂无应收账款记录</div>';
+    return;
+  }
+
+  // 未核销在前，已核销置灰在后
+  var sorted = list.slice().sort(function(a,b){
+    if(a.status===b.status) return new Date(b.date)-new Date(a.date);
+    return a.status==='pending' ? -1 : 1;
+  });
+
+  el.innerHTML = sorted.map(function(r){
+    var settled  = r.status === 'settled';
+    var daysLeft = r.dueDate ? Math.ceil((new Date(r.dueDate)-new Date())/86400000) : null;
+    var dueHint  = '';
+    if(!settled && daysLeft !== null){
+      dueHint = daysLeft < 0
+        ? '<div class="ar-due">⚠ 已逾期 '+Math.abs(daysLeft)+' 天</div>'
+        : daysLeft === 0
+          ? '<div class="ar-due">📅 今天到账</div>'
+          : '<div class="ar-due">📅 '+r.dueDate+' （'+daysLeft+' 天后）</div>';
+    }
+    if(settled && r.settledDate){
+      dueHint = '<div style="font-size:11px;color:var(--green);margin-top:2px">✓ 已核销 '+r.settledDate+'</div>';
+    }
+    return '<div class="ar-item'+(settled?' settled':'')+'" id="ar-'+r.id+'">'+
+      '<div class="ar-info">'+
+        '<div class="ar-counterparty">'+
+          r.counterparty+
+          (settled
+            ? '<span class="ar-badge-settled">已核销</span>'
+            : '<span class="ar-badge-pending">待核销</span>')+
+        '</div>'+
+        (r.note?'<div class="ar-note">'+r.note+'</div>':'')+
+        dueHint+
+      '</div>'+
+      '<div class="ar-actions">'+
+        '<div class="ar-amount'+(settled?' settled':'')+'">'+fmt(r.amount)+'</div>'+
+        (!settled?'<button class="btn-ar-settle" onclick="settleReceivable(\''+r.id+'\')">核销到账</button>':'')+
+        '<button class="btn-ar-del" onclick="deleteReceivable(\''+r.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function addReceivable(){
+  var cp     = document.getElementById('ar-counterparty').value.trim();
+  var amt    = parseFloat(document.getElementById('ar-amount').value);
+  var note   = document.getElementById('ar-note').value.trim();
+  var due    = document.getElementById('ar-due').value;
+
+  if(!cp){ shake('ar-counterparty'); return; }
+  if(!amt||amt<=0){ shake('ar-amount'); return; }
+
+  var list = load(KEYS.receivables) || [];
+  list.push({
+    id:           Date.now(),
+    counterparty: cp,
+    amount:       amt,
+    note:         note,
+    date:         new Date().toLocaleDateString(),
+    dueDate:      due || null,
+    status:       'pending',
+    settledDate:  null,
+  });
+  save(KEYS.receivables, list);
+
+  ['ar-counterparty','ar-amount','ar-note'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  renderAssets();
+  showToast('✅ 应收账款已登记');
+}
+
+function settleReceivable(id){
+  var list = load(KEYS.receivables) || [];
+  var r    = list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  if(!confirm('确认核销？厂家补款 '+fmt(r.amount)+' 将计入现金。')) return;
+
+  r.status      = 'settled';
+  r.settledDate = new Date().toLocaleDateString();
+  save(KEYS.receivables, list);
+
+  // ★ 到账：现金增加
+  var cash = parseFloat(load(KEYS.cash)) || 0;
+  cash += parseFloat(r.amount) || 0;
+  save(KEYS.cash, cash);
+
+  renderAssets();
+  showToast('✅ 已核销，现金 +'+fmt(r.amount));
+}
+
+function deleteReceivable(id){
+  if(!confirm('确定删除此应收账款记录？')) return;
+  var list = (load(KEYS.receivables)||[]).filter(function(r){ return String(r.id)!==String(id); });
+  save(KEYS.receivables, list);
+  renderAssets();
+}
+
+// ══════════════════════════════════════════════════════
 //  贷款管理
 // ══════════════════════════════════════════════════════
 function renderLoans(){
@@ -855,17 +1044,29 @@ window.addEventListener('storage', function(e){
             var cash = parseFloat(load(KEYS.cash)) || 0;
 
             if(data.type === 'sale'){
-                // 售出：增加现金（毛利）
                 cash += parseFloat(data.amount) || 0;
                 save(KEYS.cash, cash);
 
             } else if(data.type === 'inventory_in'){
-                // 新录入库存：扣减现金
                 cash += parseFloat(data.cashDelta) || 0;
                 save(KEYS.cash, cash);
 
+            } else if(data.type === 'ar'){
+                // ★ 收银台登记的应收账款（瓶盖换购差价等）
+                var list = load(KEYS.receivables) || [];
+                list.push({
+                    id:           Date.now(),
+                    counterparty: data.counterparty || '待填写',
+                    amount:       parseFloat(data.amount) || 0,
+                    note:         data.note || '',
+                    date:         new Date().toLocaleDateString(),
+                    dueDate:      data.dueDate || null,
+                    status:       'pending',
+                    settledDate:  null,
+                });
+                save(KEYS.receivables, list);
+
             } else if(!data.type){
-                // 兼容旧格式
                 cash += parseFloat(data.amount) || 0;
                 save(KEYS.cash, cash);
             }
