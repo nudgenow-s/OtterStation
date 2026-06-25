@@ -664,21 +664,28 @@ const Engine = (function () {
     const dateKey = new Date().toLocaleDateString();
     let total = 0, cost = 0, cashCollected = 0, arTotal = 0;
     items.forEach(item => {
-      // ★ 收入始终按原始售价计算（权责发生制，换购不影响毛利）
+      const costP    = parseFloat(item.costPrice);
+      const qty      = parseFloat(item.qty);
       const origPrice = item.origSalePrice || item.salePrice;
-      total += parseFloat(origPrice) * parseFloat(item.qty);
-      cost  += parseFloat(item.costPrice) * parseFloat(item.qty);
-      // ★ 实收现金：换购商品按换购价，普通商品按售价（含优惠后价）
-      const payPrice = item.isRedemption
-        ? parseFloat(item.redemptionPrice || 0)
-        : parseFloat(item.salePrice);
-      cashCollected += payPrice * parseFloat(item.qty);
-      // ★ 换购差价 → 应收账款
+
       if (item.isRedemption) {
-        arTotal += (parseFloat(origPrice) - parseFloat(item.redemptionPrice || 0)) * parseFloat(item.qty);
+        // ★ 换购会计逻辑：
+        //   收入 = 消费者实付 + 供应商补偿进价（权责发生制，AR确认为当期收入）
+        //   成本 = 进价（正常）
+        //   毛利 = 实付金额（消费者付的那部分）
+        const redeemP = parseFloat(item.redemptionPrice || 0);
+        total += (redeemP + costP) * qty;   // 收入 = 实付 + 进价
+        cost  += costP * qty;               // 成本 = 进价
+        cashCollected += redeemP * qty;     // 实收现金 = 换购价
+        arTotal       += costP * qty;       // ★ 应收 = 进价（供应商补偿成本）
+      } else {
+        // 普通商品：收入 = 售价（含优惠后价），现金 = 售价
+        total         += parseFloat(origPrice) * qty;
+        cost          += costP * qty;
+        cashCollected += parseFloat(item.salePrice) * qty;
       }
     });
-    const profit = total - cost;
+    const profit = total - cost;   // 换购商品毛利 = 实付额，普通商品毛利正常
     const record = {
       id: Date.now(), date: dateKey, items, total, profit,
       cashCollected, arTotal,   // ★ 新增字段，供成功弹窗展示
@@ -706,15 +713,14 @@ const Engine = (function () {
     } catch(e) {}
     // ★ 现金只增加实收金额，换购差价不进现金
     localStorage.setItem('finance_cash', String((parseFloat(localStorage.getItem('finance_cash'))||0) + cashCollected));
-    // ★ 自动为每个换购商品创建应收账款
+    // ★ 自动为每个换购商品创建应收账款（金额 = 进价，供应商补偿成本）
     items.filter(i => i.isRedemption).forEach(item => {
-      const origPrice = item.origSalePrice || item.salePrice;
-      const diff = (parseFloat(origPrice) - parseFloat(item.redemptionPrice||0)) * parseFloat(item.qty);
-      if (diff > 0.001) {
+      const ar = parseFloat(item.costPrice) * parseFloat(item.qty);
+      if (ar > 0.001) {
         recordReceivable(
           item.supplierName || '待填写',
-          diff,
-          item.name + ' 换购差价补贴',
+          ar,
+          item.name + ' 换购进价补偿',
           null
         );
       }
@@ -1240,36 +1246,21 @@ const RedemptionSheet = (function(){
   function onPriceChange() { _updateDiff(); }
 
   function _updateDiff() {
-    const price    = parseFloat(document.getElementById('rs-price').value);
-    const hintEl   = document.getElementById('rs-diff-hint');
-    const diffEl   = document.getElementById('rs-diff-val');
-
+    const diffEl  = document.getElementById('rs-diff-val');
+    const hintEl  = document.getElementById('rs-diff-hint');
     if (!_cart) return;
+
     if (_mode === 'single') {
-      const item     = _cart[_idx];
-      const origPrice= item.origSalePrice || item.salePrice;
-      if (!isNaN(price) && price >= 0) {
-        const diff = (origPrice - price) * item.qty;
-        diffEl.textContent = Engine.fmtMoney(Math.max(0, diff));
-        hintEl.textContent = diff > 0
-          ? '原价 '+Engine.fmtMoney(origPrice)+' − 实付 '+Engine.fmtMoney(price)+' = '+Engine.fmtMoney(diff)
-          : '实付金额 ≥ 原价，无应收差价';
-      } else {
-        diffEl.textContent = '¥—'; hintEl.textContent = '';
-      }
+      const item = _cart[_idx];
+      // ★ 供应商补偿 = 进价（与消费者实付金额无关）
+      const ar = parseFloat(item.costPrice) * item.qty;
+      diffEl.textContent = Engine.fmtMoney(ar);
+      hintEl.textContent = '进价 ' + Engine.fmtMoney(item.costPrice) + ' × ' + item.qty + ' 件';
     } else {
-      const totalOrig = _cart.reduce((a,c)=>(a+(c.origSalePrice||c.salePrice)*c.qty),0);
-      if (!isNaN(price) && price >= 0) {
-        // 整单模式：rs-price 填每件统一实付
-        const totalPay = _cart.reduce((a,c)=>a+price*c.qty,0);
-        const diff     = totalOrig - totalPay;
-        diffEl.textContent = Engine.fmtMoney(Math.max(0, diff));
-        hintEl.textContent = diff > 0
-          ? '每件实付 '+Engine.fmtMoney(price)+'，共应收 '+Engine.fmtMoney(diff)
-          : '实付金额 ≥ 原价，无应收差价';
-      } else {
-        diffEl.textContent = '¥—'; hintEl.textContent = '';
-      }
+      // ★ 整单模式：各商品进价合计
+      const totalAR = _cart.reduce((a,c) => a + parseFloat(c.costPrice) * c.qty, 0);
+      diffEl.textContent = Engine.fmtMoney(totalAR);
+      hintEl.textContent = '各商品进价合计，供应商补偿全部成本';
     }
   }
 
@@ -1507,11 +1498,10 @@ function renderCashier(container) {
       const p = c.isRedemption ? parseFloat(c.redemptionPrice||0) : (c.origSalePrice||c.salePrice);
       return a + p * c.qty;
     }, 0);
-    // 应收 = 换购差价合计
+    // ★ 应收 = 换购商品的进价合计（供应商补偿进货成本）
     const arTotal = cart.reduce((a,c) => {
       if (!c.isRedemption) return a;
-      const orig = c.origSalePrice || c.salePrice;
-      return a + (orig - parseFloat(c.redemptionPrice||0)) * c.qty;
+      return a + parseFloat(c.costPrice) * c.qty;
     }, 0);
     const count = cart.reduce((a,c)=>a+c.qty,0);
     const hasRedeem = cart.some(c=>c.isRedemption);
@@ -1521,15 +1511,15 @@ function renderCashier(container) {
     const arHint = container.querySelector('#ct-ar-hint');
     if (arHint) {
       if (hasRedeem && arTotal > 0) {
-        arHint.textContent = '另应收差价 ' + Engine.fmtMoney(arTotal);
+        arHint.textContent = '另应收进价补偿 ' + Engine.fmtMoney(arTotal);
         arHint.classList.remove('hidden');
       } else {
         arHint.classList.add('hidden');
       }
     }
     const empty = cart.length === 0;
-    container.querySelector('#ct-btn').disabled      = empty;
-    container.querySelector('#ct-disc-btn').disabled = empty;
+    container.querySelector('#ct-btn').disabled        = empty;
+    container.querySelector('#ct-disc-btn').disabled   = empty;
     container.querySelector('#ct-redeem-btn').disabled = empty;
   }
 
