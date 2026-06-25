@@ -864,23 +864,112 @@ function addReceivable(){
   showToast('✅ 应收账款已登记');
 }
 
+// 当前核销目标（打开弹窗时暂存）
+var _settleTarget = null;
+
 function settleReceivable(id){
   var list = load(KEYS.receivables) || [];
   var r    = list.find(function(x){ return String(x.id)===String(id); });
   if(!r) return;
-  if(!confirm('确认核销？厂家补款 '+fmt(r.amount)+' 将计入现金。')) return;
+  _settleTarget = r;
+  // 填充弹窗信息
+  document.getElementById('settle-desc').textContent =
+    r.counterparty + ' · ' + fmt(r.amount) + (r.note?' · '+r.note:'');
+  document.getElementById('settle-amount-lbl').textContent = fmt(r.amount);
+  // 预填补货商品名（从备注中提取）
+  var guessName = r.note ? r.note.replace('换购差价补贴','').replace('差价补贴','').trim() : '';
+  document.getElementById('sg-name').value  = guessName;
+  document.getElementById('sg-cost').value  = '';
+  document.getElementById('sg-sale').value  = '';
+  document.getElementById('sg-qty').value   = '';
+  document.getElementById('sg-exp').value   = '';
+  var overlay = document.getElementById('settle-overlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(function(){ overlay.style.display='flex'; });
+}
 
-  r.status      = 'settled';
-  r.settledDate = new Date().toLocaleDateString();
+function _closeSettleModal(){
+  document.getElementById('settle-overlay').style.display='none';
+  _settleTarget = null;
+}
+
+// ★ 核销方式一：现金到账
+function settleWithCash(){
+  if(!_settleTarget) return;
+  var r    = _settleTarget;
+  var list = load(KEYS.receivables) || [];
+  var item = list.find(function(x){ return String(x.id)===String(r.id); });
+  if(!item) return;
+  item.status      = 'settled';
+  item.settledDate = new Date().toLocaleDateString();
+  item.settleType  = 'cash';
   save(KEYS.receivables, list);
-
-  // ★ 到账：现金增加
+  // 现金增加
   var cash = parseFloat(load(KEYS.cash)) || 0;
   cash += parseFloat(r.amount) || 0;
   save(KEYS.cash, cash);
-
+  _closeSettleModal();
   renderAssets();
-  showToast('✅ 已核销，现金 +'+fmt(r.amount));
+  showToast('✅ 已核销 · 现金 +' + fmt(r.amount));
+}
+
+// ★ 核销方式二：补货到账（录入库存，不增加现金）
+function settleWithGoods(){
+  if(!_settleTarget) return;
+  var name = document.getElementById('sg-name').value.trim();
+  var cost = parseFloat(document.getElementById('sg-cost').value);
+  var sale = parseFloat(document.getElementById('sg-sale').value);
+  var qty  = parseFloat(document.getElementById('sg-qty').value);
+  var exp  = document.getElementById('sg-exp').value;
+
+  if(!name){ _shakeEl('sg-name'); return; }
+  if(isNaN(qty)||qty<1){ _shakeEl('sg-qty'); return; }
+
+  // 直接写入 otter_inventory（与 retail.html 共享 localStorage）
+  var inv = JSON.parse(localStorage.getItem('otter_inventory')||'[]');
+  var batchNo = inv.filter(function(p){ return p.name===name; }).length + 1;
+  inv.push({
+    id:         Date.now() + Math.random(),
+    batchNo:    batchNo,
+    name:       name,
+    category:   '食品饮料',
+    qty:        qty,
+    costPrice:  isNaN(cost) ? 0 : cost,
+    salePrice:  isNaN(sale) ? 0 : sale,
+    expireDate: exp || null,
+    source:     'restock',
+    barcode:    null,
+    createdAt:  new Date().toISOString(),
+    note:       '应收核销补货 · ' + (_settleTarget.counterparty||''),
+  });
+  localStorage.setItem('otter_inventory', JSON.stringify(inv));
+
+  // 核销应收（不动现金）
+  var r    = _settleTarget;
+  var list = load(KEYS.receivables) || [];
+  var item = list.find(function(x){ return String(x.id)===String(r.id); });
+  if(item){
+    item.status      = 'settled';
+    item.settledDate = new Date().toLocaleDateString();
+    item.settleType  = 'goods';
+    item.goodsDetail = { name:name, qty:qty, cost:isNaN(cost)?0:cost, sale:isNaN(sale)?0:sale };
+    save(KEYS.receivables, list);
+  }
+
+  _closeSettleModal();
+  renderAssets();
+  showToast('✅ 已核销 · 补货 '+name+' ×'+qty+' 件已录入库存');
+}
+
+function _shakeEl(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.style.borderColor='#F44336';
+  el.style.animation='none';
+  requestAnimationFrame(function(){
+    el.style.animation='shake .4s ease';
+    setTimeout(function(){ el.style.borderColor=''; el.style.animation=''; }, 600);
+  });
 }
 
 function deleteReceivable(id){
@@ -1086,5 +1175,74 @@ var d = new Date(); d.setMonth(d.getMonth()+1);
 var nextDefault = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 document.getElementById('l-next').value = nextDefault;
 </script>
+<!-- ★ 应收核销方式选择弹窗 -->
+<div id="settle-overlay"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:800;align-items:flex-end;justify-content:center"
+     onclick="if(event.target===this)_closeSettleModal()">
+  <div style="background:#fff;width:100%;max-width:480px;border-radius:28px 28px 0 0;
+              padding:0 20px 44px;max-height:88vh;overflow-y:auto">
+    <div style="width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px"></div>
+    <div style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px">核销应收账款</div>
+    <div style="font-size:13px;color:var(--text-3);font-weight:700;margin-bottom:18px" id="settle-desc">—</div>
+
+    <!-- 现金到账 -->
+    <div style="background:#F0FFF4;border:2px solid #4CAF50;border-radius:16px;padding:16px;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:900;color:#2D7D52;margin-bottom:4px">💰 现金到账</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">厂家转账/打款，现金余额增加</div>
+      <button onclick="settleWithCash()"
+        style="width:100%;padding:13px;background:#4CAF50;color:#fff;border:none;
+               border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">
+        立即核销 · 现金 ＋<span id="settle-amount-lbl">¥0</span>
+      </button>
+    </div>
+
+    <!-- 补货到账 -->
+    <div style="background:#FFF8F0;border:2px solid var(--warn);border-radius:16px;padding:16px;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:900;color:var(--warn);margin-bottom:4px">📦 补货到账</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">厂家以货物抵款，录入库存，现金不变</div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">商品名称 *</label>
+        <input id="sg-name" type="text" placeholder="补货商品名称（可与应收备注不同）"
+          style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">进价(¥)</label>
+          <input id="sg-cost" type="number" step="0.01" placeholder="0.00"
+            style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">售价(¥)</label>
+          <input id="sg-sale" type="number" step="0.01" placeholder="0.00"
+            style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">数量 *</label>
+          <input id="sg-qty" type="number" min="1" step="1" placeholder="0"
+            style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">过期日</label>
+          <input id="sg-exp" type="date"
+            style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
+        </div>
+      </div>
+      <button onclick="settleWithGoods()"
+        style="width:100%;padding:13px;background:var(--warn);color:#fff;border:none;
+               border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">
+        核销并录入库存
+      </button>
+    </div>
+
+    <button onclick="_closeSettleModal()"
+      style="width:100%;padding:13px;background:#F0F0F0;color:#555;border:none;
+             border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">
+      取消
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
