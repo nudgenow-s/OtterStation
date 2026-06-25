@@ -321,6 +321,26 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 .rs-diff-lbl { font-size:12px; font-weight:800; color:var(--text-3); }
 .rs-diff-val { font-size:17px; font-weight:900; color:var(--orange); }
 
+/* ★ 收据样式 */
+.rc-store    { font-size:15px;font-weight:700;letter-spacing:4px;color:#111;text-align:center; }
+.rc-date     { font-size:11px;color:#666;text-align:center;letter-spacing:1px;margin-top:3px; }
+.rc-divider  { border:none;border-top:1px dashed #BBB;margin:10px 0; }
+.rc-divider.solid { border-top:2px solid #222; }
+.rc-item-name{ font-size:13px;font-weight:700;color:#111;margin-bottom:4px;word-break:break-all; }
+.rc-batch    { font-size:10px;font-weight:400;color:#888;margin-left:4px; }
+.rc-row      { display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:2px;letter-spacing:.3px; }
+.rc-row.profit { color:#166534;font-weight:700; }
+.rc-row.ar-row { color:#92400E;font-size:10px; }
+.rc-row.redeem { color:#5B21B6;font-size:10px; }
+.rc-item-block { margin-bottom:8px; }
+.rc-total-row  { display:flex;justify-content:space-between;font-size:12px;color:#333;margin-bottom:3px;letter-spacing:.4px; }
+.rc-total-row.main   { font-size:14px;font-weight:700;color:#111;border-top:none; }
+.rc-total-row.profit { font-size:14px;font-weight:700;color:#166534; }
+.rc-total-row.ar     { color:#92400E;font-size:11px; }
+.rc-footer   { text-align:center;font-size:10px;color:#AAA;margin-top:10px;letter-spacing:3px; }
+/* retro badge */
+.rc-retro-badge { font-size:9px;background:#FEF3C7;color:#92400E;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle; }
+
 /* 库存看板 */
 .inv-total-chip { background:var(--orange); color:#fff; font-size:12px; font-weight:800; padding:4px 10px; border-radius:20px; }
 .inv-summary-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px; }
@@ -806,6 +826,48 @@ const Engine = (function () {
     return entry;
   }
 
+  // ★ 补记：在指定过去日期录入销售（会计逻辑与 recordSale 相同）
+  function recordSaleOnDate(items, targetDate) {
+    let total = 0, cost = 0, cashCollected = 0, arTotal = 0;
+    items.forEach(item => {
+      const costP     = parseFloat(item.costPrice);
+      const qty       = parseFloat(item.qty);
+      const origPrice = item.origSalePrice || item.salePrice;
+      if (item.isRedemption) {
+        const redeemP  = parseFloat(item.redemptionPrice || 0);
+        total         += (redeemP + costP) * qty;
+        cost          += costP * qty;
+        cashCollected += redeemP * qty;
+        arTotal       += costP * qty;
+      } else {
+        total         += parseFloat(origPrice) * qty;
+        cost          += costP * qty;
+        cashCollected += parseFloat(item.salePrice) * qty;
+      }
+    });
+    const profit = total - cost;
+    const record = {
+      id: Date.now(), date: targetDate, items, total, profit,
+      cashCollected, arTotal, retroactive: true,
+      createdAt: new Date().toISOString(),
+    };
+    const sales = getSales(); sales.push(record); saveSales(sales);
+    items.forEach(item => updateProductQty(item.productId, -parseFloat(item.qty)));
+    updateDayFromSales(targetDate);
+    // 现金按实收增加
+    localStorage.setItem('finance_cash',
+      String((parseFloat(localStorage.getItem('finance_cash'))||0) + cashCollected));
+    // 自动创建换购应收
+    items.filter(i => i.isRedemption).forEach(item => {
+      const ar = parseFloat(item.costPrice) * parseFloat(item.qty);
+      if (ar > 0.001) recordReceivable(item.supplierName||'待填写', ar, item.name+' 换购进价补偿', null);
+    });
+    localStorage.setItem('realcost_trigger', JSON.stringify({
+      type:'retro_sale', amount:profit, date:targetDate, timestamp:Date.now(),
+    }));
+    return record;
+  }
+
   function getSalesRanking() {
     const map = {};
     getSales().forEach(s => s.items.forEach(item => {
@@ -891,7 +953,7 @@ const Engine = (function () {
   return {
     getHistory, setDay, getDay,
     getInventory, addProduct, updateProductQty, deleteProduct, getBatchesByName,
-    getSales, recordSale, recordLoss, recordReceivable,
+    getSales, recordSale, recordSaleOnDate, recordLoss, recordReceivable,
     getSalesRanking, getSoldProfitRanking, getUnitProfitRanking,
     getExpiringProducts, getMonthStats, getStreak,
     fmtMoney, fmtDate, daysUntil, KEYS,
@@ -1889,6 +1951,10 @@ var TODAY = now.getDate();
 var DAYS  = new Date(YEAR, MONTH+1, 0).getDate();
 var MN    = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
+// ★ 全局：记录当前打开的日历弹窗的日期，供 ReceiptViewer 和 RetroSheet 使用
+var _currentSheetKey = '';
+var _currentSheetDay = 0;
+
 function dateKey(d) { return new Date(YEAR, MONTH, d).toLocaleDateString(); }
 
 function switchTab(btn, viewId) {
@@ -1962,17 +2028,18 @@ function buildSnake() {
     node.className='day-node';
     node.style.left=pos.x+'px'; node.style.top=pos.y+'px';
     node.style.animationDelay=(idx*35)+'ms';
-    if (isToday)            node.classList.add('n-today');
-    else if (isFuture)      node.classList.add('n-future');
-    else if (hasSales)      node.classList.add('n-done');
-    else if (hasLoss)       node.classList.add('n-loss');   // ★ 仅有损耗无销售：红色
-    else                    node.classList.add('n-missed');
+    if (isToday)       node.classList.add('n-today');
+    else if (isFuture) node.classList.add('n-future');
+    else if (hasLoss)  node.classList.add('n-loss');   // ★ 只要有损耗就红色，优先于销售
+    else if (hasSales) node.classList.add('n-done');
+    else               node.classList.add('n-missed');
     if (isToday) {
       var tag=document.createElement('div');tag.className='today-tag';tag.textContent='今天';node.appendChild(tag);
     }
     var numEl=document.createElement('div');numEl.className='nd-num';numEl.textContent=day;node.appendChild(numEl);
     var icoEl=document.createElement('div');icoEl.className='nd-ico';
-    icoEl.textContent=isToday?'⭐':hasSales?'✓':hasLoss?'⚠':isPast?'✗':'';  // ★ 损耗图标
+    // 今天有损耗也显示警告
+    icoEl.textContent = isToday ? (hasLoss?'⚠':'⭐') : hasLoss?'⚠': hasSales?'✓': isPast?'✗':'';
     node.appendChild(icoEl);
     (function(d,k,dat,isT,isF,isP,hS,hL){
       node.onclick=function(){ openSheet(d,k,dat,isT,isF,isP,hS,hL); };
@@ -1992,6 +2059,10 @@ function buildSnake() {
 }
 
 function openSheet(day, key, data, isToday, isFuture, isPast, hasSales, hasLoss) {
+  // ★ 存全局供 ReceiptViewer / RetroSheet 读取
+  _currentSheetKey = key;
+  _currentSheetDay = day;
+
   document.getElementById('sh-date').textContent = (MONTH+1)+'月'+day+'日';
   var metrics=document.getElementById('sh-metrics'), btnRow=document.getElementById('sh-btn-row');
 
@@ -2000,27 +2071,36 @@ function openSheet(day, key, data, isToday, isFuture, isPast, hasSales, hasLoss)
     metrics.innerHTML=''; btnRow.innerHTML='';
   } else if (!hasSales && !hasLoss && !isToday) {
     document.getElementById('sh-status').textContent='这天没有记录';
-    metrics.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">经营盈余</div><div class="mc-val">—</div></div>';
-    btnRow.innerHTML='';
+    metrics.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div>'+
+      '<div class="mc"><div class="mc-lbl">经营盈余</div><div class="mc-val">—</div></div>';
+    // 无记录的过去日期也可补记
+    btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 补记销售</button>';
   } else {
-    const cd=Engine.getDay(key)||data||{};
-    var rev=parseFloat(cd.revenue)||0, prof=parseFloat(cd.profit)||0;
+    var cd=Engine.getDay(key)||data||{};
+    var rev =parseFloat(cd.revenue)||0;
+    var prof=parseFloat(cd.profit)||0;
     var varC=parseFloat(cd.variableCost)||(rev-prof);
-    var gm=cd.grossMargin||(rev>0?Math.round(prof/rev*100):null);
     var loss=parseFloat(cd.loss)||0;
     var statusTxt=isToday?'今天 · 进行中':(hasSales?'已完成 ✓':(hasLoss?'有损耗记录 ⚠':'暂无记录'));
     document.getElementById('sh-status').textContent=statusTxt;
+
+    // ★ 营收卡片可点击 → 弹出销售单
     metrics.innerHTML=
-      `<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val o">${Engine.fmtMoney(rev)}</div></div>`+
-      `<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val ${prof>=0?'g':'r'}">${Engine.fmtMoney(prof)}</div></div>`+
-      `<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">${Engine.fmtMoney(varC)}</div></div>`+
-      `<div class="mc"><div class="mc-lbl">损耗成本</div><div class="mc-val r">${loss>0?Engine.fmtMoney(loss):'—'}</div></div>`;
+      '<div class="mc" onclick="ReceiptViewer.open(_currentSheetKey)" style="cursor:pointer">'+
+        '<div class="mc-lbl">营收 <span style="font-size:9px;color:var(--orange);font-weight:800">▶ 查看</span></div>'+
+        '<div class="mc-val o">'+Engine.fmtMoney(rev)+'</div>'+
+      '</div>'+
+      '<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">损耗成本</div><div class="mc-val r">'+(loss>0?Engine.fmtMoney(loss):'—')+'</div></div>';
+
     if (isToday) {
       btnRow.innerHTML=
         '<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'cashier\')"><span>🛒</span> 开始收银</button>'+
         '<button class="btn-sh btn-stock"   onclick="closeSheet();switchTab(null,\'restock\')"><span>📦</span> 进货</button>';
     } else {
-      btnRow.innerHTML='';
+      // ★ 过去日期：补记按钮
+      btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 补记销售</button>';
     }
   }
   document.getElementById('overlay').classList.add('open');
@@ -2051,7 +2131,305 @@ document.querySelectorAll('.nav-btn').forEach(function(btn){
   if(!view)return;
   btn.onclick=function(){switchTab(btn,view);};
 });
+
+// ★ 重建蛇形路径（补记/损耗后刷新节点颜色）
+function refreshSnake() {
+  var track=document.getElementById('snake-track');
+  var svg=document.getElementById('snake-svg');
+  if (!track||!svg) return;
+  Array.from(track.children).forEach(function(c){ if(c!==svg) track.removeChild(c); });
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  buildSnake();
+}
 </script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ ReceiptViewer — 销售单查看器（美式小票风格，左右滑动翻页）
+// ════════════════════════════════════════════════════════════════════════════
+const ReceiptViewer = (function(){
+  let _receipts = [], _cur = 0, _startX = 0;
+
+  function open(dateKey) {
+    _receipts = Engine.getSales().filter(function(s){ return s.date === dateKey; });
+    if (!_receipts.length) {
+      alert('这一天还没有销售记录');
+      return;
+    }
+    _cur = 0;
+    _render();
+    var ov = document.getElementById('receipt-overlay');
+    ov.style.display = 'flex';
+    // 绑定触摸滑动（只绑一次）
+    var card = document.getElementById('receipt-card');
+    card.ontouchstart = function(e){ _startX = e.touches[0].clientX; };
+    card.ontouchend   = function(e){
+      var diff = _startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 44) { diff > 0 ? next() : prev(); }
+    };
+  }
+
+  function _render() {
+    // 导航信息
+    document.getElementById('rv-nav-info').textContent =
+      '第 ' + (_cur+1) + ' 张 / 共 ' + _receipts.length + ' 张';
+    // 分页点
+    document.getElementById('rv-dots').innerHTML = _receipts.map(function(_,i){
+      return '<div style="width:'+(i===_cur?18:6)+'px;height:6px;border-radius:3px;background:'+(i===_cur?'#fff':'rgba(255,255,255,.3)')+';transition:all .2s"></div>';
+    }).join('');
+    // 收据内容
+    document.getElementById('receipt-card').innerHTML = _buildHTML(_receipts[_cur]);
+  }
+
+  function _buildHTML(rec) {
+    var dt       = new Date(rec.createdAt);
+    var timeStr  = dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
+    var cashIn   = rec.cashCollected != null ? rec.cashCollected : rec.total;
+    var hasAR    = rec.arTotal > 0;
+
+    var itemsHTML = '';
+    rec.items.forEach(function(item){
+      var origPrice  = item.origSalePrice || item.salePrice;
+      var itemRevenue= parseFloat(item.isRedemption
+        ? (parseFloat(item.redemptionPrice||0) + parseFloat(item.costPrice))
+        : parseFloat(origPrice)) * parseFloat(item.qty);
+      var itemProfit = (parseFloat(origPrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
+      itemsHTML +=
+        '<div class="rc-item-block">'+
+          '<div class="rc-item-name">'+item.name+
+            (item.batchNo?'<span class="rc-batch">·批'+item.batchNo+'</span>':'')+
+            (rec.retroactive?'<span class="rc-retro-badge">补记</span>':'')+
+          '</div>'+
+          '<div class="rc-row"><span>UNIT PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
+          '<div class="rc-row"><span>UNIT COST</span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+          '<div class="rc-row"><span>QTY</span><span>× '+item.qty+'</span></div>'+
+          '<div class="rc-row profit"><span>MARGIN</span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'+
+          (item.isRedemption
+            ? '<div class="rc-row redeem"><span>REDEMPTION @ '+Engine.fmtMoney(item.redemptionPrice)+'</span><span></span></div>'+
+              '<div class="rc-row ar-row"><span>A/R ← '+(item.supplierName||'供应商')+'</span><span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'
+            : '')+
+        '</div>'+
+        '<hr class="rc-divider">';
+    });
+
+    var totalItems = rec.items.reduce(function(a,i){ return a+parseFloat(i.qty); }, 0);
+
+    return '<div class="rc-store">獭 掌 柜</div>'+
+      '<div class="rc-date">'+rec.date+'  '+timeStr+'</div>'+
+      '<hr class="rc-divider" style="margin-top:10px">'+
+      itemsHTML+
+      '<div style="margin-top:6px">'+
+        '<div class="rc-total-row"><span>ITEMS</span><span>'+totalItems+' 件</span></div>'+
+        '<div class="rc-total-row main"><span>REVENUE</span><span>'+Engine.fmtMoney(rec.total)+'</span></div>'+
+        (cashIn !== rec.total
+          ? '<div class="rc-total-row"><span>CASH IN</span><span>'+Engine.fmtMoney(cashIn)+'</span></div>'
+          : '')+
+        '<hr class="rc-divider solid">'+
+        '<div class="rc-total-row profit"><span>GROSS PROFIT</span><span>'+Engine.fmtMoney(rec.profit)+'</span></div>'+
+        (hasAR ? '<div class="rc-total-row ar"><span>A/R CREATED</span><span>'+Engine.fmtMoney(rec.arTotal)+'</span></div>' : '')+
+      '</div>'+
+      '<div class="rc-footer">★  THANK  YOU  ★</div>';
+  }
+
+  function next() {
+    if (_cur < _receipts.length - 1) { _cur++; _render(); }
+  }
+  function prev() {
+    if (_cur > 0) { _cur--; _render(); }
+  }
+  function close() {
+    document.getElementById('receipt-overlay').style.display = 'none';
+  }
+
+  return { open, next, prev, close };
+})();
+window.ReceiptViewer = ReceiptViewer;
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ RetroSheet — 补记销售（对过去日期补录销售记录）
+// ════════════════════════════════════════════════════════════════════════════
+const RetroSheet = (function(){
+  var _cart = [];
+
+  function open() {
+    var key = _currentSheetKey;
+    var day = _currentSheetDay;
+    _cart = [];
+    var el = document.getElementById('retro-content');
+    el.innerHTML =
+      '<div class="page-title-bar">'+
+        '<span class="page-title-icon">📝</span>'+
+        '<span class="page-title-text">补记销售</span>'+
+      '</div>'+
+      '<div style="background:#FEF9C3;border:1.5px solid #EAB308;border-radius:12px;'+
+                  'padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:700;color:#713F12">'+
+        '📅 补记日期：'+(MONTH+1)+'月'+day+'日（'+key+'）'+
+      '</div>'+
+      '<div class="search-wrap">'+
+        '<div class="search-box">'+
+          '<span class="search-ico">🔍</span>'+
+          '<input id="retro-search" class="search-inp" type="text" placeholder="搜索商品名称…" autocomplete="off">'+
+        '</div>'+
+        '<div id="retro-dd" class="search-dropdown hidden"></div>'+
+      '</div>'+
+      '<div class="section-label">已选商品</div>'+
+      '<div id="retro-cart" class="cart-list" style="margin-bottom:12px;min-height:60px"></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;'+
+                  'background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:14px;'+
+                  'box-shadow:0 2px 8px rgba(0,0,0,.07)">'+
+        '<span style="font-size:13px;font-weight:700;color:var(--text-3)" id="retro-count">0 件商品</span>'+
+        '<span style="font-size:18px;font-weight:900;color:var(--text)" id="retro-sum">¥0</span>'+
+      '</div>'+
+      '<button class="form-submit" id="retro-btn" disabled onclick="RetroSheet.submit()">📝 确认补记</button>'+
+      '<div class="form-success hidden" id="retro-ok">✅ 补记成功！</div>';
+
+    // 绑定搜索
+    var inp = document.getElementById('retro-search');
+    var dd  = document.getElementById('retro-dd');
+    inp.addEventListener('input', function(){
+      var q = inp.value.trim().toLowerCase();
+      if (!q) { dd.classList.add('hidden'); return; }
+      var inv = Engine.getInventory().filter(function(p){ return parseFloat(p.qty)>0; });
+      var nameMap = {};
+      inv.forEach(function(p){
+        if (!p.name.toLowerCase().includes(q)) return;
+        if (!nameMap[p.name]) nameMap[p.name]={name:p.name,totalQty:0,batches:0};
+        nameMap[p.name].totalQty += parseFloat(p.qty);
+        nameMap[p.name].batches++;
+      });
+      var results = Object.values(nameMap);
+      dd.innerHTML = results.length
+        ? results.map(function(r){
+            return '<div class="dd-item" data-name="'+r.name+'">'+
+              '<span class="dd-name">'+r.name+'</span>'+
+              '<span class="dd-info">库存'+r.totalQty+'件'+(r.batches>1?' · '+r.batches+'批次':'')+'</span></div>';
+          }).join('')
+        : '<div class="dd-empty">没有找到商品</div>';
+      dd.querySelectorAll('.dd-item').forEach(function(item){
+        item.onclick = function(){
+          inp.value=''; dd.classList.add('hidden');
+          BatchPicker.open(item.dataset.name, function(batch){ if(batch) _add(batch); });
+        };
+      });
+      dd.classList.remove('hidden');
+    });
+    document.addEventListener('click', function(e){
+      var wrap = el.querySelector('.search-wrap');
+      if (wrap && !wrap.contains(e.target)) dd.classList.add('hidden');
+    });
+
+    _renderCart();
+    document.getElementById('retro-overlay').classList.add('open');
+  }
+
+  function _add(prod) {
+    var ex = _cart.find(function(c){ return c.productId===prod.id; });
+    if (ex) { ex.qty = Math.min(ex.qty+1, parseFloat(prod.qty)); }
+    else {
+      _cart.push({ productId:prod.id, name:prod.name, batchNo:prod.batchNo, qty:1,
+        costPrice:parseFloat(prod.costPrice), salePrice:parseFloat(prod.salePrice),
+        maxQty:parseFloat(prod.qty) });
+    }
+    _renderCart();
+  }
+
+  function _renderCart() {
+    var el = document.getElementById('retro-cart'); if(!el) return;
+    el.innerHTML = _cart.length
+      ? _cart.map(function(item,i){
+          return '<div class="cart-item">'+
+            '<div class="ci-info">'+
+              '<div class="ci-name">'+item.name+'</div>'+
+              '<div class="ci-price">'+Engine.fmtMoney(item.salePrice)+'/件 · 进价'+Engine.fmtMoney(item.costPrice)+'</div>'+
+            '</div>'+
+            '<div class="ci-qty-ctrl">'+
+              '<button class="qty-btn" onclick="RetroSheet._adj('+i+',-1)">−</button>'+
+              '<span class="qty-val">'+item.qty+'</span>'+
+              '<button class="qty-btn" onclick="RetroSheet._adj('+i+',1)">+</button>'+
+            '</div>'+
+            '<div class="ci-subtotal">'+Engine.fmtMoney(item.salePrice*item.qty)+'</div>'+
+            '<button class="ci-del" onclick="RetroSheet._del('+i+')">✕</button>'+
+          '</div>';
+        }).join('')
+      : '<div class="cart-empty">搜索添加商品 📦</div>';
+    var total = _cart.reduce(function(a,c){ return a+c.salePrice*c.qty; },0);
+    var count = _cart.reduce(function(a,c){ return a+c.qty; },0);
+    var ce = document.getElementById('retro-count');
+    var se = document.getElementById('retro-sum');
+    var be = document.getElementById('retro-btn');
+    if(ce) ce.textContent = count + ' 件商品';
+    if(se) se.textContent = Engine.fmtMoney(total);
+    if(be) be.disabled = _cart.length === 0;
+  }
+
+  function submit() {
+    if (!_cart.length) return;
+    Engine.recordSaleOnDate(_cart, _currentSheetKey);
+    _cart = [];
+    var ok = document.getElementById('retro-ok');
+    if(ok){ ok.classList.remove('hidden'); setTimeout(function(){ ok.classList.add('hidden'); },2000); }
+    _renderCart();
+    updateHeader();
+    refreshSnake();
+    if(window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
+  }
+
+  function close() {
+    document.getElementById('retro-overlay').classList.remove('open');
+  }
+
+  return {
+    open, submit, close,
+    _adj: function(i,d){ _cart[i].qty=Math.max(1,Math.min(_cart[i].qty+d,_cart[i].maxQty)); _renderCart(); },
+    _del: function(i)  { _cart.splice(i,1); _renderCart(); },
+  };
+})();
+window.RetroSheet = RetroSheet;
+
+<!-- ★ 销售单查看器 -->
+<div id="receipt-overlay"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:900;
+            flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px"
+     onclick="if(event.target===this)ReceiptViewer.close()">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px">
+    <button onclick="ReceiptViewer.prev()"
+      style="background:rgba(255,255,255,.12);border:none;color:#fff;width:36px;height:36px;
+             border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+    <div style="text-align:center">
+      <div style="color:#fff;font-size:13px;font-weight:700" id="rv-nav-info">第 1 张 / 共 1 张</div>
+      <div id="rv-dots" style="display:flex;gap:5px;justify-content:center;margin-top:4px"></div>
+    </div>
+    <button onclick="ReceiptViewer.next()"
+      style="background:rgba(255,255,255,.12);border:none;color:#fff;width:36px;height:36px;
+             border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+  </div>
+
+  <!-- 收据卡片 -->
+  <div id="receipt-card"
+       style="background:#FEFEFE;width:100%;max-width:340px;max-height:62vh;overflow-y:auto;
+              border-radius:2px;font-family:'Courier New',monospace;
+              box-shadow:0 12px 48px rgba(0,0,0,.7);padding:22px 18px;
+              transition:transform .22s ease,opacity .22s ease">
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px">
+    <div style="color:rgba(255,255,255,.45);font-size:12px;font-weight:700">← 左滑 / 右滑 →</div>
+    <button onclick="ReceiptViewer.close()"
+      style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
+             color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+      关闭
+    </button>
+  </div>
+</div>
+
+<!-- ★ 补记销售弹窗 -->
+<div class="modal-overlay" id="retro-overlay" onclick="if(event.target===this)RetroSheet.close()">
+  <div class="modal-sheet" style="max-height:88vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div id="retro-content" style="padding-bottom:8px"></div>
+    <button class="btn-sh btn-ghost" style="margin-top:4px" onclick="RetroSheet.close()">关闭</button>
+  </div>
+</div>
 
 </body>
 </html>
