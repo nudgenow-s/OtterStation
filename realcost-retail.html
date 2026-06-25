@@ -298,6 +298,29 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 .hi-qty  { font-size:16px; font-weight:900; color:var(--orange); text-align:right; } .hi-exp { font-size:10px; color:var(--text-3); text-align:right; margin-top:2px; }
 .hidden  { display:none !important; }
 
+/* ★ 换购相关 */
+.ci-redeem-chip {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:3px 8px; border-radius:8px; font-size:11px; font-weight:800;
+  cursor:pointer; border:1.5px solid var(--border); background:#fff;
+  color:var(--text-3); margin-top:5px; font-family:inherit; transition:all .15s;
+}
+.ci-redeem-chip.active { background:#FFF3EE; border-color:var(--orange); color:var(--orange); }
+.ct-redeem-btn {
+  background:#fff; color:var(--green); border:2px solid var(--green);
+  border-radius:14px; padding:11px 10px; font-size:12px; font-weight:900;
+  cursor:pointer; font-family:inherit; margin-right:5px; transition:all .1s;
+}
+.ct-redeem-btn:disabled { color:#CCC; border-color:#CCC; cursor:not-allowed; }
+.ct-ar-hint { font-size:11px; color:var(--orange); font-weight:700; margin-top:1px; }
+.rs-product-box { background:var(--gray-bg); border-radius:14px; padding:12px 14px; margin-bottom:16px; }
+.rs-diff-row {
+  background:#FFF3EE; border-radius:12px; padding:10px 14px; margin:8px 0 20px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.rs-diff-lbl { font-size:12px; font-weight:800; color:var(--text-3); }
+.rs-diff-val { font-size:17px; font-weight:900; color:var(--orange); }
+
 /* 库存看板 */
 .inv-total-chip { background:var(--orange); color:#fff; font-size:12px; font-weight:800; padding:4px 10px; border-radius:20px; }
 .inv-summary-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px; }
@@ -505,6 +528,33 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
   </div>
 </div>
 
+<!-- ★ 换购弹窗（单品 + 整单两种模式） -->
+<div class="modal-overlay" id="redeem-overlay" onclick="if(event.target===this)RedemptionSheet.close()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="rs-title">🔄 标记换购</div>
+    <div class="modal-sub">消费者以换购价购买，差价由供应商补偿（自动登记应收）</div>
+    <div class="rs-product-box">
+      <div style="font-size:14px;font-weight:900;color:var(--text)" id="rs-prod-name">—</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:3px" id="rs-prod-price">—</div>
+    </div>
+    <label class="form-lbl">供应商 / 厂家 *</label>
+    <input id="rs-supplier" class="form-inp" type="text" placeholder="如：农夫山泉、东鹏饮料" style="margin-bottom:14px">
+    <label class="form-lbl">消费者实付金额 (¥) *</label>
+    <input id="rs-price" class="form-inp" type="number" step="0.01" min="0" placeholder="1.00"
+           oninput="RedemptionSheet.onPriceChange()">
+    <div class="rs-diff-row" style="margin-top:10px">
+      <div>
+        <div class="rs-diff-lbl">应收差价（供应商补偿）</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px" id="rs-diff-hint"></div>
+      </div>
+      <div class="rs-diff-val" id="rs-diff-val">¥0</div>
+    </div>
+    <button class="form-submit" onclick="RedemptionSheet.confirm()">✅ 确认换购</button>
+    <button class="btn-sh btn-ghost" style="margin-top:8px;width:100%" onclick="RedemptionSheet.close()">取消</button>
+  </div>
+</div>
+
 <!-- ★ 损耗记录弹窗 -->
 <div class="modal-overlay" id="loss-overlay" onclick="if(event.target===this)LossSheet.close()">
   <div class="modal-sheet">
@@ -612,13 +662,28 @@ const Engine = (function () {
 
   function recordSale(items) {
     const dateKey = new Date().toLocaleDateString();
-    let total = 0, cost = 0;
+    let total = 0, cost = 0, cashCollected = 0, arTotal = 0;
     items.forEach(item => {
-      total += parseFloat(item.salePrice) * parseFloat(item.qty);
+      // ★ 收入始终按原始售价计算（权责发生制，换购不影响毛利）
+      const origPrice = item.origSalePrice || item.salePrice;
+      total += parseFloat(origPrice) * parseFloat(item.qty);
       cost  += parseFloat(item.costPrice) * parseFloat(item.qty);
+      // ★ 实收现金：换购商品按换购价，普通商品按售价（含优惠后价）
+      const payPrice = item.isRedemption
+        ? parseFloat(item.redemptionPrice || 0)
+        : parseFloat(item.salePrice);
+      cashCollected += payPrice * parseFloat(item.qty);
+      // ★ 换购差价 → 应收账款
+      if (item.isRedemption) {
+        arTotal += (parseFloat(origPrice) - parseFloat(item.redemptionPrice || 0)) * parseFloat(item.qty);
+      }
     });
     const profit = total - cost;
-    const record = { id: Date.now(), date: dateKey, items, total, profit, createdAt: new Date().toISOString() };
+    const record = {
+      id: Date.now(), date: dateKey, items, total, profit,
+      cashCollected, arTotal,   // ★ 新增字段，供成功弹窗展示
+      createdAt: new Date().toISOString(),
+    };
     const sales = getSales(); sales.push(record); saveSales(sales);
     items.forEach(item => updateProductQty(item.productId, -parseFloat(item.qty)));
     updateDayFromSales(dateKey);
@@ -639,9 +704,23 @@ const Engine = (function () {
       history[today].costSnapshot = { rent:(r/dim).toFixed(2), salary:(s/dim).toFixed(2), other:(o/dim).toFixed(2) };
       localStorage.setItem('revenue_history', JSON.stringify(history));
     } catch(e) {}
-    localStorage.setItem('finance_cash', String((parseFloat(localStorage.getItem('finance_cash'))||0) + total));
+    // ★ 现金只增加实收金额，换购差价不进现金
+    localStorage.setItem('finance_cash', String((parseFloat(localStorage.getItem('finance_cash'))||0) + cashCollected));
+    // ★ 自动为每个换购商品创建应收账款
+    items.filter(i => i.isRedemption).forEach(item => {
+      const origPrice = item.origSalePrice || item.salePrice;
+      const diff = (parseFloat(origPrice) - parseFloat(item.redemptionPrice||0)) * parseFloat(item.qty);
+      if (diff > 0.001) {
+        recordReceivable(
+          item.supplierName || '待填写',
+          diff,
+          item.name + ' 换购差价补贴',
+          null
+        );
+      }
+    });
     localStorage.setItem('realcost_trigger', JSON.stringify({
-      type:'sale', amount:profit, revenue:total, todayRev:newRev, timestamp:Date.now(),
+      type:'sale', amount:profit, revenue:total, cashCollected, todayRev:newRev, timestamp:Date.now(),
     }));
     return record;
   }
@@ -1118,6 +1197,120 @@ const ARSheet = (function(){
 })();
 window.ARSheet = ARSheet;
 function closeARSheet() { ARSheet.close(); }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ★ RedemptionSheet — 换购弹窗
+//  单品模式：对购物车某一行标记换购，设置实付金额+供应商
+//  整单模式：对购物车所有商品批量设置
+//  确认后：cart[i].isRedemption=true, .redemptionPrice=X, .supplierName=Y
+//  recordSale 会自动用原价记收入、只增实付现金、自动建AR
+// ════════════════════════════════════════════════════════════════════════════
+const RedemptionSheet = (function(){
+  let _mode      = 'single';  // 'single' | 'all'
+  let _idx       = -1;        // single 模式下的 cart index
+  let _cart      = null;      // 外部 cart 引用
+  let _onConfirm = null;
+
+  function openSingle(cartRef, idx, onConfirm) {
+    _mode = 'single'; _idx = idx; _cart = cartRef; _onConfirm = onConfirm;
+    const item = cartRef[idx];
+    const origPrice = item.origSalePrice || item.salePrice;
+    document.getElementById('rs-title').textContent     = '🔄 单品换购';
+    document.getElementById('rs-prod-name').textContent = item.name + (item.batchNo?' 批次'+item.batchNo:'');
+    document.getElementById('rs-prod-price').textContent= '原价 ' + Engine.fmtMoney(origPrice) + ' × ' + item.qty + ' 件';
+    document.getElementById('rs-supplier').value = item.supplierName || '';
+    document.getElementById('rs-price').value    = item.isRedemption ? (item.redemptionPrice||'') : '1';
+    _updateDiff();
+    document.getElementById('redeem-overlay').classList.add('open');
+    document.getElementById('rs-price').focus();
+  }
+
+  function openAll(cartRef, onConfirm) {
+    _mode = 'all'; _idx = -1; _cart = cartRef; _onConfirm = onConfirm;
+    const totalOrig = cartRef.reduce((a,c)=>(a+(c.origSalePrice||c.salePrice)*c.qty),0);
+    document.getElementById('rs-title').textContent     = '🔄 整单换购';
+    document.getElementById('rs-prod-name').textContent = '全部 ' + cartRef.length + ' 种商品';
+    document.getElementById('rs-prod-price').textContent= '原价合计 ' + Engine.fmtMoney(totalOrig);
+    document.getElementById('rs-supplier').value = cartRef[0]?.supplierName || '';
+    document.getElementById('rs-price').value    = '';
+    _updateDiff();
+    document.getElementById('redeem-overlay').classList.add('open');
+  }
+
+  function onPriceChange() { _updateDiff(); }
+
+  function _updateDiff() {
+    const price    = parseFloat(document.getElementById('rs-price').value);
+    const hintEl   = document.getElementById('rs-diff-hint');
+    const diffEl   = document.getElementById('rs-diff-val');
+
+    if (!_cart) return;
+    if (_mode === 'single') {
+      const item     = _cart[_idx];
+      const origPrice= item.origSalePrice || item.salePrice;
+      if (!isNaN(price) && price >= 0) {
+        const diff = (origPrice - price) * item.qty;
+        diffEl.textContent = Engine.fmtMoney(Math.max(0, diff));
+        hintEl.textContent = diff > 0
+          ? '原价 '+Engine.fmtMoney(origPrice)+' − 实付 '+Engine.fmtMoney(price)+' = '+Engine.fmtMoney(diff)
+          : '实付金额 ≥ 原价，无应收差价';
+      } else {
+        diffEl.textContent = '¥—'; hintEl.textContent = '';
+      }
+    } else {
+      const totalOrig = _cart.reduce((a,c)=>(a+(c.origSalePrice||c.salePrice)*c.qty),0);
+      if (!isNaN(price) && price >= 0) {
+        // 整单模式：rs-price 填每件统一实付
+        const totalPay = _cart.reduce((a,c)=>a+price*c.qty,0);
+        const diff     = totalOrig - totalPay;
+        diffEl.textContent = Engine.fmtMoney(Math.max(0, diff));
+        hintEl.textContent = diff > 0
+          ? '每件实付 '+Engine.fmtMoney(price)+'，共应收 '+Engine.fmtMoney(diff)
+          : '实付金额 ≥ 原价，无应收差价';
+      } else {
+        diffEl.textContent = '¥—'; hintEl.textContent = '';
+      }
+    }
+  }
+
+  function confirm() {
+    const supplier = document.getElementById('rs-supplier').value.trim();
+    const price    = parseFloat(document.getElementById('rs-price').value);
+    if (!supplier) { _shake(document.getElementById('rs-supplier')); return; }
+    if (isNaN(price) || price < 0) { _shake(document.getElementById('rs-price')); return; }
+
+    if (_mode === 'single') {
+      _cart[_idx].isRedemption  = true;
+      _cart[_idx].redemptionPrice = price;
+      _cart[_idx].supplierName    = supplier;
+    } else {
+      _cart.forEach(item => {
+        item.isRedemption   = true;
+        item.redemptionPrice = price;
+        item.supplierName    = supplier;
+      });
+    }
+    document.getElementById('redeem-overlay').classList.remove('open');
+    if (_onConfirm) _onConfirm(_cart);
+  }
+
+  function clearItem(cartRef, idx, onConfirm) {
+    cartRef[idx].isRedemption   = false;
+    cartRef[idx].redemptionPrice = null;
+    cartRef[idx].supplierName    = null;
+    if (onConfirm) onConfirm(cartRef);
+  }
+
+  function close() { document.getElementById('redeem-overlay').classList.remove('open'); }
+  function _shake(el) {
+    el.style.borderColor='#F44336'; el.classList.add('shake');
+    setTimeout(()=>{el.classList.remove('shake');el.style.borderColor='';},600);
+  }
+
+  return { openSingle, openAll, onPriceChange, confirm, clearItem, close };
+})();
+window.RedemptionSheet = RedemptionSheet;
+function closeRedeemSheet() { RedemptionSheet.close(); }
 </script>
 
 <script>
@@ -1192,12 +1385,13 @@ function renderCashier(container) {
         <div class="ct-left">
           <div class="ct-items" id="ct-items">0 件商品</div>
           <div class="ct-total" id="ct-total">¥0.00</div>
+          <div class="ct-ar-hint hidden" id="ct-ar-hint"></div>
         </div>
-        <!-- ★ 优惠按钮 -->
+        <button class="ct-redeem-btn" id="ct-redeem-btn" disabled onclick="Accounting._openRedeemAll()">🔄 整单换购</button>
         <button class="ct-disc-btn" id="ct-disc-btn" disabled onclick="Accounting._openDiscount()">🏷️ 优惠</button>
         <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>出售</button>
       </div>
-      <!-- ★ 应收快捷入口（独立于收银流程，随时可用）-->
+      <!-- ★ 应收快捷入口 -->
       <div style="text-align:center;margin-top:-4px;margin-bottom:8px">
         <button onclick="ARSheet.open()" style="background:none;border:none;color:var(--orange);font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;padding:4px 0">
           📬 登记应收账款（换购差价/厂家补贴）
@@ -1226,6 +1420,12 @@ function renderCashier(container) {
   Accounting._openDiscount = () => {
     if (!cart.length) return;
     DiscountSheet.open(cart, (newCart) => { cart=newCart; renderCart(); });
+  };
+
+  // ★ 整单换购入口
+  Accounting._openRedeemAll = () => {
+    if (!cart.length) return;
+    RedemptionSheet.openAll(cart, (newCart) => { cart = newCart; renderCart(); });
   };
 
   inp.addEventListener('input', () => {
@@ -1271,37 +1471,75 @@ function renderCashier(container) {
   function renderCart() {
     const el=container.querySelector('#cashier-cart');
     el.innerHTML=cart.length
-      ?cart.map((item,i)=>`
+      ?cart.map((item,i)=>{
+        const origPrice = item.origSalePrice || item.salePrice;
+        const displayPrice = item.origSalePrice && item.origSalePrice !== item.salePrice
+          ? `<span style="text-decoration:line-through;color:#CCC;margin-right:3px">${Engine.fmtMoney(item.origSalePrice)}</span><span style="color:var(--red)">${Engine.fmtMoney(item.salePrice)}</span>`
+          : Engine.fmtMoney(item.salePrice);
+        const redeemChip = item.isRedemption
+          ? `<button class="ci-redeem-chip active" onclick="Accounting._clearRedeem(${i})">
+               🔄 换购·实付${Engine.fmtMoney(item.redemptionPrice)} <span style="font-size:10px;opacity:.7">✕</span>
+             </button>`
+          : `<button class="ci-redeem-chip" onclick="Accounting._openRedeemSingle(${i})">🔄 换购</button>`;
+        return `
         <div class="cart-item">
           <div class="ci-info">
             <div class="ci-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;font-weight:700;margin-left:4px">批次'+item.batchNo+'</span>':''}</div>
-            <div class="ci-price">
-              ${item.origSalePrice&&item.origSalePrice!==item.salePrice
-                ?'<span style="text-decoration:line-through;color:#CCC;margin-right:3px">'+Engine.fmtMoney(item.origSalePrice)+'</span><span style="color:var(--red)">'+Engine.fmtMoney(item.salePrice)+'</span>'
-                :Engine.fmtMoney(item.salePrice)}/件 · 进价 ${Engine.fmtMoney(item.costPrice)}
-            </div>
+            <div class="ci-price">${displayPrice}/件 · 进价 ${Engine.fmtMoney(item.costPrice)}</div>
+            ${redeemChip}
           </div>
           <div class="ci-qty-ctrl">
             <button class="qty-btn" onclick="Accounting._cartQty(${i},-1)">−</button>
             <span class="qty-val">${item.qty}</span>
             <button class="qty-btn" onclick="Accounting._cartQty(${i},1)">+</button>
           </div>
-          <div class="ci-subtotal">${Engine.fmtMoney(item.salePrice*item.qty)}</div>
+          <div class="ci-subtotal">${Engine.fmtMoney(origPrice*item.qty)}</div>
           <button class="ci-del" onclick="Accounting._cartDel(${i})">✕</button>
-        </div>`).join('')
+        </div>`;
+      }).join('')
       :'<div class="cart-empty">搜索或扫码添加商品 🛍️</div>';
     _updateTotal();
   }
 
   function _updateTotal() {
-    const total=cart.reduce((a,c)=>a+c.salePrice*c.qty,0);
-    const count=cart.reduce((a,c)=>a+c.qty,0);
-    container.querySelector('#ct-items').textContent=count+' 件商品';
-    container.querySelector('#ct-total').textContent=Engine.fmtMoney(total);
-    const empty=cart.length===0;
-    container.querySelector('#ct-btn').disabled=empty;
-    container.querySelector('#ct-disc-btn').disabled=empty;
+    // 实收 = 换购商品按换购价，普通商品按售价
+    const cashTotal = cart.reduce((a,c) => {
+      const p = c.isRedemption ? parseFloat(c.redemptionPrice||0) : (c.origSalePrice||c.salePrice);
+      return a + p * c.qty;
+    }, 0);
+    // 应收 = 换购差价合计
+    const arTotal = cart.reduce((a,c) => {
+      if (!c.isRedemption) return a;
+      const orig = c.origSalePrice || c.salePrice;
+      return a + (orig - parseFloat(c.redemptionPrice||0)) * c.qty;
+    }, 0);
+    const count = cart.reduce((a,c)=>a+c.qty,0);
+    const hasRedeem = cart.some(c=>c.isRedemption);
+
+    container.querySelector('#ct-items').textContent = count + ' 件商品';
+    container.querySelector('#ct-total').textContent = Engine.fmtMoney(cashTotal);
+    const arHint = container.querySelector('#ct-ar-hint');
+    if (arHint) {
+      if (hasRedeem && arTotal > 0) {
+        arHint.textContent = '另应收差价 ' + Engine.fmtMoney(arTotal);
+        arHint.classList.remove('hidden');
+      } else {
+        arHint.classList.add('hidden');
+      }
+    }
+    const empty = cart.length === 0;
+    container.querySelector('#ct-btn').disabled      = empty;
+    container.querySelector('#ct-disc-btn').disabled = empty;
+    container.querySelector('#ct-redeem-btn').disabled = empty;
   }
+
+  // ★ 单品换购 / 取消换购
+  Accounting._openRedeemSingle = (i) => {
+    RedemptionSheet.openSingle(cart, i, (newCart) => { cart = newCart; renderCart(); });
+  };
+  Accounting._clearRedeem = (i) => {
+    RedemptionSheet.clearItem(cart, i, () => renderCart());
+  };
 
   Accounting._cartQty=(i,d)=>{cart[i].qty=Math.max(1,Math.min(cart[i].qty+d,cart[i].maxQty));renderCart();};
   Accounting._cartDel=(i)=>{cart.splice(i,1);renderCart();};
@@ -1310,7 +1548,9 @@ function renderCashier(container) {
     const record=Engine.recordSale(cart);
     cart=[];renderCart();
     const su=container.querySelector('#cashier-success');
-    container.querySelector('#ss-sub').textContent='共收 '+Engine.fmtMoney(record.total)+' · 毛利 '+Engine.fmtMoney(record.profit);
+    let subText='共收 '+Engine.fmtMoney(record.cashCollected)+' · 毛利 '+Engine.fmtMoney(record.profit);
+    if(record.arTotal>0) subText+=' · 应收 '+Engine.fmtMoney(record.arTotal);
+    container.querySelector('#ss-sub').textContent=subText;
     su.classList.remove('hidden');su.style.animation='none';
     requestAnimationFrame(()=>{su.style.animation='';});
     setTimeout(()=>su.classList.add('hidden'),3000);
