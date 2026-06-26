@@ -217,7 +217,7 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 .ss-icon { font-size:56px; } .ss-text { font-size:22px; font-weight:900; color:var(--text); margin-top:10px; } .ss-sub { font-size:14px; color:var(--text-3); margin-top:6px; }
 
 /* ── 批次选择弹窗 ── */
-.batch-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:600; align-items:flex-end; }
+.batch-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:800; align-items:flex-end; }
 .batch-overlay.open { display:flex; animation:fadeIn .2s ease; }
 .batch-sheet { background:#fff; width:100%; border-radius:28px 28px 0 0; padding:0 20px 40px; animation:sheetUp .3s ease; max-height:75vh; overflow-y:auto; }
 .batch-handle { width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px; }
@@ -2148,11 +2148,12 @@ function refreshSnake() {
 //  ★ ReceiptViewer — 销售单查看器（美式小票风格，左右滑动翻页）
 // ════════════════════════════════════════════════════════════════════════════
 const ReceiptViewer = (function(){
-  let _receipts = [], _cur = 0, _startX = 0;
+  let _receipts = [], _cur = 0, _startX = 0, _bound = false;
 
   function open(dateKey) {
     _receipts = Engine.getSales().filter(function(s){ return s.date === dateKey; });
     if (!_receipts.length) {
+      // 有销售记录的天才会显示"▶ 查看"，这里是保险措施
       alert('这一天还没有销售记录');
       return;
     }
@@ -2160,53 +2161,57 @@ const ReceiptViewer = (function(){
     _render();
     var ov = document.getElementById('receipt-overlay');
     ov.style.display = 'flex';
-    // 绑定触摸滑动（只绑一次）
-    var card = document.getElementById('receipt-card');
-    card.ontouchstart = function(e){ _startX = e.touches[0].clientX; };
-    card.ontouchend   = function(e){
-      var diff = _startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 44) { diff > 0 ? next() : prev(); }
-    };
+    // 绑定触摸滑动（只绑一次，避免重复注册）
+    if (!_bound) {
+      _bound = true;
+      var card = document.getElementById('receipt-card');
+      card.addEventListener('touchstart', function(e){ _startX = e.touches[0].clientX; }, {passive:true});
+      card.addEventListener('touchend', function(e){
+        var diff = _startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 44) { diff > 0 ? next() : prev(); }
+      }, {passive:true});
+    }
   }
 
   function _render() {
-    // 导航信息
     document.getElementById('rv-nav-info').textContent =
       '第 ' + (_cur+1) + ' 张 / 共 ' + _receipts.length + ' 张';
-    // 分页点
     document.getElementById('rv-dots').innerHTML = _receipts.map(function(_,i){
-      return '<div style="width:'+(i===_cur?18:6)+'px;height:6px;border-radius:3px;background:'+(i===_cur?'#fff':'rgba(255,255,255,.3)')+';transition:all .2s"></div>';
+      var active = i === _cur;
+      return '<div style="width:'+(active?18:6)+'px;height:6px;border-radius:3px;'+
+             'background:'+(active?'#fff':'rgba(255,255,255,.3)')+';transition:all .2s"></div>';
     }).join('');
-    // 收据内容
     document.getElementById('receipt-card').innerHTML = _buildHTML(_receipts[_cur]);
   }
 
   function _buildHTML(rec) {
-    var dt       = new Date(rec.createdAt);
-    var timeStr  = dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
-    var cashIn   = rec.cashCollected != null ? rec.cashCollected : rec.total;
-    var hasAR    = rec.arTotal > 0;
+    var dt      = new Date(rec.createdAt);
+    var timeStr = dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
+    // cashCollected 可能为 undefined（旧数据），此时等于 total
+    var cashIn  = (rec.cashCollected != null) ? rec.cashCollected : rec.total;
+    var hasAR   = rec.arTotal > 0;
+    // 浮点安全比较：差值超过 0.005 才显示 CASH IN 行
+    var showCashIn = Math.abs(cashIn - rec.total) > 0.005;
 
     var itemsHTML = '';
     rec.items.forEach(function(item){
       var origPrice  = item.origSalePrice || item.salePrice;
-      var itemRevenue= parseFloat(item.isRedemption
-        ? (parseFloat(item.redemptionPrice||0) + parseFloat(item.costPrice))
-        : parseFloat(origPrice)) * parseFloat(item.qty);
       var itemProfit = (parseFloat(origPrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
       itemsHTML +=
         '<div class="rc-item-block">'+
-          '<div class="rc-item-name">'+item.name+
-            (item.batchNo?'<span class="rc-batch">·批'+item.batchNo+'</span>':'')+
-            (rec.retroactive?'<span class="rc-retro-badge">补记</span>':'')+
+          '<div class="rc-item-name">'+
+            item.name+
+            (item.batchNo ? '<span class="rc-batch"> ·批'+item.batchNo+'</span>' : '')+
+            (rec.retroactive ? '<span class="rc-retro-badge">补记</span>' : '')+
           '</div>'+
           '<div class="rc-row"><span>UNIT PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
-          '<div class="rc-row"><span>UNIT COST</span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
-          '<div class="rc-row"><span>QTY</span><span>× '+item.qty+'</span></div>'+
-          '<div class="rc-row profit"><span>MARGIN</span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'+
+          '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+          '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
+          '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'+
           (item.isRedemption
-            ? '<div class="rc-row redeem"><span>REDEMPTION @ '+Engine.fmtMoney(item.redemptionPrice)+'</span><span></span></div>'+
-              '<div class="rc-row ar-row"><span>A/R ← '+(item.supplierName||'供应商')+'</span><span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'
+            ? '<div class="rc-row redeem"><span>REDEMPTION@'+Engine.fmtMoney(item.redemptionPrice)+'</span><span></span></div>'+
+              '<div class="rc-row ar-row"><span>A/R ← '+(item.supplierName||'供应商')+'</span>'+
+              '<span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'
             : '')+
         '</div>'+
         '<hr class="rc-divider">';
@@ -2218,28 +2223,22 @@ const ReceiptViewer = (function(){
       '<div class="rc-date">'+rec.date+'  '+timeStr+'</div>'+
       '<hr class="rc-divider" style="margin-top:10px">'+
       itemsHTML+
-      '<div style="margin-top:6px">'+
-        '<div class="rc-total-row"><span>ITEMS</span><span>'+totalItems+' 件</span></div>'+
-        '<div class="rc-total-row main"><span>REVENUE</span><span>'+Engine.fmtMoney(rec.total)+'</span></div>'+
-        (cashIn !== rec.total
-          ? '<div class="rc-total-row"><span>CASH IN</span><span>'+Engine.fmtMoney(cashIn)+'</span></div>'
+      '<div style="margin-top:4px">'+
+        '<div class="rc-total-row"><span>ITEMS   </span><span>'+totalItems+' 件</span></div>'+
+        '<div class="rc-total-row main"><span>REVENUE </span><span>'+Engine.fmtMoney(rec.total)+'</span></div>'+
+        (showCashIn
+          ? '<div class="rc-total-row"><span>CASH IN </span><span>'+Engine.fmtMoney(cashIn)+'</span></div>'
           : '')+
         '<hr class="rc-divider solid">'+
         '<div class="rc-total-row profit"><span>GROSS PROFIT</span><span>'+Engine.fmtMoney(rec.profit)+'</span></div>'+
-        (hasAR ? '<div class="rc-total-row ar"><span>A/R CREATED</span><span>'+Engine.fmtMoney(rec.arTotal)+'</span></div>' : '')+
+        (hasAR ? '<div class="rc-total-row ar"><span>A/R CREATED </span><span>'+Engine.fmtMoney(rec.arTotal)+'</span></div>' : '')+
       '</div>'+
       '<div class="rc-footer">★  THANK  YOU  ★</div>';
   }
 
-  function next() {
-    if (_cur < _receipts.length - 1) { _cur++; _render(); }
-  }
-  function prev() {
-    if (_cur > 0) { _cur--; _render(); }
-  }
-  function close() {
-    document.getElementById('receipt-overlay').style.display = 'none';
-  }
+  function next() { if (_cur < _receipts.length-1) { _cur++; _render(); } }
+  function prev() { if (_cur > 0)                  { _cur--; _render(); } }
+  function close() { document.getElementById('receipt-overlay').style.display = 'none'; }
 
   return { open, next, prev, close };
 })();
@@ -2250,11 +2249,13 @@ window.ReceiptViewer = ReceiptViewer;
 // ════════════════════════════════════════════════════════════════════════════
 const RetroSheet = (function(){
   var _cart = [];
+  var _clickHandler = null;   // 保存 click handler 引用，防止重复注册
 
   function open() {
     var key = _currentSheetKey;
     var day = _currentSheetDay;
     _cart = [];
+
     var el = document.getElementById('retro-content');
     el.innerHTML =
       '<div class="page-title-bar">'+
@@ -2265,10 +2266,11 @@ const RetroSheet = (function(){
                   'padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:700;color:#713F12">'+
         '📅 补记日期：'+(MONTH+1)+'月'+day+'日（'+key+'）'+
       '</div>'+
-      '<div class="search-wrap">'+
+      '<div class="search-wrap" id="retro-search-wrap">'+
         '<div class="search-box">'+
           '<span class="search-ico">🔍</span>'+
-          '<input id="retro-search" class="search-inp" type="text" placeholder="搜索商品名称…" autocomplete="off">'+
+          '<input id="retro-search" class="search-inp" type="text"'+
+                 'placeholder="搜索商品名称…" autocomplete="off">'+
         '</div>'+
         '<div id="retro-dd" class="search-dropdown hidden"></div>'+
       '</div>'+
@@ -2280,20 +2282,30 @@ const RetroSheet = (function(){
         '<span style="font-size:13px;font-weight:700;color:var(--text-3)" id="retro-count">0 件商品</span>'+
         '<span style="font-size:18px;font-weight:900;color:var(--text)" id="retro-sum">¥0</span>'+
       '</div>'+
-      '<button class="form-submit" id="retro-btn" disabled onclick="RetroSheet.submit()">📝 确认补记</button>'+
+      '<button class="form-submit" id="retro-btn" disabled onclick="RetroSheet.submit()">'+
+        '📝 确认补记'+
+      '</button>'+
       '<div class="form-success hidden" id="retro-ok">✅ 补记成功！</div>';
 
-    // 绑定搜索
+    _bindSearch();
+    _renderCart();
+
+    document.getElementById('retro-overlay').style.display = 'flex';
+  }
+
+  function _bindSearch() {
     var inp = document.getElementById('retro-search');
     var dd  = document.getElementById('retro-dd');
+    if (!inp) return;
+
     inp.addEventListener('input', function(){
-      var q = inp.value.trim().toLowerCase();
+      var q   = inp.value.trim().toLowerCase();
       if (!q) { dd.classList.add('hidden'); return; }
-      var inv = Engine.getInventory().filter(function(p){ return parseFloat(p.qty)>0; });
+      var inv = Engine.getInventory().filter(function(p){ return parseFloat(p.qty) > 0; });
       var nameMap = {};
       inv.forEach(function(p){
         if (!p.name.toLowerCase().includes(q)) return;
-        if (!nameMap[p.name]) nameMap[p.name]={name:p.name,totalQty:0,batches:0};
+        if (!nameMap[p.name]) nameMap[p.name] = { name:p.name, totalQty:0, batches:0 };
         nameMap[p.name].totalQty += parseFloat(p.qty);
         nameMap[p.name].batches++;
       });
@@ -2302,64 +2314,72 @@ const RetroSheet = (function(){
         ? results.map(function(r){
             return '<div class="dd-item" data-name="'+r.name+'">'+
               '<span class="dd-name">'+r.name+'</span>'+
-              '<span class="dd-info">库存'+r.totalQty+'件'+(r.batches>1?' · '+r.batches+'批次':'')+'</span></div>';
+              '<span class="dd-info">库存'+r.totalQty+'件'+
+                (r.batches>1?' · '+r.batches+'批次':'')+
+              '</span></div>';
           }).join('')
         : '<div class="dd-empty">没有找到商品</div>';
-      dd.querySelectorAll('.dd-item').forEach(function(item){
-        item.onclick = function(){
-          inp.value=''; dd.classList.add('hidden');
-          BatchPicker.open(item.dataset.name, function(batch){ if(batch) _add(batch); });
+      dd.querySelectorAll('.dd-item').forEach(function(row){
+        row.onclick = function(){
+          inp.value = ''; dd.classList.add('hidden');
+          BatchPicker.open(row.dataset.name, function(batch){ if(batch) _add(batch); });
         };
       });
       dd.classList.remove('hidden');
     });
-    document.addEventListener('click', function(e){
-      var wrap = el.querySelector('.search-wrap');
-      if (wrap && !wrap.contains(e.target)) dd.classList.add('hidden');
-    });
 
-    _renderCart();
-    document.getElementById('retro-overlay').classList.add('open');
+    // 移除旧监听器再添加新的，防止 open() 多次调用时重复注册
+    if (_clickHandler) document.removeEventListener('click', _clickHandler);
+    _clickHandler = function(e){
+      var wrap = document.getElementById('retro-search-wrap');
+      if (wrap && !wrap.contains(e.target)) dd.classList.add('hidden');
+    };
+    document.addEventListener('click', _clickHandler);
   }
 
   function _add(prod) {
-    var ex = _cart.find(function(c){ return c.productId===prod.id; });
-    if (ex) { ex.qty = Math.min(ex.qty+1, parseFloat(prod.qty)); }
+    var ex = _cart.find(function(c){ return c.productId === prod.id; });
+    if (ex) { ex.qty = Math.min(ex.qty + 1, parseFloat(prod.qty)); }
     else {
-      _cart.push({ productId:prod.id, name:prod.name, batchNo:prod.batchNo, qty:1,
-        costPrice:parseFloat(prod.costPrice), salePrice:parseFloat(prod.salePrice),
-        maxQty:parseFloat(prod.qty) });
+      _cart.push({
+        productId: prod.id, name: prod.name, batchNo: prod.batchNo, qty: 1,
+        costPrice: parseFloat(prod.costPrice), salePrice: parseFloat(prod.salePrice),
+        maxQty: parseFloat(prod.qty),
+      });
     }
     _renderCart();
   }
 
   function _renderCart() {
-    var el = document.getElementById('retro-cart'); if(!el) return;
+    var el = document.getElementById('retro-cart'); if (!el) return;
     el.innerHTML = _cart.length
-      ? _cart.map(function(item,i){
+      ? _cart.map(function(item, i){
           return '<div class="cart-item">'+
             '<div class="ci-info">'+
-              '<div class="ci-name">'+item.name+'</div>'+
-              '<div class="ci-price">'+Engine.fmtMoney(item.salePrice)+'/件 · 进价'+Engine.fmtMoney(item.costPrice)+'</div>'+
+              '<div class="ci-name">'+item.name+
+                (item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+item.batchNo+'</span>':'')+
+              '</div>'+
+              '<div class="ci-price">'+Engine.fmtMoney(item.salePrice)+'/件 · 进价 '+Engine.fmtMoney(item.costPrice)+'</div>'+
             '</div>'+
             '<div class="ci-qty-ctrl">'+
               '<button class="qty-btn" onclick="RetroSheet._adj('+i+',-1)">−</button>'+
               '<span class="qty-val">'+item.qty+'</span>'+
               '<button class="qty-btn" onclick="RetroSheet._adj('+i+',1)">+</button>'+
             '</div>'+
-            '<div class="ci-subtotal">'+Engine.fmtMoney(item.salePrice*item.qty)+'</div>'+
+            '<div class="ci-subtotal">'+Engine.fmtMoney(item.salePrice * item.qty)+'</div>'+
             '<button class="ci-del" onclick="RetroSheet._del('+i+')">✕</button>'+
           '</div>';
         }).join('')
       : '<div class="cart-empty">搜索添加商品 📦</div>';
-    var total = _cart.reduce(function(a,c){ return a+c.salePrice*c.qty; },0);
-    var count = _cart.reduce(function(a,c){ return a+c.qty; },0);
+
+    var total = _cart.reduce(function(a,c){ return a + c.salePrice * c.qty; }, 0);
+    var count = _cart.reduce(function(a,c){ return a + c.qty; }, 0);
     var ce = document.getElementById('retro-count');
     var se = document.getElementById('retro-sum');
     var be = document.getElementById('retro-btn');
-    if(ce) ce.textContent = count + ' 件商品';
-    if(se) se.textContent = Engine.fmtMoney(total);
-    if(be) be.disabled = _cart.length === 0;
+    if (ce) ce.textContent = count + ' 件商品';
+    if (se) se.textContent = Engine.fmtMoney(total);
+    if (be) be.disabled = (_cart.length === 0);
   }
 
   function submit() {
@@ -2367,67 +2387,85 @@ const RetroSheet = (function(){
     Engine.recordSaleOnDate(_cart, _currentSheetKey);
     _cart = [];
     var ok = document.getElementById('retro-ok');
-    if(ok){ ok.classList.remove('hidden'); setTimeout(function(){ ok.classList.add('hidden'); },2000); }
+    if (ok) {
+      ok.classList.remove('hidden');
+      setTimeout(function(){ ok.classList.add('hidden'); }, 2000);
+    }
     _renderCart();
     updateHeader();
     refreshSnake();
-    if(window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
+    if (window.Dashboard && window.Dashboard.refresh) window.Dashboard.refresh();
   }
 
   function close() {
-    document.getElementById('retro-overlay').classList.remove('open');
+    document.getElementById('retro-overlay').style.display = 'none';
+    // 清理全局 click 监听器
+    if (_clickHandler) {
+      document.removeEventListener('click', _clickHandler);
+      _clickHandler = null;
+    }
   }
 
   return {
     open, submit, close,
-    _adj: function(i,d){ _cart[i].qty=Math.max(1,Math.min(_cart[i].qty+d,_cart[i].maxQty)); _renderCart(); },
-    _del: function(i)  { _cart.splice(i,1); _renderCart(); },
+    _adj: function(i, d){ _cart[i].qty = Math.max(1, Math.min(_cart[i].qty+d, _cart[i].maxQty)); _renderCart(); },
+    _del: function(i)   { _cart.splice(i, 1); _renderCart(); },
   };
 })();
 window.RetroSheet = RetroSheet;
+</script>
 
-<!-- ★ 销售单查看器 -->
+<!-- ★ 销售单查看器 overlay (z-index 900, outside all script blocks) -->
 <div id="receipt-overlay"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:900;
             flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px"
      onclick="if(event.target===this)ReceiptViewer.close()">
+
+  <!-- 顶部导航：上一张 / 页码 / 下一张 -->
   <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px">
     <button onclick="ReceiptViewer.prev()"
-      style="background:rgba(255,255,255,.12);border:none;color:#fff;width:36px;height:36px;
-             border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+      style="background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;
+             border-radius:50%;font-size:22px;cursor:pointer;flex-shrink:0;
+             display:flex;align-items:center;justify-content:center">‹</button>
     <div style="text-align:center">
       <div style="color:#fff;font-size:13px;font-weight:700" id="rv-nav-info">第 1 张 / 共 1 张</div>
-      <div id="rv-dots" style="display:flex;gap:5px;justify-content:center;margin-top:4px"></div>
+      <div id="rv-dots" style="display:flex;gap:5px;justify-content:center;margin-top:5px"></div>
     </div>
     <button onclick="ReceiptViewer.next()"
-      style="background:rgba(255,255,255,.12);border:none;color:#fff;width:36px;height:36px;
-             border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+      style="background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;
+             border-radius:50%;font-size:22px;cursor:pointer;flex-shrink:0;
+             display:flex;align-items:center;justify-content:center">›</button>
   </div>
 
   <!-- 收据卡片 -->
   <div id="receipt-card"
-       style="background:#FEFEFE;width:100%;max-width:340px;max-height:62vh;overflow-y:auto;
+       style="background:#FEFEFE;width:100%;max-width:340px;max-height:60vh;overflow-y:auto;
               border-radius:2px;font-family:'Courier New',monospace;
-              box-shadow:0 12px 48px rgba(0,0,0,.7);padding:22px 18px;
-              transition:transform .22s ease,opacity .22s ease">
+              box-shadow:0 12px 48px rgba(0,0,0,.7);padding:22px 18px">
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px">
-    <div style="color:rgba(255,255,255,.45);font-size:12px;font-weight:700">← 左滑 / 右滑 →</div>
+    <div style="color:rgba(255,255,255,.4);font-size:12px;font-weight:700">← 左滑 / 右滑 →</div>
     <button onclick="ReceiptViewer.close()"
       style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
-             color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-      关闭
-    </button>
+             color:#fff;padding:9px 22px;border-radius:20px;font-size:13px;font-weight:700;
+             cursor:pointer;font-family:inherit">关闭</button>
   </div>
 </div>
 
-<!-- ★ 补记销售弹窗 -->
-<div class="modal-overlay" id="retro-overlay" onclick="if(event.target===this)RetroSheet.close()">
-  <div class="modal-sheet" style="max-height:88vh;overflow-y:auto">
-    <div class="modal-handle"></div>
+<!-- ★ 补记销售弹窗 (z-index 750, 低于 batch-overlay 的 800 以便批次弹窗盖在上面) -->
+<div id="retro-overlay"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);
+            z-index:750;align-items:flex-end;justify-content:center"
+     onclick="if(event.target===this)RetroSheet.close()">
+  <div style="background:#fff;width:100%;max-width:480px;border-radius:28px 28px 0 0;
+              padding:0 20px 44px;max-height:88vh;overflow-y:auto">
+    <div style="width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px"></div>
     <div id="retro-content" style="padding-bottom:8px"></div>
-    <button class="btn-sh btn-ghost" style="margin-top:4px" onclick="RetroSheet.close()">关闭</button>
+    <button onclick="RetroSheet.close()"
+      style="width:100%;padding:14px;background:#F0F0F0;color:#555;border:none;
+             border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;
+             font-family:inherit;box-shadow:0 4px 0 #CECECE">关闭</button>
   </div>
 </div>
 
