@@ -2195,8 +2195,12 @@ const ReceiptViewer = (function(){
 
     var itemsHTML = '';
     rec.items.forEach(function(item){
-      var origPrice  = item.origSalePrice || item.salePrice;
-      var itemProfit = (parseFloat(origPrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
+      var origPrice = item.origSalePrice || item.salePrice;
+      // ★ 换购商品：毛利 = 消费者实付额（收入 = 实付+进价，成本 = 进价，利润 = 实付）
+      // 普通商品：毛利 = (售价 - 进价) × 数量
+      var itemProfit = item.isRedemption
+        ? parseFloat(item.redemptionPrice || 0) * parseFloat(item.qty)
+        : (parseFloat(origPrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
       itemsHTML +=
         '<div class="rc-item-block">'+
           '<div class="rc-item-name">'+
@@ -2204,15 +2208,21 @@ const ReceiptViewer = (function(){
             (item.batchNo ? '<span class="rc-batch"> ·批'+item.batchNo+'</span>' : '')+
             (rec.retroactive ? '<span class="rc-retro-badge">补记</span>' : '')+
           '</div>'+
-          '<div class="rc-row"><span>UNIT PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
-          '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
-          '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
-          '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'+
           (item.isRedemption
-            ? '<div class="rc-row redeem"><span>REDEMPTION@'+Engine.fmtMoney(item.redemptionPrice)+'</span><span></span></div>'+
+            // 换购商品：显示原价（参考）、实付价、进价、应收
+            ? '<div class="rc-row"><span>ORIG PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
+              '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+              '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
+              '<div class="rc-row redeem"><span>REDEEMED @</span><span>'+Engine.fmtMoney(item.redemptionPrice)+'</span></div>'+
               '<div class="rc-row ar-row"><span>A/R ← '+(item.supplierName||'供应商')+'</span>'+
-              '<span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'
-            : '')+
+                '<span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'+
+              '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
+            // 普通商品
+            : '<div class="rc-row"><span>UNIT PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
+              '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+              '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
+              '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
+          )+
         '</div>'+
         '<hr class="rc-divider">';
     });
