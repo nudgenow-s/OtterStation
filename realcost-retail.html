@@ -722,7 +722,7 @@ const Engine = (function () {
         arTotal       += costP * qty;       // ★ 应收 = 进价（供应商补偿成本）
       } else {
         // 普通商品：收入 = 售价（含优惠后价），现金 = 售价
-        total         += parseFloat(origPrice) * qty;
+        total         += parseFloat(item.salePrice) * qty;
         cost          += costP * qty;
         cashCollected += parseFloat(item.salePrice) * qty;
       }
@@ -860,7 +860,7 @@ const Engine = (function () {
         cashCollected += redeemP * qty;
         arTotal       += costP * qty;
       } else {
-        total         += parseFloat(origPrice) * qty;
+        total         += parseFloat(item.salePrice) * qty;
         cost          += costP * qty;
         cashCollected += parseFloat(item.salePrice) * qty;
       }
@@ -2274,7 +2274,7 @@ const ReceiptViewer = (function(){
       // 普通商品：毛利 = (售价 - 进价) × 数量
       var itemProfit = item.isRedemption
         ? parseFloat(item.redemptionPrice || 0) * parseFloat(item.qty)
-        : (parseFloat(origPrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
+        : (parseFloat(item.salePrice) - parseFloat(item.costPrice)) * parseFloat(item.qty);
       itemsHTML +=
         '<div class="rc-item-block">'+
           '<div class="rc-item-name">'+
