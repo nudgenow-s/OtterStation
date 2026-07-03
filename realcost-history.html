@@ -221,6 +221,34 @@ body {
 .ar-badge-pending  { display:inline-block; padding:2px 7px; background:#FFF3CD; color:var(--warn); border-radius:6px; font-size:10px; font-weight:800; margin-left:6px; }
 .ar-badge-settled  { display:inline-block; padding:2px 7px; background:#E8F5E9; color:var(--green); border-radius:6px; font-size:10px; font-weight:800; margin-left:6px; }
 
+/* ── 应收账款 · 多选批量核销 ── */
+.hidden { display:none !important; }
+.ar-batch-toggle-btn {
+  padding:6px 12px; background:none; border:1.5px solid var(--border-md);
+  border-radius:10px; font-size:12px; font-weight:800; color:var(--text-2);
+  cursor:pointer; font-family:inherit;
+}
+.ar-batch-toggle-btn.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.ar-check {
+  width:20px; height:20px; border-radius:6px; border:2px solid var(--border-md);
+  background:#fff; flex-shrink:0; margin-top:2px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff;
+}
+.ar-check.checked { background:var(--primary); border-color:var(--primary); }
+.ar-batch-bar {
+  position:sticky; bottom:0; margin-top:10px; padding:12px 14px;
+  background:var(--bg-surface); border:1.5px solid var(--border-md); border-radius:14px;
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.ar-batch-info { font-size:12px; font-weight:700; color:var(--text-2); }
+.ar-batch-info span { color:var(--primary); font-weight:900; }
+.btn-ar-batch-settle {
+  padding:10px 14px; background:var(--green); color:#fff; border:none;
+  border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;
+  font-family:inherit; white-space:nowrap;
+}
+.btn-ar-batch-settle:disabled { background:#CCC; cursor:not-allowed; }
+
 /* ── 空状态 ── */
 .empty { text-align:center; color:var(--text-3); padding:48px 20px; font-size:14px; line-height:2; }
 
@@ -328,7 +356,17 @@ body {
       <span>📬 应收账款</span>
       <span style="font-size:11px;color:var(--text-3);font-weight:600" id="ar-total-badge"></span>
     </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+      <button id="ar-batch-toggle" class="ar-batch-toggle-btn" onclick="toggleArBatchMode()">☑️ 多选核销</button>
+    </div>
     <div id="ar-list"></div>
+    <!-- ★ 批量核销操作条（多选模式下显示） -->
+    <div id="ar-batch-bar" class="ar-batch-bar hidden">
+      <div class="ar-batch-info">
+        已选 <span id="ar-batch-count">0</span> 笔 · 合计 <span id="ar-batch-sum">¥0</span>
+      </div>
+      <button class="btn-ar-batch-settle" id="ar-batch-settle-btn" onclick="openBatchSettle()" disabled>💰 批量核销（现金到账）</button>
+    </div>
     <!-- 添加应收账款 -->
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
       <div class="form-lbl">登记新应收账款</div>
@@ -792,6 +830,7 @@ function renderReceivables(){
 
   if(!list.length){
     el.innerHTML = '<div class="empty" style="padding:16px 0;font-size:13px">暂无应收账款记录</div>';
+    _updateArBatchBar();
     return;
   }
 
@@ -815,8 +854,14 @@ function renderReceivables(){
     if(settled && r.settledDate){
       dueHint = '<div style="font-size:11px;color:var(--green);margin-top:2px">✓ 已核销 '+r.settledDate+'</div>';
     }
-    return '<div class="ar-item'+(settled?' settled':'')+'" id="ar-'+r.id+'">'+
-      '<div class="ar-info">'+
+    var checked = !!_arSelected[r.id];
+    // ★ 多选模式下、且未核销的记录才显示复选框
+    var checkboxHtml = (_arBatchMode && !settled)
+      ? '<div class="ar-check'+(checked?' checked':'')+'" onclick="toggleArSelect(\''+r.id+'\')">'+(checked?'✓':'')+'</div>'
+      : '';
+    return '<div class="ar-item'+(settled?' settled':'')+'" id="ar-'+r.id+'" style="display:flex;gap:10px">'+
+      checkboxHtml+
+      '<div class="ar-info" style="flex:1">'+
         '<div class="ar-counterparty">'+
           r.counterparty+
           (settled
@@ -828,11 +873,87 @@ function renderReceivables(){
       '</div>'+
       '<div class="ar-actions">'+
         '<div class="ar-amount'+(settled?' settled':'')+'">'+fmt(r.amount)+'</div>'+
-        (!settled?'<button class="btn-ar-settle" onclick="settleReceivable(\''+r.id+'\')">核销到账</button>':'')+
-        '<button class="btn-ar-del" onclick="deleteReceivable(\''+r.id+'\')">🗑</button>'+
+        (!settled && !_arBatchMode?'<button class="btn-ar-settle" onclick="settleReceivable(\''+r.id+'\')">核销到账</button>':'')+
+        (!_arBatchMode?'<button class="btn-ar-del" onclick="deleteReceivable(\''+r.id+'\')">🗑</button>':'')+
       '</div>'+
     '</div>';
   }).join('');
+
+  _updateArBatchBar();
+}
+
+// ══════════════════════════════════════════════════════
+//  ★ 应收账款 · 多选批量核销
+// ══════════════════════════════════════════════════════
+var _arBatchMode = false;
+var _arSelected  = {};   // { [id]: true }
+
+function toggleArBatchMode(){
+  _arBatchMode = !_arBatchMode;
+  _arSelected  = {}; // 切换模式时清空已选
+  var btn = document.getElementById('ar-batch-toggle');
+  if(btn) btn.classList.toggle('active', _arBatchMode);
+  var bar = document.getElementById('ar-batch-bar');
+  if(bar) bar.classList.toggle('hidden', !_arBatchMode);
+  renderReceivables();
+}
+
+function toggleArSelect(id){
+  if(_arSelected[id]) delete _arSelected[id];
+  else _arSelected[id] = true;
+  renderReceivables();
+}
+
+function _updateArBatchBar(){
+  var bar = document.getElementById('ar-batch-bar');
+  if(!bar) return;
+  bar.classList.toggle('hidden', !_arBatchMode);
+  if(!_arBatchMode) return;
+
+  var list = load(KEYS.receivables) || [];
+  var selectedItems = list.filter(function(r){ return _arSelected[r.id] && r.status !== 'settled'; });
+  var sum  = selectedItems.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
+
+  var countEl = document.getElementById('ar-batch-count');
+  var sumEl   = document.getElementById('ar-batch-sum');
+  var btnEl   = document.getElementById('ar-batch-settle-btn');
+  if(countEl) countEl.textContent = selectedItems.length;
+  if(sumEl)   sumEl.textContent   = fmt(sum);
+  if(btnEl)   btnEl.disabled      = selectedItems.length === 0;
+}
+
+// ★ 批量核销：只支持"现金到账"（补货到账需要逐条填写商品信息，不适合批量）
+function openBatchSettle(){
+  var list = load(KEYS.receivables) || [];
+  var selectedItems = list.filter(function(r){ return _arSelected[r.id] && r.status !== 'settled'; });
+  if(!selectedItems.length) return;
+
+  var sum = selectedItems.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
+  var names = selectedItems.map(function(r){ return r.counterparty; }).join('、');
+  if(!confirm('确认批量核销 '+selectedItems.length+' 笔应收账款？\n'+names+'\n合计现金 +'+fmt(sum))) return;
+
+  selectedItems.forEach(function(r){
+    var item = list.find(function(x){ return String(x.id)===String(r.id); });
+    if(item){
+      item.status      = 'settled';
+      item.settledDate = new Date().toLocaleDateString();
+      item.settleType  = 'cash';
+    }
+  });
+  save(KEYS.receivables, list);
+
+  var cash = parseFloat(load(KEYS.cash)) || 0;
+  cash += sum;
+  save(KEYS.cash, cash);
+
+  // 退出多选模式
+  _arBatchMode = false;
+  _arSelected  = {};
+  var toggleBtn = document.getElementById('ar-batch-toggle');
+  if(toggleBtn) toggleBtn.classList.remove('active');
+
+  renderAssets();
+  showToast('✅ 已批量核销 '+selectedItems.length+' 笔 · 现金 +'+fmt(sum));
 }
 
 function addReceivable(){
