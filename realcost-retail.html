@@ -259,12 +259,30 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 .disc-preview-left .disc-preview-lbl { font-size:12px; font-weight:800; color:var(--text-3); }
 .disc-preview-left .disc-save { font-size:12px; font-weight:800; color:var(--green); margin-top:2px; }
 .disc-preview-total { font-size:22px; font-weight:900; color:var(--orange); }
+.disc-margin { font-size:12px; font-weight:800; margin-top:2px; }
+.disc-margin.g { color:var(--green); }
+.disc-margin.o { color:var(--orange); }
+.disc-margin.r { color:var(--red); }
 
 /* ★ 损耗弹窗 */
 .loss-info-box { background:#FFF5F5; border-radius:14px; padding:14px 16px; margin-bottom:16px; }
 .loss-info-name { font-size:16px; font-weight:900; color:var(--text); margin-bottom:4px; }
 .loss-info-meta { font-size:12px; color:var(--text-3); }
 .loss-qty-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.loss-qty-inp {
+  width:56px; height:34px; text-align:center; font-size:16px; font-weight:900;
+  color:var(--text); border:2px solid var(--border); border-radius:10px;
+  font-family:inherit; outline:none; -moz-appearance:textfield;
+}
+.loss-qty-inp:focus { border-color:var(--red); }
+.loss-qty-inp::-webkit-outer-spin-button,
+.loss-qty-inp::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.loss-qty-max-btn {
+  padding:8px 12px; border-radius:10px; border:1.5px solid var(--red);
+  background:#FFF5F5; color:var(--red); font-size:12px; font-weight:800;
+  cursor:pointer; font-family:inherit; white-space:nowrap;
+}
+.loss-qty-max-btn:active { transform:scale(.95); }
 .loss-qty-lbl { font-size:14px; font-weight:800; color:var(--text); flex:1; }
 .loss-calc { background:var(--gray-bg); border-radius:12px; padding:11px 14px; margin-bottom:20px; font-size:13px; color:var(--text-2); font-weight:700; }
 .loss-calc span { color:var(--red); font-size:16px; font-weight:900; }
@@ -508,6 +526,7 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
       <div class="disc-preview-left">
         <div class="disc-preview-lbl">优惠后合计</div>
         <div class="disc-save" id="disc-save-lbl"></div>
+        <div class="disc-margin" id="disc-margin-lbl"></div>
       </div>
       <div class="disc-preview-total" id="disc-total-preview">¥0</div>
     </div>
@@ -587,10 +606,13 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
     </div>
     <div class="loss-qty-row">
       <span class="loss-qty-lbl">损耗数量</span>
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px">
         <button class="qty-btn" onclick="LossSheet.adj(-1)">−</button>
-        <span class="qty-val" id="loss-qty-val">1</span>
+        <input id="loss-qty-val" class="loss-qty-inp" type="number" min="1" step="1"
+               value="1" oninput="LossSheet.onInput(this.value)"
+               onblur="LossSheet.onBlur()">
         <button class="qty-btn" onclick="LossSheet.adj(1)">+</button>
+        <button class="loss-qty-max-btn" onclick="LossSheet.setMax()">全部</button>
       </div>
     </div>
     <div class="loss-calc" id="loss-calc">损耗成本：<span>¥0</span></div>
@@ -774,12 +796,11 @@ const Engine = (function () {
     p.qty = Math.max(0, parseFloat(p.qty) - lossQty);
     saveInventory(inv);
 
-    // 写日历历史
+    // 写日历历史 —— ★ 只累加 loss，不再倒扣 profit（毛利与损耗分离）
     const h = getHistory();
     if (!h[dk]) h[dk] = {};
     h[dk].loss      = (parseFloat(h[dk].loss)||0) + lossCost;
     h[dk].lossCount = (parseInt(h[dk].lossCount)||0) + 1;
-    h[dk].profit    = (parseFloat(h[dk].profit)||0) - lossCost;
     saveHistory(h);
 
     // 写 revenue_history（供 realcost-history 现金流页面联动）
@@ -788,7 +809,6 @@ const Engine = (function () {
       if (!rh[dk]) rh[dk] = {};
       rh[dk].loss      = ((parseFloat(rh[dk].loss)||0)      + lossCost).toFixed(2);
       rh[dk].lossCount = (parseInt(rh[dk].lossCount)||0)    + 1;
-      rh[dk].profit    = ((parseFloat(rh[dk].profit)||0)    - lossCost).toFixed(2);
       localStorage.setItem('revenue_history', JSON.stringify(rh));
     } catch(e) {}
 
@@ -936,7 +956,11 @@ const Engine = (function () {
         if ((parseFloat(h[k].revenue)||0)>0 || (parseFloat(h[k].loss)||0)>0) days++;
       }
     });
-    return { revenue, profit, days, totalLoss, gm: revenue>0?Math.round(profit/revenue*100):0 };
+    return {
+      revenue, profit, days, totalLoss,
+      netProfit: profit - totalLoss,   // ★ 毛利 - 损耗后的净值，仅供展示，不覆盖 profit
+      gm: revenue>0?Math.round(profit/revenue*100):0,
+    };
   }
 
   function getStreak() {
@@ -1106,14 +1130,31 @@ const DiscountSheet = (function () {
   }
 
   function _updatePreview() {
-    let total=0, origTotal=0;
+    let total=0, origTotal=0, cost=0;
     _cart.forEach((item,i)=>{
-      total     += _effectivePrice(item,i)*item.qty;
+      const p = _effectivePrice(item,i);
+      total     += p*item.qty;
       origTotal += (item.origSalePrice||item.salePrice)*item.qty;
+      cost      += parseFloat(item.costPrice||0)*item.qty;
     });
     const saved=origTotal-total;
     document.getElementById('disc-total-preview').textContent=Engine.fmtMoney(total);
     document.getElementById('disc-save-lbl').textContent=saved>0.005?'优惠 '+Engine.fmtMoney(saved):'';
+
+    // ★ 优惠后毛利率实时预览
+    const marginEl = document.getElementById('disc-margin-lbl');
+    if (marginEl) {
+      if (total > 0) {
+        const profit = total - cost;
+        const rate   = Math.round(profit/total*100);
+        const cls    = rate >= 20 ? 'g' : rate >= 0 ? 'o' : 'r';
+        marginEl.className = 'disc-margin ' + cls;
+        marginEl.textContent = '优惠后毛利率 ' + rate + '%（毛利 ' + Engine.fmtMoney(profit) + '）';
+      } else {
+        marginEl.textContent = '';
+        marginEl.className = 'disc-margin';
+      }
+    }
   }
 
   function apply() {
@@ -1157,20 +1198,53 @@ const LossSheet = (function () {
     document.getElementById('loss-overlay').classList.add('open');
   }
 
+  function _maxQty() { return Math.max(1, Math.floor(parseFloat(_prod.qty)||1)); }
+
   function adj(d) {
-    _qty = Math.max(1, Math.min(_qty+d, parseFloat(_prod.qty)||1));
+    _qty = Math.max(1, Math.min(_qty+d, _maxQty()));
+    _render();
+  }
+
+  // ★ 手动输入时实时响应（打字过程中不强行纠正，避免光标跳动）
+  function onInput(val) {
+    const v = parseInt(val, 10);
+    if (!isNaN(v)) {
+      _qty = v;
+      _renderCalc();
+    }
+  }
+
+  // ★ 失焦时校正到合法范围 [1, 库存上限]
+  function onBlur() {
+    const max = _maxQty();
+    if (isNaN(_qty) || _qty < 1) _qty = 1;
+    if (_qty > max) _qty = max;
+    _render();
+  }
+
+  // ★ 一键最大值：直接设为当前库存全部数量
+  function setMax() {
+    _qty = _maxQty();
     _render();
   }
 
   function _render() {
-    document.getElementById('loss-qty-val').textContent=_qty;
-    const cost=_qty*(parseFloat(_prod.costPrice)||0);
+    document.getElementById('loss-qty-val').value = _qty;
+    _renderCalc();
+  }
+
+  function _renderCalc() {
+    const cost = (parseFloat(_qty)||0) * (parseFloat(_prod.costPrice)||0);
     document.getElementById('loss-calc').innerHTML=
       '损耗成本：<span>'+Engine.fmtMoney(cost)+'</span>（'+_qty+' 件 × 进价 '+Engine.fmtMoney(_prod.costPrice)+'）';
   }
 
   function confirm() {
     if (!_prod) return;
+    // ★ 提交前再校正一次，防止用户未失焦直接点确认
+    const max = _maxQty();
+    if (isNaN(_qty) || _qty < 1) _qty = 1;
+    if (_qty > max) _qty = max;
     const result = Engine.recordLoss(_prod.id, _qty);
     document.getElementById('loss-overlay').classList.remove('open');
     // 刷新相关视图
@@ -1210,7 +1284,7 @@ const LossSheet = (function () {
 
   function close() { document.getElementById('loss-overlay').classList.remove('open'); }
 
-  return { open, adj, confirm, close };
+  return { open, adj, onInput, onBlur, setMax, confirm, close };
 })();
 window.LossSheet=LossSheet;
 
