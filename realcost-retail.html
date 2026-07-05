@@ -8,6 +8,61 @@
 <meta name="theme-color" content="#6B4226">
 <title>獭掌柜</title>
 <script src="config.js"></script>
+<script src="i18n/zh.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n/i18n-core.js"></script>
+<script>
+// ★ 语言切换悬浮按钮（风格与 main.html 的 i18n-engine.js 一致：左下角悬浮圆角按钮）
+(function () {
+  function mountLangToggle() {
+    if (document.getElementById('i18n-toggle-btn')) return; // 防止重复挂载
+    var btn = document.createElement('div');
+    btn.id = 'i18n-toggle-btn';
+    var curLang = (window.I18N && window.I18N.getLang) ? window.I18N.getLang() : 'zh';
+    btn.innerHTML = curLang === 'zh' ? 'EN' : '中文';
+    Object.assign(btn.style, {
+      position: 'fixed', bottom: '25px', left: '20px',
+      background: 'var(--orange, #FF6B35)',
+      color: '#fff', padding: '6px 14px', borderRadius: '20px',
+      fontSize: '11px', cursor: 'pointer', zIndex: '99999',
+      fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      fontFamily: "'PingFang SC','Helvetica Neue',sans-serif",
+    });
+    document.body.appendChild(btn);
+    btn.onclick = function () {
+      var next = ((window.I18N && window.I18N.getLang) ? window.I18N.getLang() : 'zh') === 'zh' ? 'en' : 'zh';
+      if (window.I18N && window.I18N.switchLang) {
+        window.I18N.switchLang(next);
+        btn.innerHTML = next === 'zh' ? 'EN' : '中文';
+      } else {
+        // 兜底逻辑未加载成功时，只能刷新页面重试（不会崩溃，但也无法真正切换）
+        console.warn('[i18n] 语言引擎未就绪，无法切换语言');
+      }
+    };
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountLangToggle);
+  } else {
+    mountLangToggle();
+  }
+})();
+</script>
+<script>
+// ★ 兜底防御：若上面三个 i18n 文件因路径/部署问题未能加载（404等），
+//   window.t / window.tMonth / window.I18N 会是 undefined，
+//   后续所有 t('xxx') 调用都会抛 ReferenceError 导致整页白屏。
+//   这里做安全兜底：没加载成功时，t() 直接返回 key 本身，tMonth() 返回月份数字，
+//   页面仍可正常运行（只是暂时显示中文 key 名而非译文），不会白屏。
+if (typeof window.t !== 'function') {
+  console.warn('[i18n] i18n-core.js 未成功加载，已启用兜底 t()。请检查 i18n/ 目录是否已正确部署到服务器。');
+  window.t = function(key, params) {
+    if (!params) return key;
+    return key.replace(/\{(\w+)\}/g, (m, k) => (params[k] !== undefined ? params[k] : m));
+  };
+  window.tMonth = function(idx) { return String(idx + 1) + '月'; };
+  window.I18N = { getLang: () => 'zh', setLang: () => {}, switchLang: () => {}, applyDOM: () => {}, getAvailableLangs: () => ['zh'] };
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -425,7 +480,7 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="15 18 9 12 15 6"/>
     </svg>
-    返回
+    <span data-i18n="common.back">返回</span>
   </button>
 </div>
 
@@ -436,7 +491,7 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
   </div>
   <div class="mh-right">
     <div class="mh-rev"  id="mh-rev">¥0</div>
-    <div class="mh-rlbl">本月毛利</div>
+    <div class="mh-rlbl" data-i18n="retail.monthlyProfitLabel">本月毛利</div>
   </div>
 </div>
 
@@ -457,22 +512,22 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 
 <div class="bottom-nav">
   <button class="nav-btn active" data-view="calendar" onclick="switchTab(this,'calendar')">
-    <span class="nav-ico">📅</span><span class="nav-lbl">日历</span>
+    <span class="nav-ico">📅</span><span class="nav-lbl" data-i18n="retail.nav.calendar">日历</span>
   </button>
   <button class="nav-btn" data-view="inventory" onclick="switchTab(this,'inventory')">
-    <span class="nav-ico">📦</span><span class="nav-lbl">库存看板</span>
+    <span class="nav-ico">📦</span><span class="nav-lbl" data-i18n="retail.nav.inventory">库存看板</span>
   </button>
   <button class="nav-btn" data-view="expiring" onclick="switchTab(this,'expiring')">
-    <span class="nav-ico">⏰</span><span class="nav-lbl">临期货品</span>
+    <span class="nav-ico">⏰</span><span class="nav-lbl" data-i18n="retail.nav.expiring">临期货品</span>
   </button>
   <button class="nav-btn" data-view="sales" onclick="switchTab(this,'sales')">
-    <span class="nav-ico">📊</span><span class="nav-lbl">销量排行</span>
+    <span class="nav-ico">📊</span><span class="nav-lbl" data-i18n="retail.nav.sales">销量排行</span>
   </button>
   <button class="nav-btn" data-view="profit" onclick="switchTab(this,'profit')">
-    <span class="nav-ico">💹</span><span class="nav-lbl">毛利排行</span>
+    <span class="nav-ico">💹</span><span class="nav-lbl" data-i18n="retail.nav.profit">毛利排行</span>
   </button>
   <button class="nav-btn" data-view="entry" onclick="switchTab(this,'entry')">
-    <span class="nav-ico">➕</span><span class="nav-lbl">库存录入</span>
+    <span class="nav-ico">➕</span><span class="nav-lbl" data-i18n="retail.nav.entry">库存录入</span>
   </button>
 </div>
 
@@ -492,10 +547,10 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 <div class="batch-overlay" id="batch-overlay" onclick="if(event.target===this)closeBatchSheet()">
   <div class="batch-sheet">
     <div class="batch-handle"></div>
-    <div class="batch-title" id="batch-title">选择批次</div>
-    <div class="batch-sub" id="batch-sub">该商品有多个进货批次，请选择本次使用的批次</div>
+    <div class="batch-title" id="batch-title" data-i18n="batchPicker.title">选择批次</div>
+    <div class="batch-sub" id="batch-sub" data-i18n="batchPicker.defaultSub">该商品有多个进货批次，请选择本次使用的批次</div>
     <div id="batch-list"></div>
-    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="closeBatchSheet()">取消</button>
+    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="closeBatchSheet()" data-i18n="common.cancel">取消</button>
   </div>
 </div>
 
@@ -503,28 +558,28 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 <div class="modal-overlay" id="discount-overlay" onclick="if(event.target===this)DiscountSheet.close()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">🏷️ 优惠设置</div>
-    <div class="modal-sub">整单打折或对单项商品改价，不影响库存原始售价</div>
+    <div class="modal-title" data-i18n="discount.title">🏷️ 优惠设置</div>
+    <div class="modal-sub" data-i18n="discount.subtitle">整单打折或对单项商品改价，不影响库存原始售价</div>
 
-    <div class="section-label" style="margin-top:0">整单折扣</div>
+    <div class="section-label" style="margin-top:0" data-i18n="discount.wholeOrder">整单折扣</div>
     <div class="disc-pct-row">
-      <button class="disc-pct-btn" data-pct="95" onclick="DiscountSheet.setPct(95)">九五折</button>
-      <button class="disc-pct-btn" data-pct="90" onclick="DiscountSheet.setPct(90)">九折</button>
-      <button class="disc-pct-btn" data-pct="80" onclick="DiscountSheet.setPct(80)">八折</button>
-      <button class="disc-pct-btn" data-pct="70" onclick="DiscountSheet.setPct(70)">七折</button>
+      <button class="disc-pct-btn" data-pct="95" onclick="DiscountSheet.setPct(95)" data-i18n="discount.pct95">九五折</button>
+      <button class="disc-pct-btn" data-pct="90" onclick="DiscountSheet.setPct(90)" data-i18n="discount.pct90">九折</button>
+      <button class="disc-pct-btn" data-pct="80" onclick="DiscountSheet.setPct(80)" data-i18n="discount.pct80">八折</button>
+      <button class="disc-pct-btn" data-pct="70" onclick="DiscountSheet.setPct(70)" data-i18n="discount.pct70">七折</button>
     </div>
     <div class="disc-custom-row">
       <input id="disc-custom-inp" class="disc-custom-inp" type="number" min="1" max="100"
-             placeholder="自定义折扣" oninput="DiscountSheet.onCustomPct()">
-      <span class="disc-custom-unit">% 的原价</span>
+             data-i18n-placeholder="discount.customPlaceholder" placeholder="自定义折扣" oninput="DiscountSheet.onCustomPct()">
+      <span class="disc-custom-unit" data-i18n="discount.customUnit">% 的原价</span>
     </div>
 
-    <div class="section-label">逐行改价</div>
+    <div class="section-label" data-i18n="discount.itemByItem">逐行改价</div>
     <div id="disc-items-list"></div>
 
     <div class="disc-preview">
       <div class="disc-preview-left">
-        <div class="disc-preview-lbl">优惠后合计</div>
+        <div class="disc-preview-lbl" data-i18n="discount.afterTotal">优惠后合计</div>
         <div class="disc-save" id="disc-save-lbl"></div>
         <div class="disc-margin" id="disc-margin-lbl"></div>
       </div>
@@ -532,10 +587,10 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
     </div>
 
     <div class="btn-row">
-      <button class="btn-sh btn-primary" onclick="DiscountSheet.apply()">✅ 确认优惠</button>
-      <button class="btn-sh btn-ghost" style="box-shadow:0 4px 0 #CECECE" onclick="DiscountSheet.reset()">重置</button>
+      <button class="btn-sh btn-primary" onclick="DiscountSheet.apply()" data-i18n="discount.applyBtn">✅ 确认优惠</button>
+      <button class="btn-sh btn-ghost" style="box-shadow:0 4px 0 #CECECE" onclick="DiscountSheet.reset()" data-i18n="discount.resetBtn">重置</button>
     </div>
-    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="DiscountSheet.close()">取消</button>
+    <button class="btn-sh btn-ghost" style="margin-top:8px" onclick="DiscountSheet.close()" data-i18n="common.cancel">取消</button>
   </div>
 </div>
 
@@ -543,27 +598,27 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 <div class="modal-overlay" id="ar-overlay" onclick="if(event.target===this)closeARSheet()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">📬 登记应收账款</div>
-    <div class="modal-sub">差价补贴、换购补款等厂家应付款项</div>
+    <div class="modal-title" data-i18n="ar.title">📬 登记应收账款</div>
+    <div class="modal-sub" data-i18n="ar.subtitle">差价补贴、换购补款等厂家应付款项</div>
     <div style="margin-bottom:12px">
-      <label class="form-lbl">欠款方（厂家/品牌）*</label>
-      <input id="ar-cp" class="form-inp" type="text" placeholder="如：农夫山泉、东鹏饮料">
+      <label class="form-lbl" data-i18n="ar.counterparty">欠款方（厂家/品牌）*</label>
+      <input id="ar-cp" class="form-inp" type="text" data-i18n-placeholder="ar.counterpartyPlaceholder" placeholder="如：农夫山泉、东鹏饮料">
     </div>
     <div style="margin-bottom:12px">
-      <label class="form-lbl">应收金额 (¥) *</label>
+      <label class="form-lbl" data-i18n="ar.amount">应收金额 (¥) *</label>
       <input id="ar-amt" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00">
     </div>
     <div style="margin-bottom:12px">
-      <label class="form-lbl">备注</label>
-      <input id="ar-nt" class="form-inp" type="text" placeholder="如：东方树叶瓶盖换购差价">
+      <label class="form-lbl" data-i18n="ar.note">备注</label>
+      <input id="ar-nt" class="form-inp" type="text" data-i18n-placeholder="ar.notePlaceholder" placeholder="如：东方树叶瓶盖换购差价">
     </div>
     <div style="margin-bottom:20px">
-      <label class="form-lbl">预计到账日（月结填月末）</label>
+      <label class="form-lbl" data-i18n="ar.dueDate">预计到账日（月结填月末）</label>
       <input id="ar-due-inp" class="form-inp" type="date">
     </div>
-    <button class="form-submit" onclick="ARSheet.confirm()">📬 确认登记</button>
-    <div class="form-success hidden" id="ar-success">✅ 应收账款已登记！</div>
-    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="closeARSheet()">关闭</button>
+    <button class="form-submit" onclick="ARSheet.confirm()" data-i18n="ar.confirmBtn">📬 确认登记</button>
+    <div class="form-success hidden" id="ar-success" data-i18n="ar.success">✅ 应收账款已登记！</div>
+    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="closeARSheet()" data-i18n="common.close">关闭</button>
   </div>
 </div>
 
@@ -572,25 +627,25 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="rs-title">🔄 标记换购</div>
-    <div class="modal-sub">消费者以换购价购买，差价由供应商补偿（自动登记应收）</div>
+    <div class="modal-sub" data-i18n="redeem.subtitle">消费者以换购价购买，差价由供应商补偿（自动登记应收）</div>
     <div class="rs-product-box">
       <div style="font-size:14px;font-weight:900;color:var(--text)" id="rs-prod-name">—</div>
       <div style="font-size:12px;color:var(--text-3);margin-top:3px" id="rs-prod-price">—</div>
     </div>
-    <label class="form-lbl">供应商 / 厂家 *</label>
-    <input id="rs-supplier" class="form-inp" type="text" placeholder="如：农夫山泉、东鹏饮料" style="margin-bottom:14px">
-    <label class="form-lbl">消费者实付金额 (¥) *</label>
+    <label class="form-lbl" data-i18n="redeem.supplier">供应商 / 厂家 *</label>
+    <input id="rs-supplier" class="form-inp" type="text" data-i18n-placeholder="ar.counterpartyPlaceholder" placeholder="如：农夫山泉、东鹏饮料" style="margin-bottom:14px">
+    <label class="form-lbl" data-i18n="redeem.actualPay">消费者实付金额 (¥) *</label>
     <input id="rs-price" class="form-inp" type="number" step="0.01" min="0" placeholder="1.00"
            oninput="RedemptionSheet.onPriceChange()">
     <div class="rs-diff-row" style="margin-top:10px">
       <div>
-        <div class="rs-diff-lbl">应收差价（供应商补偿）</div>
+        <div class="rs-diff-lbl" data-i18n="redeem.arRow">应收差价（供应商补偿）</div>
         <div style="font-size:11px;color:var(--text-3);margin-top:2px" id="rs-diff-hint"></div>
       </div>
       <div class="rs-diff-val" id="rs-diff-val">¥0</div>
     </div>
-    <button class="form-submit" onclick="RedemptionSheet.confirm()">✅ 确认换购</button>
-    <button class="btn-sh btn-ghost" style="margin-top:8px;width:100%" onclick="RedemptionSheet.close()">取消</button>
+    <button class="form-submit" onclick="RedemptionSheet.confirm()" data-i18n="redeem.confirmBtn">✅ 确认换购</button>
+    <button class="btn-sh btn-ghost" style="margin-top:8px;width:100%" onclick="RedemptionSheet.close()" data-i18n="common.cancel">取消</button>
   </div>
 </div>
 
@@ -598,26 +653,26 @@ box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:50;
 <div class="modal-overlay" id="loss-overlay" onclick="if(event.target===this)LossSheet.close()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" style="color:var(--red)">📦 记录损耗</div>
-    <div class="modal-sub">损耗进价成本计入当日支出，库存同步扣减</div>
+    <div class="modal-title" style="color:var(--red)" data-i18n="loss.title">📦 记录损耗</div>
+    <div class="modal-sub" data-i18n="loss.subtitle">损耗进价成本计入当日支出，库存同步扣减</div>
     <div class="loss-info-box">
       <div class="loss-info-name" id="loss-prod-name">—</div>
       <div class="loss-info-meta" id="loss-prod-meta">—</div>
     </div>
     <div class="loss-qty-row">
-      <span class="loss-qty-lbl">损耗数量</span>
+      <span class="loss-qty-lbl" data-i18n="loss.qtyLabel">损耗数量</span>
       <div style="display:flex;align-items:center;gap:8px">
         <button class="qty-btn" onclick="LossSheet.adj(-1)">−</button>
         <input id="loss-qty-val" class="loss-qty-inp" type="number" min="1" step="1"
                value="1" oninput="LossSheet.onInput(this.value)"
                onblur="LossSheet.onBlur()">
         <button class="qty-btn" onclick="LossSheet.adj(1)">+</button>
-        <button class="loss-qty-max-btn" onclick="LossSheet.setMax()">全部</button>
+        <button class="loss-qty-max-btn" onclick="LossSheet.setMax()" data-i18n="loss.maxBtn">全部</button>
       </div>
     </div>
-    <div class="loss-calc" id="loss-calc">损耗成本：<span>¥0</span></div>
-    <button class="btn-loss" onclick="LossSheet.confirm()">确认记录损耗</button>
-    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="LossSheet.close()">取消</button>
+    <div class="loss-calc" id="loss-calc"></div>
+    <button class="btn-loss" onclick="LossSheet.confirm()" data-i18n="loss.confirmBtn">确认记录损耗</button>
+    <button class="btn-sh btn-ghost" style="margin-top:10px" onclick="LossSheet.close()" data-i18n="common.cancel">取消</button>
   </div>
 </div>
 
@@ -760,9 +815,9 @@ const Engine = (function () {
       const ar = parseFloat(item.costPrice) * parseFloat(item.qty);
       if (ar > 0.001) {
         recordReceivable(
-          item.supplierName || '待填写',
+          item.supplierName || t('ar.defaultCounterparty'),
           ar,
-          item.name + ' 换购进价补偿',
+          t('ar.redemptionNote', {name: item.name}),
           null
         );
       }
@@ -826,7 +881,7 @@ const Engine = (function () {
   function recordReceivable(counterparty, amount, note, dueDate) {
     const entry = {
       id:           Date.now(),
-      counterparty: counterparty || '待填写',
+      counterparty: counterparty || t('ar.defaultCounterparty'),
       amount:       parseFloat(amount) || 0,
       note:         note || '',
       date:         new Date().toLocaleDateString(),
@@ -880,7 +935,7 @@ const Engine = (function () {
     // 自动创建换购应收
     items.filter(i => i.isRedemption).forEach(item => {
       const ar = parseFloat(item.costPrice) * parseFloat(item.qty);
-      if (ar > 0.001) recordReceivable(item.supplierName||'待填写', ar, item.name+' 换购进价补偿', null);
+      if (ar > 0.001) recordReceivable(item.supplierName||t('ar.defaultCounterparty'), ar, t('ar.redemptionNote',{name:item.name}), null);
     });
     localStorage.setItem('realcost_trigger', JSON.stringify({
       type:'retro_sale', amount:profit, date:targetDate, timestamp:Date.now(),
@@ -986,7 +1041,7 @@ const Engine = (function () {
 
 // ── 数据迁移 ────────────────────────────────────────────────────────────────
 (function runMigrations() {
-  const VK='otter_db_version', CV=2;
+  const VK='otter_db_version', CV=3;
   const cur = parseInt(localStorage.getItem(VK)||'0');
   if (cur >= CV) return;
   if (cur < 1) {
@@ -1004,6 +1059,28 @@ const Engine = (function () {
       inv.sort((a,b) => new Date(a.createdAt||0)-new Date(b.createdAt||0));
       inv.forEach(p => { if (!p.batchNo) { nm[p.name]=(nm[p.name]||0)+1; p.batchNo=nm[p.name]; } });
       localStorage.setItem('otter_inventory', JSON.stringify(inv));
+    } catch(e) {}
+  }
+  // ★ v3：商品分类从中文字符串迁移为语言无关 key（支持多语言显示）
+  //   旧值 → 新 key；不在映射表里的旧值（脏数据/用户手改）一律归为 'other'
+  if (cur < 3) {
+    try {
+      const CAT_MIGRATE_MAP = {
+        '食品饮料':'foodDrink', '日用百货':'daily', '休闲零食':'snacks',
+        '冷冻冷藏':'frozen',   '酒水':'alcohol',    '烟草':'tobacco',
+        '其他':'other',
+      };
+      const CAT_VALID_KEYS = new Set(Object.values(CAT_MIGRATE_MAP));
+      const inv = JSON.parse(localStorage.getItem('otter_inventory'))||[];
+      let ch=false;
+      inv.forEach(p => {
+        if (!p.category) return;
+        if (CAT_VALID_KEYS.has(p.category)) return; // 已经是新 key，不用转
+        const mapped = CAT_MIGRATE_MAP[p.category];
+        p.category = mapped || 'other';
+        ch = true;
+      });
+      if (ch) localStorage.setItem('otter_inventory', JSON.stringify(inv));
     } catch(e) {}
   }
   localStorage.setItem(VK, String(CV));
@@ -1024,8 +1101,8 @@ const BatchPicker = (function () {
     if (!batches.length) { onPick && onPick(null); return; }
     if (batches.length === 1) { onPick && onPick(batches[0]); return; }
 
-    document.getElementById('batch-title').textContent = '选择批次 · ' + productName;
-    document.getElementById('batch-sub').textContent   = '共 '+batches.length+' 个批次，🟡 为最早入库（先进先出建议优先出货）';
+    document.getElementById('batch-title').textContent = t('batchPicker.titleWithName', {name: productName});
+    document.getElementById('batch-sub').textContent   = t('batchPicker.subtitle', {n: batches.length});
 
     document.getElementById('batch-list').innerHTML = batches.map((b, i) => {
       const isFifo = i === 0;
@@ -1033,14 +1110,14 @@ const BatchPicker = (function () {
       return `
         <div class="batch-item${isFifo?' batch-fifo-row':''}" onclick="BatchPicker._pick(${i})">
           <div class="batch-item-top">
-            <span class="batch-item-name">批次 ${b.batchNo||(i+1)}${isFifo?'<span class="batch-fifo-tag">先进先出</span>':''}</span>
-            <span class="batch-item-sale">售 ${Engine.fmtMoney(b.salePrice)}</span>
+            <span class="batch-item-name">${t('common.batchN',{n:b.batchNo||(i+1)})}${isFifo?'<span class="batch-fifo-tag">'+t('batchPicker.fifoTag')+'</span>':''}</span>
+            <span class="batch-item-sale">${t('batchPicker.saleLabel',{val:Engine.fmtMoney(b.salePrice)})}</span>
           </div>
           <div class="batch-item-meta">
-            <span>进价 ${Engine.fmtMoney(b.costPrice)}</span>
-            <span>剩余 ${b.qty} 件</span>
-            <span>入库 ${inDate}</span>
-            ${b.expireDate?'<span>到期 '+Engine.fmtDate(b.expireDate)+'</span>':''}
+            <span>${t('common.costPriceLabel')} ${Engine.fmtMoney(b.costPrice)}</span>
+            <span>${t('batchPicker.remaining',{n:b.qty})}</span>
+            <span>${t('batchPicker.inStockDate',{date:inDate})}</span>
+            ${b.expireDate?'<span>'+t('batchPicker.expireLabel',{date:Engine.fmtDate(b.expireDate)})+'</span>':''}
           </div>
         </div>`;
     }).join('');
@@ -1085,8 +1162,8 @@ const DiscountSheet = (function () {
     document.getElementById('disc-items-list').innerHTML = cart.map((item, i) => `
       <div class="disc-item-row">
         <div class="disc-item-info">
-          <div class="disc-item-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+item.batchNo+'</span>':''}</div>
-          <div class="disc-item-orig">原价 ${Engine.fmtMoney(item.salePrice)} × ${item.qty} 件</div>
+          <div class="disc-item-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">'+t('common.batchN',{n:item.batchNo})+'</span>':''}</div>
+          <div class="disc-item-orig">${t('discount.origPrice',{price:Engine.fmtMoney(item.salePrice),qty:item.qty})}</div>
         </div>
         <input class="disc-item-inp" type="number" step="0.01" min="0"
                placeholder="${(item.origSalePrice||item.salePrice).toFixed(2)}"
@@ -1139,7 +1216,7 @@ const DiscountSheet = (function () {
     });
     const saved=origTotal-total;
     document.getElementById('disc-total-preview').textContent=Engine.fmtMoney(total);
-    document.getElementById('disc-save-lbl').textContent=saved>0.005?'优惠 '+Engine.fmtMoney(saved):'';
+    document.getElementById('disc-save-lbl').textContent=saved>0.005?t('discount.saved',{val:Engine.fmtMoney(saved)}):'';
 
     // ★ 优惠后毛利率实时预览
     const marginEl = document.getElementById('disc-margin-lbl');
@@ -1149,7 +1226,7 @@ const DiscountSheet = (function () {
         const rate   = Math.round(profit/total*100);
         const cls    = rate >= 20 ? 'g' : rate >= 0 ? 'o' : 'r';
         marginEl.className = 'disc-margin ' + cls;
-        marginEl.textContent = '优惠后毛利率 ' + rate + '%（毛利 ' + Engine.fmtMoney(profit) + '）';
+        marginEl.textContent = t('discount.marginPreview', {rate: rate, val: Engine.fmtMoney(profit)});
       } else {
         marginEl.textContent = '';
         marginEl.className = 'disc-margin';
@@ -1191,9 +1268,9 @@ const LossSheet = (function () {
   function open(product) {
     _prod=product; _qty=1;
     document.getElementById('loss-prod-name').textContent =
-      product.name + (product.batchNo ? '（批次'+product.batchNo+'）' : '');
+      product.name + (product.batchNo ? '（'+t('common.batchN',{n:product.batchNo})+'）' : '');
     document.getElementById('loss-prod-meta').textContent =
-      '进价 '+Engine.fmtMoney(product.costPrice)+' · 当前库存 '+product.qty+' 件';
+      t('common.costPriceLabel')+' '+Engine.fmtMoney(product.costPrice)+' · '+t('inventory.currentStock',{n:product.qty});
     _render();
     document.getElementById('loss-overlay').classList.add('open');
   }
@@ -1235,8 +1312,9 @@ const LossSheet = (function () {
 
   function _renderCalc() {
     const cost = (parseFloat(_qty)||0) * (parseFloat(_prod.costPrice)||0);
+    const costSpan = '<span>'+Engine.fmtMoney(cost)+'</span>';
     document.getElementById('loss-calc').innerHTML=
-      '损耗成本：<span>'+Engine.fmtMoney(cost)+'</span>（'+_qty+' 件 × 进价 '+Engine.fmtMoney(_prod.costPrice)+'）';
+      t('loss.calc', {val: costSpan, qty: _qty, cost: Engine.fmtMoney(_prod.costPrice)});
   }
 
   function confirm() {
@@ -1253,7 +1331,7 @@ const LossSheet = (function () {
     if (expEl&&expEl.classList.contains('visible')) Dashboard.renderExpiring(expEl);
     // 日历节点补丁：今天若仅有损耗无销售，变为红色
     _patchTodayNode();
-    _toast('已记录损耗：'+result.productName+' × '+result.qty+' 件，损耗成本 '+Engine.fmtMoney(result.lossCost));
+    _toast(t('loss.recorded', {name: result.productName, qty: result.qty, val: Engine.fmtMoney(result.lossCost)}));
   }
 
   function _patchTodayNode() {
@@ -1276,10 +1354,10 @@ const LossSheet = (function () {
   }
 
   function _toast(msg) {
-    let t=document.getElementById('bco-toast');
-    if (!t){t=document.createElement('div');t.id='bco-toast';document.body.appendChild(t);}
-    t.textContent=msg;t.classList.add('show');
-    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500);
+    let toastEl=document.getElementById('bco-toast');
+    if (!toastEl){toastEl=document.createElement('div');toastEl.id='bco-toast';document.body.appendChild(toastEl);}
+    toastEl.textContent=msg;toastEl.classList.add('show');
+    clearTimeout(toastEl._t);toastEl._t=setTimeout(()=>toastEl.classList.remove('show'),3500);
   }
 
   function close() { document.getElementById('loss-overlay').classList.remove('open'); }
@@ -1357,9 +1435,9 @@ const RedemptionSheet = (function(){
     _mode = 'single'; _idx = idx; _cart = cartRef; _onConfirm = onConfirm;
     const item = cartRef[idx];
     const origPrice = item.origSalePrice || item.salePrice;
-    document.getElementById('rs-title').textContent     = '🔄 单品换购';
-    document.getElementById('rs-prod-name').textContent = item.name + (item.batchNo?' 批次'+item.batchNo:'');
-    document.getElementById('rs-prod-price').textContent= '原价 ' + Engine.fmtMoney(origPrice) + ' × ' + item.qty + ' 件';
+    document.getElementById('rs-title').textContent     = t('redeem.singleTitle');
+    document.getElementById('rs-prod-name').textContent = item.name + (item.batchNo?' '+t('common.batchN',{n:item.batchNo}):'');
+    document.getElementById('rs-prod-price').textContent= t('discount.origPrice',{price:Engine.fmtMoney(origPrice),qty:item.qty});
     document.getElementById('rs-supplier').value = item.supplierName || '';
     document.getElementById('rs-price').value    = item.isRedemption ? (item.redemptionPrice||'') : '1';
     _updateDiff();
@@ -1370,9 +1448,9 @@ const RedemptionSheet = (function(){
   function openAll(cartRef, onConfirm) {
     _mode = 'all'; _idx = -1; _cart = cartRef; _onConfirm = onConfirm;
     const totalOrig = cartRef.reduce((a,c)=>(a+(c.origSalePrice||c.salePrice)*c.qty),0);
-    document.getElementById('rs-title').textContent     = '🔄 整单换购';
-    document.getElementById('rs-prod-name').textContent = '全部 ' + cartRef.length + ' 种商品';
-    document.getElementById('rs-prod-price').textContent= '原价合计 ' + Engine.fmtMoney(totalOrig);
+    document.getElementById('rs-title').textContent     = t('redeem.allTitle');
+    document.getElementById('rs-prod-name').textContent = t('redeem.allProductCount', {n: cartRef.length});
+    document.getElementById('rs-prod-price').textContent= t('redeem.allOrigTotal', {val: Engine.fmtMoney(totalOrig)});
     document.getElementById('rs-supplier').value = cartRef[0]?.supplierName || '';
     document.getElementById('rs-price').value    = '';
     _updateDiff();
@@ -1391,12 +1469,12 @@ const RedemptionSheet = (function(){
       // ★ 供应商补偿 = 进价（与消费者实付金额无关）
       const ar = parseFloat(item.costPrice) * item.qty;
       diffEl.textContent = Engine.fmtMoney(ar);
-      hintEl.textContent = '进价 ' + Engine.fmtMoney(item.costPrice) + ' × ' + item.qty + ' 件';
+      hintEl.textContent = t('redeem.singleHint', {cost: Engine.fmtMoney(item.costPrice), qty: item.qty});
     } else {
       // ★ 整单模式：各商品进价合计
       const totalAR = _cart.reduce((a,c) => a + parseFloat(c.costPrice) * c.qty, 0);
       diffEl.textContent = Engine.fmtMoney(totalAR);
-      hintEl.textContent = '各商品进价合计，供应商补偿全部成本';
+      hintEl.textContent = t('redeem.allHint');
     }
   }
 
@@ -1447,15 +1525,15 @@ function closeRedeemSheet() { RedemptionSheet.close(); }
 const BARCODE_API = 'https://retail.nudgenow.xyz';
 const BarcodeScanner=(function(){
   let _od=null,_ov=null,_st=null,_vid=null,_raf=null,_sc=null,_run=false,_lf='',_lt=0;
-  function _dd(c){const n=Date.now();if(c===_lf&&n-_lt<1500)return;_lf=c;_lt=n;_beep();_ss('✅ 识别：'+c);_stop();if(_od)_od(c);}
+  function _dd(c){const n=Date.now();if(c===_lf&&n-_lt<1500)return;_lf=c;_lt=n;_beep();_ss(t('scanner.detected',{code:c}));_stop();if(_od)_od(c);}
   function _beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='square';o.frequency.setValueAtTime(1800,ctx.currentTime);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.12);}catch(e){}}
-  function _eo(){if(_ov)return;_ov=document.createElement('div');_ov.id='barcode-overlay';_ov.innerHTML=`<div id="bco-inner"><div id="bco-header"><div id="bco-title">📷 扫描商品条形码</div><div id="bco-hint">手机离条形码 15-20cm，保持稳定</div></div><div id="bco-viewport"><video id="bco-video" autoplay muted playsinline></video><div id="bco-frame"><span class="bco-corner tl"></span><span class="bco-corner tr"></span><span class="bco-corner bl"></span><span class="bco-corner br"></span><div id="bco-scanline"></div></div><div id="bco-reader" style="display:none;width:100%;height:100%;"></div></div><div id="bco-status">正在启动摄像头…</div><div id="bco-manual-row"><input id="bco-manual-inp" type="text" inputmode="numeric" placeholder="或手动输入条形码" autocomplete="off"><button id="bco-manual-btn">查询</button></div><button id="bco-close">✕ 关闭</button></div>`;document.body.appendChild(_ov);_is();_vid=_ov.querySelector('#bco-video');_ov.querySelector('#bco-close').onclick=close;_ov.querySelector('#bco-manual-btn').onclick=()=>{const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);};_ov.querySelector('#bco-manual-inp').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);}});}
+  function _eo(){if(_ov)return;_ov=document.createElement('div');_ov.id='barcode-overlay';_ov.innerHTML=`<div id="bco-inner"><div id="bco-header"><div id="bco-title">📷 ${t('scanner.title')}</div><div id="bco-hint">${t('scanner.hint')}</div></div><div id="bco-viewport"><video id="bco-video" autoplay muted playsinline></video><div id="bco-frame"><span class="bco-corner tl"></span><span class="bco-corner tr"></span><span class="bco-corner bl"></span><span class="bco-corner br"></span><div id="bco-scanline"></div></div><div id="bco-reader" style="display:none;width:100%;height:100%;"></div></div><div id="bco-status">${t('scanner.starting')}</div><div id="bco-manual-row"><input id="bco-manual-inp" type="text" inputmode="numeric" placeholder="${t('scanner.manualPlaceholder')}" autocomplete="off"><button id="bco-manual-btn">${t('scanner.query')}</button></div><button id="bco-close">✕ ${t('common.close')}</button></div>`;document.body.appendChild(_ov);_is();_vid=_ov.querySelector('#bco-video');_ov.querySelector('#bco-close').onclick=close;_ov.querySelector('#bco-manual-btn').onclick=()=>{const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);};_ov.querySelector('#bco-manual-inp').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=_ov.querySelector('#bco-manual-inp').value.trim();if(v)_dd(v);}});}
   function _is(){if(document.getElementById('bco-styles'))return;const s=document.createElement('style');s.id='bco-styles';s.textContent=`#barcode-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;}#barcode-overlay.open{display:flex;animation:bcoFadeIn .2s ease;}@keyframes bcoFadeIn{from{opacity:0}to{opacity:1}}#bco-inner{display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px;width:100%;max-width:380px;}#bco-header{text-align:center;margin-bottom:14px;}#bco-title{color:#fff;font-size:19px;font-weight:900;}#bco-hint{color:rgba(255,255,255,.6);font-size:12px;margin-top:5px;}#bco-viewport{position:relative;width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#000;}#bco-video{width:100%;height:100%;object-fit:cover;display:block;}#bco-frame{position:absolute;inset:0;pointer-events:none;}.bco-corner{position:absolute;width:28px;height:28px;border-color:#FF6B35;border-style:solid;}.bco-corner.tl{top:16px;left:16px;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}.bco-corner.tr{top:16px;right:16px;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}.bco-corner.bl{bottom:16px;left:16px;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}.bco-corner.br{bottom:16px;right:16px;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}#bco-scanline{position:absolute;left:16px;right:16px;height:2px;background:linear-gradient(90deg,transparent,#FF6B35,transparent);animation:bcoScan 2s ease-in-out infinite;}@keyframes bcoScan{0%{top:16px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(100% - 18px);opacity:0;}}#bco-status{color:rgba(255,255,255,.8);font-size:13px;font-weight:700;margin-top:14px;min-height:18px;text-align:center;}#bco-manual-row{display:flex;gap:8px;margin-top:14px;width:100%;max-width:360px;}#bco-manual-inp{flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 12px;font-size:14px;color:#fff;outline:none;font-family:inherit;}#bco-manual-inp::placeholder{color:rgba(255,255,255,.35);}#bco-manual-btn{background:#FF6B35;border:none;border-radius:10px;padding:10px 16px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}#bco-close{margin-top:18px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;padding:11px 36px;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}.f-name-wrap{position:relative;display:flex;align-items:center;}.f-name-wrap .form-inp{padding-right:52px;}.scan-trigger-btn{position:absolute;right:6px;width:38px;height:38px;background:#FF6B35;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s;box-shadow:0 3px 0 #C44D1A;}.scan-trigger-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #C44D1A;}.scan-trigger-btn svg{width:19px;height:19px;}.f-barcode-tag{font-size:11px;font-weight:700;color:#999;margin-top:4px;display:none;}.f-barcode-tag.show{display:block;}.f-barcode-tag span{color:#FF6B35;}@keyframes autoFill{0%{background:#FFF3EE;border-color:#FF6B35;}100%{background:#fff;border-color:#EBEBEB;}}.auto-filled{animation:autoFill 1.8s ease forwards;}#bco-toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-12px);background:rgba(0,0,0,.78);color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;font-weight:700;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:90vw;font-family:'PingFang SC','Helvetica Neue',sans-serif;}#bco-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}`;document.head.appendChild(s);}
   function _ss(m){if(_ov)_ov.querySelector('#bco-status').textContent=m;}
   function _stop(){_run=false;if(_raf){cancelAnimationFrame(_raf);_raf=null;}if(_st){_st.getTracks().forEach(t=>t.stop());_st=null;}if(_vid)_vid.srcObject=null;if(_sc){_sc.stop().catch(()=>{});_sc=null;}}
-  function _native(fmts){const wanted=['ean_13','ean-13','ean_8','ean-8','code_128','code-128','code_39','code-39','upc_a','upc-a','upc_e','upc-e'];const formats=fmts?wanted.filter(f=>fmts.includes(f)):wanted;const det=new BarcodeDetector({formats});navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}}).then(stream=>{_st=stream;_vid.srcObject=stream;_vid.style.display='block';_ov.querySelector('#bco-reader').style.display='none';let started=false;function sl(){if(started)return;started=true;_ss('🔍 对准条形码，手机离远一点效果更好…');const cv=document.createElement('canvas');const ctx=cv.getContext('2d');function scan(){if(!_run)return;if(!_vid.videoWidth){_raf=requestAnimationFrame(scan);return;}cv.width=_vid.videoWidth;cv.height=_vid.videoHeight;ctx.drawImage(_vid,0,0);createImageBitmap(cv).then(b=>det.detect(b).then(cs=>{b.close();if(cs.length)_dd(cs[0].rawValue);}).catch(()=>{})).catch(()=>{}).finally(()=>{if(_run)_raf=requestAnimationFrame(scan);});}_raf=requestAnimationFrame(scan);}_vid.onloadedmetadata=()=>{_vid.play();sl();};_vid.onloadeddata=()=>{_vid.play();sl();};_vid.oncanplay=()=>{_vid.play();sl();};setTimeout(()=>{_vid.play().then(sl).catch(()=>{});},500);}).catch(()=>{_ss('⚠️ 摄像头启动失败，请手动输入');});}
-  function _fallback(){_vid.style.display='none';const re=_ov.querySelector('#bco-reader');re.style.display='block';re.innerHTML='';function ll(cb){if(window.Html5Qrcode){cb();return;}const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=cb;s.onerror=()=>_ss('⚠️ 扫码库加载失败');document.head.appendChild(s);}ll(()=>{try{_sc=new Html5Qrcode('bco-reader');}catch(e){_ss('⚠️ 初始化失败');return;}_sc.start({facingMode:'environment'},{fps:10,qrbox:(w,h)=>({width:Math.round(w*.85),height:Math.round(h*.35)}),aspectRatio:1.333,supportedScanTypes:[Html5QrcodeScanType.SCAN_TYPE_CAMERA],formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E]},(c)=>{if(_sc)_dd(c);},()=>{}).then(()=>{_ss('🔍 对准条形码…');}).catch(()=>{_ss('⚠️ 摄像头启动失败');});});}
-  function open(cb){_od=cb;_eo();_ov.classList.add('open');_ov.querySelector('#bco-manual-inp').value='';_lf='';_lt=0;if(_run)_stop();_run=true;_ss('正在启动摄像头…');if(window.BarcodeDetector){BarcodeDetector.getSupportedFormats().then(fmts=>{_ss('检测格式：'+fmts.join(',').substring(0,40));setTimeout(()=>{const ok=fmts.some(f=>['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f));if(ok){_ss('✨ 使用系统级扫码引擎…');_native(fmts);}else{_ss('降级到 JS 引擎…');_fallback();}},1500);}).catch(()=>_fallback());}else{_fallback();}}
+  function _native(fmts){const wanted=['ean_13','ean-13','ean_8','ean-8','code_128','code-128','code_39','code-39','upc_a','upc-a','upc_e','upc-e'];const formats=fmts?wanted.filter(f=>fmts.includes(f)):wanted;const det=new BarcodeDetector({formats});navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}}).then(stream=>{_st=stream;_vid.srcObject=stream;_vid.style.display='block';_ov.querySelector('#bco-reader').style.display='none';let started=false;function sl(){if(started)return;started=true;_ss(t('scanner.aim'));const cv=document.createElement('canvas');const ctx=cv.getContext('2d');function scan(){if(!_run)return;if(!_vid.videoWidth){_raf=requestAnimationFrame(scan);return;}cv.width=_vid.videoWidth;cv.height=_vid.videoHeight;ctx.drawImage(_vid,0,0);createImageBitmap(cv).then(b=>det.detect(b).then(cs=>{b.close();if(cs.length)_dd(cs[0].rawValue);}).catch(()=>{})).catch(()=>{}).finally(()=>{if(_run)_raf=requestAnimationFrame(scan);});}_raf=requestAnimationFrame(scan);}_vid.onloadedmetadata=()=>{_vid.play();sl();};_vid.onloadeddata=()=>{_vid.play();sl();};_vid.oncanplay=()=>{_vid.play();sl();};setTimeout(()=>{_vid.play().then(sl).catch(()=>{});},500);}).catch(()=>{_ss(t('scanner.cameraFail'));});}
+  function _fallback(){_vid.style.display='none';const re=_ov.querySelector('#bco-reader');re.style.display='block';re.innerHTML='';function ll(cb){if(window.Html5Qrcode){cb();return;}const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=cb;s.onerror=()=>_ss(t('scanner.libLoadFail'));document.head.appendChild(s);}ll(()=>{try{_sc=new Html5Qrcode('bco-reader');}catch(e){_ss(t('scanner.initFail'));return;}_sc.start({facingMode:'environment'},{fps:10,qrbox:(w,h)=>({width:Math.round(w*.85),height:Math.round(h*.35)}),aspectRatio:1.333,supportedScanTypes:[Html5QrcodeScanType.SCAN_TYPE_CAMERA],formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E]},(c)=>{if(_sc)_dd(c);},()=>{}).then(()=>{_ss(t('scanner.aim'));}).catch(()=>{_ss(t('scanner.cameraFail'));});});}
+  function open(cb){_od=cb;_eo();_ov.classList.add('open');_ov.querySelector('#bco-manual-inp').value='';_lf='';_lt=0;if(_run)_stop();_run=true;_ss(t('scanner.starting'));if(window.BarcodeDetector){BarcodeDetector.getSupportedFormats().then(fmts=>{_ss(t('scanner.detectFormat',{fmts:fmts.join(',').substring(0,40)}));setTimeout(()=>{const ok=fmts.some(f=>['ean_13','ean-13','ean_8','ean-8','code_128','code-128','upc_a','upc-a'].includes(f));if(ok){_ss(t('scanner.usingNative'));_native(fmts);}else{_ss(t('scanner.fallback'));_fallback();}},1500);}).catch(()=>_fallback());}else{_fallback();}}
   function close(){_stop();if(_ov)_ov.classList.remove('open');}
   return{open,close};
 })();
@@ -1485,15 +1563,15 @@ function renderCashier(container) {
     <div class="page-cashier">
       <div class="page-title-bar">
         <span class="page-title-icon">🛒</span>
-        <span class="page-title-text">开始收银</span>
+        <span class="page-title-text">${t('cashier.title')}</span>
       </div>
       <div class="search-wrap">
         <div class="search-box" style="position:relative;">
           <span class="search-ico">🔍</span>
           <input id="cashier-search" class="search-inp" type="text"
-                 placeholder="搜索商品名称…" autocomplete="off" style="padding-right:52px;">
+                 placeholder="${t('cashier.searchPlaceholder')}" autocomplete="off" style="padding-right:52px;">
           <button class="scan-trigger-btn" style="position:absolute;right:6px;"
-                  title="扫描条形码" onclick="Accounting._cashierScan()">
+                  title="${t('cashier.scanTitle')}" onclick="Accounting._cashierScan()">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2"  y="4" width="2"  height="16" rx=".4"/>
               <rect x="6"  y="4" width="1"  height="16" rx=".4"/>
@@ -1506,27 +1584,27 @@ function renderCashier(container) {
         </div>
         <div id="cashier-dropdown" class="search-dropdown hidden"></div>
       </div>
-      <div class="section-label">已选商品</div>
+      <div class="section-label">${t('cashier.selectedItems')}</div>
       <div id="cashier-cart" class="cart-list"></div>
       <div class="cashier-total-bar">
         <div class="ct-left">
-          <div class="ct-items" id="ct-items">0 件商品</div>
+          <div class="ct-items" id="ct-items">${t('cashier.itemCount', {n: 0})}</div>
           <div class="ct-total" id="ct-total">¥0.00</div>
           <div class="ct-ar-hint hidden" id="ct-ar-hint"></div>
         </div>
-        <button class="ct-redeem-btn" id="ct-redeem-btn" disabled onclick="Accounting._openRedeemAll()">🔄 整单换购</button>
-        <button class="ct-disc-btn" id="ct-disc-btn" disabled onclick="Accounting._openDiscount()">🏷️ 优惠</button>
-        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>出售</button>
+        <button class="ct-redeem-btn" id="ct-redeem-btn" disabled onclick="Accounting._openRedeemAll()">🔄 ${t('cashier.redeemAll')}</button>
+        <button class="ct-disc-btn" id="ct-disc-btn" disabled onclick="Accounting._openDiscount()">🏷️ ${t('cashier.discount')}</button>
+        <button class="ct-btn" id="ct-btn" onclick="Accounting._submitSale()" disabled>${t('cashier.checkout')}</button>
       </div>
       <!-- ★ 应收快捷入口 -->
       <div style="text-align:center;margin-top:-4px;margin-bottom:8px">
         <button onclick="ARSheet.open()" style="background:none;border:none;color:var(--orange);font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;padding:4px 0">
-          📬 登记应收账款（换购差价/厂家补贴）
+          ${t('cashier.arEntry')}
         </button>
       </div>
       <div id="cashier-success" class="sale-success hidden">
         <div class="ss-icon">🎉</div>
-        <div class="ss-text">出售成功！</div>
+        <div class="ss-text">${t('cashier.successTitle')}</div>
         <div class="ss-sub" id="ss-sub"></div>
       </div>
     </div>`;
@@ -1539,7 +1617,7 @@ function renderCashier(container) {
       BarcodeScanner.close();
       const prod = Engine.getInventory().filter(p=>parseFloat(p.qty)>0).find(p=>p.barcode===code);
       if (prod) { _pickAndAdd(prod.name); }
-      else { _showToast('⚠️ 库存中没有条码 '+code+' 的商品，请先录入'); }
+      else { _showToast(t('cashier.noBarcodeProduct', {code: code})); }
     });
   };
 
@@ -1568,8 +1646,8 @@ function renderCashier(container) {
     });
     const results=Object.values(nameMap);
     dd.innerHTML=results.length
-      ?results.map(r=>`<div class="dd-item" data-name="${r.name}"><span class="dd-name">${r.name}</span><span class="dd-info">库存${r.totalQty}件${r.batches>1?' · '+r.batches+'个批次':''}</span></div>`).join('')
-      :'<div class="dd-empty">没有找到商品</div>';
+      ?results.map(r=>`<div class="dd-item" data-name="${r.name}"><span class="dd-name">${r.name}</span><span class="dd-info">${t('cashier.stockCount',{n:r.totalQty})}${r.batches>1?' · '+t('cashier.batchCount',{n:r.batches}):''}</span></div>`).join('')
+      :`<div class="dd-empty">${t('cashier.noProductFound')}</div>`;
     dd.querySelectorAll('.dd-item').forEach(el=>{
       el.onclick=()=>{inp.value='';dd.classList.add('hidden');_pickAndAdd(el.dataset.name);};
     });
@@ -1605,14 +1683,14 @@ function renderCashier(container) {
           : Engine.fmtMoney(item.salePrice);
         const redeemChip = item.isRedemption
           ? `<button class="ci-redeem-chip active" onclick="Accounting._clearRedeem(${i})">
-               🔄 换购·实付${Engine.fmtMoney(item.redemptionPrice)} <span style="font-size:10px;opacity:.7">✕</span>
+               ${t('cashier.redeemChipActive',{val:Engine.fmtMoney(item.redemptionPrice)})} <span style="font-size:10px;opacity:.7">✕</span>
              </button>`
-          : `<button class="ci-redeem-chip" onclick="Accounting._openRedeemSingle(${i})">🔄 换购</button>`;
+          : `<button class="ci-redeem-chip" onclick="Accounting._openRedeemSingle(${i})">${t('cashier.redeemChip')}</button>`;
         return `
         <div class="cart-item">
           <div class="ci-info">
-            <div class="ci-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;font-weight:700;margin-left:4px">批次'+item.batchNo+'</span>':''}</div>
-            <div class="ci-price">${displayPrice}/件 · 进价 ${Engine.fmtMoney(item.costPrice)}</div>
+            <div class="ci-name">${item.name}${item.batchNo?'<span style="font-size:11px;color:#999;font-weight:700;margin-left:4px">'+t('common.batchN',{n:item.batchNo})+'</span>':''}</div>
+            <div class="ci-price">${displayPrice}/${t('common.stockUnit')} · ${t('common.costPriceLabel')} ${Engine.fmtMoney(item.costPrice)}</div>
             ${redeemChip}
           </div>
           <div class="ci-qty-ctrl">
@@ -1624,7 +1702,7 @@ function renderCashier(container) {
           <button class="ci-del" onclick="Accounting._cartDel(${i})">✕</button>
         </div>`;
       }).join('')
-      :'<div class="cart-empty">搜索或扫码添加商品 🛍️</div>';
+      :`<div class="cart-empty">${t('cashier.cartEmpty')}</div>`;
     _updateTotal();
   }
 
@@ -1642,12 +1720,12 @@ function renderCashier(container) {
     const count = cart.reduce((a,c)=>a+c.qty,0);
     const hasRedeem = cart.some(c=>c.isRedemption);
 
-    container.querySelector('#ct-items').textContent = count + ' 件商品';
+    container.querySelector('#ct-items').textContent = t('cashier.itemCount', {n: count});
     container.querySelector('#ct-total').textContent = Engine.fmtMoney(cashTotal);
     const arHint = container.querySelector('#ct-ar-hint');
     if (arHint) {
       if (hasRedeem && arTotal > 0) {
-        arHint.textContent = '另应收进价补偿 ' + Engine.fmtMoney(arTotal);
+        arHint.textContent = t('cashier.arHint', {val: Engine.fmtMoney(arTotal)});
         arHint.classList.remove('hidden');
       } else {
         arHint.classList.add('hidden');
@@ -1674,8 +1752,9 @@ function renderCashier(container) {
     const record=Engine.recordSale(cart);
     cart=[];renderCart();
     const su=container.querySelector('#cashier-success');
-    let subText='共收 '+Engine.fmtMoney(record.cashCollected)+' · 毛利 '+Engine.fmtMoney(record.profit);
-    if(record.arTotal>0) subText+=' · 应收 '+Engine.fmtMoney(record.arTotal);
+    const subText = record.arTotal>0
+      ? t('cashier.successSubAr', {cash: Engine.fmtMoney(record.cashCollected), profit: Engine.fmtMoney(record.profit), ar: Engine.fmtMoney(record.arTotal)})
+      : t('cashier.successSub',   {cash: Engine.fmtMoney(record.cashCollected), profit: Engine.fmtMoney(record.profit)});
     container.querySelector('#ss-sub').textContent=subText;
     su.classList.remove('hidden');su.style.animation='none';
     requestAnimationFrame(()=>{su.style.animation='';});
@@ -1687,22 +1766,28 @@ function renderCashier(container) {
 }
 
 // ── 库存录入 / 进货 ─────────────────────────────────────────────────────────
-function renderEntry(container)   { _renderForm(container,'entry',  '库存录入','➕','将现有商品录入库存系统'); }
-function renderRestock(container) { _renderForm(container,'restock','进货',    '📦','记录新到货商品，自动补充库存'); }
+function renderEntry(container)   { _renderForm(container,'entry'); }
+function renderRestock(container) { _renderForm(container,'restock'); }
 
-const CATS = ['食品饮料','日用百货','休闲零食','冷冻冷藏','酒水','烟草','其他'];
+const CAT_KEYS = ['foodDrink','daily','snacks','frozen','alcohol','tobacco','other'];
 
-function _renderForm(container, source, title, icon, subtitle) {
+function _renderForm(container, source) {
+  const icon     = source==='entry' ? '➕' : '📦';
+  const title    = source==='entry' ? t('entry.title')    : t('restock.title');
+  const subtitle = source==='entry' ? t('entry.subtitle')  : t('restock.subtitle');
+  const submitLabel  = source==='entry' ? t('form.submitEntry')  : t('form.submitRestock');
+  const successLabel = source==='entry' ? t('form.successEntry') : t('form.successRestock');
+
   container.innerHTML = `
     <div class="page-form">
       <div class="page-title-bar"><span class="page-title-icon">${icon}</span><span class="page-title-text">${title}</span></div>
       <div class="form-subtitle">${subtitle}</div>
       <div class="form-card">
         <div class="form-group">
-          <label class="form-lbl">商品名称 *</label>
+          <label class="form-lbl">${t('form.productName')}</label>
           <div class="f-name-wrap">
-            <input id="f-name" class="form-inp" type="text" placeholder="例：农夫山泉 550ml" autocomplete="off">
-            <button class="scan-trigger-btn" title="扫描条形码" onclick="Accounting._openScanner()">
+            <input id="f-name" class="form-inp" type="text" placeholder="${t('form.productNamePlaceholder')}" autocomplete="off">
+            <button class="scan-trigger-btn" title="${t('scanner.title')}" onclick="Accounting._openScanner()">
               <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2"  y="4" width="2"  height="16" rx=".4"/><rect x="6"  y="4" width="1"  height="16" rx=".4"/>
                 <rect x="9"  y="4" width="2"  height="16" rx=".4"/><rect x="13" y="4" width="1"  height="16" rx=".4"/>
@@ -1710,31 +1795,31 @@ function _renderForm(container, source, title, icon, subtitle) {
               </svg>
             </button>
           </div>
-          <div class="f-barcode-tag" id="f-barcode-tag">条形码：<span id="f-barcode-val"></span></div>
+          <div class="f-barcode-tag" id="f-barcode-tag">${t('form.barcodeLabel',{code:''})}<span id="f-barcode-val"></span></div>
         </div>
         <div class="form-group">
-          <label class="form-lbl">商品分类</label>
+          <label class="form-lbl">${t('form.category')}</label>
           <div class="cat-chips" id="cat-chips">
-            ${CATS.map((c,i)=>`<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${c}</button>`).join('')}
+            ${CAT_KEYS.map((c,i)=>`<button class="cat-chip${i===0?' active':''}" data-cat="${c}">${catLabel(c)}</button>`).join('')}
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group half"><label class="form-lbl">进价 (¥) *</label><input id="f-cost" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
-          <div class="form-group half"><label class="form-lbl">售价 (¥) *</label><input id="f-sale" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
+          <div class="form-group half"><label class="form-lbl">${t('form.costPrice')}</label><input id="f-cost" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
+          <div class="form-group half"><label class="form-lbl">${t('form.salePrice')}</label><input id="f-sale" class="form-inp" type="number" step="0.01" min="0" placeholder="0.00"></div>
         </div>
         <div class="form-row">
-          <div class="form-group half"><label class="form-lbl">数量 *</label><input id="f-qty" class="form-inp" type="number" min="1" step="1" placeholder="0"></div>
-          <div class="form-group half"><label class="form-lbl">过期日期</label><input id="f-exp" class="form-inp" type="date"></div>
+          <div class="form-group half"><label class="form-lbl">${t('form.qty')}</label><input id="f-qty" class="form-inp" type="number" min="1" step="1" placeholder="0"></div>
+          <div class="form-group half"><label class="form-lbl">${t('form.expireDate')}</label><input id="f-exp" class="form-inp" type="date"></div>
         </div>
         <div class="margin-preview" id="margin-preview" style="display:none">
-          <span class="mp-label">毛利预览</span>
-          <span class="mp-unit" id="mp-unit">单件毛利 ¥—</span>
-          <span class="mp-rate" id="mp-rate">毛利率 —%</span>
+          <span class="mp-label">${t('form.marginPreview')}</span>
+          <span class="mp-unit" id="mp-unit">${t('form.unitMargin',{val:'¥—'})}</span>
+          <span class="mp-rate" id="mp-rate">${t('form.marginRate',{val:'—'})}</span>
         </div>
       </div>
-      <button class="form-submit" onclick="Accounting._submitForm('${source}')"><span>${icon}</span> 确认${title}</button>
-      <div class="form-success hidden" id="f-success">✅ ${title}成功！</div>
-      <div class="section-label" style="margin-top:24px">${title}历史</div>
+      <button class="form-submit" onclick="Accounting._submitForm('${source}')"><span>${icon}</span> ${submitLabel}</button>
+      <div class="form-success hidden" id="f-success">${successLabel}</div>
+      <div class="section-label" style="margin-top:24px">${t('form.history',{title:title})}</div>
       <div id="form-history" class="form-history-list"></div>
     </div>`;
 
@@ -1754,10 +1839,10 @@ function _renderForm(container, source, title, icon, subtitle) {
           if(ce&&data.costPrice){ce.value=data.costPrice;ce.classList.add('auto-filled');}
           if(se&&data.salePrice){se.value=data.salePrice;se.classList.add('auto-filled');}
           if(data.category)container.querySelectorAll('.cat-chip').forEach(b=>b.classList.toggle('active',b.dataset.cat===data.category));
-          _showToast('✅ 已自动填入：'+data.name);
+          _showToast(t('form.autoFilled',{name:data.name}));
           container.querySelector('#f-cost').dispatchEvent(new Event('input'));
-        } else { _showToast('📝 新商品，请填写商品信息后录入'); }
-      } catch(e) { _showToast('⚠️ 查询失败，请手动填写商品信息'); }
+        } else { _showToast(t('form.newProduct')); }
+      } catch(e) { _showToast(t('form.queryFailed')); }
     });
   };
 
@@ -1771,8 +1856,8 @@ function _renderForm(container, source, title, icon, subtitle) {
       const s=parseFloat(container.querySelector('#f-sale').value)||0;
       const mp=container.querySelector('#margin-preview');
       if(c>0&&s>0){const p=s-c,r=Math.round(p/s*100);mp.style.display='flex';
-        container.querySelector('#mp-unit').textContent='单件毛利 '+Engine.fmtMoney(p);
-        const re=container.querySelector('#mp-rate');re.textContent='毛利率 '+r+'%';
+        container.querySelector('#mp-unit').textContent=t('form.unitMargin',{val:Engine.fmtMoney(p)});
+        const re=container.querySelector('#mp-rate');re.textContent=t('form.marginRate',{val:r});
         re.style.color=r>=20?'#4CAF50':r>=0?'#FF6B35':'#F44336';}
       else mp.style.display='none';
     });
@@ -1784,11 +1869,11 @@ function _renderForm(container, source, title, icon, subtitle) {
     const sale   =parseFloat(container.querySelector('#f-sale').value);
     const qty    =parseFloat(container.querySelector('#f-qty').value);
     const expDate=container.querySelector('#f-exp').value;
-    const cat    =container.querySelector('.cat-chip.active')?.dataset.cat||'其他';
-    if(!name)                  return _shake(container.querySelector('#f-name'), '请填写商品名称');
-    if(isNaN(cost)||cost<0)    return _shake(container.querySelector('#f-cost'), '请填写有效进价');
-    if(isNaN(sale)||sale<0)    return _shake(container.querySelector('#f-sale'), '请填写有效售价');
-    if(isNaN(qty)||qty<1)      return _shake(container.querySelector('#f-qty'),  '数量至少为1');
+    const cat    =container.querySelector('.cat-chip.active')?.dataset.cat||'other';
+    if(!name)                  return _shake(container.querySelector('#f-name'), t('form.errorName'));
+    if(isNaN(cost)||cost<0)    return _shake(container.querySelector('#f-cost'), t('form.errorCost'));
+    if(isNaN(sale)||sale<0)    return _shake(container.querySelector('#f-sale'), t('form.errorSale'));
+    if(isNaN(qty)||qty<1)      return _shake(container.querySelector('#f-qty'),  t('form.errorQty'));
     Engine.addProduct({barcode:_currentBarcode||null,name,category:cat,qty,costPrice:cost,salePrice:sale,expireDate:expDate,source:src,createdAt:new Date().toISOString()});
     BarcodeDB.report({barcode:_currentBarcode,name,category:cat,costPrice:cost,salePrice:sale,qty,expireDate:expDate});
     ['f-name','f-cost','f-sale','f-qty','f-exp'].forEach(id=>container.querySelector('#'+id).value='');
@@ -1805,15 +1890,15 @@ function _renderForm(container, source, title, icon, subtitle) {
     el.innerHTML=inv.length
       ?inv.map(p=>`<div class="hist-item">
           <div class="hi-left">
-            <div class="hi-name">${p.name}${p.batchNo?'<span style="font-size:10px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
-            <div class="hi-meta">${p.category} · 进价${Engine.fmtMoney(p.costPrice)} · 售价${Engine.fmtMoney(p.salePrice)}</div>
+            <div class="hi-name">${p.name}${p.batchNo?'<span style="font-size:10px;color:#999;margin-left:4px">'+t('common.batchN',{n:p.batchNo})+'</span>':''}</div>
+            <div class="hi-meta">${catLabel(p.category)} · ${t('common.costPriceLabel')}${Engine.fmtMoney(p.costPrice)} · ${t('inventory.colSale')}${Engine.fmtMoney(p.salePrice)}</div>
           </div>
           <div class="hi-right">
             <div class="hi-qty">×${p.qty}</div>
-            ${p.expireDate?`<div class="hi-exp">到期${Engine.fmtDate(p.expireDate)}</div>`:''}
+            ${p.expireDate?`<div class="hi-exp">${t('inventory.colExpire')}${Engine.fmtDate(p.expireDate)}</div>`:''}
           </div>
         </div>`).join('')
-      :'<div class="hist-empty">暂无记录</div>';
+      :'<div class="hist-empty">'+t('form.historyEmpty')+'</div>';
   }
   renderHistory();
 }
@@ -1821,9 +1906,9 @@ function _renderForm(container, source, title, icon, subtitle) {
 function _shake(el,msg){el.style.borderColor='#F44336';el.placeholder=msg;el.classList.add('shake');setTimeout(()=>{el.classList.remove('shake');el.style.borderColor='';},600);}
 
 function _showToast(msg){
-  let t=document.getElementById('bco-toast');
-  if(!t){t=document.createElement('div');t.id='bco-toast';document.body.appendChild(t);}
-  t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2800);
+  let toastEl=document.getElementById('bco-toast');
+  if(!toastEl){toastEl=document.createElement('div');toastEl.id='bco-toast';document.body.appendChild(toastEl);}
+  toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._timer);toastEl._timer=setTimeout(()=>toastEl.classList.remove('show'),2800);
 }
 
 return { renderCashier, renderEntry, renderRestock };
@@ -1846,16 +1931,16 @@ const Dashboard = (function () {
       <div class="page-dashboard">
         <div class="page-title-bar">
           <span class="page-title-icon">📦</span>
-          <span class="page-title-text">库存看板</span>
-          <span class="inv-total-chip">${inv.length} 条批次</span>
+          <span class="page-title-text">${t('inventory.title')}</span>
+          <span class="inv-total-chip">${t('inventory.batchChip',{n:inv.length})}</span>
         </div>
         <div class="inv-summary-row">
-          <div class="inv-sc"><div class="inv-sc-val">${inv.reduce((a,p)=>a+(parseFloat(p.qty)||0),0)}</div><div class="inv-sc-lbl">总库存件数</div></div>
-          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.costPrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">库存进价总值</div></div>
-          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.salePrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">库存售价总值</div></div>
+          <div class="inv-sc"><div class="inv-sc-val">${inv.reduce((a,p)=>a+(parseFloat(p.qty)||0),0)}</div><div class="inv-sc-lbl">${t('inventory.totalQty')}</div></div>
+          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.costPrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">${t('inventory.totalCostValue')}</div></div>
+          <div class="inv-sc"><div class="inv-sc-val">${Engine.fmtMoney(inv.reduce((a,p)=>a+(parseFloat(p.salePrice)||0)*(parseFloat(p.qty)||0),0))}</div><div class="inv-sc-lbl">${t('inventory.totalSaleValue')}</div></div>
         </div>
-        <div class="inv-search-wrap"><span class="search-ico">🔍</span><input id="inv-search" class="search-inp" type="text" placeholder="搜索商品名称…"></div>
-        ${!inv.length?'<div class="inv-empty">暂无库存商品<br>请先在「库存录入」或「进货」中添加</div>':''}
+        <div class="inv-search-wrap"><span class="search-ico">🔍</span><input id="inv-search" class="search-inp" type="text" placeholder="${t('inventory.searchPlaceholder')}"></div>
+        ${!inv.length?'<div class="inv-empty">'+t('inventory.emptyAll')+'</div>':''}
         <div id="inv-tables"></div>
       </div>`;
 
@@ -1866,10 +1951,10 @@ const Dashboard = (function () {
     function renderTables() {
       const tbContainer=container.querySelector('#inv-tables');if(!tbContainer)return;
       const filtered=filterQ?inv.filter(p=>p.name.toLowerCase().includes(filterQ)):inv;
-      if(!filtered.length){tbContainer.innerHTML='<div class="inv-empty">没有匹配的商品</div>';return;}
+      if(!filtered.length){tbContainer.innerHTML='<div class="inv-empty">'+t('inventory.emptyFiltered')+'</div>';return;}
       const grouped={};
-      filtered.forEach(p=>{const cat=p.category||'其他';if(!grouped[cat])grouped[cat]=[];grouped[cat].push(p);});
-      tbContainer.innerHTML=Object.keys(grouped).sort().map(cat=>{
+      filtered.forEach(p=>{const cat=p.category||'other';if(!grouped[cat])grouped[cat]=[];grouped[cat].push(p);});
+      tbContainer.innerHTML=Object.keys(grouped).sort((a,b)=>catLabel(a).localeCompare(catLabel(b))).map(cat=>{
         const items=grouped[cat];
         const sorted=[...items].sort((a,b)=>a.name.localeCompare(b.name)||(a.batchNo||0)-(b.batchNo||0));
         const nameCount={};sorted.forEach(p=>{nameCount[p.name]=(nameCount[p.name]||0)+1;});
@@ -1884,30 +1969,30 @@ const Dashboard = (function () {
           const showFifo=nameCount[p.name]>1&&fifoIds.has(p.id);
           return `<tr${showFifo?' class="batch-fifo-row"':''}>
             <td class="inv-td td-name">
-              ${p.name}<span class="batch-tag">批${p.batchNo||1}</span>
-              ${showFifo?'<span style="font-size:10px;color:var(--green);font-weight:800;margin-left:2px">先出</span>':''}
+              ${p.name}<span class="batch-tag">${t('common.batchN',{n:p.batchNo||1})}</span>
+              ${showFifo?'<span style="font-size:10px;color:var(--green);font-weight:800;margin-left:2px">'+t('inventory.fifoTag')+'</span>':''}
             </td>
             <td class="inv-td td-qty ${qc}">${p.qty}</td>
             <td class="inv-td td-cost">${Engine.fmtMoney(p.costPrice)}</td>
             <td class="inv-td td-sale">${Engine.fmtMoney(p.salePrice)}</td>
             <td class="inv-td td-exp ${ec}">
-              ${p.expireDate?(dl<0?'<span class="expired-badge">已过期</span>':dl===0?'<span class="exp-today">今天到期</span>':Engine.fmtDate(p.expireDate)+'('+dl+'d)'):'—'}
+              ${p.expireDate?(dl<0?'<span class="expired-badge">'+t('inventory.expired')+'</span>':dl===0?'<span class="exp-today">'+t('inventory.expireToday')+'</span>':Engine.fmtDate(p.expireDate)+'('+dl+'d)'):'—'}
             </td>
             <td class="inv-td td-act"><button class="inv-del-btn" onclick="Dashboard._deleteProduct(${p.id})">🗑</button></td>
           </tr>`;
         }).join('');
 
         return `<div class="inv-cat-section">
-          <div class="inv-cat-header"><span class="inv-cat-name">${cat}</span><span class="inv-cat-count">${items.length} 条</span></div>
+          <div class="inv-cat-header"><span class="inv-cat-name">${catLabel(cat)}</span><span class="inv-cat-count">${t('inventory.batchCountChip',{n:items.length})}</span></div>
           <div class="inv-table-wrap"><table class="inv-table">
-            <thead><tr><th class="inv-th">商品名称</th><th class="inv-th">数量</th><th class="inv-th">进价</th><th class="inv-th">售价</th><th class="inv-th">过期日</th><th class="inv-th"></th></tr></thead>
+            <thead><tr><th class="inv-th">${t('inventory.colName')}</th><th class="inv-th">${t('inventory.colQty')}</th><th class="inv-th">${t('inventory.colCost')}</th><th class="inv-th">${t('inventory.colSale')}</th><th class="inv-th">${t('inventory.colExpire')}</th><th class="inv-th"></th></tr></thead>
             <tbody>${rows}</tbody>
           </table></div>
         </div>`;
       }).join('');
     }
     renderTables();
-    Dashboard._deleteProduct=(id)=>{if(!confirm('确定删除此批次？'))return;Engine.deleteProduct(id);_drawInventory(container);};
+    Dashboard._deleteProduct=(id)=>{if(!confirm(t('inventory.confirmDeleteBatch')))return;Engine.deleteProduct(id);_drawInventory(container);};
   }
 
   function refresh() { if(_inventoryContainer) _drawInventory(_inventoryContainer); }
@@ -1915,12 +2000,12 @@ const Dashboard = (function () {
   function renderExpiring(container) {
     container.innerHTML = `
       <div class="page-expiring">
-        <div class="page-title-bar"><span class="page-title-icon">⏰</span><span class="page-title-text">临期货品</span></div>
+        <div class="page-title-bar"><span class="page-title-icon">⏰</span><span class="page-title-text">${t('expiring.title')}</span></div>
         <div class="exp-filter-row">
-          <button class="exp-filter-btn active" data-days="7">7天内</button>
-          <button class="exp-filter-btn" data-days="14">14天内</button>
-          <button class="exp-filter-btn" data-days="30">30天内</button>
-          <button class="exp-filter-btn" data-days="0">已过期</button>
+          <button class="exp-filter-btn active" data-days="7">${t('expiring.filter7')}</button>
+          <button class="exp-filter-btn" data-days="14">${t('expiring.filter14')}</button>
+          <button class="exp-filter-btn" data-days="30">${t('expiring.filter30')}</button>
+          <button class="exp-filter-btn" data-days="0">${t('expiring.filterExpired')}</button>
         </div>
         <div id="exp-content"></div>
       </div>`;
@@ -1933,23 +2018,26 @@ const Dashboard = (function () {
       const items=activeDays===0
         ?Engine.getInventory().filter(p=>p.expireDate&&Engine.daysUntil(p.expireDate)<0).sort((a,b)=>new Date(a.expireDate)-new Date(b.expireDate))
         :Engine.getExpiringProducts(activeDays);
-      if(!items.length){el.innerHTML=`<div class="exp-empty"><div class="exp-empty-icon">✨</div><div>暂无${activeDays===0?'过期':activeDays+'天内临期'}商品</div></div>`;return;}
+      if(!items.length){
+        const emptyMsg = activeDays===0 ? t('expiring.emptyExpired') : t('expiring.emptyDays',{days:activeDays});
+        el.innerHTML=`<div class="exp-empty"><div class="exp-empty-icon">✨</div><div>${emptyMsg}</div></div>`;return;
+      }
 
       // ★ 用全局 id 索引传参，避免 JSON 序列化遇到特殊字符时崩溃
       window._expProds = {};
       items.forEach(p => { window._expProds[p.id] = p; });
 
-      el.innerHTML=`<div class="exp-summary">共 <b>${items.length}</b> 种商品需要关注</div>`
+      el.innerHTML=`<div class="exp-summary">${t('expiring.summary',{n:items.length})}</div>`
         +items.map(p=>{
           const d=Engine.daysUntil(p.expireDate);
           const u=d<0?'exp-card-danger':d===0?'exp-card-danger':d<=3?'exp-card-warn':'exp-card-ok';
-          const badge=d<0?`已过期 ${Math.abs(d)} 天`:d===0?'今天到期':`还剩 ${d} 天`;
+          const badge=d<0?t('expiring.expiredDays',{n:Math.abs(d)}):d===0?t('expiring.dueToday'):t('expiring.remainDays',{n:d});
           return `<div class="exp-card ${u}">
             <div class="exp-card-left">
-              <div class="exp-card-name">${p.name}${p.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+p.batchNo+'</span>':''}</div>
-              <div class="exp-card-meta">${p.category||'其他'} · 库存 ${p.qty} 件</div>
-              <div class="exp-card-price">进价 ${Engine.fmtMoney(p.costPrice)} · 售价 ${Engine.fmtMoney(p.salePrice)}</div>
-              <button class="exp-loss-btn" onclick="LossSheet.open(window._expProds[${p.id}])">📦 记录损耗</button>
+              <div class="exp-card-name">${p.name}${p.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">'+t('common.batchN',{n:p.batchNo})+'</span>':''}</div>
+              <div class="exp-card-meta">${catLabel(p.category)} · ${t('inventory.currentStock',{n:p.qty})}</div>
+              <div class="exp-card-price">${t('common.costPriceLabel')} ${Engine.fmtMoney(p.costPrice)} · ${t('inventory.colSale')} ${Engine.fmtMoney(p.salePrice)}</div>
+              <button class="exp-loss-btn" onclick="LossSheet.open(window._expProds[${p.id}])">${t('expiring.recordLoss')}</button>
             </div>
             <div class="exp-card-right"><div class="exp-badge ${u}">${badge}</div><div class="exp-date">${p.expireDate}</div></div>
           </div>`;
@@ -1960,28 +2048,28 @@ const Dashboard = (function () {
 
   function renderSalesRanking(container) {
     const data=Engine.getSalesRanking();
-    _renderRanking(container,{title:'销量排行',icon:'📊',subtitle:'统计开业以来累计售出数量',
-      data,valueKey:'totalQty',valueFmt:v=>v+' 件',subFmt:item=>'营收 '+Engine.fmtMoney(item.totalRevenue),emptyMsg:'还没有销售记录，快去收银吧！'});
+    _renderRanking(container,{title:t('ranking.sales.title'),icon:'📊',subtitle:t('ranking.sales.subtitle'),
+      data,valueKey:'totalQty',valueFmt:v=>t('cashier.itemCount',{n:v}),subFmt:item=>t('ranking.revenueLabel',{val:Engine.fmtMoney(item.totalRevenue)}),emptyMsg:t('ranking.sales.empty')});
   }
 
   function renderProfitRanking(container) {
     container.innerHTML=`<div class="page-ranking">
-      <div class="page-title-bar"><span class="page-title-icon">💹</span><span class="page-title-text">毛利排行</span></div>
+      <div class="page-title-bar"><span class="page-title-icon">💹</span><span class="page-title-text">${t('ranking.profit.title')}</span></div>
       <div class="rank-tab-row">
-        <button class="rank-tab active" id="rtab-sold" onclick="Dashboard._switchRankTab('sold')">已售毛利榜</button>
-        <button class="rank-tab" id="rtab-unit" onclick="Dashboard._switchRankTab('unit')">单品毛利榜</button>
+        <button class="rank-tab active" id="rtab-sold" onclick="Dashboard._switchRankTab('sold')">${t('ranking.profit.soldTab')}</button>
+        <button class="rank-tab" id="rtab-unit" onclick="Dashboard._switchRankTab('unit')">${t('ranking.profit.unitTab')}</button>
       </div>
       <div id="rank-panel-sold"></div><div id="rank-panel-unit" style="display:none"></div>
     </div>`;
-    Dashboard._switchRankTab=(tab)=>{['sold','unit'].forEach(t=>{container.querySelector('#rtab-'+t).classList.toggle('active',t===tab);container.querySelector('#rank-panel-'+t).style.display=t===tab?'':'none';});};
+    Dashboard._switchRankTab=(tab)=>{['sold','unit'].forEach(tabName=>{container.querySelector('#rtab-'+tabName).classList.toggle('active',tabName===tab);container.querySelector('#rank-panel-'+tabName).style.display=tabName===tab?'':'none';});};
     const sd=Engine.getSoldProfitRanking(),ms=sd.length?sd[0].profit:1;
     container.querySelector('#rank-panel-sold').innerHTML=sd.length
-      ?`<div class="rank-subtitle">售价×售出量 − 进价×售出量，贡献总毛利</div>${sd.map((it,i)=>_rankCard(it,i,it.profit,ms,Engine.fmtMoney(it.profit),'已售 '+it.qty+' 件')).join('')}`
-      :'<div class="rank-empty">暂无销售数据</div>';
+      ?`<div class="rank-subtitle">${t('ranking.profit.soldSubtitle')}</div>${sd.map((it,i)=>_rankCard(it,i,it.profit,ms,Engine.fmtMoney(it.profit),t('ranking.soldCount',{n:it.qty}))).join('')}`
+      :`<div class="rank-empty">${t('ranking.profit.emptySold')}</div>`;
     const ud=Engine.getUnitProfitRanking(),mu=ud.length?ud[0].unitProfit:1;
     container.querySelector('#rank-panel-unit').innerHTML=ud.length
-      ?`<div class="rank-subtitle">所有商品单件毛利（售价 − 进价），不论是否售出</div>${ud.map((it,i)=>_rankCard(it,i,it.unitProfit,mu,Engine.fmtMoney(it.unitProfit)+'/件','毛利率 '+it.margin+'%')).join('')}`
-      :'<div class="rank-empty">请先录入商品</div>';
+      ?`<div class="rank-subtitle">${t('ranking.profit.unitSubtitle')}</div>${ud.map((it,i)=>_rankCard(it,i,it.unitProfit,mu,Engine.fmtMoney(it.unitProfit)+'/'+t('common.stockUnit'),t('ranking.marginRate',{n:it.margin}))).join('')}`
+      :`<div class="rank-empty">${t('ranking.profit.emptyUnit')}</div>`;
   }
 
   function _renderRanking(container,opts) {
@@ -2023,7 +2111,6 @@ var YEAR  = now.getFullYear();
 var MONTH = now.getMonth();
 var TODAY = now.getDate();
 var DAYS  = new Date(YEAR, MONTH+1, 0).getDate();
-var MN    = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
 // ★ 全局：记录当前打开的日历弹窗的日期，供 ReceiptViewer 和 RetroSheet 使用
 var _currentSheetKey = '';
@@ -2031,12 +2118,15 @@ var _currentSheetDay = 0;
 
 function dateKey(d) { return new Date(YEAR, MONTH, d).toLocaleDateString(); }
 
+var _currentView = 'calendar'; // ★ 供 i18n 语言切换后重渲染当前视图使用
+
 function switchTab(btn, viewId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   if (btn && btn.classList) btn.classList.add('active');
   document.querySelectorAll('.page-view').forEach(v => v.classList.remove('visible'));
   var calView = document.getElementById('view-calendar');
   calView.style.display = 'none';
+  _currentView = viewId;
   if (viewId === 'calendar') {
     calView.style.display = '';
   } else {
@@ -2054,11 +2144,30 @@ function switchTab(btn, viewId) {
   }
 }
 
+// ★ 语言切换后：静态 data-i18n 文案已由 I18N.switchLang 自动刷新，
+//   这里补充刷新日历（月份名/头部）和当前动态渲染的 tab（收银台/库存/临期等）
+window.addEventListener('i18n:change', function () {
+  updateHeader();
+  refreshSnake();
+  if (_currentView !== 'calendar') {
+    var activeBtn = document.querySelector('.nav-btn[data-view="' + _currentView + '"]');
+    switchTab(activeBtn || null, _currentView);
+  }
+});
+
 function updateHeader() {
   var s = Engine.getMonthStats(YEAR, MONTH);
-  document.getElementById('mh-title').textContent = YEAR+'年'+MN[MONTH];
-  document.getElementById('mh-sub').textContent   = '本月已记录 '+s.days+' 天';
+  document.getElementById('mh-title').textContent = YEAR + tYearSuffix() + tMonth(MONTH);
+  document.getElementById('mh-sub').textContent   = t('retail.recordedDays', {days: s.days});
   document.getElementById('mh-rev').textContent   = Engine.fmtMoney(s.profit);
+}
+// ★ 中文用"2026年"，英文等语言直接用空格分隔（月份名已含语义，不需要"年"字）
+function tYearSuffix() { return I18N.getLang()==='zh' ? '年' : ' '; }
+
+// ★ 商品分类 key -> 当前语言显示文字（分类存储值是语言无关 key，如 foodDrink）
+function catLabel(catKey) {
+  if (!catKey) return t('inventory.categoryOther');
+  return t('category.' + catKey);
 }
 
 var X_POSITIONS = [50, 68, 80, 68, 50, 32, 20, 32];
@@ -2108,7 +2217,7 @@ function buildSnake() {
     else if (hasSales) node.classList.add('n-done');
     else               node.classList.add('n-missed');
     if (isToday) {
-      var tag=document.createElement('div');tag.className='today-tag';tag.textContent='今天';node.appendChild(tag);
+      var tag=document.createElement('div');tag.className='today-tag';tag.textContent=t('retail.calendar.todayTag');node.appendChild(tag);
     }
     var numEl=document.createElement('div');numEl.className='nd-num';numEl.textContent=day;node.appendChild(numEl);
     var icoEl=document.createElement('div');icoEl.className='nd-ico';
@@ -2128,7 +2237,7 @@ function buildSnake() {
   // 宝箱
   var cp=coords[DAYS], chest=document.createElement('div');chest.className='chest-node';
   chest.style.left=cp.x+'px';chest.style.top=cp.y+'px';
-  chest.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">月度总结</div>';
+  chest.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">'+t('retail.calendar.monthSummary')+'</div>';
   chest.onclick=openChest;track.appendChild(chest);
 }
 
@@ -2137,47 +2246,54 @@ function openSheet(day, key, data, isToday, isFuture, isPast, hasSales, hasLoss)
   _currentSheetKey = key;
   _currentSheetDay = day;
 
-  document.getElementById('sh-date').textContent = (MONTH+1)+'月'+day+'日';
+  document.getElementById('sh-date').textContent = tDateLabel(MONTH, day);
   var metrics=document.getElementById('sh-metrics'), btnRow=document.getElementById('sh-btn-row');
 
   if (isFuture) {
-    document.getElementById('sh-status').textContent='还没到这天哦 🔒';
+    document.getElementById('sh-status').textContent=t('retail.sheet.future');
     metrics.innerHTML=''; btnRow.innerHTML='';
   } else if (!hasSales && !hasLoss && !isToday) {
-    document.getElementById('sh-status').textContent='这天没有记录';
-    metrics.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div>'+
-      '<div class="mc"><div class="mc-lbl">经营盈余</div><div class="mc-val">—</div></div>';
+    document.getElementById('sh-status').textContent=t('retail.sheet.noRecord');
+    metrics.innerHTML='<div class="mc"><div class="mc-lbl">'+t('retail.sheet.revenue')+'</div><div class="mc-val">¥0</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.grossProfit')+'</div><div class="mc-val">—</div></div>';
     // 无记录的过去日期也可补记
-    btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 补记销售</button>';
+    btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 '+t('retail.sheet.btnRetro')+'</button>';
   } else {
     var cd=Engine.getDay(key)||data||{};
     var rev =parseFloat(cd.revenue)||0;
     var prof=parseFloat(cd.profit)||0;
     var varC=parseFloat(cd.variableCost)||(rev-prof);
     var loss=parseFloat(cd.loss)||0;
-    var statusTxt=isToday?'今天 · 进行中':(hasSales?'已完成 ✓':(hasLoss?'有损耗记录 ⚠':'暂无记录'));
+    var statusTxt=isToday?t('retail.sheet.todayInProgress'):(hasSales?t('retail.sheet.done'):(hasLoss?t('retail.sheet.lossOnly'):t('retail.sheet.noRecord')));
     document.getElementById('sh-status').textContent=statusTxt;
 
     // ★ 营收卡片可点击 → 弹出销售单
     metrics.innerHTML=
       '<div class="mc" onclick="ReceiptViewer.open(_currentSheetKey)" style="cursor:pointer">'+
-        '<div class="mc-lbl">营收 <span style="font-size:9px;color:var(--orange);font-weight:800">▶ 查看</span></div>'+
+        '<div class="mc-lbl">'+t('retail.sheet.revenue')+' <span style="font-size:9px;color:var(--orange);font-weight:800">'+t('retail.sheet.revenueView')+'</span></div>'+
         '<div class="mc-val o">'+Engine.fmtMoney(rev)+'</div>'+
       '</div>'+
-      '<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
-      '<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
-      '<div class="mc"><div class="mc-lbl">损耗成本</div><div class="mc-val r">'+(loss>0?Engine.fmtMoney(loss):'—')+'</div></div>';
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.grossProfit')+'</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.variableCost')+'</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.lossCost')+'</div><div class="mc-val r">'+(loss>0?Engine.fmtMoney(loss):'—')+'</div></div>';
 
     if (isToday) {
       btnRow.innerHTML=
-        '<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'cashier\')"><span>🛒</span> 开始收银</button>'+
-        '<button class="btn-sh btn-stock"   onclick="closeSheet();switchTab(null,\'restock\')"><span>📦</span> 进货</button>';
+        '<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'cashier\')"><span>🛒</span> '+t('retail.sheet.btnCashier')+'</button>'+
+        '<button class="btn-sh btn-stock"   onclick="closeSheet();switchTab(null,\'restock\')"><span>📦</span> '+t('retail.sheet.btnRestock')+'</button>';
     } else {
       // ★ 过去日期：补记按钮
-      btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 补记销售</button>';
+      btnRow.innerHTML='<button class="btn-sh btn-ghost" onclick="closeSheet();RetroSheet.open()">📝 '+t('retail.sheet.btnRetro')+'</button>';
     }
   }
   document.getElementById('overlay').classList.add('open');
+}
+
+// ★ "3月15日" / "Mar 15" 两种日期展示格式
+function tDateLabel(monthIdx, day) {
+  return I18N.getLang()==='zh'
+    ? (monthIdx+1)+'月'+day+'日'
+    : tMonth(monthIdx)+' '+day;
 }
 
 function overlayTap(e) { if(e.target===document.getElementById('overlay')) closeSheet(); }
@@ -2185,7 +2301,13 @@ function closeSheet()  { document.getElementById('overlay').classList.remove('op
 
 function openChest() {
   var s=Engine.getMonthStats(YEAR,MONTH);
-  alert('📊 '+(MONTH+1)+'月月度总结\n\n营业天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+'\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+s.gm+'%'+(s.totalLoss>0?'\n本月损耗：'+Engine.fmtMoney(s.totalLoss):''));
+  var msg = '📊 '+t('retail.chest.title', {month: tMonth(MONTH)})+'\n\n'+
+    t('retail.chest.days', {days: s.days})+'\n'+
+    t('retail.chest.revenue', {val: Engine.fmtMoney(s.revenue)})+'\n'+
+    t('retail.chest.profit', {val: Engine.fmtMoney(s.profit)})+'\n'+
+    t('retail.chest.margin', {val: s.gm})+
+    (s.totalLoss>0?'\n'+t('retail.chest.loss', {val: Engine.fmtMoney(s.totalLoss)}):'');
+  alert(msg);
 }
 
 function scrollToToday() {
@@ -2228,7 +2350,7 @@ const ReceiptViewer = (function(){
     _receipts = Engine.getSales().filter(function(s){ return s.date === dateKey; });
     if (!_receipts.length) {
       // 有销售记录的天才会显示"▶ 查看"，这里是保险措施
-      alert('这一天还没有销售记录');
+      alert(t('receipt.noSaleThisDay'));
       return;
     }
     _cur = 0;
@@ -2249,7 +2371,7 @@ const ReceiptViewer = (function(){
 
   function _render() {
     document.getElementById('rv-nav-info').textContent =
-      '第 ' + (_cur+1) + ' 张 / 共 ' + _receipts.length + ' 张';
+      t('receipt.pageInfo', {cur: _cur+1, total: _receipts.length});
     document.getElementById('rv-dots').innerHTML = _receipts.map(function(_,i){
       var active = i === _cur;
       return '<div style="width:'+(active?18:6)+'px;height:6px;border-radius:3px;'+
@@ -2279,23 +2401,23 @@ const ReceiptViewer = (function(){
         '<div class="rc-item-block">'+
           '<div class="rc-item-name">'+
             item.name+
-            (item.batchNo ? '<span class="rc-batch"> ·批'+item.batchNo+'</span>' : '')+
-            (rec.retroactive ? '<span class="rc-retro-badge">补记</span>' : '')+
+            (item.batchNo ? '<span class="rc-batch"> ·'+t('common.batchN',{n:item.batchNo})+'</span>' : '')+
+            (rec.retroactive ? '<span class="rc-retro-badge">'+t('receipt.retroBadge')+'</span>' : '')+
           '</div>'+
           (item.isRedemption
             // 换购商品：显示原价（参考）、实付价、进价、应收
-            ? '<div class="rc-row"><span>ORIG PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
-              '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
-              '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
-              '<div class="rc-row redeem"><span>REDEEMED @</span><span>'+Engine.fmtMoney(item.redemptionPrice)+'</span></div>'+
-              '<div class="rc-row ar-row"><span>A/R ← '+(item.supplierName||'供应商')+'</span>'+
+            ? '<div class="rc-row"><span>'+t('receipt.field.origPrice')+'</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
+              '<div class="rc-row"><span>'+t('receipt.field.unitCost')+'</span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+              '<div class="rc-row"><span>'+t('receipt.field.qty')+'</span><span>× '+item.qty+'</span></div>'+
+              '<div class="rc-row redeem"><span>'+t('receipt.field.redeemedAt')+'</span><span>'+Engine.fmtMoney(item.redemptionPrice)+'</span></div>'+
+              '<div class="rc-row ar-row"><span>'+t('receipt.field.arFrom',{name:item.supplierName||t('receipt.field.defaultSupplier')})+'</span>'+
                 '<span>+'+Engine.fmtMoney(parseFloat(item.costPrice)*parseFloat(item.qty))+'</span></div>'+
-              '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
+              '<div class="rc-row profit"><span>'+t('receipt.field.margin')+'</span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
             // 普通商品
-            : '<div class="rc-row"><span>UNIT PRICE</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
-              '<div class="rc-row"><span>UNIT COST </span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
-              '<div class="rc-row"><span>QTY       </span><span>× '+item.qty+'</span></div>'+
-              '<div class="rc-row profit"><span>MARGIN    </span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
+            : '<div class="rc-row"><span>'+t('receipt.field.unitPrice')+'</span><span>'+Engine.fmtMoney(origPrice)+'</span></div>'+
+              '<div class="rc-row"><span>'+t('receipt.field.unitCost')+'</span><span>'+Engine.fmtMoney(item.costPrice)+'</span></div>'+
+              '<div class="rc-row"><span>'+t('receipt.field.qty')+'</span><span>× '+item.qty+'</span></div>'+
+              '<div class="rc-row profit"><span>'+t('receipt.field.margin')+'</span><span>'+Engine.fmtMoney(itemProfit)+'</span></div>'
           )+
         '</div>'+
         '<hr class="rc-divider">';
@@ -2303,21 +2425,21 @@ const ReceiptViewer = (function(){
 
     var totalItems = rec.items.reduce(function(a,i){ return a+parseFloat(i.qty); }, 0);
 
-    return '<div class="rc-store">獭 掌 柜</div>'+
+    return '<div class="rc-store">'+t('receipt.storeName')+'</div>'+
       '<div class="rc-date">'+rec.date+'  '+timeStr+'</div>'+
       '<hr class="rc-divider" style="margin-top:10px">'+
       itemsHTML+
       '<div style="margin-top:4px">'+
-        '<div class="rc-total-row"><span>ITEMS   </span><span>'+totalItems+' 件</span></div>'+
-        '<div class="rc-total-row main"><span>REVENUE </span><span>'+Engine.fmtMoney(rec.total)+'</span></div>'+
+        '<div class="rc-total-row"><span>'+t('receipt.field.items')+'</span><span>'+totalItems+'</span></div>'+
+        '<div class="rc-total-row main"><span>'+t('receipt.field.revenue')+'</span><span>'+Engine.fmtMoney(rec.total)+'</span></div>'+
         (showCashIn
-          ? '<div class="rc-total-row"><span>CASH IN </span><span>'+Engine.fmtMoney(cashIn)+'</span></div>'
+          ? '<div class="rc-total-row"><span>'+t('receipt.field.cashIn')+'</span><span>'+Engine.fmtMoney(cashIn)+'</span></div>'
           : '')+
         '<hr class="rc-divider solid">'+
-        '<div class="rc-total-row profit"><span>GROSS PROFIT</span><span>'+Engine.fmtMoney(rec.profit)+'</span></div>'+
-        (hasAR ? '<div class="rc-total-row ar"><span>A/R CREATED </span><span>'+Engine.fmtMoney(rec.arTotal)+'</span></div>' : '')+
+        '<div class="rc-total-row profit"><span>'+t('receipt.field.grossProfit')+'</span><span>'+Engine.fmtMoney(rec.profit)+'</span></div>'+
+        (hasAR ? '<div class="rc-total-row ar"><span>'+t('receipt.field.arCreated')+'</span><span>'+Engine.fmtMoney(rec.arTotal)+'</span></div>' : '')+
       '</div>'+
-      '<div class="rc-footer">★  THANK  YOU  ★</div>';
+      '<div class="rc-footer">'+t('receipt.thankYou')+'</div>';
   }
 
   function next() { if (_cur < _receipts.length-1) { _cur++; _render(); } }
@@ -2344,32 +2466,32 @@ const RetroSheet = (function(){
     el.innerHTML =
       '<div class="page-title-bar">'+
         '<span class="page-title-icon">📝</span>'+
-        '<span class="page-title-text">补记销售</span>'+
+        '<span class="page-title-text">'+t('retro.title')+'</span>'+
       '</div>'+
       '<div style="background:#FEF9C3;border:1.5px solid #EAB308;border-radius:12px;'+
                   'padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:700;color:#713F12">'+
-        '📅 补记日期：'+(MONTH+1)+'月'+day+'日（'+key+'）'+
+        '📅 '+t('retro.dateLabel',{date:tDateLabel(MONTH,day),key:key})+
       '</div>'+
       '<div class="search-wrap" id="retro-search-wrap">'+
         '<div class="search-box">'+
           '<span class="search-ico">🔍</span>'+
           '<input id="retro-search" class="search-inp" type="text"'+
-                 'placeholder="搜索商品名称…" autocomplete="off">'+
+                 'placeholder="'+t('retro.searchPlaceholder')+'" autocomplete="off">'+
         '</div>'+
         '<div id="retro-dd" class="search-dropdown hidden"></div>'+
       '</div>'+
-      '<div class="section-label">已选商品</div>'+
+      '<div class="section-label">'+t('retro.selected')+'</div>'+
       '<div id="retro-cart" class="cart-list" style="margin-bottom:12px;min-height:60px"></div>'+
       '<div style="display:flex;justify-content:space-between;align-items:center;'+
                   'background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:14px;'+
                   'box-shadow:0 2px 8px rgba(0,0,0,.07)">'+
-        '<span style="font-size:13px;font-weight:700;color:var(--text-3)" id="retro-count">0 件商品</span>'+
+        '<span style="font-size:13px;font-weight:700;color:var(--text-3)" id="retro-count">'+t('cashier.itemCount',{n:0})+'</span>'+
         '<span style="font-size:18px;font-weight:900;color:var(--text)" id="retro-sum">¥0</span>'+
       '</div>'+
       '<button class="form-submit" id="retro-btn" disabled onclick="RetroSheet.submit()">'+
-        '📝 确认补记'+
+        t('retro.submitBtn')+
       '</button>'+
-      '<div class="form-success hidden" id="retro-ok">✅ 补记成功！</div>';
+      '<div class="form-success hidden" id="retro-ok">'+t('retro.success')+'</div>';
 
     _bindSearch();
     _renderCart();
@@ -2398,11 +2520,11 @@ const RetroSheet = (function(){
         ? results.map(function(r){
             return '<div class="dd-item" data-name="'+r.name+'">'+
               '<span class="dd-name">'+r.name+'</span>'+
-              '<span class="dd-info">库存'+r.totalQty+'件'+
-                (r.batches>1?' · '+r.batches+'批次':'')+
+              '<span class="dd-info">'+t('cashier.stockCount',{n:r.totalQty})+
+                (r.batches>1?' · '+t('cashier.batchCount',{n:r.batches}):'')+
               '</span></div>';
           }).join('')
-        : '<div class="dd-empty">没有找到商品</div>';
+        : '<div class="dd-empty">'+t('cashier.noProductFound')+'</div>';
       dd.querySelectorAll('.dd-item').forEach(function(row){
         row.onclick = function(){
           inp.value = ''; dd.classList.add('hidden');
@@ -2441,9 +2563,9 @@ const RetroSheet = (function(){
           return '<div class="cart-item">'+
             '<div class="ci-info">'+
               '<div class="ci-name">'+item.name+
-                (item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">批次'+item.batchNo+'</span>':'')+
+                (item.batchNo?'<span style="font-size:11px;color:#999;margin-left:4px">'+t('common.batchN',{n:item.batchNo})+'</span>':'')+
               '</div>'+
-              '<div class="ci-price">'+Engine.fmtMoney(item.salePrice)+'/件 · 进价 '+Engine.fmtMoney(item.costPrice)+'</div>'+
+              '<div class="ci-price">'+Engine.fmtMoney(item.salePrice)+'/'+t('common.stockUnit')+' · '+t('common.costPriceLabel')+' '+Engine.fmtMoney(item.costPrice)+'</div>'+
             '</div>'+
             '<div class="ci-qty-ctrl">'+
               '<button class="qty-btn" onclick="RetroSheet._adj('+i+',-1)">−</button>'+
@@ -2454,14 +2576,14 @@ const RetroSheet = (function(){
             '<button class="ci-del" onclick="RetroSheet._del('+i+')">✕</button>'+
           '</div>';
         }).join('')
-      : '<div class="cart-empty">搜索添加商品 📦</div>';
+      : '<div class="cart-empty">'+t('retro.empty')+'</div>';
 
     var total = _cart.reduce(function(a,c){ return a + c.salePrice * c.qty; }, 0);
     var count = _cart.reduce(function(a,c){ return a + c.qty; }, 0);
     var ce = document.getElementById('retro-count');
     var se = document.getElementById('retro-sum');
     var be = document.getElementById('retro-btn');
-    if (ce) ce.textContent = count + ' 件商品';
+    if (ce) ce.textContent = t('cashier.itemCount',{n:count});
     if (se) se.textContent = Engine.fmtMoney(total);
     if (be) be.disabled = (_cart.length === 0);
   }
@@ -2512,7 +2634,7 @@ window.RetroSheet = RetroSheet;
              border-radius:50%;font-size:22px;cursor:pointer;flex-shrink:0;
              display:flex;align-items:center;justify-content:center">‹</button>
     <div style="text-align:center">
-      <div style="color:#fff;font-size:13px;font-weight:700" id="rv-nav-info">第 1 张 / 共 1 张</div>
+      <div style="color:#fff;font-size:13px;font-weight:700" id="rv-nav-info" data-i18n="receipt.pageInfoDefault">第 1 张 / 共 1 张</div>
       <div id="rv-dots" style="display:flex;gap:5px;justify-content:center;margin-top:5px"></div>
     </div>
     <button onclick="ReceiptViewer.next()"
@@ -2529,11 +2651,11 @@ window.RetroSheet = RetroSheet;
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px">
-    <div style="color:rgba(255,255,255,.4);font-size:12px;font-weight:700">← 左滑 / 右滑 →</div>
+    <div style="color:rgba(255,255,255,.4);font-size:12px;font-weight:700" data-i18n="receipt.swipeHint">← 左滑 / 右滑 →</div>
     <button onclick="ReceiptViewer.close()"
       style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
              color:#fff;padding:9px 22px;border-radius:20px;font-size:13px;font-weight:700;
-             cursor:pointer;font-family:inherit">关闭</button>
+             cursor:pointer;font-family:inherit" data-i18n="common.close">关闭</button>
   </div>
 </div>
 
@@ -2549,7 +2671,7 @@ window.RetroSheet = RetroSheet;
     <button onclick="RetroSheet.close()"
       style="width:100%;padding:14px;background:#F0F0F0;color:#555;border:none;
              border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;
-             font-family:inherit;box-shadow:0 4px 0 #CECECE">关闭</button>
+             font-family:inherit;box-shadow:0 4px 0 #CECECE" data-i18n="common.close">关闭</button>
   </div>
 </div>
 
