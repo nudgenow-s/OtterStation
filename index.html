@@ -8,6 +8,17 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>主理人工作台</title>
+    <script src="i18n/zh.js"></script>
+    <script src="i18n/en.js"></script>
+    <script src="i18n/es.js"></script>
+    <script src="i18n/fr.js"></script>
+    <script src="i18n/ja.js"></script>
+    <script src="i18n/i18n-core.js"></script>
+    <script>
+      if (typeof window.t !== "function") {
+        window.t = function (key) { return key; };
+      }
+    </script>
     <style>
         :root {
             --bg-page: #F7F3EE;
@@ -57,9 +68,10 @@
     <span class="logo">🦦</span>
     <div class="brand">PRESTIGE STATION</div>
     <div class="bar-track"><div class="bar-fill"></div></div>
-    <div class="tip">正在同步数据...</div>
+    <div class="tip" id="sync-tip" data-i18n="index.syncingData">正在同步数据...</div>
 </div>
 <script>
+    document.title = t("main.pageTitle");
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').then(r => r.update());
     }

@@ -303,7 +303,7 @@ window.I18N_PACKS.es = {
   'main.brand': 'PRESTIGE STATION',
   'main.industryLogo': '{name} · STATION',
   'main.nav.backup': '📤 Copia',
-  'main.nav.retro': '📅 RET',
+  'main.nav.retro': '📅 Pasado',
   'main.nav.cost': '🔒 Costes',
   'main.nav.report': '📊 Informe',
 
@@ -383,7 +383,7 @@ window.I18N_PACKS.es = {
   'main.cost.enterPassword': 'Introduce la contraseña:',
 
   // ══ main.html · Retro calendar ══
-  'main.retro.title': '📅 RET',
+  'main.retro.title': '📅 Registrar venta pasada',
   'main.retro.hint': 'Selecciona una fecha para registrar',
   'main.retro.hintEn': 'Selecciona una fecha para registrar',
   'main.retro.placeholder': '¥ Ingresos totales del día',
@@ -399,6 +399,7 @@ window.I18N_PACKS.es = {
   'main.calc.addBtn': '＋ Añadir',
   'main.calc.saveBtn': '💾 Guardar',
   'main.calc.riskHint': 'Margen de riesgo +20%',
+  'main.calc.realtimeRate': 'Tasa en tiempo real',
   'main.calc.colItem': 'Artículo',
   'main.calc.colFreq': 'Frecuencia',
   'main.calc.colMonthlySub': 'Mensual',
@@ -445,4 +446,40 @@ window.I18N_PACKS.es = {
   'achievement.badge.antiProcrastination.desc': 'Gerente estrella — objetivo de hoy cumplido.',
   'achievement.unlockedLabel': 'Logro desbloqueado',
   'achievement.claimBtn': 'Reclamar insignia',
+
+  // ══ setup.html · Asistente de configuración inicial ══
+  'setup.pageTitle': 'Configuración inicial — Panel del propietario',
+  'setup.brand': 'Prestige Station',
+  'setup.calcEntryBtn': 'Calcular',
+  'setup.step.tag': '{n} / 05',
+  'setup.step0.title': '🏷️ Selecciona tu sector',
+  'setup.step0.desc': 'Adaptaremos las métricas y el análisis a tu sector.',
+  'setup.step0.confirmBtn': 'Confirmar',
+  'setup.step1.title': '🏠 Alquiler y local',
+  'setup.step1.desc': 'El alquiler es tu primer obstáculo. Introduce tu gasto fijo mensual:',
+  'setup.step1.placeholder': '5000',
+  'setup.step1.nextBtn': 'Siguiente',
+  'setup.step2.title': '👸 Tu salario',
+  'setup.step2.desc': 'Si no te pagas a ti mismo, te estás explotando:',
+  'setup.step2.placeholder': '8000',
+  'setup.step2.nextBtn': 'Siguiente',
+  'setup.step3.title': '🔋 Servicios y depreciación',
+  'setup.step3.desc': 'Servicios, depreciación de materiales. Calcula tu coste diario de operación:',
+  'setup.step3.placeholder': '1000',
+  'setup.step3.nextBtn': 'Último paso',
+  'setup.step4.title': '🏗️ Inversión inicial',
+  'setup.step4.desc': 'Reforma, equipamiento, cuotas de franquicia y otros costes hundidos:',
+  'setup.step4.placeholder': '50000',
+  'setup.step4.finishBtn': 'Finalizar y entrar a la estación',
+  'setup.backLink': 'Volver',
+
+  // ══ setup.html · Calculadora de costes (comparte la mayoría de main.calc.*) ══
+  'setup.calc.histTitle': '📋 Historial',
+  'setup.calc.clearAll': 'Borrar todo',
+  'setup.calc.itemNamePlaceholder': 'Nombre del artículo...',
+  'setup.calc.confirmClearHistory': '¿Borrar todo el historial?',
+  'setup.calc.laborWage': 'Salarios',
+
+  // ══ index.html · Pantalla de carga ══
+  'index.syncingData': 'Sincronizando datos...',
 };

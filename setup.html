@@ -9,6 +9,26 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>初始配置 — 主理人工作台</title>
     <script src="config.js"></script>
+    <script src="i18n/zh.js"></script>
+    <script src="i18n/en.js"></script>
+    <script src="i18n/es.js"></script>
+    <script src="i18n/fr.js"></script>
+    <script src="i18n/ja.js"></script>
+    <script src="i18n/i18n-core.js"></script>
+    <script>
+      // ★ 兜底防御：若 i18n 文件加载失败，t() 直接返回 key 本身，页面仍可正常运行
+      if (typeof window.t !== "function") {
+        console.warn("[i18n] i18n-core.js 未成功加载，已启用兜底 t()。");
+        window.t = function (key, params) {
+          if (!params) return key;
+          return key.replace(/\{(\w+)\}/g, (m, k) => (params[k] !== undefined ? params[k] : m));
+        };
+        window.I18N = {
+          getLang: () => "zh", setLang: () => {}, switchLang: () => {},
+          applyDOM: () => {}, getAvailableLangs: () => ["zh"],
+        };
+      }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
@@ -319,69 +339,69 @@
 <div class="card">
     <div class="header">
         <span class="logo" id="main-logo">🦦</span>
-        <div class="brand-name">Prestige Station</div>
+        <div class="brand-name" data-i18n="setup.brand">Prestige Station</div>
         <!-- 成本计算器入口按钮 -->
         <button class="calc-entry-btn" onclick="openCalc()">
-            🧮 <span id="calc-btn-text">成本计算</span>
+            🧮 <span id="calc-btn-text" data-i18n="setup.calcEntryBtn">成本计算</span>
         </button>
     </div>
     <div class="progress"><div id="bar"></div></div>
 
     <!-- Step 0 -->
     <div class="step active" id="s0">
-        <div class="step-tag">01 / 05</div>
-        <h2>🏷️ 选择行业身份</h2>
-        <p>我们将根据您的行业定制专属计量与分析模型。</p>
+        <div class="step-tag" data-i18n="setup.step.tag" data-i18n-params='{"n":"01"}'>01 / 05</div>
+        <h2 data-i18n="setup.step0.title">🏷️ 选择行业身份</h2>
+        <p data-i18n="setup.step0.desc">我们将根据您的行业定制专属计量与分析模型。</p>
         <div class="industry-grid" id="industry-selector">
-            <div class="industry-item selected" onclick="selectType('nail',this)"><span>💒</span><label>美业</label></div>
-            <div class="industry-item"          onclick="selectType('food',this)"><span>🌭</span><label>餐饮</label></div>
-            <div class="industry-item"          onclick="selectType('retail',this)"><span>📦</span><label>零售</label></div>
+            <div class="industry-item selected" onclick="selectType('nail',this)"><span>💒</span><label data-i18n="industry.nail">美业</label></div>
+            <div class="industry-item"          onclick="selectType('food',this)"><span>🌭</span><label data-i18n="industry.food">餐饮</label></div>
+            <div class="industry-item"          onclick="selectType('retail',this)"><span>📦</span><label data-i18n="industry.retail">零售</label></div>
         </div>
-        <button class="btn-primary" onclick="move(1)">确认身份</button>
+        <button class="btn-primary" onclick="move(1)" data-i18n="setup.step0.confirmBtn">确认身份</button>
     </div>
 
     <!-- Step 1 -->
     <div class="step" id="s1">
-        <div class="step-tag">02 / 05</div>
-        <h2>🏠 房租与物业</h2>
-        <p>房租是生存的第一道坎。请输入每月固定支出：</p>
+        <div class="step-tag" data-i18n="setup.step.tag" data-i18n-params='{"n":"02"}'>02 / 05</div>
+        <h2 data-i18n="setup.step1.title">🏠 房租与物业</h2>
+        <p data-i18n="setup.step1.desc">房租是生存的第一道坎。请输入每月固定支出：</p>
         <div class="rule"></div>
-        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="rent" placeholder="5000"></div>
-        <button class="btn-primary" onclick="move(2)">下一步</button>
-        <span class="back-link" onclick="move(0)">返回上一步</span>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="rent" placeholder="5000" data-i18n-placeholder="setup.step1.placeholder"></div>
+        <button class="btn-primary" onclick="move(2)" data-i18n="setup.step1.nextBtn">下一步</button>
+        <span class="back-link" onclick="move(0)" data-i18n="setup.backLink">返回上一步</span>
     </div>
 
     <!-- Step 2 -->
     <div class="step" id="s2">
-        <div class="step-tag">03 / 05</div>
-        <h2>👸 你的专属工资</h2>
-        <p>如果你不发工资，那你只是在自我剥削：</p>
+        <div class="step-tag" data-i18n="setup.step.tag" data-i18n-params='{"n":"03"}'>03 / 05</div>
+        <h2 data-i18n="setup.step2.title">👸 你的专属工资</h2>
+        <p data-i18n="setup.step2.desc">如果你不发工资，那你只是在自我剥削：</p>
         <div class="rule"></div>
-        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="salary" placeholder="8000"></div>
-        <button class="btn-primary" onclick="move(3)">下一步</button>
-        <span class="back-link" onclick="move(1)">返回上一步</span>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="salary" placeholder="8000" data-i18n-placeholder="setup.step2.placeholder"></div>
+        <button class="btn-primary" onclick="move(3)" data-i18n="setup.step2.nextBtn">下一步</button>
+        <span class="back-link" onclick="move(1)" data-i18n="setup.backLink">返回上一步</span>
     </div>
 
     <!-- Step 3 -->
     <div class="step" id="s3">
-        <div class="step-tag">04 / 05</div>
-        <h2>🔋 杂费与折旧</h2>
-        <p>水电、材料折旧。算出日均运营成本：</p>
+        <div class="step-tag" data-i18n="setup.step.tag" data-i18n-params='{"n":"04"}'>04 / 05</div>
+        <h2 data-i18n="setup.step3.title">🔋 杂费与折旧</h2>
+        <p data-i18n="setup.step3.desc">水电、材料折旧。算出日均运营成本：</p>
         <div class="rule"></div>
-        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="misc" placeholder="1000"></div>
-        <button class="btn-primary" onclick="move(4)">最后一步</button>
-        <span class="back-link" onclick="move(2)">返回上一步</span>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="misc" placeholder="1000" data-i18n-placeholder="setup.step3.placeholder"></div>
+        <button class="btn-primary" onclick="move(4)" data-i18n="setup.step3.nextBtn">最后一步</button>
+        <span class="back-link" onclick="move(2)" data-i18n="setup.backLink">返回上一步</span>
     </div>
 
     <!-- Step 4 -->
     <div class="step" id="s4">
-        <div class="step-tag">05 / 05</div>
-        <h2>🏗️ 初始投入成本</h2>
-        <p>装修、设备、加盟费等沉没成本：</p>
+        <div class="step-tag" data-i18n="setup.step.tag" data-i18n-params='{"n":"05"}'>05 / 05</div>
+        <h2 data-i18n="setup.step4.title">🏗️ 初始投入成本</h2>
+        <p data-i18n="setup.step4.desc">装修、设备、加盟费等沉没成本：</p>
         <div class="rule"></div>
-        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="startup" placeholder="50000"></div>
-        <button class="btn-primary" onclick="save()">完成并进入水獭能量站</button>
-        <span class="back-link" onclick="move(3)">返回上一步</span>
+        <div class="input-wrap"><span class="input-prefix">¥</span><input type="number" id="startup" placeholder="50000" data-i18n-placeholder="setup.step4.placeholder"></div>
+        <button class="btn-primary" onclick="save()" data-i18n="setup.step4.finishBtn">完成并进入水獭能量站</button>
+        <span class="back-link" onclick="move(3)" data-i18n="setup.backLink">返回上一步</span>
     </div>
 </div>
 
@@ -392,9 +412,9 @@
         <!-- 历史记录面板（覆盖在计算器上） -->
         <div id="history-panel">
             <div class="hist-topbar">
-                <div class="hist-title">📋 计算历史</div>
+                <div class="hist-title" data-i18n="setup.calc.histTitle">📋 计算历史</div>
                 <div style="display:flex;gap:8px;">
-                    <button class="calc-tb-btn history" onclick="clearAllHistory()" style="color:#f43f5e;border-color:rgba(244,63,94,0.3);">清空全部</button>
+                    <button class="calc-tb-btn history" onclick="clearAllHistory()" style="color:#f43f5e;border-color:rgba(244,63,94,0.3);" data-i18n="setup.calc.clearAll">清空全部</button>
                     <button class="calc-close-btn" onclick="closeHistory()">×</button>
                 </div>
             </div>
@@ -405,16 +425,16 @@
         <div class="calc-topbar">
             <div class="calc-topbar-left">
                 <button class="calc-close-btn" onclick="closeCalc()">×</button>
-                <div class="calc-title" id="calc-title-text">成本计算器</div>
+                <div class="calc-title" id="calc-title-text" data-i18n="main.calc.brand">成本计算器</div>
             </div>
             <div class="calc-toolbar-btns">
                 <!-- 货币切换 -->
                 <button class="calc-tb-btn currency active" id="btn-cny" onclick="setCurrency('CNY')">¥ CNY</button>
                 <button class="calc-tb-btn currency" id="btn-usd" onclick="setCurrency('USD')">$ USD</button>
                 <!-- 功能按钮 -->
-                <button class="calc-tb-btn history" onclick="openHistory()">📋 历史</button>
-                <button class="calc-tb-btn add-row" onclick="addCalcRow()">＋ 添加</button>
-                <button class="calc-tb-btn save-calc" onclick="saveCalcHistory()">💾 保存</button>
+                <button class="calc-tb-btn history" onclick="openHistory()" data-i18n="main.calc.historyBtn">📋 历史</button>
+                <button class="calc-tb-btn add-row" onclick="addCalcRow()" data-i18n="main.calc.addBtn">＋ 添加</button>
+                <button class="calc-tb-btn save-calc" onclick="saveCalcHistory()" data-i18n="main.calc.saveBtn">💾 保存</button>
             </div>
         </div>
 
@@ -427,19 +447,19 @@
                 <div class="calc-rate-row">
                     <span class="calc-rate-label">USD → CNY</span>
                     <input class="calc-rate-input" type="number" id="calc-rate" value="7.25" step="0.0001" oninput="calcRecalc()">
-                    <span style="font-size:10px;color:rgba(201,168,76,0.4);margin-left:4px;">实时汇率</span>
-                    <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.2);">风险金 +20%</span>
+                    <span style="font-size:10px;color:rgba(201,168,76,0.4);margin-left:4px;" data-i18n="main.calc.realtimeRate">实时汇率</span>
+                    <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.2);" data-i18n="main.calc.riskHint">风险金 +20%</span>
                 </div>
 
                 <!-- 成本表格 -->
                 <table class="calc-table">
                     <thead>
                         <tr>
-                            <th style="width:30%" id="th-item">项目</th>
-                            <th style="width:16%" id="th-freq">频率</th>
+                            <th style="width:30%" id="th-item" data-i18n="main.calc.colItem">项目</th>
+                            <th style="width:16%" id="th-freq" data-i18n="main.calc.colFreq">频率</th>
                             <th style="width:17%">USD</th>
                             <th style="width:17%">CNY</th>
-                            <th style="width:14%;text-align:right;" id="th-sub">月小计</th>
+                            <th style="width:14%;text-align:right;" id="th-sub" data-i18n="main.calc.colMonthlySub">月小计</th>
                             <th style="width:6%"></th>
                         </tr>
                     </thead>
@@ -450,15 +470,15 @@
             <!-- 右：汇总 -->
             <div class="calc-summary-area">
                 <div class="sum-card">
-                    <div class="sum-label" id="sum-base-label">原始月度</div>
+                    <div class="sum-label" id="sum-base-label" data-i18n="main.calc.baseLabel">原始月度</div>
                     <div class="sum-value"><span class="c-sym">¥</span> <span id="sum-base">0.00</span></div>
                 </div>
                 <div class="sum-card">
-                    <div class="sum-label" id="sum-risk-label">风险金 20%</div>
+                    <div class="sum-label" id="sum-risk-label" data-i18n="main.calc.riskLabel">风险金 20%</div>
                     <div class="sum-value warn"><span class="c-sym">¥</span> <span id="sum-risk">0.00</span></div>
                 </div>
                 <div class="sum-card grand">
-                    <div class="sum-label" id="sum-grand-label">月度总预算</div>
+                    <div class="sum-label" id="sum-grand-label" data-i18n="main.calc.grandLabel">月度总预算</div>
                     <div class="sum-value gold"><span class="c-sym">¥</span> <span id="sum-grand">0.00</span></div>
                 </div>
             </div>
@@ -472,6 +492,11 @@
 
     /* ══ Setup 逻辑 ══ */
     let selectedIndustry = 'nail';
+
+    // ★ i18n: registry key（nail/food/retail）本身语言无关，直接映射到 industry.* 翻译 key
+    function industryNameKey(type) {
+        return 'industry.' + type;
+    }
 
     function selectType(type, el) {
         selectedIndustry = type;
@@ -510,29 +535,9 @@
     }
 
     /* ══ 成本计算器 ══ */
+    // ★ i18n: 计算器文案改用共享字典的 main.calc.* / setup.calc.* key，
+    //   不再维护独立的 calcI18n 中英字典，天然支持全部已加载语言
     let calcCurrency = 'CNY';
-    let calcLang     = localStorage.getItem('lang') === 'en' ? 'en' : 'zh';
-
-    const calcI18n = {
-        zh: {
-            title:      '成本计算器',
-            btnText:    '成本计算',
-            freqDay:    '日费用', freqMonth: '月费用', freqYear:  '年费用',
-            thItem:     '项目', thFreq: '频率', thSub: '月小计',
-            baseLabel:  '原始月度', riskLabel: '风险金 20%', grandLabel: '月度总预算',
-            saveOk:     '✅ 已保存本次计算',
-            histEmpty:  '暂无历史记录',
-        },
-        en: {
-            title:      'Cost Calculator',
-            btnText:    'Calc',
-            freqDay:    'Daily', freqMonth: 'Monthly', freqYear: 'Yearly',
-            thItem:     'Item', thFreq: 'Freq', thSub: 'Monthly',
-            baseLabel:  'Base Total', riskLabel: 'Risk 20%', grandLabel: 'Monthly Budget',
-            saveOk:     '✅ Saved',
-            histEmpty:  'No history yet',
-        }
-    };
 
     function openCalc() {
         const modal = document.getElementById('calc-modal');
@@ -543,9 +548,9 @@
         }
         updateCalcLang();
         if (document.querySelectorAll('#calc-body tr').length === 0) {
-            addCalcRow('房租', '', '5000');
-            addCalcRow('人工工资', '', '8000');
-            addCalcRow('水电杂费', '', '1000');
+            addCalcRow(t('main.calc.defaultItemRent'), '', '5000');
+            addCalcRow(t('setup.calc.laborWage'), '', '8000');
+            addCalcRow(t('main.calc.defaultItemUtility'), '', '1000');
         }
         calcRecalc();
     }
@@ -571,16 +576,15 @@
     }
 
     function addCalcRow(name='', usd='', cny='') {
-        const t = calcI18n[calcLang];
         const tbody = document.getElementById('calc-body');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input class="calc-input" type="text" value="${name}" placeholder="${calcLang==='zh'?'项目名称...':'Item name...'}" oninput="calcRecalc()"></td>
+            <td><input class="calc-input" type="text" value="${name}" placeholder="${t('setup.calc.itemNamePlaceholder')}" oninput="calcRecalc()"></td>
             <td>
                 <select class="calc-freq-select" onchange="calcRecalc()">
-                    <option value="30">${t.freqDay}</option>
-                    <option value="1" selected>${t.freqMonth}</option>
-                    <option value="0.0833">${t.freqYear}</option>
+                    <option value="30">${t('main.calc.freqDay')}</option>
+                    <option value="1" selected>${t('main.calc.freqMonth')}</option>
+                    <option value="0.0833">${t('main.calc.freqYear')}</option>
                 </select>
             </td>
             <td><input class="calc-input num" type="number" value="${usd}" placeholder="0" oninput="calcRecalc()"></td>
@@ -645,7 +649,7 @@
         // 最多保留 30 条
         if (history.length > 30) history.splice(30);
         localStorage.setItem('calc_history', JSON.stringify(history));
-        alert(calcI18n[calcLang].saveOk);
+        alert(t('main.calc.savedOk'));
     }
 
     function openHistory() {
@@ -656,7 +660,7 @@
         document.getElementById('history-panel').classList.remove('open');
     }
     function clearAllHistory() {
-        if (confirm(calcLang === 'zh' ? '确认清空全部历史？' : 'Clear all history?')) {
+        if (confirm(t('setup.calc.confirmClearHistory'))) {
             localStorage.removeItem('calc_history');
             renderHistory();
         }
@@ -665,10 +669,9 @@
     function renderHistory() {
         const history = JSON.parse(localStorage.getItem('calc_history') || '[]');
         const list    = document.getElementById('hist-list');
-        const t       = calcI18n[calcLang];
 
         if (!history.length) {
-            list.innerHTML = `<div class="hist-empty">${t.histEmpty}</div>`;
+            list.innerHTML = `<div class="hist-empty">${t('main.calc.historyEmpty')}</div>`;
             return;
         }
 
@@ -679,7 +682,7 @@
                     <button class="hist-item-del" onclick="event.stopPropagation();deleteHistory(${idx})">×</button>
                 </div>
                 <div class="hist-item-total">${item.currency === 'CNY' ? '¥' : '$'} ${item.grand}</div>
-                <div class="hist-item-rows">${item.rows.length} 项 · 汇率 ${item.rate} · ${item.currency}</div>
+                <div class="hist-item-rows">${t('main.calc.historyItemMeta', {n: item.rows.length, rate: item.rate, currency: item.currency})}</div>
             </div>
         `).join('');
     }
@@ -711,27 +714,66 @@
     }
 
     /* ── 语言同步 ── */
+    // ★ i18n: 静态 data-i18n 标签由 I18N.applyDOM()/switchLang() 自动刷新；
+    //   这里只需重刷由 JS 动态生成的计算器内容（表格行的频率下拉选项文字）
     function updateCalcLang() {
-        calcLang = localStorage.getItem('lang') === 'en' ? 'en' : 'zh';
-        const t  = calcI18n[calcLang];
-        document.getElementById('calc-title-text').innerText = t.title;
-        document.getElementById('calc-btn-text').innerText   = t.btnText;
-        document.getElementById('th-item').innerText  = t.thItem;
-        document.getElementById('th-freq').innerText  = t.thFreq;
-        document.getElementById('th-sub').innerText   = t.thSub;
-        document.getElementById('sum-base-label').innerText  = t.baseLabel;
-        document.getElementById('sum-risk-label').innerText  = t.riskLabel;
-        document.getElementById('sum-grand-label').innerText = t.grandLabel;
-        // 同步频率选项文字
+        // 同步频率选项文字（select 的 <option>.text 不受 data-i18n 管辖，需手动刷新）
         document.querySelectorAll('.calc-freq-select').forEach(s => {
             const v = s.value;
-            s.options[0].text = t.freqDay;
-            s.options[1].text = t.freqMonth;
-            s.options[2].text = t.freqYear;
+            s.options[0].text = t('main.calc.freqDay');
+            s.options[1].text = t('main.calc.freqMonth');
+            s.options[2].text = t('main.calc.freqYear');
             s.value = v;
         });
     }
+
+    /* ── 语言切换悬浮按钮 ── */
+    (function () {
+        var LANG_CYCLE = ['zh', 'en', 'es', 'fr', 'ja'];
+        var LANG_LABEL = { zh: '中文', en: 'EN', es: 'ES', fr: 'FR', ja: 'JA' };
+
+        function nextLang(cur) {
+            var available = LANG_CYCLE.filter(l => I18N.getAvailableLangs().indexOf(l) !== -1);
+            if (!available.length) return cur;
+            var idx = available.indexOf(cur);
+            return available[(idx + 1) % available.length];
+        }
+
+        function mountLangToggle() {
+            if (document.getElementById('i18n-toggle-btn')) return;
+            var btn = document.createElement('div');
+            btn.id = 'i18n-toggle-btn';
+            var cur = I18N.getLang();
+            btn.innerHTML = LANG_LABEL[nextLang(cur)] || 'EN';
+            Object.assign(btn.style, {
+                position: 'fixed', bottom: '16px', left: '16px',
+                background: 'var(--crimson, #9B2335)', color: '#fff',
+                padding: '6px 14px', borderRadius: '20px', fontSize: '11px',
+                cursor: 'pointer', zIndex: '99999', fontWeight: 'bold',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                fontFamily: "'PingFang SC','Helvetica Neue',sans-serif",
+            });
+            document.body.appendChild(btn);
+            btn.onclick = function () {
+                var next = nextLang(I18N.getLang());
+                if (I18N.switchLang(next)) {
+                    btn.innerHTML = LANG_LABEL[nextLang(next)] || 'EN';
+                }
+            };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', mountLangToggle);
+        } else {
+            mountLangToggle();
+        }
+    })();
+
+    window.addEventListener('i18n:change', function () {
+        document.title = t('setup.pageTitle');
+        updateCalcLang();
+    });
+    document.title = t('setup.pageTitle');
 </script>
-<script src="i18n-engine.js"></script>
 </body>
 </html>

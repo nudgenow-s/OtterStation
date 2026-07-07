@@ -400,6 +400,7 @@ window.I18N_PACKS.zh = {
   'main.calc.addBtn': '＋ 添加',
   'main.calc.saveBtn': '💾 保存',
   'main.calc.riskHint': '风险金 +20%',
+  'main.calc.realtimeRate': '实时汇率',
   'main.calc.colItem': '项目',
   'main.calc.colFreq': '频率',
   'main.calc.colMonthlySub': '月小计',
@@ -446,4 +447,40 @@ window.I18N_PACKS.zh = {
   'achievement.badge.antiProcrastination.desc': '超绝主理人，今日目标已达成。',
   'achievement.unlockedLabel': 'Achievement Unlocked',
   'achievement.claimBtn': '收下勋章',
+
+  // ══ setup.html · 初始配置向导 ══
+  'setup.pageTitle': '初始配置 — 主理人工作台',
+  'setup.brand': 'Prestige Station',
+  'setup.calcEntryBtn': '成本计算',
+  'setup.step.tag': '{n} / 05',
+  'setup.step0.title': '🏷️ 选择行业身份',
+  'setup.step0.desc': '我们将根据您的行业定制专属计量与分析模型。',
+  'setup.step0.confirmBtn': '确认身份',
+  'setup.step1.title': '🏠 房租与物业',
+  'setup.step1.desc': '房租是生存的第一道坎。请输入每月固定支出：',
+  'setup.step1.placeholder': '5000',
+  'setup.step1.nextBtn': '下一步',
+  'setup.step2.title': '👸 你的专属工资',
+  'setup.step2.desc': '如果你不发工资，那你只是在自我剥削：',
+  'setup.step2.placeholder': '8000',
+  'setup.step2.nextBtn': '下一步',
+  'setup.step3.title': '🔋 杂费与折旧',
+  'setup.step3.desc': '水电、材料折旧。算出日均运营成本：',
+  'setup.step3.placeholder': '1000',
+  'setup.step3.nextBtn': '最后一步',
+  'setup.step4.title': '🏗️ 初始投入成本',
+  'setup.step4.desc': '装修、设备、加盟费等沉没成本：',
+  'setup.step4.placeholder': '50000',
+  'setup.step4.finishBtn': '完成并进入水獭能量站',
+  'setup.backLink': '返回上一步',
+
+  // ══ setup.html · 成本计算器（与 main.html 共用大部分 main.calc.* key）══
+  'setup.calc.histTitle': '📋 计算历史',
+  'setup.calc.clearAll': '清空全部',
+  'setup.calc.itemNamePlaceholder': '项目名称...',
+  'setup.calc.confirmClearHistory': '确认清空全部历史？',
+  'setup.calc.laborWage': '人工工资',
+
+  // ══ index.html · 启动加载页 ══
+  'index.syncingData': '正在同步数据...',
 };

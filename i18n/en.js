@@ -399,6 +399,7 @@ window.I18N_PACKS.en = {
   'main.calc.addBtn': '＋ Add',
   'main.calc.saveBtn': '💾 Save',
   'main.calc.riskHint': 'Risk buffer +20%',
+  'main.calc.realtimeRate': 'Live rate',
   'main.calc.colItem': 'Item',
   'main.calc.colFreq': 'Frequency',
   'main.calc.colMonthlySub': 'Monthly',
@@ -445,4 +446,40 @@ window.I18N_PACKS.en = {
   'achievement.badge.antiProcrastination.desc': "Elite manager — today's goal is done.",
   'achievement.unlockedLabel': 'Achievement Unlocked',
   'achievement.claimBtn': 'Claim Badge',
+
+  // ══ setup.html · Onboarding wizard ══
+  'setup.pageTitle': 'Initial Setup — Owner Dashboard',
+  'setup.brand': 'Prestige Station',
+  'setup.calcEntryBtn': 'Calc',
+  'setup.step.tag': '{n} / 05',
+  'setup.step0.title': '🏷️ Select Industry',
+  'setup.step0.desc': "We'll tailor the metrics and analytics to your industry.",
+  'setup.step0.confirmBtn': 'Confirm',
+  'setup.step1.title': '🏠 Rent & Property',
+  'setup.step1.desc': 'Rent is your first hurdle. Enter your monthly fixed cost:',
+  'setup.step1.placeholder': '5000',
+  'setup.step1.nextBtn': 'Next',
+  'setup.step2.title': '👸 Your Salary',
+  'setup.step2.desc': "If you don't pay yourself, you're just exploiting yourself:",
+  'setup.step2.placeholder': '8000',
+  'setup.step2.nextBtn': 'Next',
+  'setup.step3.title': '🔋 Utilities & Depreciation',
+  'setup.step3.desc': 'Utilities, material depreciation. Work out your daily running cost:',
+  'setup.step3.placeholder': '1000',
+  'setup.step3.nextBtn': 'Final Step',
+  'setup.step4.title': '🏗️ Initial Investment',
+  'setup.step4.desc': 'Renovation, equipment, franchise fees and other sunk costs:',
+  'setup.step4.placeholder': '50000',
+  'setup.step4.finishBtn': 'Finish & Enter the Station',
+  'setup.backLink': 'Back',
+
+  // ══ setup.html · Cost calculator (mostly shares main.calc.* keys) ══
+  'setup.calc.histTitle': '📋 History',
+  'setup.calc.clearAll': 'Clear all',
+  'setup.calc.itemNamePlaceholder': 'Item name...',
+  'setup.calc.confirmClearHistory': 'Clear all history?',
+  'setup.calc.laborWage': 'Labor wages',
+
+  // ══ index.html · Splash screen ══
+  'index.syncingData': 'Syncing data...',
 };

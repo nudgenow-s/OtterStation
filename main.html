@@ -134,18 +134,23 @@
       }
       .nav-actions {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
         flex-wrap: nowrap;
-        flex-shrink: 0;
+        flex-shrink: 1;
+        min-width: 0;
       }
       .nav-btn {
         font-size: 11px;
         color: var(--text-3);
         cursor: pointer;
         white-space: nowrap;
-        transition: color 0.2s;
+        transition: color 0.2s, font-size 0.15s;
         letter-spacing: 0;
+        flex-shrink: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .nav-btn:hover {
         color: var(--crimson);
@@ -2367,6 +2372,43 @@
       }
       renderIndustryLogo();
       document.title = t("main.pageTitle");
+      fitNavActions();
+
+      // ★ i18n: 不同语言译文长度差异很大（法语/日语常比中/英文长），
+      //   四个顶部导航项在固定宽度卡片内可能挤不下。这里用实际渲染宽度
+      //   做检测，超出可用空间时逐级缩小字号，直到放得下或触底为止，
+      //   而不是针对某个语言写死字号（写死的话下次改译文又会碎）。
+      function fitNavActions() {
+        var row = document.querySelector(".nav-actions");
+        var topNav = document.querySelector(".top-nav");
+        if (!row || !topNav) return;
+        var dateEl = document.getElementById("date-display");
+        var sizes = [11, 10, 9.5, 9, 8.5, 8];
+        var i = 0;
+        row.style.fontSize = "";
+        row.querySelectorAll(".nav-btn").forEach(function (b) {
+          b.style.fontSize = "";
+        });
+        function apply(size) {
+          row.querySelectorAll(".nav-btn").forEach(function (b) {
+            b.style.fontSize = size + "px";
+          });
+        }
+        function overflows() {
+          var avail =
+            topNav.clientWidth - (dateEl ? dateEl.offsetWidth : 0) - 16;
+          return row.scrollWidth > avail;
+        }
+        apply(sizes[0]);
+        while (overflows() && i < sizes.length - 1) {
+          i++;
+          apply(sizes[i]);
+        }
+      }
+      window.addEventListener("resize", function () {
+        clearTimeout(window._navFitTimer);
+        window._navFitTimer = setTimeout(fitNavActions, 120);
+      });
 
       // 首次激活时记录时间戳
       if (
@@ -3101,6 +3143,8 @@
       window.addEventListener("i18n:change", function () {
         document.title = t("main.pageTitle");
         if (typeof renderIndustryLogo === "function") renderIndustryLogo();
+        if (typeof fitNavActions === "function")
+          setTimeout(fitNavActions, 0);
         if (typeof render === "function") render();
         var supHint = document.getElementById("supplement-hint");
         if (supHint) supHint.innerText = _cL.hint;

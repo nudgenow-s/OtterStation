@@ -303,7 +303,7 @@ window.I18N_PACKS.ja = {
   'main.brand': 'PRESTIGE STATION',
   'main.industryLogo': '{name} · STATION',
   'main.nav.backup': '📤 保存',
-  'main.nav.retro': '📅 追記',
+  'main.nav.retro': '📅 過去分',
   'main.nav.cost': '🔒 コスト',
   'main.nav.report': '📊 レポート',
 
@@ -399,6 +399,7 @@ window.I18N_PACKS.ja = {
   'main.calc.addBtn': '＋ 追加',
   'main.calc.saveBtn': '💾 保存',
   'main.calc.riskHint': 'リスク引当金 +20%',
+  'main.calc.realtimeRate': 'リアルタイムレート',
   'main.calc.colItem': '項目',
   'main.calc.colFreq': '頻度',
   'main.calc.colMonthlySub': '月次小計',
@@ -445,4 +446,40 @@ window.I18N_PACKS.ja = {
   'achievement.badge.antiProcrastination.desc': '超一流オーナー、本日の目標を達成しました。',
   'achievement.unlockedLabel': '実績解除',
   'achievement.claimBtn': 'バッジを受け取る',
+
+  // ══ setup.html · 初期設定ウィザード ══
+  'setup.pageTitle': '初期設定 — オーナーダッシュボード',
+  'setup.brand': 'Prestige Station',
+  'setup.calcEntryBtn': '計算',
+  'setup.step.tag': '{n} / 05',
+  'setup.step0.title': '🏷️ 業種を選択',
+  'setup.step0.desc': 'お客様の業種に合わせて専用の計測・分析モデルを用意します。',
+  'setup.step0.confirmBtn': '確認',
+  'setup.step1.title': '🏠 家賃・物件費',
+  'setup.step1.desc': '家賃は経営の最初の壁です。毎月の固定支出を入力してください：',
+  'setup.step1.placeholder': '5000',
+  'setup.step1.nextBtn': '次へ',
+  'setup.step2.title': '👸 あなたの給与',
+  'setup.step2.desc': '自分に給料を払わないなら、それは自己搾取です：',
+  'setup.step2.placeholder': '8000',
+  'setup.step2.nextBtn': '次へ',
+  'setup.step3.title': '🔋 光熱費・減価償却',
+  'setup.step3.desc': '光熱費や材料の減価償却。1日あたりの運営コストを算出します：',
+  'setup.step3.placeholder': '1000',
+  'setup.step3.nextBtn': '最後のステップ',
+  'setup.step4.title': '🏗️ 初期投資額',
+  'setup.step4.desc': '内装、設備、加盟金などの初期埋没コスト：',
+  'setup.step4.placeholder': '50000',
+  'setup.step4.finishBtn': '完了してステーションへ',
+  'setup.backLink': '前に戻る',
+
+  // ══ setup.html · コスト計算機（main.calc.* のキーの大部分を共有）══
+  'setup.calc.histTitle': '📋 計算履歴',
+  'setup.calc.clearAll': 'すべてクリア',
+  'setup.calc.itemNamePlaceholder': '項目名...',
+  'setup.calc.confirmClearHistory': 'すべての履歴を削除しますか？',
+  'setup.calc.laborWage': '人件費',
+
+  // ══ index.html · スプラッシュ画面 ══
+  'index.syncingData': 'データを同期中...',
 };

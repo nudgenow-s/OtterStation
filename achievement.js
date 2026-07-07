@@ -1,10 +1,20 @@
 const AchievementEngine = {
+    // ★ i18n: badge 的 name/desc 不再硬编码中文，而是在使用处通过 t() 实时翻译，
+    //   使徽章名称/描述能跟随用户当前语言切换。id 保持不变（用于 localStorage 中
+    //   earned_badges 的持久化 key，语言无关，不能修改，否则会导致已解锁记录失效）。
     badges: [
-        { id:'first_blood',        name:'首单入账', icon:'💰', desc:'打破鸭蛋，开工大吉！',              condition:(s)=>s.totalSales>0 },
-        { id:'profitable_king',    name:'盈利王者', icon:'👑', desc:'连续达标，你是房东克星！',          condition:(s)=>s.totalSales>=s.dailyCost*3 },
-        { id:'smart_buyer',        name:'精明猎手', icon:'🦊', desc:'精准记账，每一分钱都有据可查。',    condition:(s)=>s.recordCount>=5 },
-        { id:'anti_procrastination',name:'黄金选手',icon:'🔥', desc:'超绝主理人，今日目标已达成。',      condition:(s)=>s.isDailyGoalMet===true }
+        { id:'first_blood',         icon:'💰', nameKey:'achievement.badge.firstBlood.name',          descKey:'achievement.badge.firstBlood.desc',          condition:(s)=>s.totalSales>0 },
+        { id:'profitable_king',     icon:'👑', nameKey:'achievement.badge.profitableKing.name',      descKey:'achievement.badge.profitableKing.desc',      condition:(s)=>s.totalSales>=s.dailyCost*3 },
+        { id:'smart_buyer',         icon:'🦊', nameKey:'achievement.badge.smartBuyer.name',          descKey:'achievement.badge.smartBuyer.desc',          condition:(s)=>s.recordCount>=5 },
+        { id:'anti_procrastination',icon:'🔥', nameKey:'achievement.badge.antiProcrastination.name', descKey:'achievement.badge.antiProcrastination.desc', condition:(s)=>s.isDailyGoalMet===true }
     ],
+
+    // 兜底翻译函数：若页面未加载 i18n-core.js（不太可能，但防御性处理），
+    // 直接返回 key 本身，避免整个成就系统抛错。
+    _t(key, params) {
+        if (typeof window.t === 'function') return window.t(key, params);
+        return key;
+    },
 
     getStats(){
         const def={totalSales:0,streak:0,recordCount:0,lastDate:null,isDailyGoalMet:false,dailyCost:0};
@@ -39,6 +49,11 @@ const AchievementEngine = {
     showBadgeModal(badge){
         const ex=document.getElementById('badge-modal'); if(ex) ex.remove();
 
+        const name = this._t(badge.nameKey);
+        const desc = this._t(badge.descKey);
+        const unlockedLabel = this._t('achievement.unlockedLabel');
+        const claimBtn = this._t('achievement.claimBtn');
+
         document.body.insertAdjacentHTML('beforeend',`
         <div id="badge-modal" style="
             position:fixed;inset:0;
@@ -67,7 +82,7 @@ const AchievementEngine = {
                 <!-- 小标签 -->
                 <div style="font-size:9px;letter-spacing:3px;color:#B8963E;
                     text-transform:uppercase;margin-bottom:18px;font-weight:600;">
-                    Achievement Unlocked
+                    ${unlockedLabel}
                 </div>
 
                 <!-- 图标 -->
@@ -86,13 +101,13 @@ const AchievementEngine = {
                 <!-- 名称 -->
                 <div style="font-size:18px;font-weight:700;color:#1A1208;
                     margin-bottom:8px;font-family:'PingFang SC',sans-serif;letter-spacing:0.5px;">
-                    ${badge.name}
+                    ${name}
                 </div>
 
                 <!-- 描述 -->
                 <div style="font-size:12px;color:#A89880;line-height:1.7;
                     margin-bottom:24px;font-family:'PingFang SC',sans-serif;">
-                    ${badge.desc}
+                    ${desc}
                 </div>
 
                 <!-- 按钮 -->
@@ -105,7 +120,7 @@ const AchievementEngine = {
                     box-shadow:0 4px 16px rgba(155,35,53,0.28);
                     transition:background 0.2s;
                 " onmouseover="this.style.background='#7A1828'" onmouseout="this.style.background='#9B2335'">
-                    收下勋章
+                    ${claimBtn}
                 </button>
             </div>
         </div>
