@@ -302,8 +302,8 @@ window.I18N_PACKS.fr = {
   'main.pageTitle': 'Tableau de bord du gérant',
   'main.brand': 'PRESTIGE STATION',
   'main.industryLogo': '{name} · STATION',
-  'main.nav.backup': '📤 Sauvegarde',
-  'main.nav.retro': '📅 Saisir un jour passé',
+  'main.nav.backup': '📤 SAUV',
+  'main.nav.retro': '📅 RAT',
   'main.nav.cost': '🔒 Coûts',
   'main.nav.report': '📊 Rapport',
 

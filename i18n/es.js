@@ -302,8 +302,8 @@ window.I18N_PACKS.es = {
   'main.pageTitle': 'Panel del propietario',
   'main.brand': 'PRESTIGE STATION',
   'main.industryLogo': '{name} · STATION',
-  'main.nav.backup': '📤 Copia de seguridad',
-  'main.nav.retro': '📅 Registrar pasado',
+  'main.nav.backup': '📤 Copia',
+  'main.nav.retro': '📅 RET',
   'main.nav.cost': '🔒 Costes',
   'main.nav.report': '📊 Informe',
 
@@ -383,7 +383,7 @@ window.I18N_PACKS.es = {
   'main.cost.enterPassword': 'Introduce la contraseña:',
 
   // ══ main.html · Retro calendar ══
-  'main.retro.title': '📅 Registrar venta pasada',
+  'main.retro.title': '📅 RET',
   'main.retro.hint': 'Selecciona una fecha para registrar',
   'main.retro.hintEn': 'Selecciona una fecha para registrar',
   'main.retro.placeholder': '¥ Ingresos totales del día',

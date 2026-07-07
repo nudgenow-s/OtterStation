@@ -302,8 +302,8 @@ window.I18N_PACKS.ja = {
   'main.pageTitle': 'オーナーダッシュボード',
   'main.brand': 'PRESTIGE STATION',
   'main.industryLogo': '{name} · STATION',
-  'main.nav.backup': '📤 バックアップ',
-  'main.nav.retro': '📅 過去分を記録',
+  'main.nav.backup': '📤 保存',
+  'main.nav.retro': '📅 追記',
   'main.nav.cost': '🔒 コスト',
   'main.nav.report': '📊 レポート',
 
