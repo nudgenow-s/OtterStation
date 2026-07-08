@@ -17,25 +17,25 @@
 <script>
 // ★ 语言切换悬浮按钮（风格与 main.html 的 i18n-engine.js 一致：左下角悬浮圆角按钮）
 (function () {
-        // 循环顺序：中文 → 英文 → 西语 → 法语 → 日语 → 中文…
-        var LANG_CYCLE = ["zh", "en", "es", "fr", "ja"];
-        var LANG_LABEL = { zh: "中文", en: "EN", es: "ES", fr: "FR", ja: "JA" };
+    var LANG_CYCLE = ["zh", "en", "es", "fr", "ja"];
+    var LANG_LABEL = { zh: "中文", en: "EN", es: "ES", fr: "FR", ja: "JA" };
 
-        function nextLang(cur) {
-          var available = LANG_CYCLE.filter(function (l) {
-            return I18N.getAvailableLangs().indexOf(l) !== -1;
-          });
-          if (!available.length) return cur;
-          var idx = available.indexOf(cur);
-          return available[(idx + 1) % available.length];
-        }
-  function mountLangToggle() {
-    if (document.getElementById('i18n-toggle-btn')) return; // 防止重复挂载
-    var btn = document.createElement('div');
-    btn.id = 'i18n-toggle-btn';
-    var curLang = (window.I18N && window.I18N.getLang) ? window.I18N.getLang() : 'zh';
-    btn.innerHTML = curLang === 'zh' ? 'EN' : '中文';
-    Object.assign(btn.style, {
+    function nextLang(cur) {
+      var available = LANG_CYCLE.filter(function (l) {
+        return I18N.getAvailableLangs().indexOf(l) !== -1;
+      });
+      if (!available.length) return cur;
+      var idx = available.indexOf(cur);
+      return available[(idx + 1) % available.length];
+    }
+
+    function mountLangToggle() {
+      if (document.getElementById("i18n-toggle-btn")) return;
+      var btn = document.createElement("div");
+      btn.id = "i18n-toggle-btn";
+      var cur = I18N.getLang();
+      btn.innerHTML = LANG_LABEL[nextLang(cur)] || "EN";
+      Object.assign(btn.style, {
        position: 'fixed',
        top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
        right: '16px',
@@ -45,24 +45,36 @@
        fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
        fontFamily: "'PingFang SC','Helvetica Neue',sans-serif",
     });
-    document.body.appendChild(btn);
-    btn.onclick = function () {
-      var next = ((window.I18N && window.I18N.getLang) ? window.I18N.getLang() : 'zh') === 'zh' ? 'en' : 'zh';
-      if (window.I18N && window.I18N.switchLang) {
-        window.I18N.switchLang(next);
-        btn.innerHTML = next === 'zh' ? 'EN' : '中文';
-      } else {
-        // 兜底逻辑未加载成功时，只能刷新页面重试（不会崩溃，但也无法真正切换）
-        console.warn('[i18n] 语言引擎未就绪，无法切换语言');
-      }
-    };
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountLangToggle);
-  } else {
-    mountLangToggle();
-  }
-})();
+      document.body.appendChild(btn);
+      btn.onclick = function () {
+        var next = nextLang(I18N.getLang());
+        if (I18N.switchLang(next)) {
+          btn.innerHTML = LANG_LABEL[nextLang(next)] || "EN";
+        }
+      };
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mountLangToggle);
+    } else {
+      mountLangToggle();
+    }
+  })();
+
+  // ★ 语言切换后：静态 data-i18n 已自动刷新；这里补充刷新由 JS 动态生成的内容
+  window.addEventListener("i18n:change", function () {
+    document.title = t("history.pageTitle");
+    renderAssets();
+    var activeTab = document.querySelector(".tab-btn.active");
+    var tabLabel = activeTab ? activeTab.getAttribute("data-i18n") : null;
+    if (tabLabel === "history.tab.history") renderHistory();
+    if (tabLabel === "history.tab.loans") renderLoans();
+    // 若应收核销弹窗正打开，刷新其内容
+    var settleOv = document.getElementById("settle-overlay");
+    if (settleOv && settleOv.style.display === "flex" && _settleTarget) {
+      settleReceivable(_settleTarget.id);
+    }
+  });
 </script>
 <script>
 // ★ 兜底防御：若上面三个 i18n 文件因路径/部署问题未能加载（404等），
