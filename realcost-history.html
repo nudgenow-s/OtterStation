@@ -7,6 +7,25 @@
 <meta name="theme-color" content="#9B2335">
 <title>账本总览</title>
 <script src="config.js"></script>
+<script src="i18n/zh.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n/es.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/ja.js"></script>
+<script src="i18n/i18n-core.js"></script>
+<script>
+  if (typeof window.t !== "function") {
+    console.warn("[i18n] i18n-core.js 未成功加载，已启用兜底 t()。");
+    window.t = function (key, params) {
+      if (!params) return key;
+      return key.replace(/\{(\w+)\}/g, (m, k) => (params[k] !== undefined ? params[k] : m));
+    };
+    window.I18N = {
+      getLang: () => "zh", setLang: () => {}, switchLang: () => {},
+      applyDOM: () => {}, getAvailableLangs: () => ["zh"],
+    };
+  }
+</script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
@@ -275,17 +294,17 @@ body {
 <div class="topbar">
   <button class="back-btn" onclick="goBack()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    返回
+    <span data-i18n="common.back">返回</span>
   </button>
-  <div class="topbar-title">账本总览</div>
+  <div class="topbar-title" data-i18n="history.topbarTitle">账本总览</div>
   <div class="topbar-space"></div>
 </div>
 
 <!-- Tab -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('assets',this)">资产现金流</button>
-  <button class="tab-btn" onclick="switchTab('history',this)">历史记录</button>
-  <button class="tab-btn" onclick="switchTab('loans',this)">贷款管理</button>
+  <button class="tab-btn active" onclick="switchTab('assets',this)" data-i18n="history.tab.assets">资产现金流</button>
+  <button class="tab-btn" onclick="switchTab('history',this)" data-i18n="history.tab.history">历史记录</button>
+  <button class="tab-btn" onclick="switchTab('loans',this)" data-i18n="history.tab.loans">贷款管理</button>
 </div>
 
 <!-- 资产现金流 Tab -->
@@ -296,101 +315,99 @@ body {
 
   <!-- 现金余额 -->
   <div class="card">
-    <div class="card-title">💵 现金余额</div>
+    <div class="card-title" data-i18n="history.cash.cardTitle">💵 现金余额</div>
     <div class="cf-row">
-      <span class="cf-label">当前现金</span>
+      <span class="cf-label" data-i18n="history.cash.current">当前现金</span>
       <span class="cf-val positive" id="cf-cash">¥0</span>
     </div>
     <div class="cf-row">
-      <span class="cf-label">货品资产（进货价）<span style="font-size:10px;color:var(--text-3)"> · 库存进价</span></span>
+      <span class="cf-label"><span data-i18n="history.cash.goodsAsset">货品资产（进货价）</span><span style="font-size:10px;color:var(--text-3)" data-i18n="history.cash.goodsAssetSub"> · 库存进价</span></span>
       <span class="cf-val" id="cf-goods">¥0</span>
     </div>
     <div class="cf-row">
-      <span class="cf-label">待支付合计</span>
+      <span class="cf-label" data-i18n="history.cash.pendingTotal">待支付合计</span>
       <span class="cf-val warn" id="cf-pending">¥0</span>
     </div>
     <div class="cf-row">
-      <span class="cf-label">应收账款（未核销）<span style="font-size:10px;color:var(--text-3)"> · 厂家待补款</span></span>
+      <span class="cf-label"><span data-i18n="history.cash.receivables">应收账款（未核销）</span><span style="font-size:10px;color:var(--text-3)" data-i18n="history.cash.receivablesSub"> · 厂家待补款</span></span>
       <span class="cf-val warn" id="cf-receivables">—</span>
     </div>
     <div class="cf-row" style="border-bottom:none;padding-bottom:0">
-      <span class="cf-label" style="font-weight:800;color:var(--text)">真实可用现金</span>
+      <span class="cf-label" style="font-weight:800;color:var(--text)" data-i18n="history.cash.realCash">真实可用现金</span>
       <span class="cf-val" id="cf-real" style="font-size:18px"></span>
     </div>
     <!-- 手动更新现金 -->
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-      <div class="form-lbl">手动更新现金余额</div>
+      <div class="form-lbl" data-i18n="history.cash.manualUpdate">手动更新现金余额</div>
       <div class="form-row" style="margin-bottom:8px">
-        <input id="cash-input" class="form-inp" type="number" step="0.01" placeholder="输入当前现金金额">
-        <button onclick="updateCash()" style="padding:11px 16px;background:var(--primary);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit">更新</button>
+        <input id="cash-input" class="form-inp" type="number" step="0.01" placeholder="输入当前现金金额" data-i18n-placeholder="history.cash.manualPlaceholder">
+        <button onclick="updateCash()" style="padding:11px 16px;background:var(--primary);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit" data-i18n="history.cash.updateBtn">更新</button>
       </div>
-      <div style="font-size:11px;color:var(--text-3)">收银/收款后现金自动累加，也可手动修改为实际金额</div>
+      <div style="font-size:11px;color:var(--text-3)" data-i18n="history.cash.hint">收银/收款后现金自动累加，也可手动修改为实际金额</div>
     </div>
   </div>
 
   <!-- 待支付 -->
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      <span>📋 本月待支付</span>
-      <span style="font-size:11px;color:var(--text-3);font-weight:600">点击✓标记已付</span>
+      <span data-i18n="history.pending.cardTitle">📋 本月待支付</span>
+      <span style="font-size:11px;color:var(--text-3);font-weight:600" data-i18n="history.pending.tapHint">点击✓标记已付</span>
     </div>
     <div id="pending-list"></div>
     <!-- 添加自定义待支付 -->
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <div class="form-lbl">添加其他待支付项</div>
+      <div class="form-lbl" data-i18n="history.pending.addOther">添加其他待支付项</div>
       <div class="form-row">
         <div class="form-group" style="flex:2">
-          <input id="p-name" class="form-inp" type="text" placeholder="项目名称">
+          <input id="p-name" class="form-inp" type="text" placeholder="项目名称" data-i18n-placeholder="history.pending.namePlaceholder">
         </div>
         <div class="form-group">
-          <input id="p-amount" class="form-inp" type="number" step="0.01" placeholder="金额">
+          <input id="p-amount" class="form-inp" type="number" step="0.01" placeholder="金额" data-i18n-placeholder="history.pending.amountPlaceholder">
         </div>
       </div>
-      <button onclick="addPendingItem()" class="btn-primary">＋ 添加</button>
+      <button onclick="addPendingItem()" class="btn-primary" data-i18n="history.pending.addBtn">＋ 添加</button>
     </div>
   </div>
 
   <!-- ★ 应收账款 -->
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      <span>📬 应收账款</span>
+      <span data-i18n="history.ar.cardTitle">📬 应收账款</span>
       <span style="font-size:11px;color:var(--text-3);font-weight:600" id="ar-total-badge"></span>
     </div>
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button id="ar-batch-toggle" class="ar-batch-toggle-btn" onclick="toggleArBatchMode()">☑️ 多选核销</button>
+      <button id="ar-batch-toggle" class="ar-batch-toggle-btn" onclick="toggleArBatchMode()" data-i18n="history.ar.batchToggle">☑️ 多选核销</button>
     </div>
     <div id="ar-list"></div>
     <!-- ★ 批量核销操作条（多选模式下显示） -->
     <div id="ar-batch-bar" class="ar-batch-bar hidden">
-      <div class="ar-batch-info">
-        已选 <span id="ar-batch-count">0</span> 笔 · 合计 <span id="ar-batch-sum">¥0</span>
-      </div>
-      <button class="btn-ar-batch-settle" id="ar-batch-settle-btn" onclick="openBatchSettle()" disabled>💰 批量核销（现金到账）</button>
+      <div class="ar-batch-info" id="ar-batch-info-text"></div>
+      <button class="btn-ar-batch-settle" id="ar-batch-settle-btn" onclick="openBatchSettle()" disabled data-i18n="history.ar.batchSettleBtn">💰 批量核销（现金到账）</button>
     </div>
     <!-- 添加应收账款 -->
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <div class="form-lbl">登记新应收账款</div>
+      <div class="form-lbl" data-i18n="history.ar.registerNew">登记新应收账款</div>
       <div class="form-row">
         <div class="form-group" style="flex:2">
-          <label class="form-lbl">对方（欠款方）</label>
-          <input id="ar-counterparty" class="form-inp" type="text" placeholder="厂家/品牌名称">
+          <label class="form-lbl" data-i18n="history.ar.counterpartyLbl">对方（欠款方）</label>
+          <input id="ar-counterparty" class="form-inp" type="text" placeholder="厂家/品牌名称" data-i18n-placeholder="history.ar.counterpartyPlaceholder">
         </div>
         <div class="form-group">
-          <label class="form-lbl">金额 *</label>
+          <label class="form-lbl" data-i18n="history.ar.amountLbl">金额 *</label>
           <input id="ar-amount" class="form-inp" type="number" step="0.01" placeholder="0.00">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group" style="flex:2">
-          <label class="form-lbl">备注</label>
-          <input id="ar-note" class="form-inp" type="text" placeholder="如：东方树叶换购差价补贴">
+          <label class="form-lbl" data-i18n="history.ar.noteLbl">备注</label>
+          <input id="ar-note" class="form-inp" type="text" placeholder="如：东方树叶换购差价补贴" data-i18n-placeholder="history.ar.notePlaceholder">
         </div>
         <div class="form-group">
-          <label class="form-lbl">预计到账日</label>
+          <label class="form-lbl" data-i18n="history.ar.dueLbl">预计到账日</label>
           <input id="ar-due" class="form-inp" type="date">
         </div>
       </div>
-      <button onclick="addReceivable()" class="btn-primary">＋ 登记应收</button>
+      <button onclick="addReceivable()" class="btn-primary" data-i18n="history.ar.registerBtn">＋ 登记应收</button>
     </div>
   </div>
 
@@ -406,63 +423,63 @@ body {
 <div class="page" id="tab-loans" style="display:none">
 
   <div class="card">
-    <div class="card-title">➕ 添加贷款</div>
+    <div class="card-title" data-i18n="history.loan.addTitle">➕ 添加贷款</div>
     <div class="form-row">
       <div class="form-group" style="flex:2">
-        <label class="form-lbl">贷款机构 *</label>
-        <input id="l-inst" class="form-inp" type="text" placeholder="银行/网贷/亲友…">
+        <label class="form-lbl" data-i18n="history.loan.institution">贷款机构 *</label>
+        <input id="l-inst" class="form-inp" type="text" placeholder="银行/网贷/亲友…" data-i18n-placeholder="history.loan.institutionPlaceholder">
       </div>
       <div class="form-group">
-        <label class="form-lbl">贷款总额 *</label>
+        <label class="form-lbl" data-i18n="history.loan.total">贷款总额 *</label>
         <input id="l-total" class="form-inp" type="number" step="0.01" placeholder="0.00">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-lbl">月供 *</label>
+        <label class="form-lbl" data-i18n="history.loan.monthly">月供 *</label>
         <input id="l-monthly" class="form-inp" type="number" step="0.01" placeholder="0.00">
       </div>
       <div class="form-group">
-        <label class="form-lbl">总期数</label>
+        <label class="form-lbl" data-i18n="history.loan.periods">总期数</label>
         <input id="l-periods" class="form-inp" type="number" step="1" placeholder="12">
       </div>
       <div class="form-group">
-        <label class="form-lbl">已还期数</label>
+        <label class="form-lbl" data-i18n="history.loan.paid">已还期数</label>
         <input id="l-paid" class="form-inp" type="number" step="1" placeholder="0">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-lbl">下次还款日</label>
+        <label class="form-lbl" data-i18n="history.loan.nextDate">下次还款日</label>
         <input id="l-next" class="form-inp" type="date">
       </div>
       <div class="form-group">
-        <label class="form-lbl">利率 (%/年)</label>
+        <label class="form-lbl" data-i18n="history.loan.rate">利率 (%/年)</label>
         <input id="l-rate" class="form-inp" type="number" step="0.01" placeholder="0">
       </div>
     </div>
-    <button class="btn-primary" onclick="addLoan()">💾 保存贷款</button>
+    <button class="btn-primary" onclick="addLoan()" data-i18n="history.loan.saveBtn">💾 保存贷款</button>
   </div>
 
   <div id="loan-list"></div>
 
   <!-- 贷款汇总 -->
   <div class="card" id="loan-summary" style="display:none">
-    <div class="card-title">📊 贷款汇总</div>
+    <div class="card-title" data-i18n="history.loan.summaryTitle">📊 贷款汇总</div>
     <div class="cf-row">
-      <span class="cf-label">贷款总额</span>
+      <span class="cf-label" data-i18n="history.loan.totalAmount">贷款总额</span>
       <span class="cf-val" id="ls-total">¥0</span>
     </div>
     <div class="cf-row">
-      <span class="cf-label">累计已还</span>
+      <span class="cf-label" data-i18n="history.loan.totalPaid">累计已还</span>
       <span class="cf-val positive" id="ls-paid">¥0</span>
     </div>
     <div class="cf-row">
-      <span class="cf-label">剩余待还</span>
+      <span class="cf-label" data-i18n="history.loan.totalRemain">剩余待还</span>
       <span class="cf-val negative" id="ls-remain">¥0</span>
     </div>
     <div class="cf-row" style="border-bottom:none">
-      <span class="cf-label">本月月供合计</span>
+      <span class="cf-label" data-i18n="history.loan.monthlyTotal">本月月供合计</span>
       <span class="cf-val warn" id="ls-monthly">¥0</span>
     </div>
   </div>
@@ -536,6 +553,7 @@ function switchTab(tab, btn){
 }
 
 function goBack(){ window.location.href = backUrl; }
+document.title = t('history.pageTitle');
 
 // ══════════════════════════════════════════════════════
 //  货品资产计算
@@ -576,13 +594,13 @@ function buildPendingItems(){
   var custom  = load(KEYS.pending) || [];
 
   var items = [];
-  if(rent>0)   items.push({ id:'rent',   icon:'🏠', name:'月房租',   desc:'固定支出', amount:rent   });
-  if(salary>0) items.push({ id:'salary', icon:'👥', name:'员工工资', desc:'固定支出', amount:salary });
-  if(other>0)  items.push({ id:'other',  icon:'🔧', name:'月杂费',   desc:'水电等杂费', amount:other });
-  if(loanMonthly>0) items.push({ id:'loans', icon:'🏦', name:'贷款月供合计', desc:loans.length+'笔贷款', amount:loanMonthly });
+  if(rent>0)   items.push({ id:'rent',   icon:'🏠', name:t('history.pending.itemRent'),   desc:t('history.pending.descFixed'), amount:rent   });
+  if(salary>0) items.push({ id:'salary', icon:'👥', name:t('history.pending.itemSalary'), desc:t('history.pending.descFixed'), amount:salary });
+  if(other>0)  items.push({ id:'other',  icon:'🔧', name:t('history.pending.itemOther'),  desc:t('history.pending.descUtility'), amount:other });
+  if(loanMonthly>0) items.push({ id:'loans', icon:'🏦', name:t('history.pending.itemLoans'), desc:t('history.pending.descLoanCount',{n:loans.length}), amount:loanMonthly });
 
   custom.forEach(function(c){
-    items.push({ id:'custom_'+c.id, icon:'📌', name:c.name, desc:'自定义', amount:parseFloat(c.amount)||0, deletable:true, rawId:c.id });
+    items.push({ id:'custom_'+c.id, icon:'📌', name:c.name, desc:t('history.pending.descCustom'), amount:parseFloat(c.amount)||0, deletable:true, rawId:c.id });
   });
 
   return items;
@@ -609,13 +627,13 @@ function renderAssets(){
 
   // 英雄卡
   document.getElementById('asset-hero').innerHTML =
-    '<div class="ah-label">总资产</div>'+
+    '<div class="ah-label">'+t('history.assetHero.label')+'</div>'+
     '<div class="ah-total">'+fmt(totalAsset)+'</div>'+
-    '<div class="ah-sub">现金 + 货品资产 + 应收账款</div>'+
+    '<div class="ah-sub">'+t('history.assetHero.sub')+'</div>'+
     '<div class="ah-grid">'+
-      '<div class="ah-item"><div class="ah-item-val">'+fmt(cash)+'</div><div class="ah-item-lbl">现金</div></div>'+
-      '<div class="ah-item"><div class="ah-item-val">'+fmt(goods)+'</div><div class="ah-item-lbl">货品资产</div></div>'+
-      '<div class="ah-item"><div class="ah-item-val" style="color:'+(realCash>=0?'#9ff':'#f87171')+'">'+fmt(realCash)+'</div><div class="ah-item-lbl">真实可用</div></div>'+
+      '<div class="ah-item"><div class="ah-item-val">'+fmt(cash)+'</div><div class="ah-item-lbl">'+t('history.assetHero.cash')+'</div></div>'+
+      '<div class="ah-item"><div class="ah-item-val">'+fmt(goods)+'</div><div class="ah-item-lbl">'+t('history.assetHero.goods')+'</div></div>'+
+      '<div class="ah-item"><div class="ah-item-val" style="color:'+(realCash>=0?'#9ff':'#f87171')+'">'+fmt(realCash)+'</div><div class="ah-item-lbl">'+t('history.assetHero.realCash')+'</div></div>'+
     '</div>';
 
   // 现金流卡数据
@@ -635,7 +653,7 @@ function renderAssets(){
   // 待支付列表
   var el = document.getElementById('pending-list');
   if(!items.length){
-    el.innerHTML = '<div class="empty" style="padding:20px 0">暂无待支付项目<br>请先在 main 中设置固定成本</div>';
+    el.innerHTML = '<div class="empty" style="padding:20px 0">'+t('history.pending.empty')+'</div>';
     return;
   }
   el.innerHTML = items.map(function(item){
@@ -643,7 +661,7 @@ function renderAssets(){
     return '<div class="pending-item" id="pi-'+item.id+'" style="'+(paid?'opacity:0.5':'')+'">'+
       '<span class="pi-icon">'+item.icon+'</span>'+
       '<div class="pi-info">'+
-        '<div class="pi-name">'+item.name+(paid?' <span style="font-size:10px;color:var(--green);font-weight:700">已付✓</span>':'')+'</div>'+
+        '<div class="pi-name">'+item.name+(paid?' <span style="font-size:10px;color:var(--green);font-weight:700">'+t('history.pending.paidTag')+'</span>':'')+'</div>'+
         '<div class="pi-desc">'+item.desc+'</div>'+
       '</div>'+
       '<div class="pi-amount" style="'+(paid?'text-decoration:line-through;color:var(--text-3)':'')+'">'+fmt(item.amount)+'</div>'+
@@ -672,7 +690,7 @@ function togglePaid(id){
   }
   save(KEYS.pendingPaid, state);
   renderAssets();
-  showToast(state[id] ? '✅ 已标记为已付，现金已扣减' : '↩️ 已取消，现金已还原');
+  showToast(state[id] ? t('history.toast.paidMarked') : t('history.toast.paidUnmarked'));
 }
 
 function updateCash(){
@@ -682,7 +700,7 @@ function updateCash(){
   save(KEYS.cash, val);
   inp.value = '';
   renderAssets();
-  showToast('✅ 现金余额已更新');
+  showToast(t('history.toast.cashUpdated'));
 }
 
 function addPendingItem(){
@@ -697,11 +715,11 @@ function addPendingItem(){
   save(KEYS.pending, list);
   nameEl.value=''; amountEl.value='';
   renderAssets();
-  showToast('✅ 已添加');
+  showToast(t('history.toast.added'));
 }
 
 function deleteCustomPending(rawId){
-  if(!confirm('确定删除？')) return;
+  if(!confirm(t('history.confirm.deletePending'))) return;
   var list = (load(KEYS.pending)||[]).filter(function(c){ return c.id != rawId; });
   save(KEYS.pending, list);
   renderAssets();
@@ -729,12 +747,10 @@ function renderHistory(){
     return b.year!==a.year ? b.year-a.year : b.month-a.month;
   });
 
-  var MN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-
   // 月份选择器
   var selEl = document.getElementById('month-selector');
   if(!sortedMonths.length){
-    document.getElementById('history-content').innerHTML = '<div class="empty">暂无历史数据</div>';
+    document.getElementById('history-content').innerHTML = '<div class="empty">'+t('history.hist.empty')+'</div>';
     selEl.innerHTML = '';
     return;
   }
@@ -742,7 +758,7 @@ function renderHistory(){
   selEl.innerHTML = sortedMonths.map(function(m){
     var active = (m.year===_selYear && m.month===_selMonth);
     return '<button class="month-chip'+(active?' active':'')+'" onclick="selectHistoryMonth('+m.year+','+m.month+',this)">'+
-      m.year+'年'+MN[m.month]+'</button>';
+      t('history.hist.yearMonth',{year:m.year, month:tMonth(m.month)})+'</button>';
   }).join('');
 
   // 如果当前选择不在列表里，选第一个
@@ -761,7 +777,6 @@ function selectHistoryMonth(year, month, btn){
 }
 
 function renderHistoryMonth(history, year, month){
-  var MN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   var revenue=0, profit=0, days=0, orders=0;
   var dailyRows = [];
 
@@ -781,27 +796,27 @@ function renderHistoryMonth(history, year, month){
 
   var html = '<div class="hist-month-card">'+
     '<div class="hmc-header">'+
-      '<div class="hmc-month">'+year+'年'+MN[month]+'</div>'+
+      '<div class="hmc-month">'+t('history.hist.yearMonth',{year:year, month:tMonth(month)})+'</div>'+
       '<div class="hmc-profit '+(profit>=0?'pos':'neg')+'">'+fmt(profit)+'</div>'+
     '</div>'+
     '<div class="hmc-grid">'+
-      '<div class="hmc-item"><div class="hmc-val">'+fmt(revenue)+'</div><div class="hmc-lbl">总营收</div></div>'+
-      '<div class="hmc-item"><div class="hmc-val">'+days+'天</div><div class="hmc-lbl">营业天数</div></div>'+
-      '<div class="hmc-item"><div class="hmc-val">'+gm.toFixed(1)+'%</div><div class="hmc-lbl">平均毛利率</div></div>'+
+      '<div class="hmc-item"><div class="hmc-val">'+fmt(revenue)+'</div><div class="hmc-lbl">'+t('history.hist.totalRevenue')+'</div></div>'+
+      '<div class="hmc-item"><div class="hmc-val">'+t('history.hist.days',{n:days})+'</div><div class="hmc-lbl">'+t('history.hist.businessDays')+'</div></div>'+
+      '<div class="hmc-item"><div class="hmc-val">'+gm.toFixed(1)+'%</div><div class="hmc-lbl">'+t('history.hist.avgMargin')+'</div></div>'+
     '</div>'+
   '</div>';
 
   if(dailyRows.length){
-    html += '<div style="font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">每日明细</div>';
+    html += '<div style="font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">'+t('history.hist.dailyDetail')+'</div>';
     html += dailyRows.map(function(row){
       return '<div style="background:var(--bg-card);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);border:1px solid var(--border)">'+
         '<div>'+
           '<div style="font-size:13px;font-weight:800;color:var(--text)">'+row.date+'</div>'+
-          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+row.cnt+'单 · 毛利率 '+parseFloat(row.gm).toFixed(1)+'%</div>'+
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+t('history.hist.ordersCount',{n:row.cnt})+' · '+t('history.hist.marginRate',{val:parseFloat(row.gm).toFixed(1)})+'</div>'+
         '</div>'+
         '<div style="text-align:right">'+
           '<div style="font-size:15px;font-weight:900;color:var(--text)">'+fmt(row.rev)+'</div>'+
-          '<div style="font-size:12px;font-weight:700;color:'+(row.profit>=0?'var(--green)':'var(--red)')+'">毛利 '+fmt(row.profit)+'</div>'+
+          '<div style="font-size:12px;font-weight:700;color:'+(row.profit>=0?'var(--green)':'var(--red)')+'">'+t('history.hist.profit',{val:fmt(row.profit)})+'</div>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -826,10 +841,10 @@ function renderReceivables(){
   var total   = pending.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
 
   if(badge) badge.textContent = pending.length > 0
-    ? '待核销 '+pending.length+' 笔 · '+fmt(total) : '无待核销';
+    ? t('history.ar.pendingCount',{n:pending.length, sum:fmt(total)}) : t('history.ar.noPending');
 
   if(!list.length){
-    el.innerHTML = '<div class="empty" style="padding:16px 0;font-size:13px">暂无应收账款记录</div>';
+    el.innerHTML = '<div class="empty" style="padding:16px 0;font-size:13px">'+t('history.ar.empty')+'</div>';
     _updateArBatchBar();
     return;
   }
@@ -846,13 +861,13 @@ function renderReceivables(){
     var dueHint  = '';
     if(!settled && daysLeft !== null){
       dueHint = daysLeft < 0
-        ? '<div class="ar-due">⚠ 已逾期 '+Math.abs(daysLeft)+' 天</div>'
+        ? '<div class="ar-due">'+t('history.ar.overdue',{n:Math.abs(daysLeft)})+'</div>'
         : daysLeft === 0
-          ? '<div class="ar-due">📅 今天到账</div>'
-          : '<div class="ar-due">📅 '+r.dueDate+' （'+daysLeft+' 天后）</div>';
+          ? '<div class="ar-due">'+t('history.ar.dueToday')+'</div>'
+          : '<div class="ar-due">'+t('history.ar.dueIn',{date:r.dueDate, n:daysLeft})+'</div>';
     }
     if(settled && r.settledDate){
-      dueHint = '<div style="font-size:11px;color:var(--green);margin-top:2px">✓ 已核销 '+r.settledDate+'</div>';
+      dueHint = '<div style="font-size:11px;color:var(--green);margin-top:2px">'+t('history.ar.settledOn',{date:r.settledDate})+'</div>';
     }
     var checked = !!_arSelected[r.id];
     // ★ 多选模式下、且未核销的记录才显示复选框
@@ -865,15 +880,15 @@ function renderReceivables(){
         '<div class="ar-counterparty">'+
           r.counterparty+
           (settled
-            ? '<span class="ar-badge-settled">已核销</span>'
-            : '<span class="ar-badge-pending">待核销</span>')+
+            ? '<span class="ar-badge-settled">'+t('history.ar.settledTag')+'</span>'
+            : '<span class="ar-badge-pending">'+t('history.ar.pendingTag')+'</span>')+
         '</div>'+
         (r.note?'<div class="ar-note">'+r.note+'</div>':'')+
         dueHint+
       '</div>'+
       '<div class="ar-actions">'+
         '<div class="ar-amount'+(settled?' settled':'')+'">'+fmt(r.amount)+'</div>'+
-        (!settled && !_arBatchMode?'<button class="btn-ar-settle" onclick="settleReceivable(\''+r.id+'\')">核销到账</button>':'')+
+        (!settled && !_arBatchMode?'<button class="btn-ar-settle" onclick="settleReceivable(\''+r.id+'\')">'+t('history.ar.settleBtn')+'</button>':'')+
         (!_arBatchMode?'<button class="btn-ar-del" onclick="deleteReceivable(\''+r.id+'\')">🗑</button>':'')+
       '</div>'+
     '</div>';
@@ -914,12 +929,10 @@ function _updateArBatchBar(){
   var selectedItems = list.filter(function(r){ return _arSelected[r.id] && r.status !== 'settled'; });
   var sum  = selectedItems.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
 
-  var countEl = document.getElementById('ar-batch-count');
-  var sumEl   = document.getElementById('ar-batch-sum');
-  var btnEl   = document.getElementById('ar-batch-settle-btn');
-  if(countEl) countEl.textContent = selectedItems.length;
-  if(sumEl)   sumEl.textContent   = fmt(sum);
-  if(btnEl)   btnEl.disabled      = selectedItems.length === 0;
+  var infoEl = document.getElementById('ar-batch-info-text');
+  var btnEl  = document.getElementById('ar-batch-settle-btn');
+  if(infoEl) infoEl.innerHTML = t('history.ar.batchSelected', {count: selectedItems.length, sum: fmt(sum)});
+  if(btnEl)  btnEl.disabled   = selectedItems.length === 0;
 }
 
 // ★ 批量核销：只支持"现金到账"（补货到账需要逐条填写商品信息，不适合批量）
@@ -930,7 +943,7 @@ function openBatchSettle(){
 
   var sum = selectedItems.reduce(function(a,r){ return a+(parseFloat(r.amount)||0); },0);
   var names = selectedItems.map(function(r){ return r.counterparty; }).join('、');
-  if(!confirm('确认批量核销 '+selectedItems.length+' 笔应收账款？\n'+names+'\n合计现金 +'+fmt(sum))) return;
+  if(!confirm(t('history.confirm.batchSettle', {n:selectedItems.length, names:names, sum:fmt(sum)}))) return;
 
   selectedItems.forEach(function(r){
     var item = list.find(function(x){ return String(x.id)===String(r.id); });
@@ -953,7 +966,7 @@ function openBatchSettle(){
   if(toggleBtn) toggleBtn.classList.remove('active');
 
   renderAssets();
-  showToast('✅ 已批量核销 '+selectedItems.length+' 笔 · 现金 +'+fmt(sum));
+  showToast(t('history.toast.batchSettled', {n:selectedItems.length, val:fmt(sum)}));
 }
 
 function addReceivable(){
@@ -982,7 +995,7 @@ function addReceivable(){
     document.getElementById(id).value='';
   });
   renderAssets();
-  showToast('✅ 应收账款已登记');
+  showToast(t('history.toast.arRegistered'));
 }
 
 // 当前核销目标（打开弹窗时暂存）
@@ -996,9 +1009,13 @@ function settleReceivable(id){
   // 填充弹窗信息
   document.getElementById('settle-desc').textContent =
     r.counterparty + ' · ' + fmt(r.amount) + (r.note?' · '+r.note:'');
-  document.getElementById('settle-amount-lbl').textContent = fmt(r.amount);
-  // 预填补货商品名（从备注中提取）
-  var guessName = r.note ? r.note.replace('换购差价补贴','').replace('差价补贴','').trim() : '';
+  document.getElementById('settle-cash-btn').innerHTML = t('history.settle.cashBtn', {val: fmt(r.amount)});
+  // 预填补货商品名（从备注中提取，尝试剥离常见的差价补贴措辞，各语言均可能出现）
+  var guessName = r.note || '';
+  ['换购差价补贴','差价补贴','redemption gap subsidy','redemption cost reimbursement'].forEach(function(phrase){
+    guessName = guessName.replace(phrase, '');
+  });
+  guessName = guessName.trim();
   document.getElementById('sg-name').value  = guessName;
   document.getElementById('sg-cost').value  = '';
   document.getElementById('sg-sale').value  = '';
@@ -1031,7 +1048,7 @@ function settleWithCash(){
   save(KEYS.cash, cash);
   _closeSettleModal();
   renderAssets();
-  showToast('✅ 已核销 · 现金 +' + fmt(r.amount));
+  showToast(t('history.toast.settledCash', {val:fmt(r.amount)}));
 }
 
 // ★ 核销方式二：补货到账（录入库存，不增加现金）
@@ -1047,13 +1064,15 @@ function settleWithGoods(){
   if(isNaN(qty)||qty<1){ _shakeEl('sg-qty'); return; }
 
   // 直接写入 otter_inventory（与 retail.html 共享 localStorage）
+  // ★ i18n: category 存储为语言无关 key（与 realcost-retail.html 的 CAT_KEYS 一致），
+  //   而不是硬编码中文，界面显示时统一通过 catLabel()/t('category.*') 转换
   var inv = JSON.parse(localStorage.getItem('otter_inventory')||'[]');
   var batchNo = inv.filter(function(p){ return p.name===name; }).length + 1;
   inv.push({
     id:         Date.now() + Math.random(),
     batchNo:    batchNo,
     name:       name,
-    category:   '食品饮料',
+    category:   'foodDrink',
     qty:        qty,
     costPrice:  isNaN(cost) ? 0 : cost,
     salePrice:  isNaN(sale) ? 0 : sale,
@@ -1061,7 +1080,7 @@ function settleWithGoods(){
     source:     'restock',
     barcode:    null,
     createdAt:  new Date().toISOString(),
-    note:       '应收核销补货 · ' + (_settleTarget.counterparty||''),
+    note:       t('history.settle.restockNote', {counterparty: _settleTarget.counterparty||''}),
   });
   localStorage.setItem('otter_inventory', JSON.stringify(inv));
 
@@ -1079,7 +1098,7 @@ function settleWithGoods(){
 
   _closeSettleModal();
   renderAssets();
-  showToast('✅ 已核销 · 补货 '+name+' ×'+qty+' 件已录入库存');
+  showToast(t('history.toast.settledGoods', {name:name, qty:qty}));
 }
 
 function _shakeEl(id){
@@ -1094,7 +1113,7 @@ function _shakeEl(id){
 }
 
 function deleteReceivable(id){
-  if(!confirm('确定删除此应收账款记录？')) return;
+  if(!confirm(t('history.confirm.deleteReceivable'))) return;
   var list = (load(KEYS.receivables)||[]).filter(function(r){ return String(r.id)!==String(id); });
   save(KEYS.receivables, list);
   renderAssets();
@@ -1109,7 +1128,7 @@ function renderLoans(){
   var sumEl = document.getElementById('loan-summary');
 
   if(!loans.length){
-    el.innerHTML = '<div class="empty">暂无贷款记录</div>';
+    el.innerHTML = '<div class="empty">'+t('history.loan.empty')+'</div>';
     sumEl.style.display = 'none';
     return;
   }
@@ -1128,7 +1147,7 @@ function renderLoans(){
     var daysToNext = '';
     if(l.nextDate){
       var diff = Math.ceil((new Date(l.nextDate) - new Date()) / 86400000);
-      daysToNext = diff <= 0 ? '🔴 已到期' : diff <= 7 ? '🟡 '+diff+'天后' : '🟢 '+diff+'天后';
+      daysToNext = diff <= 0 ? t('history.loan.overdueBadge') : diff <= 7 ? t('history.loan.dueSoonBadge',{n:diff}) : t('history.loan.dueLaterBadge',{n:diff});
     }
 
     totalAmt     += total;
@@ -1140,23 +1159,23 @@ function renderLoans(){
       '<div class="loan-header">'+
         '<div>'+
           '<div class="loan-name">'+l.institution+'</div>'+
-          '<div class="loan-inst">月供 '+fmt(monthly)+' · 共'+periods+'期 · 已还'+paid+'期'+
-            (l.rate>0?' · 年利率'+l.rate+'%':'')+
+          '<div class="loan-inst">'+t('history.loan.monthlyMeta',{monthly:fmt(monthly), periods:periods, paid:paid})+
+            (l.rate>0?t('history.loan.annualRate',{rate:l.rate}):'')+
           '</div>'+
         '</div>'+
         '<div style="text-align:right">'+
           '<div class="loan-remain">'+fmt(remainAmt)+'</div>'+
-          '<div class="loan-remain-lbl">剩余待还</div>'+
+          '<div class="loan-remain-lbl">'+t('history.loan.remainLbl')+'</div>'+
         '</div>'+
       '</div>'+
       '<div class="loan-prog-wrap"><div class="loan-prog" style="width:'+pct+'%"></div></div>'+
       '<div class="loan-meta">'+
-        '<span>已还 '+pct.toFixed(0)+'%</span>'+
-        (daysToNext?'<span>下次还款 '+daysToNext+'</span>':'')+
-        '<span>已还 '+fmt(paidAmt)+'</span>'+
+        '<span>'+t('history.loan.paidPct',{pct:pct.toFixed(0)})+'</span>'+
+        (daysToNext?'<span>'+t('history.loan.nextPayment',{val:daysToNext})+'</span>':'')+
+        '<span>'+t('history.loan.paidAmt',{val:fmt(paidAmt)})+'</span>'+
       '</div>'+
       '<div style="display:flex;justify-content:flex-end;margin-top:8px;gap:8px">'+
-        '<button onclick="loanPaidOne('+i+')" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">还款+1期</button>'+
+        '<button onclick="loanPaidOne('+i+')" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">'+t('history.loan.payOneBtn')+'</button>'+
         '<button class="loan-del" onclick="deleteLoan('+i+')">🗑</button>'+
       '</div>'+
     '</div>';
@@ -1194,7 +1213,7 @@ function addLoan(){
 
   renderLoans();
   renderAssets(); // 更新待支付中的贷款月供
-  showToast('✅ 贷款已添加');
+  showToast(t('history.toast.loanAdded'));
 }
 
 function loanPaidOne(idx){
@@ -1214,11 +1233,11 @@ function loanPaidOne(idx){
   save(KEYS.loans, loans);
   renderLoans();
   renderAssets();
-  showToast('✅ 已还款，现金已扣减');
+  showToast(t('history.toast.loanPaid'));
 }
 
 function deleteLoan(idx){
-  if(!confirm('确定删除此贷款记录？')) return;
+  if(!confirm(t('history.confirm.deleteLoan'))) return;
   var loans = (load(KEYS.loans)||[]);
   loans.splice(idx,1);
   save(KEYS.loans, loans);
@@ -1236,11 +1255,12 @@ function shake(id){
 //  Toast
 // ══════════════════════════════════════════════════════
 function showToast(msg){
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  // ★ i18n: 变量名不能叫 t —— 会与全局 t() 翻译函数冲突
+  var toastEl = document.getElementById('toast');
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._timer);
+  toastEl._timer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2500);
 }
 
 // ══════════════════════════════════════════════════════
@@ -1266,7 +1286,7 @@ window.addEventListener('storage', function(e){
                 var list = load(KEYS.receivables) || [];
                 list.push({
                     id:           Date.now(),
-                    counterparty: data.counterparty || '待填写',
+                    counterparty: data.counterparty || t('history.ar.defaultCounterparty'),
                     amount:       parseFloat(data.amount) || 0,
                     note:         data.note || '',
                     date:         new Date().toLocaleDateString(),
@@ -1303,67 +1323,127 @@ document.getElementById('l-next').value = nextDefault;
   <div style="background:#fff;width:100%;max-width:480px;border-radius:28px 28px 0 0;
               padding:0 20px 44px;max-height:88vh;overflow-y:auto">
     <div style="width:44px;height:5px;background:#E0E0E0;border-radius:3px;margin:14px auto 16px"></div>
-    <div style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px">核销应收账款</div>
+    <div style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px" data-i18n="history.settle.title">核销应收账款</div>
     <div style="font-size:13px;color:var(--text-3);font-weight:700;margin-bottom:18px" id="settle-desc">—</div>
 
     <!-- 现金到账 -->
     <div style="background:#F0FFF4;border:2px solid #4CAF50;border-radius:16px;padding:16px;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:900;color:#2D7D52;margin-bottom:4px">💰 现金到账</div>
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">厂家转账/打款，现金余额增加</div>
-      <button onclick="settleWithCash()"
+      <div style="font-size:15px;font-weight:900;color:#2D7D52;margin-bottom:4px" data-i18n="history.settle.cashTitle">💰 现金到账</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px" data-i18n="history.settle.cashDesc">厂家转账/打款，现金余额增加</div>
+      <button onclick="settleWithCash()" id="settle-cash-btn"
         style="width:100%;padding:13px;background:#4CAF50;color:#fff;border:none;
                border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">
-        立即核销 · 现金 ＋<span id="settle-amount-lbl">¥0</span>
       </button>
     </div>
 
     <!-- 补货到账 -->
     <div style="background:#FFF8F0;border:2px solid var(--warn);border-radius:16px;padding:16px;margin-bottom:14px">
-      <div style="font-size:15px;font-weight:900;color:var(--warn);margin-bottom:4px">📦 补货到账</div>
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">厂家以货物抵款，录入库存，现金不变</div>
+      <div style="font-size:15px;font-weight:900;color:var(--warn);margin-bottom:4px" data-i18n="history.settle.goodsTitle">📦 补货到账</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px" data-i18n="history.settle.goodsDesc">厂家以货物抵款，录入库存，现金不变</div>
       <div style="margin-bottom:10px">
-        <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">商品名称 *</label>
-        <input id="sg-name" type="text" placeholder="补货商品名称（可与应收备注不同）"
+        <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em" data-i18n="history.settle.goodsNameLbl">商品名称 *</label>
+        <input id="sg-name" type="text" placeholder="补货商品名称（可与应收备注不同）" data-i18n-placeholder="history.settle.goodsNamePlaceholder"
           style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <div style="flex:1">
-          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">进价(¥)</label>
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase" data-i18n="history.settle.costLbl">进价(¥)</label>
           <input id="sg-cost" type="number" step="0.01" placeholder="0.00"
             style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
         </div>
         <div style="flex:1">
-          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">售价(¥)</label>
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase" data-i18n="history.settle.saleLbl">售价(¥)</label>
           <input id="sg-sale" type="number" step="0.01" placeholder="0.00"
             style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:14px">
         <div style="flex:1">
-          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">数量 *</label>
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase" data-i18n="history.settle.qtyLbl">数量 *</label>
           <input id="sg-qty" type="number" min="1" step="1" placeholder="0"
             style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
         </div>
         <div style="flex:1">
-          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase">过期日</label>
+          <label style="font-size:11px;font-weight:800;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase" data-i18n="history.settle.expLbl">过期日</label>
           <input id="sg-exp" type="date"
             style="width:100%;padding:10px 12px;border:2px solid var(--border-md);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text)">
         </div>
       </div>
       <button onclick="settleWithGoods()"
         style="width:100%;padding:13px;background:var(--warn);color:#fff;border:none;
-               border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">
+               border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit" data-i18n="history.settle.goodsBtn">
         核销并录入库存
       </button>
     </div>
 
     <button onclick="_closeSettleModal()"
       style="width:100%;padding:13px;background:#F0F0F0;color:#555;border:none;
-             border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">
+             border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit" data-i18n="history.settle.cancelBtn">
       取消
     </button>
   </div>
 </div>
+
+<!-- ★ 语言切换悬浮按钮 -->
+<script>
+  (function () {
+    var LANG_CYCLE = ["zh", "en", "es", "fr", "ja"];
+    var LANG_LABEL = { zh: "中文", en: "EN", es: "ES", fr: "FR", ja: "JA" };
+
+    function nextLang(cur) {
+      var available = LANG_CYCLE.filter(function (l) {
+        return I18N.getAvailableLangs().indexOf(l) !== -1;
+      });
+      if (!available.length) return cur;
+      var idx = available.indexOf(cur);
+      return available[(idx + 1) % available.length];
+    }
+
+    function mountLangToggle() {
+      if (document.getElementById("i18n-toggle-btn")) return;
+      var btn = document.createElement("div");
+      btn.id = "i18n-toggle-btn";
+      var cur = I18N.getLang();
+      btn.innerHTML = LANG_LABEL[nextLang(cur)] || "EN";
+      Object.assign(btn.style, {
+        position: "fixed", bottom: "16px", left: "16px",
+        background: "var(--primary, #9B2335)", color: "#fff",
+        padding: "6px 14px", borderRadius: "20px", fontSize: "11px",
+        cursor: "pointer", zIndex: "99999", fontWeight: "bold",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        fontFamily: "'PingFang SC','Helvetica Neue',sans-serif",
+      });
+      document.body.appendChild(btn);
+      btn.onclick = function () {
+        var next = nextLang(I18N.getLang());
+        if (I18N.switchLang(next)) {
+          btn.innerHTML = LANG_LABEL[nextLang(next)] || "EN";
+        }
+      };
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mountLangToggle);
+    } else {
+      mountLangToggle();
+    }
+  })();
+
+  // ★ 语言切换后：静态 data-i18n 已自动刷新；这里补充刷新由 JS 动态生成的内容
+  window.addEventListener("i18n:change", function () {
+    document.title = t("history.pageTitle");
+    renderAssets();
+    var activeTab = document.querySelector(".tab-btn.active");
+    var tabLabel = activeTab ? activeTab.getAttribute("data-i18n") : null;
+    if (tabLabel === "history.tab.history") renderHistory();
+    if (tabLabel === "history.tab.loans") renderLoans();
+    // 若应收核销弹窗正打开，刷新其内容
+    var settleOv = document.getElementById("settle-overlay");
+    if (settleOv && settleOv.style.display === "flex" && _settleTarget) {
+      settleReceivable(_settleTarget.id);
+    }
+  });
+</script>
 
 </body>
 </html>
