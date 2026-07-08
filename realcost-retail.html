@@ -10,10 +10,25 @@
 <script src="config.js"></script>
 <script src="i18n/zh.js"></script>
 <script src="i18n/en.js"></script>
+<script src="i18n/es.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/ja.js"></script>
 <script src="i18n/i18n-core.js"></script>
 <script>
 // ★ 语言切换悬浮按钮（风格与 main.html 的 i18n-engine.js 一致：左下角悬浮圆角按钮）
 (function () {
+        // 循环顺序：中文 → 英文 → 西语 → 法语 → 日语 → 中文…
+        var LANG_CYCLE = ["zh", "en", "es", "fr", "ja"];
+        var LANG_LABEL = { zh: "中文", en: "EN", es: "ES", fr: "FR", ja: "JA" };
+
+        function nextLang(cur) {
+          var available = LANG_CYCLE.filter(function (l) {
+            return I18N.getAvailableLangs().indexOf(l) !== -1;
+          });
+          if (!available.length) return cur;
+          var idx = available.indexOf(cur);
+          return available[(idx + 1) % available.length];
+        }
   function mountLangToggle() {
     if (document.getElementById('i18n-toggle-btn')) return; // 防止重复挂载
     var btn = document.createElement('div');
