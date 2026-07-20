@@ -7,6 +7,26 @@
 <meta name="theme-color" content="#9B2335">
 <title>獭掌柜·美业版 v2</title>
 <script src="config.js"></script>
+<script src="i18n/zh.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n/es.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/ja.js"></script>
+<script src="i18n/i18n-core.js"></script>
+<script>
+  if (typeof window.t !== "function") {
+    console.warn("[i18n] i18n-core.js 未成功加载，已启用兜底 t()。");
+    window.t = function (key, params) {
+      if (!params) return key;
+      return key.replace(/\{(\w+)\}/g, (m, k) => (params[k] !== undefined ? params[k] : m));
+    };
+    window.tMonth = function(idx) { return String(idx + 1) + '月'; };
+    window.I18N = {
+      getLang: () => "zh", setLang: () => {}, switchLang: () => {},
+      applyDOM: () => {}, getAvailableLangs: () => ["zh"],
+    };
+  }
+</script>
 
 <style>
 /* ── RESET & BASE ── */
@@ -373,7 +393,7 @@ body {
          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="15 18 9 12 15 6"/>
     </svg>
-    返回
+    <span data-i18n="common.back">返回</span>
   </button>
   
 </div>
@@ -385,7 +405,7 @@ body {
   </div>
   <div class="mh-right">
     <div class="mh-rev"  id="mh-rev">¥0</div>
-    <div class="mh-rlbl">本月营收</div>
+    <div class="mh-rlbl" data-i18n="beauty.monthlyRevenueLabel">本月营收</div>
   </div>
 </div>
 
@@ -406,31 +426,31 @@ body {
 <div class="bottom-nav">
   <button class="nav-btn active" data-view="calendar" onclick="switchTab(this,'calendar')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-    <span class="nav-lbl">日历</span>
+    <span class="nav-lbl" data-i18n="retail.nav.calendar">日历</span>
   </button>
   <button class="nav-btn" data-view="orders" onclick="switchTab(this,'orders')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span>
-    <span class="nav-lbl">订单</span>
+    <span class="nav-lbl" data-i18n="beauty.nav.orders">订单</span>
   </button>
   <button class="nav-btn" data-view="ranking" onclick="switchTab(this,'ranking')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-    <span class="nav-lbl">排行</span>
+    <span class="nav-lbl" data-i18n="beauty.nav.ranking">排行</span>
   </button>
   <button class="nav-btn" data-view="materials" onclick="switchTab(this,'materials')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
-    <span class="nav-lbl">库存</span>
+    <span class="nav-lbl" data-i18n="retail.nav.inventory">库存</span>
   </button>
   <button class="nav-btn" data-view="technicians" onclick="switchTab(this,'technicians')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-    <span class="nav-lbl">员工</span>
+    <span class="nav-lbl" data-i18n="beauty.nav.staff">员工</span>
   </button>
   <button class="nav-btn" data-view="neworder" onclick="switchTab(this,'neworder')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
-    <span class="nav-lbl">新建</span>
+    <span class="nav-lbl" data-i18n="beauty.nav.newOrder">新建</span>
   </button>
   <button class="nav-btn" data-view="acquire" onclick="switchTab(this,'acquire')">
     <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
-    <span class="nav-lbl">获客</span>
+    <span class="nav-lbl" data-i18n="beauty.nav.acquire">获客</span>
   </button>
 </div>
 
@@ -442,7 +462,7 @@ body {
     <div class="sh-status" id="sh-status"></div>
     <div class="metrics-grid" id="sh-metrics"></div>
     <div class="btn-row"   id="sh-btn-row"></div>
-    <button class="btn-sh btn-ghost" onclick="closeSheet()">关闭</button>
+    <button class="btn-sh btn-ghost" onclick="closeSheet()" data-i18n="common.close">关闭</button>
   </div>
 </div>
 
@@ -513,10 +533,20 @@ var Engine = (function(){
     matCategories:'beauty_matcats'
   };
 
-  var DEFAULT_CATS = ['美睫耗材','美甲耗材','美容耗材','纹绣耗材','医美耗材','通用辅材','可零售产品'];
+  // ★ i18n: 这些是首次使用时预置的默认分类名（纯文本，用户可自由改名/新增/删除）。
+  //   分类存储本身是自由文本（非枚举 key），因此这里按当前语言生成默认值，
+  //   而不是像 retail 页那样用语言无关 key 映射 —— 用户后续输入的自定义分类
+  //   本就是任意语言文本，不受 i18n 系统管辖。
+  function _defaultCats(){
+    return [
+      t('beauty.matCat.lash'), t('beauty.matCat.nail'), t('beauty.matCat.beauty'),
+      t('beauty.matCat.tattoo'), t('beauty.matCat.medical'), t('beauty.matCat.general'),
+      t('beauty.matCat.retail'),
+    ];
+  }
 
   function getMatCategories(){
-    return load(KEYS.matCategories) || DEFAULT_CATS.slice();
+    return load(KEYS.matCategories) || _defaultCats();
   }
   function saveMatCategories(cats){ save(KEYS.matCategories, cats); }
   function addMatCategory(name){
@@ -599,7 +629,7 @@ var Engine = (function(){
   function addTechnician(t){
     var list=getTechnicians(); t.id=Date.now()+Math.random(); list.push(t); save(KEYS.technicians,list); return list;
   }
-  function deleteTechnician(id){ save(KEYS.technicians,getTechnicians().filter(function(t){ return t.id!=id; })); }
+  function deleteTechnician(id){ save(KEYS.technicians,getTechnicians().filter(function(tc){ return tc.id!=id; })); }
 
   function getOrders()   { return load(KEYS.orders)||[]; }
 
@@ -683,7 +713,7 @@ var Engine = (function(){
 
   function getProjectRanking(){
     var map={};
-    var typeLabel={ lash:'美睫', nail:'美甲', beauty:'美容', tattoo:'纹绣', medical:'医美' };
+    var typeLabel={ lash:t('beauty.projectType.lash'), nail:t('beauty.projectType.nail'), beauty:t('beauty.projectType.beauty'), tattoo:t('beauty.projectType.tattoo'), medical:t('beauty.projectType.medical') };
     getOrders().forEach(function(o){
       if(!map[o.projectName]) map[o.projectName]={ name:o.projectName, type:o.projectType, typeLabel:typeLabel[o.projectType]||o.projectType, count:0, revenue:0, profit:0 };
       map[o.projectName].count++; map[o.projectName].revenue+=o.facePrice; map[o.projectName].profit+=o.grossProfit;
@@ -692,7 +722,7 @@ var Engine = (function(){
   }
   function getProfitRanking(){
     var map={};
-    var typeLabel={ lash:'美睫', nail:'美甲', beauty:'美容', tattoo:'纹绣', medical:'医美' };
+    var typeLabel={ lash:t('beauty.projectType.lash'), nail:t('beauty.projectType.nail'), beauty:t('beauty.projectType.beauty'), tattoo:t('beauty.projectType.tattoo'), medical:t('beauty.projectType.medical') };
     getOrders().forEach(function(o){
       if(!map[o.projectName]) map[o.projectName]={ name:o.projectName, type:o.projectType, typeLabel:typeLabel[o.projectType]||o.projectType, count:0, revenue:0, profit:0 };
       map[o.projectName].count++; map[o.projectName].revenue+=o.facePrice; map[o.projectName].profit+=o.grossProfit;
@@ -713,7 +743,7 @@ var Engine = (function(){
   }
   function getChannelRanking(){
     var map={};
-    var chLabel={ offline:'到店自然客', meituan:'美团团购', douyin:'抖音团购' };
+    var chLabel={ offline:t('beauty.channel.offline'), meituan:t('beauty.channel.meituan'), douyin:t('beauty.channel.douyin') };
     var chEmoji={ offline:'🚶', meituan:'🥡', douyin:'🎵' };
     getOrders().forEach(function(o){
       var ch=o.channel||'offline';
@@ -789,7 +819,7 @@ var Engine = (function(){
 // ══════════════════════════════════════════════════════════════════
 var now=new Date(), YEAR=now.getFullYear(), MONTH=now.getMonth(), TODAY=now.getDate();
 var DAYS=new Date(YEAR,MONTH+1,0).getDate();
-var MN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+// ★ i18n: 月份名统一通过 tMonth() 获取（i18n-core.js），不再用硬编码中文数组
 function dateKey(d){ return new Date(YEAR,MONTH,d).toLocaleDateString(); }
 
 function switchTab(btn,viewId){
@@ -812,11 +842,13 @@ function switchTab(btn,viewId){
 
 function updateHeader(){
   var s=Engine.getMonthStats(YEAR,MONTH);
-  document.getElementById('mh-title').textContent=YEAR+'年'+MN[MONTH];
-  document.getElementById('mh-sub').textContent='本月已完成 '+s.days+' 个工作日';
+  document.getElementById('mh-title').textContent=YEAR+tYearSuffix()+tMonth(MONTH);
+  document.getElementById('mh-sub').textContent=t('beauty.header.completedDays',{n:s.days});
   document.getElementById('mh-rev').textContent=Engine.fmtMoney(s.revenue);
   
 }
+// ★ 中文用"2026年"，其他语言用空格分隔（月份名已含语义）
+function tYearSuffix() { return I18N.getLang()==='zh' ? '年' : ' '; }
 
 // ── 蛇形日历 ──────────────────────────────────────────────────────
 var XP=[50,68,80,68,50,32,20,32];
@@ -854,7 +886,7 @@ function buildSnake(){
     else if(hasSales) node.classList.add('n-done');
     else node.classList.add('n-missed');
 
-    if(isToday){ var tg=document.createElement('div'); tg.className='today-tag'; tg.textContent='今天'; node.appendChild(tg); }
+    if(isToday){ var tg=document.createElement('div'); tg.className='today-tag'; tg.textContent=t('retail.calendar.todayTag'); node.appendChild(tg); }
     var ne=document.createElement('div'); ne.className='nd-num'; ne.textContent=day; node.appendChild(ne);
     var ie=document.createElement('div'); ie.className='nd-ico'; ie.textContent=isToday?'⭐':hasSales?'✓':isPast?'✗':''; node.appendChild(ie);
 
@@ -869,17 +901,17 @@ function buildSnake(){
 
   var cp=coords[DAYS], ch=document.createElement('div'); ch.className='chest-node';
   ch.style.left=cp.x+'px'; ch.style.top=cp.y+'px';
-  ch.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">月度总结</div>';
+  ch.innerHTML='<div class="ch-icon">'+(TODAY>=DAYS?'🏆':'🔒')+'</div><div class="ch-label">'+t('retail.calendar.monthSummary')+'</div>';
   ch.onclick=openChest; track.appendChild(ch);
 }
 
 function openSheet(day,key,data,isToday,isFuture,isPast,hasSales){
-  document.getElementById('sh-date').textContent=(MONTH+1)+'月'+day+'日';
+  document.getElementById('sh-date').textContent=tDateLabel(MONTH,day);
   var m=document.getElementById('sh-metrics'), br=document.getElementById('sh-btn-row');
-  if(isFuture){ document.getElementById('sh-status').textContent='还没到这天哦 🔒'; m.innerHTML=''; br.innerHTML=''; }
+  if(isFuture){ document.getElementById('sh-status').textContent=t('retail.sheet.future'); m.innerHTML=''; br.innerHTML=''; }
   else if(!hasSales&&!isToday){
-    document.getElementById('sh-status').textContent='这天没有接单';
-    m.innerHTML='<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val">—</div></div>';
+    document.getElementById('sh-status').textContent=t('beauty.sheet.noOrders');
+    m.innerHTML='<div class="mc"><div class="mc-lbl">'+t('retail.sheet.revenue')+'</div><div class="mc-val">¥0</div></div><div class="mc"><div class="mc-lbl">'+t('retail.sheet.grossProfit')+'</div><div class="mc-val">—</div></div>';
     br.innerHTML='';
   } else {
     var rawD=(function(){ try{ return JSON.parse(localStorage.getItem('beauty_h'))||{}; }catch(e){ return {}; } })();
@@ -888,15 +920,21 @@ function openSheet(day,key,data,isToday,isFuture,isPast,hasSales){
     var varC=parseFloat(cur.varCost)||(rev-prof);
     var gm=cur.grossMargin||(rev>0?(prof/rev*100):null);
     var cnt=cur.orderCount||0;
-    document.getElementById('sh-status').textContent=isToday?'今天 · 进行中 ('+cnt+'单)':'已完成 '+cnt+' 单 ✓';
+    document.getElementById('sh-status').textContent=isToday?t('beauty.sheet.todayInProgress',{n:cnt}):t('beauty.sheet.completed',{n:cnt});
     m.innerHTML=
-      '<div class="mc"><div class="mc-lbl">营收</div><div class="mc-val p">'+Engine.fmtMoney(rev)+'</div></div>'+
-      '<div class="mc"><div class="mc-lbl">毛利</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
-      '<div class="mc"><div class="mc-lbl">变动成本</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
-      '<div class="mc"><div class="mc-lbl">毛利率</div><div class="mc-val '+(gm&&gm>=50?'g':'p')+'">'+(gm?Engine.fmtMargin(gm):'—')+'</div></div>';
-    br.innerHTML=isToday?'<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'neworder\')">'+icon('plusCircle',16,'#fff')+' 新建订单</button>':'';
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.revenue')+'</div><div class="mc-val p">'+Engine.fmtMoney(rev)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.grossProfit')+'</div><div class="mc-val '+(prof>=0?'g':'r')+'">'+Engine.fmtMoney(prof)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('retail.sheet.variableCost')+'</div><div class="mc-val">'+Engine.fmtMoney(varC)+'</div></div>'+
+      '<div class="mc"><div class="mc-lbl">'+t('beauty.sheet.marginRate')+'</div><div class="mc-val '+(gm&&gm>=50?'g':'p')+'">'+(gm?Engine.fmtMargin(gm):'—')+'</div></div>';
+    br.innerHTML=isToday?'<button class="btn-sh btn-primary" onclick="closeSheet();switchTab(null,\'neworder\')">'+icon('plusCircle',16,'#fff')+' '+t('beauty.sheet.newOrderBtn')+'</button>':'';
   }
   document.getElementById('overlay').classList.add('open');
+}
+// ★ "3月15日" / "Mar 15" 两种日期展示格式
+function tDateLabel(monthIdx, day) {
+  return I18N.getLang()==='zh'
+    ? (monthIdx+1)+'月'+day+'日'
+    : tMonth(monthIdx)+' '+day;
 }
 function overlayTap(e){ if(e.target===document.getElementById('overlay')) closeSheet(); }
 function closeSheet()  { document.getElementById('overlay').classList.remove('open'); }
@@ -910,12 +948,16 @@ function openChest(){
     return a;
   },0);
   var netProfit=s.profit-monthAcq;
-  alert('💅 '+(MONTH+1)+'月月度总结\n\n接单天数：'+s.days+' 天\n本月营收：'+Engine.fmtMoney(s.revenue)+
-    '\n本月毛利：'+Engine.fmtMoney(s.profit)+'\n平均毛利率：'+Engine.fmtMargin(s.gm)+
-    '\n\n📣 本月获客投入：'+Engine.fmtMoney(monthAcq)+
-    '\n💰 月毛利润（扣获客后）：'+Engine.fmtMoney(netProfit)+
-    '\n\n🧴 库存进货价值：'+Engine.fmtMoney(inv.purchaseTotal)+
-    '\n📦 可零售产品可卖：'+Engine.fmtMoney(inv.resaleTotal));
+  var msg = '💅 '+t('beauty.chest.title',{month:tMonth(MONTH)})+'\n\n'+
+    t('beauty.chest.days',{days:s.days})+'\n'+
+    t('beauty.chest.revenue',{val:Engine.fmtMoney(s.revenue)})+'\n'+
+    t('beauty.chest.profit',{val:Engine.fmtMoney(s.profit)})+'\n'+
+    t('beauty.chest.margin',{val:Engine.fmtMargin(s.gm)})+
+    '\n\n'+t('beauty.chest.acquireCost',{val:Engine.fmtMoney(monthAcq)})+
+    '\n'+t('beauty.chest.netProfit',{val:Engine.fmtMoney(netProfit)})+
+    '\n\n'+t('beauty.chest.inventoryValue',{val:Engine.fmtMoney(inv.purchaseTotal)})+
+    '\n'+t('beauty.chest.resaleValue',{val:Engine.fmtMoney(inv.resaleTotal)});
+  alert(msg);
 }
 
 function shake(el,msg){
@@ -982,7 +1024,7 @@ function renderNewOrder(container){
   var mats=Engine.getMaterials(), techs=Engine.getTechnicians();
   var matCategories = {};
   mats.forEach(function(m){
-    var cat = m.category || '未分类';
+    var cat = m.category || t('inventory.categoryOther');
     if(!matCategories[cat]) matCategories[cat] = [];
     matCategories[cat].push(m);
   });
@@ -995,17 +1037,17 @@ function renderNewOrder(container){
   var giftItems=[];   // { matId, name, unitCost, qty }
 
   var PROJECT_TYPES=[
-    { val:'lash',    label:'美睫', rateKey:'lashRate'    },
-    { val:'nail',    label:'美甲', rateKey:'nailRate'    },
-    { val:'beauty',  label:'美容', rateKey:'beautyRate'  },
-    { val:'tattoo',  label:'纹绣', rateKey:'tattooRate'  },
-    { val:'medical', label:'医美', rateKey:'medicalRate' },
+    { val:'lash',    label:t('beauty.projectType.lash'),    rateKey:'lashRate'    },
+    { val:'nail',    label:t('beauty.projectType.nail'),    rateKey:'nailRate'    },
+    { val:'beauty',  label:t('beauty.projectType.beauty'),  rateKey:'beautyRate'  },
+    { val:'tattoo',  label:t('beauty.projectType.tattoo'),  rateKey:'tattooRate'  },
+    { val:'medical', label:t('beauty.projectType.medical'), rateKey:'medicalRate' },
   ];
 
   // 耗材选择器（含产品，用于BOM）
-  var matOptGroupsHtml = '<option value="">选择耗材/产品…</option>';
+  var matOptGroupsHtml = '<option value="">'+t('beauty.no.matPickPlaceholder')+'</option>';
   if(Object.keys(matCategories).length === 0){
-    matOptGroupsHtml = '<option value="">暂无耗材，请先在库存中添加</option>';
+    matOptGroupsHtml = '<option value="">'+t('beauty.no.matPickEmpty')+'</option>';
   } else {
     Object.keys(matCategories).forEach(function(cat){
       matOptGroupsHtml += '<optgroup label="' + cat + '">';
@@ -1013,144 +1055,144 @@ function renderNewOrder(container){
         var uc = Engine.getUsageCounts();
         var usedRemainder = uc[m.id] || 0;
         var usageCount = parseFloat(m.usageCount)||1;
-        var remaining = usedRemainder > 0 ? (usageCount - usedRemainder) + '次剩余' : '';
-        matOptGroupsHtml += '<option value="'+m.id+'">'+m.name+(m.stock?' (库存:'+m.stock+(m.stockUnit||'')+(remaining?' · '+remaining:'')+')':'')+'（¥'+m.unitCost.toFixed(2)+'/次）</option>';
+        var remaining = usedRemainder > 0 ? t('beauty.no.matPickRemaining',{n:(usageCount - usedRemainder)}) : '';
+        matOptGroupsHtml += '<option value="'+m.id+'">'+m.name+(m.stock?' ('+t('beauty.no.matPickStock',{qty:m.stock,unit:(m.stockUnit||'')})+(remaining?' · '+remaining:'')+')':'')+t('beauty.no.matPickCostPerUse',{cost:m.unitCost.toFixed(2)})+'</option>';
       });
       matOptGroupsHtml += '</optgroup>';
     });
   }
 
   // 产品下拉（仅 isProduct 的）
-  var prodOptHtml = '<option value="">选择产品…</option>';
+  var prodOptHtml = '<option value="">'+t('beauty.no.prodPickPlaceholder')+'</option>';
   if(allProducts.length){
     allProducts.forEach(function(p){
-      prodOptHtml += '<option value="'+p.id+'" data-cost="'+p.unitCost.toFixed(4)+'" data-sale="'+(p.salePrice||0)+'" data-name="'+p.name+'" data-unit="'+(p.stockUnit||'个')+'" data-stock="'+(p.stock||0)+'">'+
-        p.name+' (库存:'+p.stock+(p.stockUnit||'')+'  进价¥'+p.unitCost.toFixed(2)+'  售¥'+(p.salePrice||0)+')</option>';
+      prodOptHtml += '<option value="'+p.id+'" data-cost="'+p.unitCost.toFixed(4)+'" data-sale="'+(p.salePrice||0)+'" data-name="'+p.name+'" data-unit="'+(p.stockUnit||t('common.stockUnit'))+'" data-stock="'+(p.stock||0)+'">'+
+        t('beauty.no.prodPickLine',{name:p.name, qty:p.stock, unit:(p.stockUnit||''), cost:p.unitCost.toFixed(2), sale:(p.salePrice||0)})+'</option>';
     });
   } else {
-    prodOptHtml = '<option value="">暂无可售产品，请先在库存添加</option>';
+    prodOptHtml = '<option value="">'+t('beauty.no.prodPickEmpty')+'</option>';
   }
 
   container.innerHTML='<div>'+
-    '<div class="page-title-bar">'+icon('sparkles',24,'var(--pink)')+'<span class="page-title-text">新建订单</span></div>'+
-    '<div class="form-subtitle">服务 · 产品销售 · 赠品均在此页面完成</div>'+
+    '<div class="page-title-bar">'+icon('sparkles',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.no.pageTitle')+'</span></div>'+
+    '<div class="form-subtitle">'+t('beauty.no.subtitle')+'</div>'+
 
     // ── 项目信息 ──
     '<div class="form-card">'+
-      '<div class="section-label">项目信息</div>'+
-      '<div class="form-group"><label class="form-lbl">项目名称 *</label>'+
-        '<input id="o-name" class="form-inp" type="text" placeholder="如：日式美睫 D型 0.07mm"></div>'+
+      '<div class="section-label">'+t('beauty.no.projectInfo')+'</div>'+
+      '<div class="form-group"><label class="form-lbl">'+t('beauty.no.projectName')+'</label>'+
+        '<input id="o-name" class="form-inp" type="text" placeholder="'+t('beauty.no.projectNamePlaceholder')+'"></div>'+
       '<div class="form-row">'+
-        '<div class="form-group half"><label class="form-lbl">项目类别</label>'+
+        '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.projectCategory')+'</label>'+
           '<div class="cat-chips" style="margin-top:4px" id="type-chips">'+
-            PROJECT_TYPES.map(function(t,i){ return '<button class="cat-chip'+(i===0?' active':'')+'" data-val="'+t.val+'" data-rate-key="'+t.rateKey+'">'+t.label+'</button>'; }).join('')+
+            PROJECT_TYPES.map(function(pt,i){ return '<button class="cat-chip'+(i===0?' active':'')+'" data-val="'+pt.val+'" data-rate-key="'+pt.rateKey+'">'+pt.label+'</button>'; }).join('')+
           '</div></div>'+
-        '<div class="form-group half"><label class="form-lbl">员工</label>'+
+        '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.staffLbl')+'</label>'+
           '<select id="o-tech" class="form-inp">'+
-            '<option value="">选择员工…</option>'+
-            techs.map(function(t){ return '<option value="'+t.id+'">'+t.name+'</option>'; }).join('')+
+            '<option value="">'+t('beauty.no.staffPlaceholder')+'</option>'+
+            techs.map(function(tc){ return '<option value="'+tc.id+'">'+tc.name+'</option>'; }).join('')+
           '</select></div>'+
       '</div>'+
     '</div>'+
 
     // ── 渠道 & 收费 ──
     '<div class="form-card">'+
-      '<div class="section-label">渠道 & 收费</div>'+
+      '<div class="section-label">'+t('beauty.no.channelFee')+'</div>'+
       '<div class="form-row">'+
-        '<div class="form-group half"><label class="form-lbl">销售渠道</label>'+
+        '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.channelLbl')+'</label>'+
           '<select id="o-channel" class="form-inp" onchange="noChChange()">'+
-            '<option value="offline">到店自然客</option>'+
-            '<option value="meituan">美团团购</option>'+
-            '<option value="douyin">抖音团购</option>'+
+            '<option value="offline">'+t('beauty.channel.offline')+'</option>'+
+            '<option value="meituan">'+t('beauty.channel.meituan')+'</option>'+
+            '<option value="douyin">'+t('beauty.channel.douyin')+'</option>'+
           '</select></div>'+
-        '<div class="form-group half"><label class="form-lbl">券面价 / 售价 (¥)</label>'+
+        '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.facePrice')+'</label>'+
           '<input id="o-face" class="form-inp" type="number" step="0.01" min="0" placeholder="299" oninput="noFaceChange()"></div>'+
       '</div>'+
       '<div id="platform-block" style="display:none">'+
         '<div class="form-row">'+
-          '<div class="form-group half"><label class="form-lbl">平台佣金率 (%)</label>'+
+          '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.commRate')+'</label>'+
             '<input id="o-comm" class="form-inp" type="number" step="0.1" min="0" max="100" placeholder="12" oninput="noCommChange()"></div>'+
-          '<div class="form-group half"><label class="form-lbl">平台实收 (¥)</label>'+
+          '<div class="form-group half"><label class="form-lbl">'+t('beauty.no.actualReceived')+'</label>'+
             '<input id="o-actual" class="form-inp" type="number" step="0.01" min="0" placeholder="263" oninput="noActualChange()"></div>'+
         '</div>'+
-        '<div class="form-group"><label class="form-lbl">员工提成基数</label>'+
+        '<div class="form-group"><label class="form-lbl">'+t('beauty.no.commBase')+'</label>'+
           '<div class="cat-chips" id="base-chips">'+
-            '<button class="cat-chip active" data-val="face">按券面价</button>'+
-            '<button class="cat-chip" data-val="actual">按平台实收</button>'+
+            '<button class="cat-chip active" data-val="face">'+t('beauty.no.commBaseFace')+'</button>'+
+            '<button class="cat-chip" data-val="actual">'+t('beauty.no.commBaseActual')+'</button>'+
           '</div></div>'+
       '</div>'+
     '</div>'+
 
     // ── 耗材成本（BOM）──
     '<div class="form-card">'+
-      '<div class="section-label">耗材成本（BOM）</div>'+
+      '<div class="section-label">'+t('beauty.no.bomTitle')+'</div>'+
       '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:10px">'+
-        '💡 用量填<b>使用次数</b>，满<span style="color:var(--pink)">可用次数</span>才自动扣减一瓶库存'+
+        '💡 '+t('beauty.no.bomHint').replace('💡 ','')+
       '</div>'+
       '<div class="form-row" style="margin-bottom:10px">'+
-        '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">从库存选择（按分类）</label>'+
+        '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.no.bomPickLbl')+'</label>'+
           '<select id="o-mat-pick" class="form-inp">'+matOptGroupsHtml+'</select></div>'+
         '<div style="display:flex;align-items:flex-end;gap:6px;flex:1">'+
-          '<div class="form-group half" style="margin-bottom:0;flex:1"><label class="form-lbl">用量（次）</label>'+
+          '<div class="form-group half" style="margin-bottom:0;flex:1"><label class="form-lbl">'+t('beauty.no.bomQtyLbl')+'</label>'+
             '<input id="o-mat-qty" class="form-inp" type="number" step="1" min="1" placeholder="1"></div>'+
-          '<button class="cat-chip active" style="margin-bottom:2px;white-space:nowrap;flex-shrink:0" onclick="noAddMat()">＋ 添加</button>'+
+          '<button class="cat-chip active" style="margin-bottom:2px;white-space:nowrap;flex-shrink:0" onclick="noAddMat()">'+t('beauty.no.bomAddBtn')+'</button>'+
         '</div>'+
       '</div>'+
       '<div id="mat-rows"></div>'+
-      '<button style="width:100%;margin-top:6px;padding:10px;border:2px dashed var(--border);border-radius:12px;background:none;color:var(--text-3);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit" onclick="noAddManual()">＋ 手动填写耗材</button>'+
+      '<button style="width:100%;margin-top:6px;padding:10px;border:2px dashed var(--border);border-radius:12px;background:none;color:var(--text-3);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit" onclick="noAddManual()">'+t('beauty.no.bomManualBtn')+'</button>'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">'+
-        '<span style="font-size:13px;color:var(--text-3);font-weight:700">耗材合计</span>'+
+        '<span style="font-size:13px;color:var(--text-3);font-weight:700">'+t('beauty.no.bomTotal')+'</span>'+
         '<span id="o-mat-total" style="font-size:18px;font-weight:900;color:var(--pink)">¥0.00</span>'+
       '</div>'+
     '</div>'+
 
     // ── 备注 ──
     '<div class="form-card">'+
-      '<div class="section-label">备注</div>'+
-      '<input id="o-note" class="form-inp" type="text" placeholder="手型特殊 / 额外钻饰 / 过敏体质…">'+
+      '<div class="section-label">'+t('beauty.no.noteTitle')+'</div>'+
+      '<input id="o-note" class="form-inp" type="text" placeholder="'+t('beauty.no.notePlaceholder')+'">'+
     '</div>'+
 
     // ── 变动成本预览 ──
     '<div class="form-card">'+
-      '<div class="section-label">变动成本预览</div>'+
-      '<div id="cost-preview"><div style="color:var(--text-3);font-size:13px">填写售价后显示预览</div></div>'+
+      '<div class="section-label">'+t('beauty.no.costPreviewTitle')+'</div>'+
+      '<div id="cost-preview"><div style="color:var(--text-3);font-size:13px">'+t('beauty.no.costPreviewEmpty')+'</div></div>'+
     '</div>'+
 
-    '<button class="form-submit" onclick="noSubmit()">'+icon('save',18,'#fff')+' 保存服务订单</button>'+
-    '<div class="form-success hidden" id="o-succ">✅ 服务订单已记录！</div>'+
+    '<button class="form-submit" onclick="noSubmit()">'+icon('save',18,'#fff')+' '+t('beauty.no.submitBtn')+'</button>'+
+    '<div class="form-success hidden" id="o-succ">'+t('beauty.no.submitSuccess')+'</div>'+
 
     // ══════════════════════════════════════════════════════════
     // 产品销售区块（BOM逐条选择）
     // ══════════════════════════════════════════════════════════
     '<div style="margin-top:20px">'+
       '<div class="form-card" style="border:2px solid #C0E0C8">'+
-        '<div class="section-label" style="color:var(--green);display:flex;align-items:center;gap:6px">'+icon('shoppingBag',14,'var(--green)')+'本次产品销售（选填）</div>'+
+        '<div class="section-label" style="color:var(--green);display:flex;align-items:center;gap:6px">'+icon('shoppingBag',14,'var(--green)')+t('beauty.no.saleSection')+'</div>'+
         '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
-          '随单销售产品 · 成本自动计入变动成本 · 售价可修改'+
+          t('beauty.no.saleSectionHint')+
         '</div>'+
 
         // 产品选择行
         '<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">'+
-          '<div style="flex:1"><label class="form-lbl">选择产品</label>'+
+          '<div style="flex:1"><label class="form-lbl">'+t('beauty.no.pickProduct')+'</label>'+
             '<select id="ps-pick" class="form-inp" onchange="psPicked()">'+prodOptHtml+'</select></div>'+
-          '<div style="width:52px"><label class="form-lbl">数量</label>'+
+          '<div style="width:52px"><label class="form-lbl">'+t('beauty.no.qtyLbl')+'</label>'+
             '<input id="ps-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:11px 6px;text-align:center"></div>'+
         '</div>'+
         // 成本/售价预览（自动带入，售价可改）
         '<div id="ps-pick-preview" style="display:none;margin-bottom:10px">'+
           '<div style="background:var(--gray-card);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
             '<div style="flex:1;min-width:120px">'+
-              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">进货成本（只读）</div>'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">'+t('beauty.no.costReadonly')+'</div>'+
               '<div id="ps-cost-display" style="font-size:15px;font-weight:900;color:var(--pink)">¥—</div>'+
             '</div>'+
             '<div style="flex:1;min-width:120px">'+
-              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">实际售价（可改）</div>'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">'+t('beauty.no.actualSalePrice')+'</div>'+
               '<input id="ps-sale-price" class="form-inp" type="number" step="0.01" min="0" placeholder="0" style="padding:9px 10px;font-size:14px" oninput="psPreviewCalc()">'+
             '</div>'+
             '<div id="ps-margin-badge" style="font-size:12px;font-weight:900;color:var(--green);text-align:right;min-width:60px"></div>'+
           '</div>'+
         '</div>'+
-        '<button onclick="psAdd()" style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--green-dk);margin-bottom:12px">＋ 加入销售清单</button>'+
+        '<button onclick="psAdd()" style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--green-dk);margin-bottom:12px">'+t('beauty.no.addToSaleList')+'</button>'+
 
         // 已添加的产品销售行
         '<div id="ps-rows"></div>'+
@@ -1158,15 +1200,15 @@ function renderNewOrder(container){
         // 销售汇总
         '<div id="ps-summary" style="display:none;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">'+
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-            '<span style="font-size:13px;color:var(--text-3);font-weight:700">销售额合计</span>'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">'+t('beauty.no.saleTotalAmt')+'</span>'+
             '<span id="ps-total" style="font-size:18px;font-weight:900;color:var(--green)">¥0.00</span>'+
           '</div>'+
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-            '<span style="font-size:12px;color:var(--text-3);font-weight:700">产品成本合计</span>'+
+            '<span style="font-size:12px;color:var(--text-3);font-weight:700">'+t('beauty.no.productCostTotal')+'</span>'+
             '<span id="ps-cost-total" style="font-size:14px;font-weight:800;color:var(--pink)">¥0.00</span>'+
           '</div>'+
           '<div style="display:flex;justify-content:space-between;align-items:center">'+
-            '<span style="font-size:13px;color:var(--text-3);font-weight:700">产品毛利</span>'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">'+t('beauty.no.productProfit')+'</span>'+
             '<span id="ps-profit" style="font-size:15px;font-weight:900;color:var(--green)">¥0.00</span>'+
           '</div>'+
         '</div>'+
@@ -1178,31 +1220,31 @@ function renderNewOrder(container){
     // ══════════════════════════════════════════════════════════
     '<div style="margin-top:4px">'+
       '<div class="form-card" style="border:2px solid #FFE082">'+
-        '<div class="section-label" style="color:var(--gold);display:flex;align-items:center;gap:6px">'+icon('gift',14,'var(--gold)')+'本次赠品发放（选填）</div>'+
+        '<div class="section-label" style="color:var(--gold);display:flex;align-items:center;gap:6px">'+icon('gift',14,'var(--gold)')+t('beauty.no.giftSection')+'</div>'+
         '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
-          '赠予客户产品 · 售价为零 · <b>成本仍计入变动成本</b> · 自动扣减库存'+
+          t('beauty.no.giftSectionHint')+
         '</div>'+
-        '<div class="form-group" style="margin-bottom:10px"><label class="form-lbl">赠品原因（选填）</label>'+
-          '<input id="o-gift-reason" class="form-inp" type="text" placeholder="如：新客礼包 / 消费满赠 / 节日活动"></div>'+
+        '<div class="form-group" style="margin-bottom:10px"><label class="form-lbl">'+t('beauty.no.giftReason')+'</label>'+
+          '<input id="o-gift-reason" class="form-inp" type="text" placeholder="'+t('beauty.no.giftReasonPlaceholder')+'"></div>'+
 
         // 赠品选择行
         '<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">'+
-          '<div style="flex:1"><label class="form-lbl">选择产品</label>'+
+          '<div style="flex:1"><label class="form-lbl">'+t('beauty.no.pickProduct')+'</label>'+
             '<select id="gift-pick" class="form-inp" onchange="giftPicked()">'+prodOptHtml+'</select></div>'+
-          '<div style="width:52px"><label class="form-lbl">数量</label>'+
+          '<div style="width:52px"><label class="form-lbl">'+t('beauty.no.qtyLbl')+'</label>'+
             '<input id="gift-qty" class="form-inp" type="number" min="1" step="1" value="1" style="padding:11px 6px;text-align:center"></div>'+
         '</div>'+
         // 赠品成本预览
         '<div id="gift-pick-preview" style="display:none;margin-bottom:10px">'+
           '<div style="background:#FFF8E1;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center">'+
             '<div style="flex:1">'+
-              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">进货成本（计入变动成本）</div>'+
+              '<div style="font-size:11px;color:var(--text-3);font-weight:800;margin-bottom:3px">'+t('beauty.no.giftCostNote')+'</div>'+
               '<div id="gift-cost-display" style="font-size:15px;font-weight:900;color:var(--gold)">¥—</div>'+
             '</div>'+
-            '<div style="font-size:12px;color:var(--text-3);font-weight:700">售价：¥0（赠品）</div>'+
+            '<div style="font-size:12px;color:var(--text-3);font-weight:700">'+t('beauty.no.giftPriceZero')+'</div>'+
           '</div>'+
         '</div>'+
-        '<button onclick="giftAdd()" style="width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--yellow-dk);margin-bottom:12px">＋ 加入赠品清单</button>'+
+        '<button onclick="giftAdd()" style="width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--yellow-dk);margin-bottom:12px">'+t('beauty.no.addToGiftList')+'</button>'+
 
         // 已添加的赠品行
         '<div id="gift-rows"></div>'+
@@ -1210,17 +1252,17 @@ function renderNewOrder(container){
         // 赠品成本汇总
         '<div id="gift-summary" style="display:none;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">'+
           '<div style="display:flex;justify-content:space-between;align-items:center">'+
-            '<span style="font-size:13px;color:var(--text-3);font-weight:700">赠品成本合计</span>'+
+            '<span style="font-size:13px;color:var(--text-3);font-weight:700">'+t('beauty.no.giftCostTotal')+'</span>'+
             '<span id="gift-cost-total" style="font-size:18px;font-weight:900;color:var(--gold)">¥0.00</span>'+
           '</div>'+
-          '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-top:4px">⚠️ 赠品成本已自动计入今日变动成本</div>'+
+          '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-top:4px">'+t('beauty.no.giftCostWarn')+'</div>'+
         '</div>'+
       '</div>'+
     '</div>'+
 
     // 一键保存全部
-    '<button class="form-submit" style="margin-top:8px;background:linear-gradient(90deg,var(--pink),var(--purple));box-shadow:0 5px 0 var(--pink-dk)" onclick="noSubmitAll()">'+icon('save',18,'#fff')+' 一键保存服务 + 销售 + 赠品</button>'+
-    '<div class="form-success hidden" id="o-succ-all">✅ 全部已记录！库存已同步扣减</div>'+
+    '<button class="form-submit" style="margin-top:8px;background:linear-gradient(90deg,var(--pink),var(--purple));box-shadow:0 5px 0 var(--pink-dk)" onclick="noSubmitAll()">'+icon('save',18,'#fff')+' '+t('beauty.no.submitAllBtn')+'</button>'+
+    '<div class="form-success hidden" id="o-succ-all">'+t('beauty.no.submitAllSuccess')+'</div>'+
 
     '<div style="height:20px"></div>'+
   '</div>';
@@ -1239,7 +1281,7 @@ function renderNewOrder(container){
       name: opt.dataset.name,
       unitCost: parseFloat(opt.dataset.cost)||0,
       salePrice: parseFloat(opt.dataset.sale)||0,
-      stockUnit: opt.dataset.unit||'个',
+      stockUnit: opt.dataset.unit||t('common.stockUnit'),
       stock: parseFloat(opt.dataset.stock)||0
     };
     // 带入成本和默认售价
@@ -1260,9 +1302,9 @@ function renderNewOrder(container){
     if(margin !== null){
       var col = margin >= 50 ? 'var(--green)' : margin >= 30 ? 'var(--gold)' : 'var(--red)';
       badge.style.color = col;
-      badge.textContent = Engine.fmtMargin(margin) + ' 毛利率';
+      badge.textContent = Engine.fmtMargin(margin) + t('beauty.no.marginSuffix');
     } else {
-      badge.textContent = sp === 0 ? '按成本价出售' : '';
+      badge.textContent = sp === 0 ? t('beauty.no.sellAtCost') : '';
     }
   };
 
@@ -1276,18 +1318,18 @@ function renderNewOrder(container){
       var cost = item.unitCost * item.qty;
       var sale = item.salePrice * item.qty;
       totalSale += sale; totalCost += cost;
-      var margin = sale > 0 ? Engine.fmtMargin((sale-cost)/sale*100) : '按成本';
+      var margin = sale > 0 ? Engine.fmtMargin((sale-cost)/sale*100) : t('beauty.no.byCost');
       var col = (sale-cost) >= 0 ? 'var(--green)' : 'var(--red)';
       return '<div class="prod-row">'+
         '<div class="prod-row-info">'+
           '<div class="prod-row-name">🛍 '+item.name+'</div>'+
-          '<div class="prod-row-sub">进价¥'+item.unitCost.toFixed(2)+' × '+item.qty+' = 成本¥'+cost.toFixed(2)+'</div>'+
+          '<div class="prod-row-sub">'+t('beauty.no.psRowSub',{cost:item.unitCost.toFixed(2), qty:item.qty, total:cost.toFixed(2)})+'</div>'+
         '</div>'+
         // 数量（可改）
-        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="数量" '+
+        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="'+t('beauty.no.qtyLbl')+'" '+
           'oninput="saleItems['+i+'].qty=Math.max(1,parseInt(this.value)||1);renderPsRows()">'+
         // 售价（可改）
-        '<input class="prod-row-price" type="number" min="0" step="0.01" value="'+item.salePrice.toFixed(2)+'" title="实际售价（可改）" '+
+        '<input class="prod-row-price" type="number" min="0" step="0.01" value="'+item.salePrice.toFixed(2)+'" title="'+t('beauty.no.actualSalePrice')+'" '+
           'oninput="saleItems['+i+'].salePrice=parseFloat(this.value)||0;renderPsRows()">'+
         '<div class="prod-row-sub-total" style="color:'+col+'">¥'+(sale).toFixed(2)+'<br><span style="font-size:10px">'+margin+'</span></div>'+
         '<button class="prod-row-del" onclick="saleItems.splice('+i+',1);renderPsRows()">✕</button>'+
@@ -1308,11 +1350,11 @@ function renderNewOrder(container){
   window.psAdd = function(){
     var sel = container.querySelector('#ps-pick');
     var qty = Math.max(1, parseInt(container.querySelector('#ps-qty').value)||1);
-    if(!_curPsOpt){ shake(sel, '请先选择产品'); return; }
+    if(!_curPsOpt){ shake(sel, t('beauty.no.selectProductFirst')); return; }
     var sp = parseFloat(container.querySelector('#ps-sale-price').value)||0;
     // 检查库存
     if(qty > _curPsOpt.stock){
-      if(!confirm('库存仅剩 '+_curPsOpt.stock+' '+_curPsOpt.stockUnit+'，确定继续？')) return;
+      if(!confirm(t('beauty.no.lowStockConfirm',{qty:_curPsOpt.stock, unit:_curPsOpt.stockUnit}))) return;
     }
     saleItems.push({ matId:_curPsOpt.matId, name:_curPsOpt.name, unitCost:_curPsOpt.unitCost, salePrice:sp, qty:qty });
     sel.value=''; container.querySelector('#ps-pick-preview').style.display='none';
@@ -1333,7 +1375,7 @@ function renderNewOrder(container){
       matId: opt.value,
       name: opt.dataset.name,
       unitCost: parseFloat(opt.dataset.cost)||0,
-      stockUnit: opt.dataset.unit||'个',
+      stockUnit: opt.dataset.unit||t('common.stockUnit'),
       stock: parseFloat(opt.dataset.stock)||0
     };
     var qty = parseFloat(container.querySelector('#gift-qty').value)||1;
@@ -1353,12 +1395,12 @@ function renderNewOrder(container){
       return '<div class="prod-row" style="background:#FFF8E1">'+
         '<div class="prod-row-info">'+
           '<div class="prod-row-name">🎁 '+item.name+'</div>'+
-          '<div class="prod-row-sub">成本¥'+item.unitCost.toFixed(2)+' × '+item.qty+' = ¥'+cost.toFixed(2)+'（计入变动成本）</div>'+
+          '<div class="prod-row-sub">'+t('beauty.no.giftRowSub',{cost:item.unitCost.toFixed(2), qty:item.qty, total:cost.toFixed(2)})+'</div>'+
         '</div>'+
         // 数量（可改）
-        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="数量" '+
+        '<input class="prod-row-qty" type="number" min="1" step="1" value="'+item.qty+'" title="'+t('beauty.no.qtyLbl')+'" '+
           'oninput="giftItems['+i+'].qty=Math.max(1,parseInt(this.value)||1);renderGiftRows()" style="border-color:#FFE082">'+
-        '<div class="prod-row-sub-total" style="color:var(--gold)">¥'+cost.toFixed(2)+'<br><span style="font-size:10px">赠品</span></div>'+
+        '<div class="prod-row-sub-total" style="color:var(--gold)">¥'+cost.toFixed(2)+'<br><span style="font-size:10px">'+t('beauty.no.giftTag')+'</span></div>'+
         '<button class="prod-row-del" onclick="giftItems.splice('+i+',1);renderGiftRows()">✕</button>'+
       '</div>';
     }).join('');
@@ -1371,9 +1413,9 @@ function renderNewOrder(container){
   window.giftAdd = function(){
     var sel = container.querySelector('#gift-pick');
     var qty = Math.max(1, parseInt(container.querySelector('#gift-qty').value)||1);
-    if(!_curGiftOpt){ shake(sel, '请先选择产品'); return; }
+    if(!_curGiftOpt){ shake(sel, t('beauty.no.selectProductFirst')); return; }
     if(qty > _curGiftOpt.stock){
-      if(!confirm('库存仅剩 '+_curGiftOpt.stock+' '+_curGiftOpt.stockUnit+'，确定继续？')) return;
+      if(!confirm(t('beauty.no.lowStockConfirm',{qty:_curGiftOpt.stock, unit:_curGiftOpt.stockUnit}))) return;
     }
     giftItems.push({ matId:_curGiftOpt.matId, name:_curGiftOpt.name, unitCost:_curGiftOpt.unitCost, qty:qty });
     sel.value=''; container.querySelector('#gift-pick-preview').style.display='none';
@@ -1393,12 +1435,12 @@ function renderNewOrder(container){
         var uc = Engine.getUsageCounts();
         var used = uc[m.matId]||0;
         var total = parseFloat(mat.usageCount)||1;
-        return ' (瓶内已用'+used+'/'+total+'次)';
+        return t('beauty.no.matUsageTip',{used:used, total:total});
       })() : '';
       return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--gray-card);border-radius:10px;padding:8px 10px">'+
-        '<input class="form-inp" style="flex:2;padding:7px 10px;font-size:13px" placeholder="耗材名称" value="'+m.name+'" oninput="window._om['+i+'].name=this.value">'+
-        '<input class="form-inp" style="flex:1;padding:7px 8px;font-size:12px" type="number" placeholder="单次¥" value="'+(m.unitCost||'')+'" oninput="window._om['+i+'].unitCost=parseFloat(this.value)||0;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()">'+
-        '<input class="form-inp" style="width:44px;padding:7px 4px;font-size:13px;text-align:center" type="number" step="1" min="1" placeholder="次" value="'+m.qty+'" oninput="window._om['+i+'].qty=parseFloat(this.value)||1;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()" title="使用次数'+usageTip+'">'+
+        '<input class="form-inp" style="flex:2;padding:7px 10px;font-size:13px" placeholder="'+t('beauty.no.matNamePlaceholder')+'" value="'+m.name+'" oninput="window._om['+i+'].name=this.value">'+
+        '<input class="form-inp" style="flex:1;padding:7px 8px;font-size:12px" type="number" placeholder="'+t('beauty.no.matUnitCostPlaceholder')+'" value="'+(m.unitCost||'')+'" oninput="window._om['+i+'].unitCost=parseFloat(this.value)||0;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()">'+
+        '<input class="form-inp" style="width:44px;padding:7px 4px;font-size:13px;text-align:center" type="number" step="1" min="1" placeholder="'+t('beauty.no.matUsageCountPlaceholder')+'" value="'+m.qty+'" oninput="window._om['+i+'].qty=parseFloat(this.value)||1;window._om['+i+'].subtotal=window._om['+i+'].unitCost*window._om['+i+'].qty;window._reRender()" title="'+t('beauty.no.matUsageTitleAttr',{tip:usageTip})+'">'+
         '<span style="font-size:12px;font-weight:800;color:var(--pink);min-width:40px;text-align:right">¥'+(m.unitCost*m.qty).toFixed(2)+'</span>'+
         '<button onclick="window._om.splice('+i+',1);window._reRender()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-3)">✕</button>'+
       '</div>';
@@ -1446,7 +1488,7 @@ function renderNewOrder(container){
     var pType=typeChip?typeChip.dataset.val:'lash';
     var rateKey=typeChip?typeChip.dataset.rateKey:'lashRate';
     var techSel=container.querySelector('#o-tech').value;
-    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel; });
+    var tech=Engine.getTechnicians().find(function(tc){ return tc.id==techSel; });
     var techRate=tech?(parseFloat(tech[rateKey])||0):0;
     return { pType:pType, techRate:techRate, rateKey:rateKey };
   }
@@ -1473,7 +1515,7 @@ function renderNewOrder(container){
     if(mtEl) mtEl.textContent='¥'+matTotal.toFixed(2);
 
     var pv=container.querySelector('#cost-preview');
-    if(!pv||face<=0){ if(pv) pv.innerHTML='<div style="color:var(--text-3);font-size:13px">填写售价后显示预览</div>'; return; }
+    if(!pv||face<=0){ if(pv) pv.innerHTML='<div style="color:var(--text-3);font-size:13px">'+t('beauty.no.costPreviewEmpty')+'</div>'; return; }
 
     function row(label,val,big,col){
       return '<div style="display:flex;justify-content:space-between;align-items:center;'+(big?'border-top:1px solid var(--border);padding-top:10px;margin-top:4px':'')+'">'+
@@ -1481,17 +1523,17 @@ function renderNewOrder(container){
         '<span style="font-size:'+(big?'16':'14')+'px;font-weight:'+(big?900:800)+';color:'+(col||'var(--text)')+'">'+val+'</span>'+
       '</div>';
     }
-    var html=row('券面价 / 售价','¥'+face.toFixed(2));
+    var html=row(t('beauty.no.previewFacePrice'),'¥'+face.toFixed(2));
     if(isOnline){
-      html+=row('  ↳ 平台佣金（'+commRate+'%）','-¥'+platformFee.toFixed(2));
-      html+=row('  ↳ 实收到账','¥'+actual.toFixed(2));
+      html+=row(t('beauty.no.previewPlatformComm',{rate:commRate}),'-¥'+platformFee.toFixed(2));
+      html+=row(t('beauty.no.previewActualReceived'),'¥'+actual.toFixed(2));
     }
-    html+=row('耗材成本','¥'+matTotal.toFixed(2));
-    html+=row('员工提成（'+tr.techRate+'%）','¥'+techCost.toFixed(2));
-    html+=row('变动成本合计','¥'+totalVC.toFixed(2),true);
-    html+=row('毛利润',(grossProfit>=0?'':'−')+'¥'+Math.abs(grossProfit).toFixed(2),true,grossProfit>=0?'var(--green)':'var(--red)');
+    html+=row(t('beauty.no.previewMatCost'),'¥'+matTotal.toFixed(2));
+    html+=row(t('beauty.no.previewTechComm',{rate:tr.techRate}),'¥'+techCost.toFixed(2));
+    html+=row(t('beauty.no.previewVCTotal'),'¥'+totalVC.toFixed(2),true);
+    html+=row(t('beauty.no.previewGrossProfit'),(grossProfit>=0?'':'−')+'¥'+Math.abs(grossProfit).toFixed(2),true,grossProfit>=0?'var(--green)':'var(--red)');
     var mc=margin>=50?'var(--green)':margin>=30?'var(--gold)':'var(--red)';
-    html+=row('毛利率',Engine.fmtMargin(margin),true,mc);
+    html+=row(t('beauty.no.previewMarginRate'),Engine.fmtMargin(margin),true,mc);
     pv.innerHTML=html;
   }
   window.noCalc=noCalc;
@@ -1512,8 +1554,8 @@ function renderNewOrder(container){
   window.noSubmit=function(){
     var name=container.querySelector('#o-name').value.trim();
     var face=parseFloat(container.querySelector('#o-face').value)||0;
-    if(!name) return shake(container.querySelector('#o-name'),'请填写项目名称');
-    if(!face) return shake(container.querySelector('#o-face'),'请填写售价');
+    if(!name) return shake(container.querySelector('#o-name'),t('beauty.no.errorProjectName'));
+    if(!face) return shake(container.querySelector('#o-face'),t('beauty.no.errorFacePrice'));
     var ch=container.querySelector('#o-channel').value, isOnline=ch!=='offline';
     var commRate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
     var actual=isOnline?face*(1-commRate/100):face;
@@ -1521,7 +1563,7 @@ function renderNewOrder(container){
     var baseMode=baseChip?baseChip.dataset.val:'face';
     var tr=getCurTechRate();
     var techSel2=container.querySelector('#o-tech').value;
-    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel2; });
+    var tech=Engine.getTechnicians().find(function(tc){ return tc.id==techSel2; });
     Engine.recordOrder({
       projectName:name, projectType:tr.pType,
       techId:techSel2, techName:tech?tech.name:'', techRate:tr.techRate,
@@ -1547,8 +1589,8 @@ function renderNewOrder(container){
   window.noSubmitAll=function(){
     var name=container.querySelector('#o-name').value.trim();
     var face=parseFloat(container.querySelector('#o-face').value)||0;
-    if(!name) return shake(container.querySelector('#o-name'),'请填写项目名称');
-    if(!face) return shake(container.querySelector('#o-face'),'请填写售价');
+    if(!name) return shake(container.querySelector('#o-name'),t('beauty.no.errorProjectName'));
+    if(!face) return shake(container.querySelector('#o-face'),t('beauty.no.errorFacePrice'));
     var ch=container.querySelector('#o-channel').value, isOnline=ch!=='offline';
     var commRate=parseFloat(container.querySelector('#o-comm')&&container.querySelector('#o-comm').value)||0;
     var actual=isOnline?face*(1-commRate/100):face;
@@ -1556,7 +1598,7 @@ function renderNewOrder(container){
     var baseMode=baseChip?baseChip.dataset.val:'face';
     var tr=getCurTechRate();
     var techSel3=container.querySelector('#o-tech').value;
-    var tech=Engine.getTechnicians().find(function(t){ return t.id==techSel3; });
+    var tech=Engine.getTechnicians().find(function(tc){ return tc.id==techSel3; });
     // 保存服务订单
     Engine.recordOrder({
       projectName:name, projectType:tr.pType,
@@ -1640,64 +1682,61 @@ function renderNewOrder(container){
 function renderOrders(container){
   var orders=Engine.getOrders();
   var pOrders=Engine.getProductOrders();
-  var chMap={ offline:'到店', meituan:'美团', douyin:'抖音' };
-  var typeLabel={ lash:'💜 美睫', nail:'💅 美甲', beauty:'🌿 美容', tattoo:'🖌 纹绣', medical:'💉 医美' };
+  var chMap={ offline:t('beauty.ord.chLabel.offline'), meituan:t('beauty.ord.chLabel.meituan'), douyin:t('beauty.ord.chLabel.douyin') };
+  var typeLabel={ lash:'💜 '+t('beauty.projectType.lash'), nail:'💅 '+t('beauty.projectType.nail'), beauty:'🌿 '+t('beauty.projectType.beauty'), tattoo:'🖌 '+t('beauty.projectType.tattoo'), medical:'💉 '+t('beauty.projectType.medical') };
   var typeCls  ={ lash:'tag-lash', nail:'tag-nail', beauty:'tag-beauty', tattoo:'tag-tattoo', medical:'tag-medical' };
 
   container.innerHTML='<div>'+
-    '<div class="page-title-bar">'+icon('clipboard',24,'var(--pink)')+'<span class="page-title-text">订单记录</span></div>'+
+    '<div class="page-title-bar">'+icon('clipboard',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.ord.pageTitle')+'</span></div>'+
     '<div class="rank-tab-row" style="margin-bottom:12px">'+
-      '<button class="rank-tab active" onclick="ordTabSwitch(\'service\',this)">服务订单</button>'+
-      '<button class="rank-tab" onclick="ordTabSwitch(\'product\',this)">产品/赠品</button>'+
+      '<button class="rank-tab active" onclick="ordTabSwitch(\'service\',this)">'+t('beauty.ord.tabService')+'</button>'+
+      '<button class="rank-tab" onclick="ordTabSwitch(\'product\',this)">'+t('beauty.ord.tabProduct')+'</button>'+
     '</div>'+
 
     '<div id="ord-service-block">'+
     '<div class="form-row" style="margin-bottom:12px;gap:8px">'+
       '<select id="f-ch" class="form-inp" onchange="filterOrders()" style="flex:1;padding:10px 12px">'+
-        '<option value="">全部渠道</option><option value="offline">到店</option><option value="meituan">美团</option><option value="douyin">抖音</option>'+
+        '<option value="">'+t('beauty.ord.filterAllChannel')+'</option><option value="offline">'+t('beauty.ord.chLabel.offline')+'</option><option value="meituan">'+t('beauty.ord.chLabel.meituan')+'</option><option value="douyin">'+t('beauty.ord.chLabel.douyin')+'</option>'+
       '</select>'+
       '<select id="f-type" class="form-inp" onchange="filterOrders()" style="flex:1;padding:10px 12px">'+
-        '<option value="">全部类别</option>'+
-        '<option value="lash">美睫</option><option value="nail">美甲</option>'+
-        '<option value="beauty">美容</option><option value="tattoo">纹绣</option><option value="medical">医美</option>'+
+        '<option value="">'+t('beauty.ord.filterAllType')+'</option>'+
+        '<option value="lash">'+t('beauty.projectType.lash')+'</option><option value="nail">'+t('beauty.projectType.nail')+'</option>'+
+        '<option value="beauty">'+t('beauty.projectType.beauty')+'</option><option value="tattoo">'+t('beauty.projectType.tattoo')+'</option><option value="medical">'+t('beauty.projectType.medical')+'</option>'+
       '</select>'+
     '</div>'+
-    '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
-      '共 <span id="o-count">'+orders.length+'</span> 单 · 平均毛利率 '+
-      '<span id="o-avg" style="color:var(--pink);font-weight:900">'+(orders.length?Engine.fmtMargin(orders.reduce(function(a,o){ return a+o.grossMargin; },0)/orders.length):'—')+'</span>'+
-    '</div>'+
+    '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:12px" id="ord-summary-text"></div>'+
     '<div class="order-list" id="o-list"></div>'+
     '</div>'+
 
     '<div id="ord-product-block" style="display:none">'+
     '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:12px">'+
-      '销售 <span style="color:var(--green);font-weight:900">'+pOrders.filter(function(p){ return p.type==='sale'; }).length+'</span> 笔 · '+
-      '赠品 <span style="color:var(--gold);font-weight:900">'+pOrders.filter(function(p){ return p.type==='gift'; }).length+'</span> 笔'+
+      t('beauty.ord.saleCount',{n:'<span style="color:var(--green);font-weight:900">'+pOrders.filter(function(p){ return p.type==='sale'; }).length+'</span>'})+' · '+
+      t('beauty.ord.giftCount',{n:'<span style="color:var(--gold);font-weight:900">'+pOrders.filter(function(p){ return p.type==='gift'; }).length+'</span>'})+
     '</div>'+
     '<div class="order-list">'+
       (pOrders.length?pOrders.map(function(o){
         var isSale=o.type==='sale';
         return '<div class="order-card '+(isSale?'type-sale':'type-gift')+'">'+
           '<div class="oc-header">'+
-            '<div><div class="oc-name">'+(isSale?'🛍 产品销售':'🎁 赠品发放')+(o.related?' · '+o.related:o.reason?' · '+o.reason:'')+'</div>'+
+            '<div><div class="oc-name">'+(isSale?t('beauty.ord.saleLabel'):t('beauty.ord.giftLabel'))+(o.related?' · '+o.related:o.reason?' · '+o.reason:'')+'</div>'+
             '<div class="oc-date">'+o.date+' · '+o.items.map(function(i){ return i.name+'×'+i.qty; }).join(' / ')+'</div></div>'+
-            '<div class="oc-margin '+(isSale?(o.grossMargin>=50?'good':o.grossMargin>=30?'warn':'bad'):'warn')+'">'+(isSale?Engine.fmtMargin(o.grossMargin):'赠品')+'</div>'+
+            '<div class="oc-margin '+(isSale?(o.grossMargin>=50?'good':o.grossMargin>=30?'warn':'bad'):'warn')+'">'+(isSale?Engine.fmtMargin(o.grossMargin):t('beauty.ord.giftBadge'))+'</div>'+
           '</div>'+
           '<div class="oc-meta">'+
-            '<span class="oc-tag '+(isSale?'tag-sale':'tag-gift')+'">'+(isSale?'零售':'赠品')+'</span>'+
+            '<span class="oc-tag '+(isSale?'tag-sale':'tag-gift')+'">'+(isSale?t('beauty.ord.retailTag'):t('beauty.ord.giftTag'))+'</span>'+
           '</div>'+
           '<div class="oc-costs">'+
             (isSale?
-              '<div class="oc-cost-item"><div class="oc-cost-lbl">销售额</div><div class="oc-cost-val">¥'+(parseFloat(o.totalAmount)||0).toFixed(2)+'</div></div>'+
-              '<div class="oc-cost-item"><div class="oc-cost-lbl">产品成本</div><div class="oc-cost-val">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
-              '<div class="oc-cost-item"><div class="oc-cost-lbl">毛利</div><div class="oc-cost-val" style="color:var(--green)">¥'+(parseFloat(o.grossProfit)||0).toFixed(2)+'</div></div>'
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.saleAmount')+'</div><div class="oc-cost-val">¥'+(parseFloat(o.totalAmount)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.productCost')+'</div><div class="oc-cost-val">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.grossProfit')+'</div><div class="oc-cost-val" style="color:var(--green)">¥'+(parseFloat(o.grossProfit)||0).toFixed(2)+'</div></div>'
               :
-              '<div class="oc-cost-item"><div class="oc-cost-lbl">赠品成本</div><div class="oc-cost-val" style="color:var(--gold)">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
-              '<div class="oc-cost-item"><div class="oc-cost-lbl">成本损耗</div><div class="oc-cost-val" style="color:var(--red)">-¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.giftCost')+'</div><div class="oc-cost-val" style="color:var(--gold)">¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'+
+              '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.costLoss')+'</div><div class="oc-cost-val" style="color:var(--red)">-¥'+(parseFloat(o.costTotal)||0).toFixed(2)+'</div></div>'
             )+
           '</div>'+
         '</div>';
-      }).join(''):'<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">暂无记录</div>')+
+      }).join(''):'<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">'+t('beauty.ord.emptyProduct')+'</div>')+
     '</div>'+
     '</div>'+
   '</div>';
@@ -1711,10 +1750,10 @@ function renderOrders(container){
   window.filterOrders=function(){
     var ch=container.querySelector('#f-ch').value, ty=container.querySelector('#f-type').value;
     var filtered=orders.filter(function(o){ return (!ch||o.channel===ch)&&(!ty||o.projectType===ty); });
-    container.querySelector('#o-count').textContent=filtered.length;
-    container.querySelector('#o-avg').textContent=filtered.length?Engine.fmtMargin(filtered.reduce(function(a,o){ return a+o.grossMargin; },0)/filtered.length):'—';
+    var avgMargin=filtered.length?Engine.fmtMargin(filtered.reduce(function(a,o){ return a+o.grossMargin; },0)/filtered.length):'—';
+    container.querySelector('#ord-summary-text').textContent=t('beauty.ord.summary',{count:filtered.length, margin:avgMargin});
     var el=container.querySelector('#o-list');
-    if(!filtered.length){ el.innerHTML='<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">暂无订单记录</div>'; return; }
+    if(!filtered.length){ el.innerHTML='<div style="text-align:center;color:var(--text-3);padding:40px;font-size:14px">'+t('beauty.ord.emptyOrders')+'</div>'; return; }
     el.innerHTML=filtered.map(function(o){
       var mc=o.grossMargin>=50?'good':o.grossMargin>=30?'warn':'bad';
       return '<div class="order-card">'+
@@ -1729,10 +1768,10 @@ function renderOrders(container){
           (o.note?'<span class="oc-tag" style="background:var(--gray-card);color:var(--text-3);border:1px solid var(--border)">'+o.note+'</span>':'')+
         '</div>'+
         '<div class="oc-costs">'+
-          '<div class="oc-cost-item"><div class="oc-cost-lbl">售价</div><div class="oc-cost-val">¥'+o.facePrice.toFixed(2)+'</div></div>'+
-          '<div class="oc-cost-item"><div class="oc-cost-lbl">耗材</div><div class="oc-cost-val">¥'+o.materialTotal.toFixed(2)+'</div></div>'+
-          '<div class="oc-cost-item"><div class="oc-cost-lbl">提成</div><div class="oc-cost-val">¥'+o.techCost.toFixed(2)+'</div></div>'+
-          '<div class="oc-cost-item"><div class="oc-cost-lbl">毛利</div><div class="oc-cost-val" style="color:'+(o.grossProfit>=0?'var(--green)':'var(--red)')+'">¥'+o.grossProfit.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.priceLbl')+'</div><div class="oc-cost-val">¥'+o.facePrice.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.materialLbl')+'</div><div class="oc-cost-val">¥'+o.materialTotal.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.commissionLbl')+'</div><div class="oc-cost-val">¥'+o.techCost.toFixed(2)+'</div></div>'+
+          '<div class="oc-cost-item"><div class="oc-cost-lbl">'+t('beauty.ord.grossProfit')+'</div><div class="oc-cost-val" style="color:'+(o.grossProfit>=0?'var(--green)':'var(--red)')+'">¥'+o.grossProfit.toFixed(2)+'</div></div>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -1768,57 +1807,57 @@ function renderRanking(container){
   var chData=Engine.getChannelRanking(),        chMax=chData.length?chData[0].revenue:1;
 
   container.innerHTML='<div>'+
-    '<div class="page-title-bar">'+icon('barChart',24,'var(--pink)')+'<span class="page-title-text">项目排行</span></div>'+
+    '<div class="page-title-bar">'+icon('barChart',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.rank.pageTitle')+'</span></div>'+
     '<div class="rank-tab-row">'+
-      '<button class="rank-tab active" onclick="rankTab(\'count\',this)">接单量</button>'+
-      '<button class="rank-tab" onclick="rankTab(\'profit\',this)">毛利价值</button>'+
-      '<button class="rank-tab" onclick="rankTab(\'tech\',this)">员工提成</button>'+
-      '<button class="rank-tab" onclick="rankTab(\'channel\',this)">销售渠道</button>'+
+      '<button class="rank-tab active" onclick="rankTab(\'count\',this)">'+t('beauty.rank.tabCount')+'</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'profit\',this)">'+t('beauty.rank.tabProfit')+'</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'tech\',this)">'+t('beauty.rank.tabTech')+'</button>'+
+      '<button class="rank-tab" onclick="rankTab(\'channel\',this)">'+t('beauty.rank.tabChannel')+'</button>'+
     '</div>'+
 
     '<div id="rank-count">'+
-      (cData.length?'<div class="rank-subtitle">累计接单数量榜</div>'+cData.map(function(item,i){
-        return card(item,i,item.count,cMax,item.count+'单',Engine.fmtMoney(item.revenue)+' 营收');
-      }).join(''):'<div class="rank-empty">还没有订单，快去接单吧！</div>')+
+      (cData.length?'<div class="rank-subtitle">'+t('beauty.rank.subtitleCount')+'</div>'+cData.map(function(item,i){
+        return card(item,i,item.count,cMax,t('beauty.rank.orderCount',{n:item.count}),t('beauty.rank.revenueLabel',{val:Engine.fmtMoney(item.revenue)}));
+      }).join(''):'<div class="rank-empty">'+t('beauty.rank.emptyCount')+'</div>')+
     '</div>'+
 
     '<div id="rank-profit" style="display:none">'+
-      (pData.length?'<div class="rank-subtitle">各项目累计毛利金额</div>'+pData.map(function(item,i){
+      (pData.length?'<div class="rank-subtitle">'+t('beauty.rank.subtitleProfit')+'</div>'+pData.map(function(item,i){
         var col=item.profit>=0?'var(--green)':'var(--red)';
-        return card(item,i,Math.max(item.profit,0),pMax,Engine.fmtMoney(item.profit),item.count+'单 · 营收'+Engine.fmtMoney(item.revenue),col);
-      }).join(''):'<div class="rank-empty">暂无数据</div>')+
+        return card(item,i,Math.max(item.profit,0),pMax,Engine.fmtMoney(item.profit),t('beauty.rank.profitSub',{n:item.count, val:Engine.fmtMoney(item.revenue)}),col);
+      }).join(''):'<div class="rank-empty">'+t('beauty.rank.emptyProfit')+'</div>')+
     '</div>'+
 
     '<div id="rank-tech" style="display:none">'+
-      (tData.length?'<div class="rank-subtitle">员工累计提成金额</div>'+tData.map(function(item,i){
-        return card({name:item.name},i,item.commission,tMax,Engine.fmtMoney(item.commission),item.count+'单 · 创收'+Engine.fmtMoney(item.revenue),'var(--purple)');
-      }).join(''):'<div class="rank-empty">暂无员工提成数据</div>')+
+      (tData.length?'<div class="rank-subtitle">'+t('beauty.rank.subtitleTech')+'</div>'+tData.map(function(item,i){
+        return card({name:item.name},i,item.commission,tMax,Engine.fmtMoney(item.commission),t('beauty.rank.techSub',{n:item.count, val:Engine.fmtMoney(item.revenue)}),'var(--purple)');
+      }).join(''):'<div class="rank-empty">'+t('beauty.rank.emptyTech')+'</div>')+
     '</div>'+
 
     '<div id="rank-channel" style="display:none">'+
-      (chData.length?'<div class="rank-subtitle">各渠道累计营收与单量</div>'+chData.map(function(item,i){
+      (chData.length?'<div class="rank-subtitle">'+t('beauty.rank.subtitleChannel')+'</div>'+chData.map(function(item,i){
         return '<div class="rank-card '+(i<3?'rank-top-'+(i+1):'')+'">'+
           '<div class="rc-medal" style="font-size:32px">'+item.emoji+'</div>'+
           '<div class="rc-body">'+
             '<div class="rc-name">'+item.name+'</div>'+
             '<div class="rc-bar-wrap"><div class="rc-bar" style="width:'+Math.max(4,Math.round(item.revenue/chMax*100))+'%;background:'+BAR[Math.min(i,4)]+'"></div></div>'+
-            '<div class="rc-sub">'+item.count+'单 · 毛利'+Engine.fmtMoney(item.profit)+'</div>'+
+            '<div class="rc-sub">'+t('beauty.rank.channelSub',{n:item.count, val:Engine.fmtMoney(item.profit)})+'</div>'+
           '</div>'+
           '<div style="text-align:right;min-width:72px">'+
             '<div style="font-size:16px;font-weight:900;color:var(--teal)">'+Engine.fmtMoney(item.revenue)+'</div>'+
             '<div style="font-size:11px;color:var(--text-3);font-weight:700;margin-top:2px">'+
-              (item.revenue>0?Engine.fmtMargin(item.profit/item.revenue*100)+' 毛利率':'—')+
+              (item.revenue>0?Engine.fmtMargin(item.profit/item.revenue*100)+t('beauty.rank.marginSuffix'):'—')+
             '</div>'+
           '</div>'+
         '</div>';
-      }).join(''):'<div class="rank-empty">暂无渠道数据</div>')+
+      }).join(''):'<div class="rank-empty">'+t('beauty.rank.emptyChannel')+'</div>')+
     '</div>'+
   '</div>';
 
   window.rankTab=function(tab,btn){
     container.querySelectorAll('.rank-tab').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active');
-    ['count','profit','tech','channel'].forEach(function(t){
-      container.querySelector('#rank-'+t).style.display=t===tab?'':'none';
+    ['count','profit','tech','channel'].forEach(function(tabName){
+      container.querySelector('#rank-'+tabName).style.display=tabName===tab?'':'none';
     });
   };
 }
@@ -1837,105 +1876,105 @@ function renderMaterials(container){
     var catOptionsHtml=cats.map(function(c){ return '<option>'+c+'</option>'; }).join('');
 
     container.innerHTML='<div>'+
-      '<div class="page-title-bar">'+icon('package',24,'var(--pink)')+'<span class="page-title-text">库存管理</span></div>'+
+      '<div class="page-title-bar">'+icon('package',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.mat.pageTitle')+'</span></div>'+
 
       '<div class="inv-summary-grid">'+
         '<div class="inv-sum-card purchase">'+
-          '<div class="inv-sum-lbl">📦 库存进货价值</div>'+
+          '<div class="inv-sum-lbl">'+t('beauty.mat.purchaseValueLbl')+'</div>'+
           '<div class="inv-sum-val">'+Engine.fmtMoney(inv.purchaseTotal)+'</div>'+
-          '<div class="inv-sum-sub">单瓶/盒进价×库存量·共'+mats.length+'种</div>'+
+          '<div class="inv-sum-sub">'+t('beauty.mat.purchaseValueSub',{n:mats.length})+'</div>'+
         '</div>'+
         '<div class="inv-sum-card resale">'+
-          '<div class="inv-sum-lbl">💰 可销售零售价值</div>'+
+          '<div class="inv-sum-lbl">'+t('beauty.mat.resaleValueLbl')+'</div>'+
           '<div class="inv-sum-val">'+Engine.fmtMoney(inv.resaleTotal)+'</div>'+
-          '<div class="inv-sum-sub">按零售价·'+inv.productCount+'种产品</div>'+
+          '<div class="inv-sum-sub">'+t('beauty.mat.resaleValueSub',{n:inv.productCount})+'</div>'+
         '</div>'+
       '</div>'+
 
       '<div class="form-card">'+
-        '<div class="section-label">耗材分类管理</div>'+
-        '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:10px">点击标签上的 × 可删除，未被使用的类别才能删除</div>'+
+        '<div class="section-label">'+t('beauty.mat.catManageTitle')+'</div>'+
+        '<div style="font-size:12px;color:var(--text-3);font-weight:700;margin-bottom:10px">'+t('beauty.mat.catManageHint')+'</div>'+
         '<div id="cat-chips-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
           cats.map(function(c){
             var inUse=mats.some(function(m){ return m.category===c; });
             return '<span style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;border:2px solid var(--border);background:#fff;font-size:12px;font-weight:800;color:var(--text-2)">'+
               c+
-              '<button onclick="catDel(\''+c+'\')" style="background:none;border:none;cursor:'+(inUse?'not-allowed':'pointer')+';font-size:13px;color:'+(inUse?'#CCC':'var(--red)')+';padding:0;line-height:1" title="'+(inUse?'该类别有耗材，无法删除':'删除')+'">×</button>'+
+              '<button onclick="catDel(\''+c+'\')" style="background:none;border:none;cursor:'+(inUse?'not-allowed':'pointer')+';font-size:13px;color:'+(inUse?'#CCC':'var(--red)')+';padding:0;line-height:1" title="'+(inUse?t('beauty.mat.catDeleteBlocked'):t('beauty.mat.catDeleteOk'))+'">×</button>'+
             '</span>';
           }).join('')+
         '</div>'+
         '<div style="display:flex;gap:8px">'+
-          '<input id="new-cat-inp" class="form-inp" type="text" placeholder="输入新类别名称…" style="flex:1">'+
-          '<button onclick="catAdd()" style="padding:10px 16px;background:var(--pink);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;font-family:inherit">＋ 添加</button>'+
+          '<input id="new-cat-inp" class="form-inp" type="text" placeholder="'+t('beauty.mat.newCatPlaceholder')+'" style="flex:1">'+
+          '<button onclick="catAdd()" style="padding:10px 16px;background:var(--pink);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;font-family:inherit">'+t('beauty.mat.catAddBtn')+'</button>'+
         '</div>'+
-        '<div class="form-success hidden" id="cat-succ">✅ 类别已更新！</div>'+
+        '<div class="form-success hidden" id="cat-succ">'+t('beauty.mat.catUpdated')+'</div>'+
       '</div>'+
 
       '<div class="form-card">'+
-        '<div class="section-label">添加耗材 / 产品</div>'+
+        '<div class="section-label">'+t('beauty.mat.addTitle')+'</div>'+
 
         // ── 💡 行业耗材使用次数参考 Tip ──
         '<div id="tip-box" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:2px solid #FFE082;border-radius:14px;padding:12px 14px;margin-bottom:14px">'+
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
-            '<span style="font-size:13px;font-weight:900;color:#B8860B">💡 耗材可用次数参考</span>'+
-            '<button onclick="tipToggle()" id="tip-toggle-btn" style="background:none;border:none;font-size:12px;font-weight:800;color:#B8860B;cursor:pointer;font-family:inherit">收起 ▲</button>'+
+            '<span style="font-size:13px;font-weight:900;color:#B8860B">'+t('beauty.mat.tipTitle')+'</span>'+
+            '<button onclick="tipToggle()" id="tip-toggle-btn" style="background:none;border:none;font-size:12px;font-weight:800;color:#B8860B;cursor:pointer;font-family:inherit">'+t('beauty.mat.tipCollapse')+'</button>'+
           '</div>'+
           '<div id="tip-content">'+
             // 行业切换 tab
             '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="tip-tabs">'+
-              '<button class="tip-tab-btn active" onclick="tipTab(\'nail\',this)">💅 美甲</button>'+
-              '<button class="tip-tab-btn" onclick="tipTab(\'lash\',this)">💜 美睫</button>'+
-              '<button class="tip-tab-btn" onclick="tipTab(\'beauty\',this)">🌿 美容</button>'+
-              '<button class="tip-tab-btn" onclick="tipTab(\'tattoo\',this)">🖌 纹绣</button>'+
-              '<button class="tip-tab-btn" onclick="tipTab(\'medical\',this)">💉 医美</button>'+
+              '<button class="tip-tab-btn active" onclick="tipTab(\'nail\',this)">'+t('beauty.mat.tabNail')+'</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'lash\',this)">'+t('beauty.mat.tabLash')+'</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'beauty\',this)">'+t('beauty.mat.tabBeautyCat')+'</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'tattoo\',this)">'+t('beauty.mat.tabTattoo')+'</button>'+
+              '<button class="tip-tab-btn" onclick="tipTab(\'medical\',this)">'+t('beauty.mat.tabMedical')+'</button>'+
             '</div>'+
             '<div id="tip-body"></div>'+
           '</div>'+
         '</div>'+
 
         '<div class="form-row">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">名称 *</label>'+
-            '<input id="m-name" class="form-inp" type="text" placeholder="如：玻尿酸原液"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">类别</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.nameLbl')+'</label>'+
+            '<input id="m-name" class="form-inp" type="text" placeholder="'+t('beauty.mat.namePlaceholder')+'"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.catLbl')+'</label>'+
             '<select id="m-cat" class="form-inp">'+catOptionsHtml+'</select></div>'+
         '</div>'+
         '<div style="height:10px"></div>'+
         '<div class="form-row">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单瓶/盒进价 (¥) *</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.priceLbl')+'</label>'+
             '<input id="m-price" class="form-inp" type="number" step="0.01" min="0" placeholder="80" oninput="mPreview()"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">可用次数 *</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.usageLbl')+'</label>'+
             '<input id="m-usage" class="form-inp" type="number" step="1" min="1" placeholder="40" oninput="mPreview()"></div>'+
         '</div>'+
         '<div class="form-row" style="margin-top:10px">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">当前库存数量（瓶/盒）</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.stockQtyLbl')+'</label>'+
             '<input id="m-stock" class="form-inp" type="number" step="1" min="0" placeholder="10"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">单位</label>'+
-            '<input id="m-unit" class="form-inp" type="text" placeholder="瓶/盒/支/ml…"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.mat.unitLbl')+'</label>'+
+            '<input id="m-unit" class="form-inp" type="text" placeholder="'+t('beauty.mat.unitPlaceholder')+'"></div>'+
         '</div>'+
         '<div style="margin-top:12px;display:flex;align-items:center;gap:10px">'+
           '<input type="checkbox" id="m-is-product" style="width:18px;height:18px;accent-color:var(--green)" onchange="mProdToggle()">'+
-          '<label for="m-is-product" style="font-size:14px;font-weight:800;color:var(--text)">✅ 这是可零售产品</label>'+
+          '<label for="m-is-product" style="font-size:14px;font-weight:800;color:var(--text)">'+t('beauty.mat.isProductLbl')+'</label>'+
         '</div>'+
         '<div id="m-prod-extra" style="display:none;margin-top:10px">'+
-          '<label class="form-lbl">零售售价 (¥) *</label>'+
+          '<label class="form-lbl">'+t('beauty.mat.retailPriceLbl')+'</label>'+
           '<input id="m-sale-price" class="form-inp" type="number" step="0.01" min="0" placeholder="128" oninput="mPreview()">'+
           '<div class="margin-preview hidden" id="m-profit-prev" style="margin-top:8px">'+
-            '<span class="mp-label">产品毛利率</span><span class="mp-unit" id="m-prod-margin">—</span>'+
+            '<span class="mp-label">'+t('beauty.mat.productMarginLbl')+'</span><span class="mp-unit" id="m-prod-margin">—</span>'+
           '</div>'+
         '</div>'+
         '<div class="margin-preview hidden" id="m-prev" style="margin-top:10px">'+
-          '<span class="mp-label">单次成本</span><span class="mp-unit" id="m-uc">¥—</span>'+
+          '<span class="mp-label">'+t('beauty.mat.unitCostLbl')+'</span><span class="mp-unit" id="m-uc">¥—</span>'+
           '<span style="font-size:12px;color:var(--text-3);font-weight:700" id="m-note"></span>'+
           '<span style="font-size:11px;color:var(--text-3);font-weight:700" id="m-stock-value"></span>'+
         '</div>'+
         '<div style="height:12px"></div>'+
-        '<button class="form-submit" onclick="mSubmit()">'+icon('plus',18,'#fff')+' 添加</button>'+
-        '<div class="form-success hidden" id="m-succ">✅ 已添加！</div>'+
+        '<button class="form-submit" onclick="mSubmit()">'+icon('plus',18,'#fff')+' '+t('beauty.mat.addBtn')+'</button>'+
+        '<div class="form-success hidden" id="m-succ">'+t('beauty.mat.addedOk')+'</div>'+
       '</div>'+
 
       '<div class="rank-tab-row" id="mat-tab-row" style="margin-top:4px">'+
-        '<button class="rank-tab active" onclick="matTabSwitch(\'mat\',this)">🧴 耗材 ('+onlyMats.length+')</button>'+
-        '<button class="rank-tab" onclick="matTabSwitch(\'prod\',this)">🛍 产品 ('+onlyProds.length+')</button>'+
+        '<button class="rank-tab active" onclick="matTabSwitch(\'mat\',this)">'+t('beauty.mat.tabMat',{n:onlyMats.length})+'</button>'+
+        '<button class="rank-tab" onclick="matTabSwitch(\'prod\',this)">'+t('beauty.mat.tabProd',{n:onlyProds.length})+'</button>'+
       '</div>'+
 
       '<div id="mat-list-mat">'+
@@ -1949,18 +1988,18 @@ function renderMaterials(container){
             var stockValue = usedInBottle > 0
                ? (s - 1) * totalPrice + (totalPrice - unitCost * usedInBottle)
                : s * totalPrice;
-            var bottleInfo=usedInBottle>0?(' 本瓶已用'+usedInBottle+'/'+usageCount+'次'):'';
+            var bottleInfo=usedInBottle>0?t('beauty.mat.bottleUsedInfo',{used:usedInBottle, total:usageCount}):'';
             return '<div class="mat-card">'+
               '<button class="mat-del" onclick="mDel(\''+m.id+'\')">✕</button>'+
               '<div class="mat-name">'+m.name+'</div>'+
-              '<div class="mat-detail">'+m.category+' · ¥'+totalPrice+'/'+usageCount+'次</div>'+
-              '<div class="mat-unit-cost">¥'+m.unitCost.toFixed(2)+'<span> /次</span></div>'+
-              '<span class="mat-stock-badge '+sc+'">库存: '+s+(m.stockUnit||'')+(bottleInfo?('<br><span style="font-size:9px">'+bottleInfo+'</span>'):'')+
+              '<div class="mat-detail">'+m.category+' · ¥'+totalPrice+'/'+usageCount+t('common.stockUnit')+'</div>'+
+              '<div class="mat-unit-cost">¥'+m.unitCost.toFixed(2)+'<span>'+t('beauty.mat.unitCostPerUse')+'</span></div>'+
+              '<span class="mat-stock-badge '+sc+'">'+t('beauty.mat.stockLbl',{qty:s,unit:(m.stockUnit||'')})+(bottleInfo?('<br><span style="font-size:9px">'+bottleInfo+'</span>'):'')+
               '</span>'+
-              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">库存价值: ¥'+stockValue.toFixed(2)+'</div>'+
+              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">'+t('beauty.mat.stockValueLbl',{val:stockValue.toFixed(2)})+'</div>'+
             '</div>';
           }).join('')+'</div>'
-          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无耗材</div>'
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">'+t('beauty.mat.emptyMat')+'</div>'
         )+
       '</div>'+
 
@@ -1974,15 +2013,15 @@ function renderMaterials(container){
             return '<div class="mat-card">'+
               '<button class="mat-del" onclick="mDel(\''+m.id+'\')">✕</button>'+
               '<div class="mat-name">'+m.name+'</div>'+
-              '<div class="mat-detail">进价¥'+totalPrice+'  售价¥'+(m.salePrice||'—')+'</div>'+
+              '<div class="mat-detail">'+t('common.costPriceLabel')+'¥'+totalPrice+'  '+t('inventory.colSale')+'¥'+(m.salePrice||'—')+'</div>'+
               '<div class="mat-unit-cost">'+
-                (margin!==null?'<span style="font-size:12px;font-weight:900;color:'+(margin>=50?'var(--green)':margin>=30?'var(--gold)':'var(--red)')+'">毛利率 '+Engine.fmtMargin(margin)+'</span>':'')+
+                (margin!==null?'<span style="font-size:12px;font-weight:900;color:'+(margin>=50?'var(--green)':margin>=30?'var(--gold)':'var(--red)')+'">'+t('beauty.mat.marginRatePrefix')+Engine.fmtMargin(margin)+'</span>':'')+
               '</div>'+
-              '<span class="mat-stock-badge '+sc+'">库存: '+s+(m.stockUnit||'')+'</span>'+
-              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">进货价值: ¥'+stockValue.toFixed(2)+'</div>'+
+              '<span class="mat-stock-badge '+sc+'">'+t('beauty.mat.stockLbl',{qty:s,unit:(m.stockUnit||'')})+'</span>'+
+              '<div style="font-size:10px;color:var(--pink);font-weight:800;margin-top:4px">'+t('beauty.mat.purchaseValueItemLbl',{val:stockValue.toFixed(2)})+'</div>'+
             '</div>';
           }).join('')+'</div>'
-          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无可零售产品</div>'
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">'+t('beauty.mat.emptyProd')+'</div>'
         )+
       '</div>'+
     '</div>';
@@ -1990,58 +2029,58 @@ function renderMaterials(container){
     // ── 💡 Tip 数据 & 交互（必须在 innerHTML 之后、事件绑定之前挂载）──
     var TIP_DATA = {
       nail: [
-        { name:'底胶 15ml',         val:'300–350次' },
-        { name:'颜色胶 15ml',        val:'100–130次' },
-        { name:'封层 15ml',          val:'300–350次' },
-        { name:'卸甲水/锡纸套装',    val:'80–120次' },
-        { name:'酒精/清洁液 500ml',  val:'400–600次' },
-        { name:'砂条/锉条（盒装）',  val:'50–80次/支' },
-        { name:'甲油胶延长液 30ml',  val:'80–100次' },
-        { name:'光疗树脂 10g',       val:'60–80次' },
-        { name:'钻饰/贴纸（包）',    val:'30–50次' },
+        { name:t('beauty.tip.nail.1.name'), val:t('beauty.tip.nail.1.val') },
+        { name:t('beauty.tip.nail.2.name'), val:t('beauty.tip.nail.2.val') },
+        { name:t('beauty.tip.nail.3.name'), val:t('beauty.tip.nail.3.val') },
+        { name:t('beauty.tip.nail.4.name'), val:t('beauty.tip.nail.4.val') },
+        { name:t('beauty.tip.nail.5.name'), val:t('beauty.tip.nail.5.val') },
+        { name:t('beauty.tip.nail.6.name'), val:t('beauty.tip.nail.6.val') },
+        { name:t('beauty.tip.nail.7.name'), val:t('beauty.tip.nail.7.val') },
+        { name:t('beauty.tip.nail.8.name'), val:t('beauty.tip.nail.8.val') },
+        { name:t('beauty.tip.nail.9.name'), val:t('beauty.tip.nail.9.val') },
       ],
       lash: [
-        { name:'单根嫁接睫毛 12排装', val:'10–15次' },
-        { name:'单根嫁接睫毛 16排装', val:'15–20次' },
-        { name:'三叶草/YY 12排装',    val:'8–12次' },
-        { name:'漫画睫毛套装',         val:'3–6次' },
-        { name:'嫁接胶水 5ml',         val:'60–80次' },
-        { name:'除胶剂 15ml',          val:'80–100次' },
-        { name:'睫毛梳/镊子（套）',   val:'长期使用' },
-        { name:'眼膜/防护贴片（盒）', val:'50–80次' },
-        { name:'底膜/隔离液 10ml',     val:'60–80次' },
+        { name:t('beauty.tip.lash.1.name'), val:t('beauty.tip.lash.1.val') },
+        { name:t('beauty.tip.lash.2.name'), val:t('beauty.tip.lash.2.val') },
+        { name:t('beauty.tip.lash.3.name'), val:t('beauty.tip.lash.3.val') },
+        { name:t('beauty.tip.lash.4.name'), val:t('beauty.tip.lash.4.val') },
+        { name:t('beauty.tip.lash.5.name'), val:t('beauty.tip.lash.5.val') },
+        { name:t('beauty.tip.lash.6.name'), val:t('beauty.tip.lash.6.val') },
+        { name:t('beauty.tip.lash.7.name'), val:t('beauty.tip.lash.7.val') },
+        { name:t('beauty.tip.lash.8.name'), val:t('beauty.tip.lash.8.val') },
+        { name:t('beauty.tip.lash.9.name'), val:t('beauty.tip.lash.9.val') },
       ],
       beauty: [
-        { name:'玻尿酸原液 30ml',      val:'60–80次' },
-        { name:'精华液 50ml',           val:'80–100次' },
-        { name:'面膜（箱/30片）',       val:'30次' },
-        { name:'按摩霜/膏 500ml',       val:'100–150次' },
-        { name:'导入营养液 100ml',      val:'80–120次' },
-        { name:'清洁凝胶/洁面 200ml',  val:'60–80次' },
-        { name:'纳米微针（盒/10片）',  val:'10次' },
-        { name:'超声波耦合剂 500ml',   val:'150–200次' },
-        { name:'酒精棉片（包/100片）', val:'100次' },
+        { name:t('beauty.tip.beauty.1.name'), val:t('beauty.tip.beauty.1.val') },
+        { name:t('beauty.tip.beauty.2.name'), val:t('beauty.tip.beauty.2.val') },
+        { name:t('beauty.tip.beauty.3.name'), val:t('beauty.tip.beauty.3.val') },
+        { name:t('beauty.tip.beauty.4.name'), val:t('beauty.tip.beauty.4.val') },
+        { name:t('beauty.tip.beauty.5.name'), val:t('beauty.tip.beauty.5.val') },
+        { name:t('beauty.tip.beauty.6.name'), val:t('beauty.tip.beauty.6.val') },
+        { name:t('beauty.tip.beauty.7.name'), val:t('beauty.tip.beauty.7.val') },
+        { name:t('beauty.tip.beauty.8.name'), val:t('beauty.tip.beauty.8.val') },
+        { name:t('beauty.tip.beauty.9.name'), val:t('beauty.tip.beauty.9.val') },
       ],
       tattoo: [
-        { name:'纹绣色料（瓶/5ml）',  val:'40–60次' },
-        { name:'麻药膏 10g',           val:'15–20次' },
-        { name:'定妆液 30ml',          val:'80–100次' },
-        { name:'纹绣针头（盒/20支）', val:'20次（一次性）' },
-        { name:'纹绣纸巾/棉签（包）', val:'50–80次' },
-        { name:'保鲜膜（卷）',         val:'200–300次' },
-        { name:'修复霜 15g',           val:'30–50次' },
-        { name:'隐形眉卡（套）',       val:'长期使用' },
+        { name:t('beauty.tip.tattoo.1.name'), val:t('beauty.tip.tattoo.1.val') },
+        { name:t('beauty.tip.tattoo.2.name'), val:t('beauty.tip.tattoo.2.val') },
+        { name:t('beauty.tip.tattoo.3.name'), val:t('beauty.tip.tattoo.3.val') },
+        { name:t('beauty.tip.tattoo.4.name'), val:t('beauty.tip.tattoo.4.val') },
+        { name:t('beauty.tip.tattoo.5.name'), val:t('beauty.tip.tattoo.5.val') },
+        { name:t('beauty.tip.tattoo.6.name'), val:t('beauty.tip.tattoo.6.val') },
+        { name:t('beauty.tip.tattoo.7.name'), val:t('beauty.tip.tattoo.7.val') },
+        { name:t('beauty.tip.tattoo.8.name'), val:t('beauty.tip.tattoo.8.val') },
       ],
       medical: [
-        { name:'水光针液 2ml/支',        val:'1次（一次性）' },
-        { name:'肉毒素（瓶/100u）',      val:'4–6次（按部位）' },
-        { name:'填充剂/玻尿酸 1ml',      val:'1次（一次性）' },
-        { name:'注射针头（盒/100支）',   val:'100次（一次性）' },
-        { name:'利多卡因麻药 10ml',      val:'5–8次' },
-        { name:'碘伏棉球（包）',         val:'50次' },
-        { name:'无菌手套（盒/100只）',  val:'50次' },
-        { name:'光子仪耦合剂 500ml',     val:'100–150次' },
-        { name:'医用冷敷贴（盒/10片）', val:'10次' },
+        { name:t('beauty.tip.medical.1.name'), val:t('beauty.tip.medical.1.val') },
+        { name:t('beauty.tip.medical.2.name'), val:t('beauty.tip.medical.2.val') },
+        { name:t('beauty.tip.medical.3.name'), val:t('beauty.tip.medical.3.val') },
+        { name:t('beauty.tip.medical.4.name'), val:t('beauty.tip.medical.4.val') },
+        { name:t('beauty.tip.medical.5.name'), val:t('beauty.tip.medical.5.val') },
+        { name:t('beauty.tip.medical.6.name'), val:t('beauty.tip.medical.6.val') },
+        { name:t('beauty.tip.medical.7.name'), val:t('beauty.tip.medical.7.val') },
+        { name:t('beauty.tip.medical.8.name'), val:t('beauty.tip.medical.8.val') },
+        { name:t('beauty.tip.medical.9.name'), val:t('beauty.tip.medical.9.val') },
       ],
     };
     var _tipOpen = true;
@@ -2063,7 +2102,7 @@ function renderMaterials(container){
       _tipOpen = !_tipOpen;
       var btn = container.querySelector('#tip-toggle-btn');
       var content = container.querySelector('#tip-content');
-      if(btn) btn.textContent = _tipOpen ? '收起 ▲' : '展开 ▼';
+      if(btn) btn.textContent = _tipOpen ? t('beauty.mat.tipCollapse') : t('beauty.mat.tipExpand');
       if(content) content.style.display = _tipOpen ? '' : 'none';
     };
     window.tipTab = function(tab, btn){
@@ -2078,7 +2117,7 @@ function renderMaterials(container){
     window.catAdd=function(){
       var inp=container.querySelector('#new-cat-inp');
       var name=inp.value.trim();
-      if(!name) return shake(inp,'请输入类别名称');
+      if(!name) return shake(inp,t('beauty.mat.enterCatName'));
       Engine.addMatCategory(name);
       inp.value='';
       var s=container.querySelector('#cat-succ'); s.classList.remove('hidden'); setTimeout(function(){ s.classList.add('hidden'); },1500);
@@ -2086,8 +2125,8 @@ function renderMaterials(container){
     };
     window.catDel=function(name){
       var inUse=Engine.getMaterials().some(function(m){ return m.category===name; });
-      if(inUse){ alert('该类别下还有耗材，请先删除或更改耗材类别后再删除此类别'); return; }
-      if(!confirm('确定删除「'+name+'」分类？')) return;
+      if(inUse){ alert(t('beauty.mat.catInUseAlert')); return; }
+      if(!confirm(t('beauty.mat.confirmDeleteCat',{name:name}))) return;
       Engine.deleteMatCategory(name); draw();
     };
     window.matTabSwitch=function(tab,btn){
@@ -2107,10 +2146,10 @@ function renderMaterials(container){
       var pv=container.querySelector('#m-prev');
       if(p>0&&u>0){
         pv.classList.remove('hidden');
-        container.querySelector('#m-uc').textContent='¥'+(p/u).toFixed(2)+' / 次';
-        container.querySelector('#m-note').textContent='¥'+p+' ÷ '+u+'次';
+        container.querySelector('#m-uc').textContent='¥'+(p/u).toFixed(2)+t('beauty.mat.unitCostPerUse');
+        container.querySelector('#m-note').textContent='¥'+p+' ÷ '+u+t('common.stockUnit');
         var sv=container.querySelector('#m-stock-value');
-        if(sv&&st>0) sv.textContent='  库存价值: ¥'+(p*st).toFixed(2);
+        if(sv&&st>0) sv.textContent='  '+t('beauty.mat.stockValueLbl',{val:(p*st).toFixed(2)});
         else if(sv) sv.textContent='';
       } else pv.classList.add('hidden');
       var isProd=container.querySelector('#m-is-product').checked;
@@ -2133,9 +2172,9 @@ function renderMaterials(container){
       var unit =container.querySelector('#m-unit').value.trim();
       var isProd=container.querySelector('#m-is-product').checked;
       var salePrice=isProd?parseFloat(container.querySelector('#m-sale-price').value)||0:0;
-      if(!name)  return shake(container.querySelector('#m-name'),'请填写名称');
-      if(!price) return shake(container.querySelector('#m-price'),'请填写总价');
-      if(!usage) return shake(container.querySelector('#m-usage'),'请填写次数');
+      if(!name)  return shake(container.querySelector('#m-name'),t('beauty.mat.enterName'));
+      if(!price) return shake(container.querySelector('#m-price'),t('beauty.mat.enterPrice'));
+      if(!usage) return shake(container.querySelector('#m-usage'),t('beauty.mat.enterUsage'));
       Engine.addMaterial({ name:name, category:cat, totalPrice:price, usageCount:usage, stock:stock, stockUnit:unit, isProduct:isProd, salePrice:salePrice });
       // 新进耗材扣减现金
       var cost = (parseFloat(container.querySelector('#m-price').value)||0) *
@@ -2147,7 +2186,7 @@ function renderMaterials(container){
       draw();
     };
     window.mDel=function(id){
-      if(!confirm('确定删除？')) return; Engine.deleteMaterial(id); draw();
+      if(!confirm(t('beauty.mat.confirmDelete'))) return; Engine.deleteMaterial(id); draw();
     };
   }
   draw();
@@ -2161,49 +2200,49 @@ function renderTechnicians(container){
   function draw(){
     var list=Engine.getTechnicians();
     container.innerHTML='<div>'+
-      '<div class="page-title-bar">'+icon('users',24,'var(--pink)')+'<span class="page-title-text">员工档案</span></div>'+
-      '<div class="form-subtitle">为每位员工设置各项目提成比例</div>'+
+      '<div class="page-title-bar">'+icon('users',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.staff.pageTitle')+'</span></div>'+
+      '<div class="form-subtitle">'+t('beauty.staff.subtitle')+'</div>'+
       '<div class="form-card">'+
-        '<div class="form-group"><label class="form-lbl">员工姓名 *</label>'+
-          '<input id="t-name" class="form-inp" type="text" placeholder="小王"></div>'+
+        '<div class="form-group"><label class="form-lbl">'+t('beauty.staff.nameLbl')+'</label>'+
+          '<input id="t-name" class="form-inp" type="text" placeholder="'+t('beauty.staff.namePlaceholder')+'"></div>'+
         '<div class="form-row">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美睫提成%</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.staff.lashRate')+'</label>'+
             '<input id="t-lash" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="30"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美甲提成%</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.staff.nailRate')+'</label>'+
             '<input id="t-nail" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="25"></div>'+
         '</div>'+
         '<div class="form-row" style="margin-top:10px">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">美容提成%</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.staff.beautyRate')+'</label>'+
             '<input id="t-beauty" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="35"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">纹绣提成%</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.staff.tattooRate')+'</label>'+
             '<input id="t-tattoo" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="30"></div>'+
         '</div>'+
         '<div class="form-row" style="margin-top:10px">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">医美提成%</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.staff.medicalRate')+'</label>'+
             '<input id="t-medical" class="form-inp" type="number" min="0" max="100" step="0.5" placeholder="20"></div>'+
           '<div class="form-group half" style="margin-bottom:0"></div>'+
         '</div>'+
         '<div style="height:12px"></div>'+
-        '<button class="form-submit" onclick="tSubmit()">'+icon('plus',18,'#fff')+' 添加员工</button>'+
-        '<div class="form-success hidden" id="t-succ">✅ 员工已添加！</div>'+
+        '<button class="form-submit" onclick="tSubmit()">'+icon('plus',18,'#fff')+' '+t('beauty.staff.addBtn')+'</button>'+
+        '<div class="form-success hidden" id="t-succ">'+t('beauty.staff.addedOk')+'</div>'+
       '</div>'+
-      '<div class="section-label">员工团队（'+list.length+'人）</div>'+
+      '<div class="section-label">'+t('beauty.staff.teamTitle',{n:list.length})+'</div>'+
       '<div class="tech-list">'+
         (list.length
-          ?list.map(function(t,i){ return '<div class="tech-card">'+
+          ?list.map(function(tc,i){ return '<div class="tech-card">'+
               '<div class="tech-avatar">'+AVATARS[i%AVATARS.length]+'</div>'+
-              '<div class="tech-info"><div class="tech-name">'+t.name+'</div>'+
-                '<div class="tech-rates">美睫 '+t.lashRate+'% · 美甲 '+t.nailRate+'% · 美容 '+(t.beautyRate||0)+'% · 纹绣 '+(t.tattooRate||0)+'% · 医美 '+(t.medicalRate||0)+'%</div></div>'+
-              '<button class="tech-del" onclick="tDel(\''+t.id+'\')">🗑</button>'+
+              '<div class="tech-info"><div class="tech-name">'+tc.name+'</div>'+
+                '<div class="tech-rates">'+t('beauty.staff.rates',{lash:tc.lashRate, nail:tc.nailRate, beauty:(tc.beautyRate||0), tattoo:(tc.tattooRate||0), medical:(tc.medicalRate||0)})+'</div></div>'+
+              '<button class="tech-del" onclick="tDel(\''+tc.id+'\')">🗑</button>'+
             '</div>'; }).join('')
-          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无员工档案</div>'
+          :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">'+t('beauty.staff.empty')+'</div>'
         )+
       '</div>'+
     '</div>';
 
     window.tSubmit=function(){
       var name=container.querySelector('#t-name').value.trim();
-      if(!name) return shake(container.querySelector('#t-name'),'请填写员工姓名');
+      if(!name) return shake(container.querySelector('#t-name'),t('beauty.staff.enterName'));
       Engine.addTechnician({
         name:name,
         lashRate   :parseFloat(container.querySelector('#t-lash').value)||0,
@@ -2214,7 +2253,7 @@ function renderTechnicians(container){
       }); draw();
     };
     window.tDel=function(id){
-      if(!confirm('确定删除？')) return; Engine.deleteTechnician(id); draw();
+      if(!confirm(t('beauty.mat.confirmDelete'))) return; Engine.deleteTechnician(id); draw();
     };
   }
   draw();
@@ -2225,12 +2264,12 @@ function renderTechnicians(container){
 // ══════════════════════════════════════════════════════════════════
 function renderAcquire(container){
   var PLATFORMS=[
-    { val:'douyin_feed',  label:'🎵 抖音短视频投流' },
-    { val:'douyin_live',  label:'🔴 抖音直播投流' },
-    { val:'wechat_feed',  label:'💬 微信短视频投流' },
-    { val:'wechat_live',  label:'📡 微信直播投流' },
-    { val:'meituan_rank', label:'🥡 美团排名费用' },
-    { val:'other',        label:'📌 其他渠道' },
+    { val:'douyin_feed',  label:t('beauty.acq.platform.douyinFeed') },
+    { val:'douyin_live',  label:t('beauty.acq.platform.douyinLive') },
+    { val:'wechat_feed',  label:t('beauty.acq.platform.wechatFeed') },
+    { val:'wechat_live',  label:t('beauty.acq.platform.wechatLive') },
+    { val:'meituan_rank', label:t('beauty.acq.platform.meituanRank') },
+    { val:'other',        label:t('beauty.acq.platform.other') },
   ];
 
   function draw(){
@@ -2240,17 +2279,17 @@ function renderAcquire(container){
     var cpOrder=totalOrders>0?summary.total/totalOrders:0;
 
     container.innerHTML='<div>'+
-      '<div class="page-title-bar">'+icon('megaphone',24,'var(--pink)')+'<span class="page-title-text">获客成本</span></div>'+
+      '<div class="page-title-bar">'+icon('megaphone',24,'var(--pink)')+'<span class="page-title-text">'+t('beauty.acq.pageTitle')+'</span></div>'+
 
       '<div class="form-card" style="background:linear-gradient(135deg,#FFF0F5,#F0F0FF);border:2px solid var(--border)">'+
         '<div class="form-row" style="margin-bottom:0">'+
           '<div style="flex:1;text-align:center">'+
-            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">累计投流总额</div>'+
+            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">'+t('beauty.acq.totalSpend')+'</div>'+
             '<div style="font-size:26px;font-weight:900;color:var(--pink)">'+Engine.fmtMoney(summary.total)+'</div>'+
           '</div>'+
           '<div style="width:1px;background:var(--border)"></div>'+
           '<div style="flex:1;text-align:center">'+
-            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">单均获客成本</div>'+
+            '<div style="font-size:11px;font-weight:800;color:var(--text-3);margin-bottom:4px">'+t('beauty.acq.avgCostPerOrder')+'</div>'+
             '<div style="font-size:26px;font-weight:900;color:var(--purple)">'+Engine.fmtMoney(cpOrder)+'</div>'+
           '</div>'+
         '</div>'+
@@ -2268,28 +2307,28 @@ function renderAcquire(container){
       '</div>'+
 
       '<div class="form-card">'+
-        '<div class="section-label">记录投流费用</div>'+
+        '<div class="section-label">'+t('beauty.acq.recordTitle')+'</div>'+
         '<div class="form-row">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">平台</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.acq.platformLbl')+'</label>'+
             '<select id="acq-platform" class="form-inp">'+
               PLATFORMS.map(function(p){ return '<option value="'+p.val+'">'+p.label+'</option>'; }).join('')+
             '</select></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">金额 (¥) *</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.acq.amountLbl')+'</label>'+
             '<input id="acq-amount" class="form-inp" type="number" step="0.01" min="0" placeholder="500"></div>'+
         '</div>'+
         '<div style="height:10px"></div>'+
         '<div class="form-row">'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">投放日期</label>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.acq.dateLbl')+'</label>'+
             '<input id="acq-date" class="form-inp" type="date"></div>'+
-          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">备注</label>'+
-            '<input id="acq-note" class="form-inp" type="text" placeholder="第一周爆款视频…"></div>'+
+          '<div class="form-group half" style="margin-bottom:0"><label class="form-lbl">'+t('beauty.acq.noteLbl')+'</label>'+
+            '<input id="acq-note" class="form-inp" type="text" placeholder="'+t('beauty.acq.notePlaceholder')+'"></div>'+
         '</div>'+
         '<div style="height:12px"></div>'+
-        '<button class="form-submit" onclick="acqSubmit()">'+icon('plus',18,'#fff')+' 记录费用</button>'+
-        '<div class="form-success hidden" id="acq-succ">✅ 投流费用已记录！</div>'+
+        '<button class="form-submit" onclick="acqSubmit()">'+icon('plus',18,'#fff')+' '+t('beauty.acq.submitBtn')+'</button>'+
+        '<div class="form-success hidden" id="acq-succ">'+t('beauty.acq.submitOk')+'</div>'+
       '</div>'+
 
-      '<div class="section-label">投流记录（'+list.length+'条）</div>'+
+      '<div class="section-label">'+t('beauty.acq.recordsTitle',{n:list.length})+'</div>'+
       '<div class="acq-list">'+
         (list.length?list.map(function(a){
           var pf=PLATFORMS.find(function(p){ return p.val===a.platform; });
@@ -2306,7 +2345,7 @@ function renderAcquire(container){
             '</div>'+
           '</div>';
         }).join('')
-        :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">暂无记录，添加第一条投流费用吧</div>')+
+        :'<div style="text-align:center;color:var(--text-3);padding:32px;font-size:14px">'+t('beauty.acq.empty')+'</div>')+
       '</div>'+
     '</div>';
 
@@ -2315,7 +2354,7 @@ function renderAcquire(container){
 
     window.acqSubmit=function(){
       var amount=parseFloat(container.querySelector('#acq-amount').value)||0;
-      if(!amount) return shake(container.querySelector('#acq-amount'),'请填写金额');
+      if(!amount) return shake(container.querySelector('#acq-amount'),t('beauty.acq.enterAmount'));
       Engine.addAcquire({
         platform:container.querySelector('#acq-platform').value,
         amount:amount,
@@ -2328,7 +2367,7 @@ function renderAcquire(container){
       s.classList.remove('hidden'); setTimeout(function(){ s.classList.add('hidden'); },2000);
     };
     window.acqDel=function(id){
-      if(!confirm('确定删除？')) return; Engine.deleteAcquire(id); draw();
+      if(!confirm(t('beauty.mat.confirmDelete'))) return; Engine.deleteAcquire(id); draw();
     };
   }
   draw();
@@ -2338,10 +2377,85 @@ function renderAcquire(container){
 document.getElementById('view-calendar').style.display='';
 updateHeader();
 buildSnake();
+document.title = t('beauty.pageTitle') || document.title;
 setTimeout(function(){
   var node=document.querySelector('.n-today');
   if(node) node.scrollIntoView({ behavior:'smooth', block:'center' });
 },600);
+
+// ★ 重建蛇形路径（语言切换后刷新节点内文案，如"今天"标签）
+function refreshSnake() {
+  var track=document.getElementById('snake-track');
+  var svg=document.getElementById('snake-svg');
+  if (!track||!svg) return;
+  Array.from(track.children).forEach(function(c){ if(c!==svg) track.removeChild(c); });
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  buildSnake();
+}
+
+var _beautyCurrentView = 'calendar';
+var _origSwitchTab = switchTab;
+switchTab = function(btn, viewId) {
+  _beautyCurrentView = viewId;
+  _origSwitchTab(btn, viewId);
+};
+</script>
+
+<!-- ★ 语言切换悬浮按钮 -->
+<script>
+  (function () {
+    var LANG_CYCLE = ["zh", "en", "es", "fr", "ja"];
+    var LANG_LABEL = { zh: "中文", en: "EN", es: "ES", fr: "FR", ja: "JA" };
+
+    function nextLang(cur) {
+      var available = LANG_CYCLE.filter(function (l) {
+        return I18N.getAvailableLangs().indexOf(l) !== -1;
+      });
+      if (!available.length) return cur;
+      var idx = available.indexOf(cur);
+      return available[(idx + 1) % available.length];
+    }
+
+    function mountLangToggle() {
+      if (document.getElementById("i18n-toggle-btn")) return;
+      var btn = document.createElement("div");
+      btn.id = "i18n-toggle-btn";
+      var cur = I18N.getLang();
+      btn.innerHTML = LANG_LABEL[nextLang(cur)] || "EN";
+      Object.assign(btn.style, {
+        position: "fixed", bottom: "16px", left: "16px",
+        background: "var(--pink, #FF6B9D)", color: "#fff",
+        padding: "6px 14px", borderRadius: "20px", fontSize: "11px",
+        cursor: "pointer", zIndex: "99999", fontWeight: "bold",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        fontFamily: "'PingFang SC','Helvetica Neue',sans-serif",
+      });
+      document.body.appendChild(btn);
+      btn.onclick = function () {
+        var next = nextLang(I18N.getLang());
+        if (I18N.switchLang(next)) {
+          btn.innerHTML = LANG_LABEL[nextLang(next)] || "EN";
+        }
+      };
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mountLangToggle);
+    } else {
+      mountLangToggle();
+    }
+  })();
+
+  // ★ 语言切换后：刷新日历（今天标签/月份名）与当前动态渲染的 tab
+  window.addEventListener("i18n:change", function () {
+    updateHeader();
+    refreshSnake();
+    if (typeof _beautyCurrentView !== "undefined" && _beautyCurrentView !== "calendar") {
+      var activeBtn = document.querySelector('.nav-btn[data-view="' + _beautyCurrentView + '"]');
+      switchTab(activeBtn || null, _beautyCurrentView);
+    }
+  });
 </script>
 </body>
 </html>
+
